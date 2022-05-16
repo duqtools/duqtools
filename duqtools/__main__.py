@@ -15,11 +15,6 @@ def analyze():
 def parse():
   parser = argparse.ArgumentParser()
 
-  # Globally required options
-  parser.add_argument('CONFIG', type=str, help='path to store run files')
-
-  # Global optional options
-  parser.add_argument('--debug', action='store_const', const=True, default=False, help='Enable debug print statements')
 
   # Subparsers
   subparsers = parser.add_subparsers()
@@ -31,6 +26,12 @@ def parse():
 
   parser_analyze = subparsers.add_parser('analyze', help='Analyze the results and generate a report')
   parser_analyze.set_defaults(func=analyze)
+
+  # Globally required options
+  parser.add_argument('CONFIG', type=str, help='path to store run files')
+
+  # Global optional options
+  parser.add_argument('--debug', action='store_const', const=True, default=False, help='Enable debug print statements')
 
   # parse the arguments
   args = parser.parse_args()
