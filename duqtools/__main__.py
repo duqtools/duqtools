@@ -1,4 +1,6 @@
 import argparse
+from logging import debug
+import logging
 from duqtools.config import Config
 
 def create():
@@ -16,6 +18,9 @@ def parse():
   # Globally required options
   parser.add_argument('CONFIG', type=str, help='path to store run files')
 
+  # Global optional options
+  parser.add_argument('--debug', action='store_const', const=True, default=False, help='Enable debug print statements')
+
   # Subparsers
   subparsers = parser.add_subparsers()
   parser_create  = subparsers.add_parser('create' , help='Create the UQ run files')
@@ -29,7 +34,12 @@ def parse():
 
   # parse the arguments
   args = parser.parse_args()
-  print("Arguments after parsing: ", args)
+
+  # Set the debug level
+  if (args.debug):
+    logging.basicConfig(level=logging.DEBUG)
+
+  debug("Arguments after parsing: %s"%args)
 
   # Load the config file
   global config
