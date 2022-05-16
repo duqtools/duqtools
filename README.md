@@ -6,6 +6,6 @@ Dynamic uncertainty quantification for Tokomak reactor simulations modelling
 Install using:
 
 ```console
-conda create -n duqtools
+conda create -n duqtools python=3.7
 pip install -e .[develop]
 ```
