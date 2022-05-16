@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 import yaml
 from logging import debug
+from duqtools.submit import Submit_config
+
+config = None
 
 class Config(BaseModel):
-  test: str
+  submit: Submit_config
 
   def __init__(self, filename):
     with open(filename,'r') as f:

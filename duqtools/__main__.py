@@ -1,12 +1,10 @@
 import argparse
 from logging import debug
 import logging
-from duqtools.config import Config
+import duqtools.config as cfg
+from duqtools.submit import submit
 
 def create():
-  pass
-
-def submit():
   pass
 
 def analyze():
@@ -43,8 +41,8 @@ def parse():
   debug("Arguments after parsing: %s"%args)
 
   # Load the config file
-  global config
-  config = Config(args.CONFIG)
+
+  cfg.config = cfg.Config(args.CONFIG)
 
   # Run the subcommand
   args.func()
