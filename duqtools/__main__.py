@@ -1,6 +1,7 @@
 import argparse
 
-if __name__ == '__main__':
+def parse():
+
   parser = argparse.ArgumentParser()
 
   # Globally required options
@@ -11,3 +12,6 @@ if __name__ == '__main__':
   parser_submit  = subparsers.add_parser('submit' , help='Submit the UQ runs')
   parser_analyze = subparsers.add_parser('analyze', help='Analyze the results and generate a report')
   args = parser.parse_args()
+
+if __name__ == '__main__':
+  parse()
