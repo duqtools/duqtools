@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }}, ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    if: ! github.event.pull_request.draft
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: ['3.7']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}
+
+      - name: Python info
+        run: |
+          which python
+          python --version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -e .[develop]
+
+      - name: Test with pytest
+        run: python -m pytest --disable-warnings
