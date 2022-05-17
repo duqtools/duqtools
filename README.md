@@ -1,4 +1,7 @@
+[![Tests](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml/badge.svg)](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml)
+
 # fusion-dUQtools
+
 Dynamic uncertainty quantification for Tokomak reactor simulations modelling
 
 ## Development
