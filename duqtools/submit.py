@@ -8,4 +8,6 @@ class Submit_config(BaseModel):
   processors_per_case: int
 
 def submit():
+  if not cfg.config.submit:
+    raise Exception("submit field required in config file")
   print(cfg.config.submit)
