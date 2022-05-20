@@ -27,3 +27,9 @@ Run tests:
 ```console
 pytest
 ```
+
+Make docs:
+
+```console
+mkdocs serve
+```
