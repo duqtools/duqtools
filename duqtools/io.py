@@ -34,7 +34,7 @@ def fetch_ids_data(
 
     Returns
     -------
-    imas.DBEntry
+    db : imas.DBEntry
         Imas database entry
     """
     backend = imas.imasdef.MDSPLUS_BACKEND
