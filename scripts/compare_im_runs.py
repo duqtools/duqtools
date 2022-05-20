@@ -126,13 +126,15 @@ python compare_im_runs.py -u g2aho -d jet -s 94875 -r 1 102 --time_begin 48 --ti
     parser.add_argument("--time_end",                    type=float, default=None,                                   help="Slice shot file ending at time (s)")
     parser.add_argument("--time_out",         nargs='*', type=float, default=None,                                   help="Slice output inteprolated to times (s)")
     parser.add_argument("--signal",   "-sig", nargs='+', type=str,   default=None,                                   help="Full IDS signal names to be compared")
-    parser.add_argument("--source",           nargs='*', type=str,   default=['total'], help="sourceid to be plotted(nbi, ec,etc as given in dd description), make sence if core_source is given as target ids, default is total")
-    parser.add_argument("--transport",        nargs='*', type=str,   default=['transport_solver'], help="transpid to be plotted(neoclassical, anomalous, ets, cherck dd for more entires), make sence if core_transport is given as target ids, default is transport_solver")
-    parser.add_argument("--steady_state", default=False, action='store_true', help="Flag to identify that the input is a single point")
-    parser.add_argument("--show_plot", default=False, action='store_true', help="Toggle showing of plot or saving of plot into default file names")
-    parser.add_argument("--plot_uniform_basis", default=False, action='store_true', help="Toggle plotting of interpolated data to form uniform time and radial basis, uses first run as basis")
-    parser.add_argument("--analyze_traces", nargs='*', type=str, default=None, choices=["absolute_error"], help="Define which analyses to perform after time trace comparison plots")
-    parser.add_argument("--analyze_profiles", nargs='*', type=str, default=None, choices=["average_absolute_error"], help="Define which analyses to perform after profile comparison plots")
+    parser.add_argument("--source",           nargs='*', type=str,   default=['total'],                              help="sourceid to be plotted(nbi, ec,etc as given in dd description), make sence if core_source is given as target ids, default is total")
+    parser.add_argument("--transport",        nargs='*', type=str,   default=['transport_solver'],                   help="transpid to be plotted(neoclassical, anomalous, ets, cherck dd for more entires), make sence if core_transport is given as target ids, default is transport_solver")
+    parser.add_argument("--steady_state",                            default=False, action='store_true',             help="Flag to identify that the input is a single point")
+    parser.add_argument("--show_plot",                               default=False, action='store_true',             help="Toggle showing of plot or saving of plot into default file names")
+    parser.add_argument("--plot_uniform_basis",                      default=False, action='store_true',             help="Toggle plotting of interpolated data to form uniform time and radial basis, uses first run as basis")
+    parser.add_argument("--analyze_traces",   nargs='*', type=str,   default=None, choices=["absolute_error"],       help="Define which analyses to perform after time trace comparison plots")
+    parser.add_argument("--analyze_profiles", nargs='*', type=str,   default=None, choices=["average_absolute_error"], help="Define which analyses to perform after profile comparison plots")
+    parser.add_argument("--change_sign",                             default=None, action='store_true',               help="Allows to change the sign of the output if it is not the same in the HFPS and in the IDS")
+
 
     args=parser.parse_args()
 
@@ -341,12 +343,14 @@ def get_onedict(sigvec,user,db,shot,runid,time_begin,time_end=None,sid=None,tid=
             out_data_dict[signame] = ytable
             out_data_dict[signame+".x"] = new_x
             out_data_dict[signame+".t"] = new_t
+
     return out_data_dict
 
 def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None,set_reference=None):
     out_dict = {}
     temp_run_dict = {}
     reference_tag = None
+    first_tag = None
     # Loop over runs to extract data, set first run as the reference run for time and radial vectors
     for run in runvec:
         user = run[0]
@@ -354,6 +358,10 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
         shot = run[2]
         runid = run[3]
         tag = "%s/%s/%d/%d" % (user, db, shot, runid)
+        # Adding this line to allow for the flipping of all variables when it's not the first run. Might be necessary for the q profile
+        if not first_tag:
+            first_tag = tag
+
         temp_run_dict[tag] = get_onedict(sigvec,user,db,shot,runid,time_begin,time_end,interpolate=True)
         if reference_tag is None:
             reference_tag = tag
@@ -367,7 +375,7 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
             if key not in ref_dict:
                 ref_dict[key] = {}
             if time_vector is None:
-                ref_dict[key][tag] = copy.deepcopy(temp_run_dict[reference_tag][key])
+                ref_dict[key][reference_tag] = copy.deepcopy(temp_run_dict[reference_tag][key])
                 if key+".x" in temp_run_dict[reference_tag] and temp_run_dict[reference_tag][key+".x"] is not None:
                     ref_dict[key+".x"] = copy.deepcopy(temp_run_dict[reference_tag][key+".x"])
                 #if key+".t" in run_dict:
@@ -386,15 +394,17 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
                     for ii in range(ytable.shape[1]):
                         y_new = fit_and_substitute(temp_run_dict[reference_tag][key+".t"], t_new, ytable[:, ii])
                         ytable_new = np.vstack((ytable_new, y_new)) if ytable_new is not None else np.atleast_2d(y_new)
-                    ref_dict[key][tag] = ytable_new.T
+                    ref_dict[key][reference_tag] = ytable_new.T
                 else:
-                    # Copies existing time slice multiple times if only one time slice is present in the run
-                    ytable_new = None
-                    for ii in range(len(t_new)):
-                        ytable_new = np.vstack((ytable_new, ytable)) if ytable_new is not None else np.atleast_2d(ytable)
-                    ref_dict[key][tag] = copy.deepcopy(ytable_new)
+                    if key+".x" in ref_dict:
+                        # Copies existing time slice multiple times if only one time slice is present in the run
+                        ytable_new = None
+                        for ii in range(len(t_new)):
+                            ytable_new = np.vstack((ytable_new, ytable)) if ytable_new is not None else np.atleast_2d(ytable)
+                    ref_dict[key][reference_tag] = copy.deepcopy(ytable_new)
     # Loop over all runs in order to maintain run[0] for analysis purposes
     for tag, run_dict in temp_run_dict.items():
+        # tag contains the id of the run, key the variable to be plotted
         if tag == reference_tag:
             for key in ref_dict:
                 if not key.endswith(".x") and not key.endswith(".t"):
@@ -420,18 +430,24 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
                         ytable_temp = np.atleast_2d(ytable)
                     # Perform time vector interpolation, always present
                     t_new = ref_dict[key+".t"]
+
                     ytable_new = None
                     if len(run_dict[key+".t"]) > 1:
-                        for ii in range(ytable_temp.shape[1]):
-                            y_new = fit_and_substitute(run_dict[key+".t"], t_new, ytable_temp[:, ii])
+                        if not key+".x" in ref_dict:
+                            ytable_new = fit_and_substitute(run_dict[key+".t"], t_new, ytable_temp[0])
+                        else:
+                            for ii in range(ytable_temp.shape[1]):
+                                y_new = fit_and_substitute(run_dict[key+".t"], t_new, ytable_temp[:, ii])
                             ytable_new = np.vstack((ytable_new, y_new)) if ytable_new is not None else np.atleast_2d(y_new)
                         if ytable_new is not None:
                             ytable_new = ytable_new.T
                     else:
-                        # Copies existing time slice multiple times if only one time slice is present in the run
-                        for ii in range(len(t_new)):
-                            ytable_new = np.vstack((ytable_new, ytable_temp)) if ytable_new is not None else np.atleast_2d(ytable_temp)
+                        if key+".x" in run_dict:
+                            # Copies existing time slice multiple times if only one time slice is present in the run
+                            for ii in range(len(t_new)):
+                                ytable_new = np.vstack((ytable_new, ytable_temp)) if ytable_new is not None else np.atleast_2d(ytable_temp)
                     out_dict[key][tag] = copy.deepcopy(ytable_new)
+
     return out_dict
 
 def plot_traces(plot_data, single_time_reference=False):
@@ -476,6 +492,7 @@ def plot_interpolated_traces(interpolated_data, custom_signals=None):
             print("Plotting %s" % (signame))
             fig = plt.figure()
             ax = fig.add_subplot(111)
+
             for run in interpolated_data[signame]:
                 ax.plot(interpolated_data[signame+".t"], interpolated_data[signame][run].flatten(), label=run)
             ax.set_xlabel("time (s)")
@@ -735,6 +752,7 @@ def main():
     user_tmp = args.user
     sid_tmp = args.source
     tid_tmp = args.transport
+    change_sign = args.change_sign
 
 #    nsig=len(signame)
     nmas=len(mas_tmp)
@@ -784,6 +802,13 @@ def main():
             ref_tag = tag
         if args.steady_state and i == 0:
             ref_tag = None
+
+        # adding the option of changing the sign of the variable. Useful for q profile in some instances
+        if i > 0 and change_sign:
+            for key in plot_dict[tag]:
+                if not key.endswith(".x") and not key.endswith(".t"):
+                    for i, data in enumerate(plot_dict[tag][key]):
+                        plot_dict[tag][key][i]['y'] = -data['y']
 
     if not args.plot_uniform_basis:
         plot_traces(plot_dict, single_time_reference=args.steady_state)
