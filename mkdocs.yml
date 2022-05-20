@@ -1,0 +1,43 @@
+site_name: dUQtools
+
+theme:
+  name: material
+  primary: blue
+  accent: red
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        name: Switch to dark mode
+        icon: material/lightbulb
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        name: Switch to light mode
+        icon: material/lightbulb-outline
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+
+plugins:
+- search
+- mkdocstrings:
+    # https://mkdocstrings.github.io/usage/
+    handlers:
+      python:
+        import:
+        - https://docs.python.org/3/objects.inv
+        selection:
+          docstring_style: numpy
+          docstring_options:
+            ignore_init_summary: yes
+        rendering:
+          show_submodules: no
+          show_source: true
+          docstring_section_style: list
+          members_order: alphabetical
+          show_category_heading: no
+          merge_init_into_class: yes
