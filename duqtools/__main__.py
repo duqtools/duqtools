@@ -10,7 +10,7 @@ def create():
 def analyze():
   pass
 
-def parse():
+def cmdline():
   parser = argparse.ArgumentParser()
 
 
