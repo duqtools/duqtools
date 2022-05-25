@@ -2060,9 +2060,9 @@ def copy_ids_entry(username, db, shot, run, shot_target, run_target, ids_list = 
         print('The entry you are trying to copy does not exist')
         exit()
 
-    print('Creating', username, db, imas_version, shot_target, run_target)
+    print('Creating', getpass.getuser(), db, imas_version, shot_target, run_target) #can only create on your own imasdb
     idss_out = imas.ids(shot_target, run_target)
-    idss_out.create_env(username, db, imas_major_version)
+    idss_out.create_env(getpass.getuser(), db, imas_major_version)
     idx = idss_out.expIdx
     ids_list = None
     # read/write every IDS
@@ -2086,14 +2086,14 @@ def copy_ids_entry(username, db, shot, run, shot_target, run_target, ids_list = 
 #                print('Processing', ids_info['name'])
 
             ids = idss_in.__dict__[name]
-            stdout = sys.stdout
-            sys.stdout = open('/afs/eufus.eu/user/g/g2mmarin/warnings_imas.txt', 'w') # suppress warnings
+ #           stdout = sys.stdout
+#            sys.stdout = open('/afs/eufus.eu/user/g/g2mmarin/warnings_imas.txt', 'w') # suppress warnings. Removed since no permissions in general to write to this file
             ids.get(i)
 #            sys.stdout = stdout
             ids.setExpIdx(idx)
             ids.put(i)
-            sys.stdout.close()
-            sys.stdout = stdout
+ #           sys.stdout.close()
+#            sys.stdout = stdout
 
     idss_in.close()
     idss_out.close()
