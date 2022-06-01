@@ -17,9 +17,9 @@ pip install -e .[develop]
 On [eufus](https://wiki.eufus.eu/doku.php):
 
 ```console
-python -m venv env
+python3 -m venv env
 source env/bin/activate
-python -m pip install -e .[develop]
+python3 -m pip install -e .[develop]
 ```
 
 Run tests:
