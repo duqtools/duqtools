@@ -1,9 +1,14 @@
+import os
+from typing import TypeVar
+
 import f90nml
 
 try:
     import imas
 except ImportError:
     pass
+
+PathLike = TypeVar('PathLike', str, bytes, os.PathLike)
 
 
 def fetch_ids_data(
@@ -54,33 +59,56 @@ def fetch_ids_data(
     return db
 
 
-def read_jetto_in(path: str) -> dict:
-    """Read jetto.in (fortran namelist).
-
-    TODO: is the header in jetto.in important?
+def read_namelist(path: PathLike) -> dict:
+    """Read fortran namelist (i.e. `jetto.in`).
 
     Parameters
     ----------
-    path : str
-        Path to jetto.in namelist
+    path : PathLike
+        Path to namelist
 
     Returns
     -------
-    namelist : f90nml.Namelist
-        Returns parameters in jetto.in as Namelist
+    namelist : dict
+        Returns parameters in namelist as dict
     """
-    return f90nml.read(path)
+    return f90nml.read(path).todict()
 
 
-def write_jetto_in(path: str, namelist: dict):
-    """Write dictionary to jetto.in file.
+def write_namelist(path: PathLike, namelist: dict):
+    """Write dictionary fortran namelist (i.e. `jetto.in`).
+
+    Parameters
+    ----------
+    path : PathLike
+        Path to namelist
+    namelist : dict
+        Fortran namelist in dictionary format
+    """
+    nml = f90nml.Namelist(**namelist)
+    nml.write(path)
+
+
+def patch_namelist(path: PathLike, patch: dict, out: PathLike):
+    """Patch parameters in namelist.
+
+    i.e. in the case of `jetto.in`, this preserves
+    the comments in the header, which are required for
+    `rjettov`.
 
     Parameters
     ----------
     path : str
-        Path to jetto.in namelist
-    namelist : dict
-        Fortran namelist in dictionary format
+        Path to original namelist
+    patch : dict
+        Dictionary with variables to patch / add
+    out : PathLike
+        Path to write patched `jetto.in` file.
+
+    Returns
+    -------
+    patched_nml : dict
+        Return patched namelist as dictionary
     """
-    nml = f90nml.Namelist(namelist)
-    nml.write(path)
+    patched_nml = f90nml.patch(path, patch, out)
+    return patched_nml.todict()
