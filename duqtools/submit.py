@@ -19,14 +19,14 @@ def submit():
   debug("Case directories: %s"%run_dirs)
 
   for run_dir in run_dirs:
-    submission_script = Path(path.join(run_dir,cfg.submit.submit_script_name))
+    submission_script = run_dir / cfg.submit.submit_script_name
     if submission_script.is_file():
       info("Found submission script: %s ; Ready for submission"%submission_script)
     else:
       debug("Did not found submission script %s ; skipping this directory..."%submission_script)
       continue 
 
-    status_file = Path(path.join(run_dir,cfg.submit.status_file))
+    status_file = run_dir / cfg.submit.status_file
     if status_file.exists() and not cfg.force:
       if not status_file.is_file():
         error("Status file %s is not a file"%status_file)
