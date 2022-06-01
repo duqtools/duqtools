@@ -41,12 +41,10 @@ def cmdline():
   debug("Arguments after parsing: %s"%args)
 
   # Load the config file
-
-  cfg.config = cfg.Config(args.CONFIG)
+  cfg.Config(args.CONFIG)
 
   # Run the subcommand
   args.func()
 
-
 if __name__ == '__main__':
-  parse()
+  cmdline()

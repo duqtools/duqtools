@@ -1,16 +1,34 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, DirectoryPath
 import yaml
 from logging import debug
 from duqtools.submit import Submit_config
 
-config = None
-
 class Config(BaseModel):
-  submit: Optional[Submit_config]
+  """
+  Config class containing all configs, is a singleton and can be used with
+  import duqtools.config.Config as Cfg
+  Cfg().<variable you want>
+  """
 
-  def __init__(self, filename):
-    with open(filename,'r') as f:
-      datamap = yaml.safe_load(f)
-      debug(datamap)
-      BaseModel.__init__(self,**datamap)
+  _instance = None
+
+  #pydantic members
+  submit: Optional[Submit_config]
+  workspace: DirectoryPath
+
+  def __init__(self, filename=None):
+    """
+    Initialize with optional filename argument
+    """
+    if filename:
+      with open(filename,'r') as f:
+        datamap = yaml.safe_load(f)
+        debug(datamap)
+        BaseModel.__init__(self,**datamap)
+
+  def __new__(cls, *args, **kwargs):
+    # Make it a singleton
+    if not Config._instance:
+      Config._instance = object.__new__(cls)
+    return Config._instance
