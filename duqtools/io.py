@@ -1,4 +1,9 @@
-import imas
+import f90nml
+
+try:
+    import imas
+except ImportError:
+    pass
 
 
 def fetch_ids_data(
@@ -7,7 +12,7 @@ def fetch_ids_data(
     run: int,
     user_name: str,
     db_name: str,
-) -> imas.DBEntry:
+) -> 'imas.DBEntry':
     """Fetch entry from IMAS database.
 
     e.g.
@@ -47,3 +52,35 @@ def fetch_ids_data(
     )
 
     return db
+
+
+def read_jetto_in(path: str) -> dict:
+    """Read jetto.in (fortran namelist).
+
+    TODO: is the header in jetto.in important?
+
+    Parameters
+    ----------
+    path : str
+        Path to jetto.in namelist
+
+    Returns
+    -------
+    namelist : f90nml.Namelist
+        Returns parameters in jetto.in as Namelist
+    """
+    return f90nml.read(path)
+
+
+def write_jetto_in(path: str, namelist: dict):
+    """Write dictionary to jetto.in file.
+
+    Parameters
+    ----------
+    path : str
+        Path to jetto.in namelist
+    namelist : dict
+        Fortran namelist in dictionary format
+    """
+    nml = f90nml.Namelist(namelist)
+    nml.write(path)
