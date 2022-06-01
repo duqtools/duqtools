@@ -14,8 +14,9 @@ class Config(BaseModel):
   _instance = None
 
   #pydantic members
-  submit: Optional[Submit_config]
-  workspace: DirectoryPath
+  submit    : Optional[Submit_config]
+  workspace : DirectoryPath
+  force     : bool = False
 
   def __init__(self, filename=None):
     """

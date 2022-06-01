@@ -30,13 +30,14 @@ def cmdline():
 
   # Global optional options
   parser.add_argument('--debug', action='store_const', const=True, default=False, help='Enable debug print statements')
+  parser.add_argument('--force', action='store_const', const=True, default=False, help='Force the action you want to take')
 
   # parse the arguments
   args = parser.parse_args()
 
   # Set the debug level
   if (args.debug):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
   debug("Arguments after parsing: %s"%args)
 
