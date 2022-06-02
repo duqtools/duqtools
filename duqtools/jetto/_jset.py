@@ -2,7 +2,7 @@
 
 from typing import Dict, List, TextIO, Tuple
 
-from ..types import PathLike
+from .._types import PathLike
 
 HEADER = """!================================================================
 !                      JETTO SETTINGS FILE
@@ -79,7 +79,7 @@ def read_jset(path: PathLike) -> Dict[str, Dict[str, str]]:
 
     Returns
     -------
-    Dict[str, Dict[str, str]]
+    settings : Dict[str, Dict[str, str]]
         Return nested dictionary with settings from jset file.
     """
     with open(path) as f:
@@ -88,14 +88,29 @@ def read_jset(path: PathLike) -> Dict[str, Dict[str, str]]:
     return settings
 
 
-def write_jset(path: PathLike, data: Dict[str, Dict[str, str]]):
+def write_jset(path: PathLike, settings: Dict[str, Dict[str, str]]):
     """Write a jetto settings file.
 
     Parameters
     ----------
     path : PathLike
-        Path to which the data are saved.
-    data : Dict[str, Dict[str, str]]
+        Path to which the settings are saved.
+    settings : Dict[str, Dict[str, str]]
         Jetto settings dictionary.
     """
-    pass
+
+    def _line_gen():
+        yield HEADER
+
+        for title, section in settings.items():
+            yield '*'
+            yield f'*{title}'
+            for key, value in section.items():
+                yield f'{key:<61}: {value}'
+
+        yield from ('*', '*EOF', '')
+
+    lines = (f'\n{line}' for line in _line_gen())
+
+    with open(path, 'w') as f:
+        f.writelines(lines)

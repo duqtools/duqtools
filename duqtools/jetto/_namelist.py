@@ -2,7 +2,7 @@
 
 import f90nml
 
-from duqtools._types import PathLike
+from .._types import PathLike
 
 
 def read_namelist(path: PathLike) -> dict:
