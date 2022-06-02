@@ -1,10 +1,8 @@
-import os
-
-from typing import TypeVar
+"""Functions to interface with `jetto.in` namelists."""
 
 import f90nml
 
-PathLike = TypeVar('PathLike', str, bytes, os.PathLike)
+from duqtools._types import PathLike
 
 
 def read_namelist(path: PathLike) -> dict:
