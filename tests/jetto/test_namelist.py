@@ -1,4 +1,4 @@
-from duqtools.io import patch_namelist, read_namelist, write_namelist
+from duqtools.jetto import patch_namelist, read_namelist, write_namelist
 
 nml = {'nlist1': {'a': 123, 'b': 456}, 'nlist2': {'c': [1, 2, 3], 'd': None}}
 
