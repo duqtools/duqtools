@@ -1,4 +1,5 @@
 """Functions to interface with `jetto.jset` files."""
+from __future__ import annotations
 
 from typing import Dict, List, TextIO, Tuple
 
@@ -11,62 +12,62 @@ HEADER = """!================================================================
 JINTRAC_CONFIG_VARS = (
     {
         'name': 'shot_in',
-        'var_type': int,
-        'var_name': 'SetUpPanel.idsIMASDBShot',
+        'type': int,
+        'key': 'SetUpPanel.idsIMASDBShot',
         'doc': 'Input IDS shot'
     },
     {
         'name': 'shot_out',
-        'var_type': int,
-        'var_name': 'SetUpPanel.shotNum',
+        'type': int,
+        'key': 'SetUpPanel.shotNum',
         'doc': 'Output IDS shot'
     },
     {
         'name': 'run_in',
-        'var_type': int,
-        'var_name': 'SetUpPanel.idsIMASDBRunid',
+        'type': int,
+        'key': 'SetUpPanel.idsIMASDBRunid',
         'doc': 'Input IDS run'
     },
     {
         'name': 'run_out',
-        'var_type': int,
-        'var_name': 'JobProcessingPanel.idsRunid',
+        'type': int,
+        'key': 'JobProcessingPanel.idsRunid',
         'doc': 'Output IDS run'
     },
     {
         'name': 'user_in',
-        'var_type': str,
-        'var_name': 'SetUpPanel.idsIMASDBUser',
+        'type': str,
+        'key': 'SetUpPanel.idsIMASDBUser',
         'doc': 'Input IDS user'
     },
     {
         'name': 'machine_in',
-        'var_type': str,
-        'var_name': 'SetUpPanel.idsIMASDBMachine',
+        'type': str,
+        'key': 'SetUpPanel.idsIMASDBMachine',
         'doc': 'Input IDS machine'
     },
     {
         'name': 'machine_out',
-        'var_type': str,
-        'var_name': 'SetUpPanel.machine',
+        'type': str,
+        'key': 'SetUpPanel.machine',
         'doc': 'Output IDS machine'
     },
     {
         'name': 'noprocessors',
-        'var_type': str,
-        'var_name': 'JobProcessingPanel.numProcessors',
+        'type': str,
+        'key': 'JobProcessingPanel.numProcessors',
         'doc': 'JobProcessingPanel.numProcessors'
     },
     {
         'name': 'tstart',
-        'var_type': float,
-        'var_name': 'SetUpPanel.startTime',
+        'type': float,
+        'key': 'SetUpPanel.startTime',
         'doc': 'Start time'
     },
     {
         'name': 'tend',
-        'var_type': float,
-        'var_name': 'SetUpPanel.endTime',
+        'type': float,
+        'key': 'SetUpPanel.endTime',
         'doc': 'End time'
     },
 )
@@ -179,7 +180,7 @@ def write_jset(path: PathLike, settings: Dict[str, Dict[str, str]]):
         f.writelines(lines)
 
 
-class JettoSettings():
+class JettoSettings:
 
     def __init__(self, mapping: Dict[str, Dict[str, str]]):
         self.raw_mapping = mapping
@@ -194,28 +195,28 @@ class JettoSettings():
 
     def __new__(cls, *args, **kwargs):
 
-        def setter(name: str, var_type):
+        def setter(jset_key: str, jset_type):
 
             def f(self, value):
-                self.settings[var_name] = str(value)
+                self.settings[jset_key] = str(value)
 
             return f
 
-        def getter(name: str, var_type):
+        def getter(jset_key: str, jset_type):
 
             def f(self):
-                return var_type(self.settings[var_name])
+                return jset_type(self.settings[jset_key])
 
             return f
 
         for variable in JINTRAC_CONFIG_VARS:
-            var_name = variable['var_name']
-            var_type = variable['var_type']
+            jset_key = variable['key']
+            jset_type = variable['type']
             name = variable['name']
             doc = variable['doc']
             prop = property(
-                fget=getter(var_name, var_type),
-                fset=setter(var_name, var_type),
+                fget=getter(jset_key, jset_type),
+                fset=setter(jset_key, jset_type),
                 doc=doc,
             )
             setattr(cls, name, prop)
@@ -233,3 +234,21 @@ class JettoSettings():
         if self.settings['SetUpPanel.selReadIds']:
             components.append('IDSIN')
         return components
+
+    @classmethod
+    def from_file(cls, path: PathLike) -> JettoSettings:
+        """Read JettoSettings from 'jetto.jset' file.
+
+        Parameters
+        ----------
+        path : PathLike
+            Path to `jetto.jset`
+
+        Returns
+        -------
+        jset : JettoSettings
+            Instance of `JettoSettings`
+        """
+        mapping = read_jset(path)
+        jset = cls(mapping)
+        return jset
