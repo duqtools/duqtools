@@ -1,3 +1,3 @@
-## Reference
+# duqtools.io
 
 ::: duqtools.io
