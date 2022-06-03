@@ -1,0 +1,46 @@
+!===============================================================================
+!                              JETTO SETTINGS FILE
+!===============================================================================
+*
+*File Details
+Creation Name                                               : /pfs/work/g2ssmee/jetto/runs/runtrial_interpretive/jetto.jset
+Creation Date                                               : 12/05/2022
+Creation Time                                               : 14:52:26
+Version                                                     : v210921_gateway_imas
+*
+*Settings
+JobProcessingPanel.driver                                   : IMAS(Python), native + IDS I/O
+JobProcessingPanel.emailNotify                              :
+JobProcessingPanel.idsRunid                                 : 251
+JobProcessingPanel.jobType                                  : Set Up Job But Don't Run
+JobProcessingPanel.loadModuleType                           : 64-bit
+JobProcessingPanel.machine                                  : jac
+JobProcessingPanel.machineNumber                            : gw
+JobProcessingPanel.name                                     : v210921_gateway_imas
+JobProcessingPanel.numProcessors                            : 2
+JobProcessingPanel.priority                                 : prio1
+JobProcessingPanel.queueName                                : gen9_ib-short
+JobProcessingPanel.runDirNumber                             : trial_interpretive
+JobProcessingPanel.selEmailNotify                           : false
+JobProcessingPanel.selIdsRunid                              : true
+JobProcessingPanel.selQueueName                             : true
+JobProcessingPanel.userid                                   : g2fkoech
+JobProcessingPanel.wallTime                                 : 24
+JobProcessingPanel.walltime                                 :
+SetUpPanel.endTime                                          : 49.0
+SetUpPanel.idsIMASDBMachine                                 : jet
+SetUpPanel.idsIMASDBRunid                                   : 2
+SetUpPanel.idsIMASDBShot                                    : 94875
+SetUpPanel.idsIMASDBUser                                    : g2aho
+SetUpPanel.idsSliceUpdateDt                                 : 1.0
+SetUpPanel.machine                                          : jet
+SetUpPanel.maxTimeStep                                      : 0.001
+SetUpPanel.maxTimeStep.ConstValue                           : 0.001
+SetUpPanel.maxTimeStep.option                               : Constant Value
+SetUpPanel.minTimeStep                                      : 1e-12
+SetUpPanel.numOfGridPoints                                  : 101
+SetUpPanel.selReadIds                                       : true
+SetUpPanel.shotNum                                          : 94875
+SetUpPanel.startTime                                        : 48.35
+*
+*EOF
