@@ -114,3 +114,108 @@ def write_jset(path: PathLike, settings: Dict[str, Dict[str, str]]):
 
     with open(path, 'w') as f:
         f.writelines(lines)
+
+
+class JettoSettings():
+
+    def __init__(self, mapping: Dict[str, Dict[str, str]]):
+        self.raw_mapping = mapping
+
+    @property
+    def metadata(self):
+        return self.raw_mapping['File Details']
+
+    @property
+    def settings(self):
+        return self.raw_mapping['Settings']
+
+    @property
+    def components(self):
+        components = ['JETTO']
+        if self.settings['JobProcessingPanel.selIdsRunid']:
+            components.append('IDSOUT')
+        if self.settings['ExternalWFPanel.select']:
+            components.append('HCD')
+        if self.settings['SetUpPanel.selReadIds']:
+            components.append('IDSIN')
+        return components
+
+    @property
+    def shot_in(self):
+        return int(self.settings['SetUpPanel.idsIMASDBShot'])
+
+    @shot_in.setter
+    def shot_in(self, value: int):
+        self.settings['SetUpPanel.idsIMASDBShot'] = str(value)
+
+    @property
+    def shot_out(self):
+        return int(self.settings['SetUpPanel.shotNum'])
+
+    @shot_out.setter
+    def shot_out(self, value: int):
+        self.settings['SetUpPanel.shotNum'] = str(value)
+
+    @property
+    def run_in(self):
+        return int(self.settings['SetUpPanel.idsIMASDBRunid'])
+
+    @run_in.setter
+    def run_in(self, value: int):
+        self.settings['SetUpPanel.idsIMASDBRunid'] = str(value)
+
+    @property
+    def run_out(self):
+        return int(self.settings['JobProcessingPanel.idsRunid'])
+
+    @run_out.setter
+    def run_out(self, value: int):
+        self.settings['JobProcessingPanel.idsRunid'] = str(value)
+
+    @property
+    def user_in(self):
+        return self.settings['SetUpPanel.idsIMASDBUser']
+
+    @user_in.setter
+    def user_in(self, value: str):
+        self.settings['SetUpPanel.idsIMASDBUser'] = value
+
+    @property
+    def machine_in(self):
+        return self.settings['SetUpPanel.idsIMASDBMachine']
+
+    @machine_in.setter
+    def machine_in(self, value: str):
+        self.settings['SetUpPanel.idsIMASDBMachine'] = value
+
+    @property
+    def machine_out(self):
+        return self.settings['SetUpPanel.machine']
+
+    @machine_out.setter
+    def machine_out(self, value: str):
+        self.settings['SetUpPanel.machine'] = value
+
+    @property
+    def noprocessors(self):
+        return int(self.settings['JobProcessingPanel.numProcessors'])
+
+    @noprocessors.setter
+    def noprocessors(self, value: str):
+        self.settings['JobProcessingPanel.numProcessors'] = str(value)
+
+    @property
+    def tstart(self):
+        return float(self.settings['SetUpPanel.startTime'])
+
+    @tstart.setter
+    def tstart(self, value: float):
+        self.settings['SetUpPanel.startTime'] = str(value)
+
+    @property
+    def tend(self):
+        return float(self.settings['SetUpPanel.endTime'])
+
+    @tend.setter
+    def tend(self, value: float):
+        self.settings['SetUpPanel.endTime'] = str(value)
