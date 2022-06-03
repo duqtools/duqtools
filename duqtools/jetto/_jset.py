@@ -8,6 +8,69 @@ HEADER = """!================================================================
 !                      JETTO SETTINGS FILE
 !================================================================"""
 
+JINTRAC_CONFIG_VARS = (
+    {
+        'name': 'shot_in',
+        'var_type': int,
+        'var_name': 'SetUpPanel.idsIMASDBShot',
+        'doc': 'Input IDS shot'
+    },
+    {
+        'name': 'shot_out',
+        'var_type': int,
+        'var_name': 'SetUpPanel.shotNum',
+        'doc': 'Output IDS shot'
+    },
+    {
+        'name': 'run_in',
+        'var_type': int,
+        'var_name': 'SetUpPanel.idsIMASDBRunid',
+        'doc': 'Input IDS run'
+    },
+    {
+        'name': 'run_out',
+        'var_type': int,
+        'var_name': 'JobProcessingPanel.idsRunid',
+        'doc': 'Output IDS run'
+    },
+    {
+        'name': 'user_in',
+        'var_type': str,
+        'var_name': 'SetUpPanel.idsIMASDBUser',
+        'doc': 'Input IDS user'
+    },
+    {
+        'name': 'machine_in',
+        'var_type': str,
+        'var_name': 'SetUpPanel.idsIMASDBMachine',
+        'doc': 'Input IDS machine'
+    },
+    {
+        'name': 'machine_out',
+        'var_type': str,
+        'var_name': 'SetUpPanel.machine',
+        'doc': 'Output IDS machine'
+    },
+    {
+        'name': 'noprocessors',
+        'var_type': str,
+        'var_name': 'JobProcessingPanel.numProcessors',
+        'doc': 'JobProcessingPanel.numProcessors'
+    },
+    {
+        'name': 'tstart',
+        'var_type': float,
+        'var_name': 'SetUpPanel.startTime',
+        'doc': 'Start time'
+    },
+    {
+        'name': 'tend',
+        'var_type': float,
+        'var_name': 'SetUpPanel.endTime',
+        'doc': 'End time'
+    },
+)
+
 
 def parse_section(section: List[str]) -> Tuple[str, Dict[str, str]]:
     """Parse section of settings file.
@@ -129,8 +192,39 @@ class JettoSettings():
     def settings(self):
         return self.raw_mapping['Settings']
 
+    def __new__(cls, *args, **kwargs):
+
+        def setter(name: str, var_type):
+
+            def f(self, value):
+                self.settings[var_name] = str(value)
+
+            return f
+
+        def getter(name: str, var_type):
+
+            def f(self):
+                return var_type(self.settings[var_name])
+
+            return f
+
+        for variable in JINTRAC_CONFIG_VARS:
+            var_name = variable['var_name']
+            var_type = variable['var_type']
+            name = variable['name']
+            doc = variable['doc']
+            prop = property(
+                fget=getter(var_name, var_type),
+                fset=setter(var_name, var_type),
+                doc=doc,
+            )
+            setattr(cls, name, prop)
+
+        return super().__new__(cls)
+
     @property
     def components(self):
+        """Active components e.g. EDGE2D, JETTO, HCD (uppercase)"""
         components = ['JETTO']
         if self.settings['JobProcessingPanel.selIdsRunid']:
             components.append('IDSOUT')
@@ -139,83 +233,3 @@ class JettoSettings():
         if self.settings['SetUpPanel.selReadIds']:
             components.append('IDSIN')
         return components
-
-    @property
-    def shot_in(self):
-        return int(self.settings['SetUpPanel.idsIMASDBShot'])
-
-    @shot_in.setter
-    def shot_in(self, value: int):
-        self.settings['SetUpPanel.idsIMASDBShot'] = str(value)
-
-    @property
-    def shot_out(self):
-        return int(self.settings['SetUpPanel.shotNum'])
-
-    @shot_out.setter
-    def shot_out(self, value: int):
-        self.settings['SetUpPanel.shotNum'] = str(value)
-
-    @property
-    def run_in(self):
-        return int(self.settings['SetUpPanel.idsIMASDBRunid'])
-
-    @run_in.setter
-    def run_in(self, value: int):
-        self.settings['SetUpPanel.idsIMASDBRunid'] = str(value)
-
-    @property
-    def run_out(self):
-        return int(self.settings['JobProcessingPanel.idsRunid'])
-
-    @run_out.setter
-    def run_out(self, value: int):
-        self.settings['JobProcessingPanel.idsRunid'] = str(value)
-
-    @property
-    def user_in(self):
-        return self.settings['SetUpPanel.idsIMASDBUser']
-
-    @user_in.setter
-    def user_in(self, value: str):
-        self.settings['SetUpPanel.idsIMASDBUser'] = value
-
-    @property
-    def machine_in(self):
-        return self.settings['SetUpPanel.idsIMASDBMachine']
-
-    @machine_in.setter
-    def machine_in(self, value: str):
-        self.settings['SetUpPanel.idsIMASDBMachine'] = value
-
-    @property
-    def machine_out(self):
-        return self.settings['SetUpPanel.machine']
-
-    @machine_out.setter
-    def machine_out(self, value: str):
-        self.settings['SetUpPanel.machine'] = value
-
-    @property
-    def noprocessors(self):
-        return int(self.settings['JobProcessingPanel.numProcessors'])
-
-    @noprocessors.setter
-    def noprocessors(self, value: str):
-        self.settings['JobProcessingPanel.numProcessors'] = str(value)
-
-    @property
-    def tstart(self):
-        return float(self.settings['SetUpPanel.startTime'])
-
-    @tstart.setter
-    def tstart(self, value: float):
-        self.settings['SetUpPanel.startTime'] = str(value)
-
-    @property
-    def tend(self):
-        return float(self.settings['SetUpPanel.endTime'])
-
-    @tend.setter
-    def tend(self, value: float):
-        self.settings['SetUpPanel.endTime'] = str(value)
