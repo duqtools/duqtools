@@ -3,6 +3,7 @@ from pydantic import BaseModel, DirectoryPath
 import yaml
 from logging import debug
 from duqtools.submit import Submit_config
+from duqtools.status import Status_config
 
 class Config(BaseModel):
   """
@@ -14,7 +15,8 @@ class Config(BaseModel):
   _instance = None
 
   #pydantic members
-  submit    : Optional[Submit_config]
+  submit    : Optional[Submit_config] = Submit_config()
+  status    : Optional[Status_config] = Status_config()
   workspace : DirectoryPath
   force     : bool = False
 
