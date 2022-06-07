@@ -1,0 +1,7 @@
+f90nml
+mkdocs
+mkdocs-material
+mkdocstrings[python]
+numpy
+pydantic
+pyyaml
