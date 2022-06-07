@@ -1,4 +1,7 @@
-import imas
+try:
+    import imas
+except ImportError:
+    pass
 
 
 def fetch_ids_data(
@@ -7,7 +10,7 @@ def fetch_ids_data(
     run: int,
     user_name: str,
     db_name: str,
-) -> imas.DBEntry:
+) -> 'imas.DBEntry':
     """Fetch entry from IMAS database.
 
     e.g.
