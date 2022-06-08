@@ -8,20 +8,61 @@ import duqtools.config
 
 
 class Status_config(BaseModel):
+    """Status_config.
+    """
+
     msg_completed: str = 'Status : Completed successfully'
     msg_failed: str = 'Status : Failed'
     msg_running: str = 'Status : Running'
 
 
-def has_submit_script(dir):
+def has_submit_script(dir: Path) -> bool:
+    """has_submit_script.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+
+    Returns
+    -------
+    bool
+
+    """
     return (dir / cfg.submit.submit_script_name).exists()
 
 
-def has_status(dir):
+def has_status(dir: Path) -> bool:
+    """has_status.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+
+    Returns
+    -------
+    bool
+
+    """
     return (dir / cfg.submit.status_file).exists()
 
 
-def status_file_contains(dir, msg):
+def status_file_contains(dir: Path, msg) -> bool:
+    """status_file_contains.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+    msg :
+        msg
+
+    Returns
+    -------
+    bool
+
+    """
     sf = (dir / cfg.submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
@@ -30,19 +71,57 @@ def status_file_contains(dir, msg):
         return msg in content
 
 
-def is_completed(dir):
+def is_completed(dir: Path) -> bool:
+    """is_completed.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+
+    Returns
+    -------
+    bool
+
+    """
     return status_file_contains(dir, cfg.status.msg_completed)
 
 
-def is_failed(dir):
+def is_failed(dir: Path) -> bool:
+    """is_failed.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+
+    Returns
+    -------
+    bool
+
+    """
     return status_file_contains(dir, cfg.status.msg_failed)
 
 
-def is_running(dir):
+def is_running(dir: Path) -> bool:
+    """is_running.
+
+    Parameters
+    ----------
+    dir : Path
+        dir
+
+    Returns
+    -------
+    bool
+
+    """
     return status_file_contains(dir, cfg.status.msg_running)
 
 
 def status():
+    """status.
+    """
     global cfg
     cfg = duqtools.config.Config()
     if not cfg.submit:
