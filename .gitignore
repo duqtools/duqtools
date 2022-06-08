@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # duqtools specific
-example/run_*
+example/workspace/
