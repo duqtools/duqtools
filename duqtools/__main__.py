@@ -8,8 +8,10 @@ from .create import create
 from .status import status
 from .submit import submit
 
+
 def analyze():
     raise NotImplementedError
+
 
 def cmdline():
     parser = argparse.ArgumentParser()
@@ -20,13 +22,12 @@ def cmdline():
                                           help='Create the UQ run files')
     parser_create.set_defaults(func=create)
 
+    parser_submit = subparsers.add_parser('submit', help='Submit the UQ runs')
+    parser_submit.set_defaults(func=submit)
+
     parser_status = subparsers.add_parser(
         'status', help='Print the status of the UQ runs')
     parser_status.set_defaults(func=status)
-
-    parser_submit = subparsers.add_parser(
-        'status', help='Print the status of the UQ runs')
-    parser_submit.set_defaults(func=status)
 
     parser_analyze = subparsers.add_parser(
         'analyze', help='Analyze the results and generate a report')

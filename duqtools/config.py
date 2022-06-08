@@ -16,9 +16,9 @@ class Config(BaseModel):
     _instance = None
 
     # pydantic members
-    submit: Optional[Submit_config] = Submit_config()
+    submit: Submit_config = Submit_config()
     create: Optional[ConfigCreate]
-    status: Optional[Status_config] = Status_config()
+    status: Status_config = Status_config()
     workspace: DirectoryPath
     force: bool = False
 
