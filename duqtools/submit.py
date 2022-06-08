@@ -9,11 +9,21 @@ import duqtools.config
 
 
 class Submit_config(BaseModel):
+    """Submit_config.
+
+    Config class for submitting jobs
+    """
+
     submit_script_name: str = '.llcmd'
     status_file: str = 'jetto.status'
 
 
 def submit():
+    """submit.
+
+    Function which implements the functionality to submit jobs to the cluster
+    """
+
     cfg = duqtools.config.Config()
     if not cfg.submit:
         raise Exception('submit field required in config file')
