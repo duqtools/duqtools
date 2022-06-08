@@ -45,4 +45,4 @@ jobs:
           python -m pip install -e .[develop]
 
       - name: Test with pytest
-        run: python -m pytest --disable-warnings
+        run: python -m pytest --cov-config setup.cfg
