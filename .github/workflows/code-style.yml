@@ -1,0 +1,22 @@
+name: code style check
+
+on: [push]
+
+jobs:
+  codestyle:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install additional dependencies
+        run: |
+          pip install flake8
+
+      - name: Check code style
+        run: |
+          flake8
