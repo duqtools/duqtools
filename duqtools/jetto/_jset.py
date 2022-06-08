@@ -1,9 +1,14 @@
 """Functions to interface with `jetto.jset` files."""
 from __future__ import annotations
 
+from copy import deepcopy
+from logging import debug
+from pathlib import Path
 from typing import Dict, List, TextIO, Tuple
 
 from .._types import PathLike
+
+DEFAULT_FILENAME = 'jetto.jset'
 
 HEADER = """!================================================================
 !                      JETTO SETTINGS FILE
@@ -235,6 +240,18 @@ class JettoSettings:
             components.append('IDSIN')
         return components
 
+    def to_directory(self, directory: PathLike):
+        """Write a new jetto.jset to the given directory.
+
+        Parameters
+        ----------
+        directory : PathLike
+            Name of output directory
+        """
+        filename = Path(directory) / DEFAULT_FILENAME
+        write_jset(filename, self.raw_mapping)
+        debug('write %s' % filename)
+
     @classmethod
     def from_file(cls, path: PathLike) -> JettoSettings:
         """Read JettoSettings from 'jetto.jset' file.
@@ -252,3 +269,46 @@ class JettoSettings:
         mapping = read_jset(path)
         jset = cls(mapping)
         return jset
+
+    @classmethod
+    def from_directory(cls, path: PathLike) -> JettoSettings:
+        """Read JettoSettings from 'jetto.jset' file in given directory.
+
+        Parameters
+        ----------
+        path : PathLike
+            Path to directory containing `jetto.jset`
+
+        Returns
+        -------
+        jset : JettoSettings
+            Instance of `JettoSettings`
+        """
+        filename = Path(path) / DEFAULT_FILENAME
+        return cls.from_file(filename)
+
+    def copy_and_patch(self,
+                       settings: dict = None,
+                       metadata: dict = None) -> JettoSettings:
+        """Patch a copy of the jetto settings.
+
+        Parameters
+        ----------
+        settings : dict, optional
+            Settings to update
+        metadata : dict, optional
+            Metadata to update
+
+        Returns
+        -------
+        jset_copy : JettoSettings
+            Patched copy.
+        """
+        jset_copy = deepcopy(self)
+
+        if settings:
+            jset_copy.settings.update(settings)
+        if metadata:
+            jset_copy.metadata.update(metadata)
+
+        return jset_copy

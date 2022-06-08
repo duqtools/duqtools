@@ -4,6 +4,7 @@ from typing import Optional
 import yaml
 from pydantic import BaseModel, DirectoryPath
 
+from duqtools.create import ConfigCreate
 from duqtools.status import Status_config
 from duqtools.submit import Submit_config
 
@@ -16,6 +17,7 @@ class Config(BaseModel):
 
     # pydantic members
     submit: Optional[Submit_config] = Submit_config()
+    create: Optional[ConfigCreate]
     status: Optional[Status_config] = Status_config()
     workspace: DirectoryPath
     force: bool = False

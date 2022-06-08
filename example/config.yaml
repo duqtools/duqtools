@@ -1,0 +1,13 @@
+workspace: .
+create:
+  template: template_model
+  matrix:
+    - source: jetto.jset
+      key: SetUpPanel.shotNum
+      values: [1, 2]
+    - source: jetto.jset
+      key: SetUpPanel.numOfGridPoints
+      values: [10, 20]
+    - source: ids
+      key: temperature
+      values: [123, 456, 789]
