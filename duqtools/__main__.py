@@ -3,9 +3,10 @@ import logging
 from logging import debug
 
 import duqtools.config as cfg
-from .submit import submit
-from .status import status
+
 from .create import create
+from .status import status
+from .submit import submit
 
 
 def analyze():
@@ -21,10 +22,15 @@ def cmdline():
                                           help='Create the UQ run files')
     parser_create.set_defaults(func=create)
 
-    parser_submit  = subparsers.add_parser('status' , help='Print the status of the UQ runs')
-    parser_submit.set_defaults(func=status)
+    parser_status = subparsers.add_parser(
+        'status', help='Print the status of the UQ runs')
+    parser_status.set_defaults(func=status)
 
-    parser_analyze = subparsers.add_parser('analyze', help='Analyze the results and generate a report')
+    parser_submit = subparsers.add_parser('submit', help='Submit the UQ runs')
+    parser_submit.set_defaults(func=submit)
+
+    parser_analyze = subparsers.add_parser(
+        'analyze', help='Analyze the results and generate a report')
     parser_analyze.set_defaults(func=analyze)
 
     # Globally required options
@@ -48,7 +54,7 @@ def cmdline():
     # Set the debug level
     if (args.debug):
         logging.basicConfig(level=logging.DEBUG)
-    else: 
+    else:
         logging.basicConfig(level=logging.INFO)
 
     debug('Arguments after parsing: %s' % args)

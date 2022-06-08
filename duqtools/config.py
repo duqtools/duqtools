@@ -5,8 +5,8 @@ import yaml
 from pydantic import BaseModel, DirectoryPath
 
 from duqtools.create import ConfigCreate
-from duqtools.submit import Submit_config
 from duqtools.status import Status_config
+from duqtools.submit import Submit_config
 
 
 class Config(BaseModel):
@@ -18,7 +18,7 @@ class Config(BaseModel):
     # pydantic members
     submit: Optional[Submit_config] = Submit_config()
     create: Optional[ConfigCreate] = ConfigCreate()
-    status    : Optional[Status_config] = Status_config()
+    status: Optional[Status_config] = Status_config()
     workspace: DirectoryPath
     force: bool = False
 
@@ -35,4 +35,3 @@ class Config(BaseModel):
         if not Config._instance:
             Config._instance = object.__new__(cls)
         return Config._instance
->>>>>>> 43f9de2... Add create subcommand
