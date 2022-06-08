@@ -1,10 +1,14 @@
 import itertools
 from enum import Enum
+from logging import debug
 from typing import List
 
 from pydantic import BaseModel, DirectoryPath
 
 import duqtools.config
+
+from .ids import write_ids
+from .jetto import JettoSettings
 
 
 class Sources(Enum):
@@ -43,29 +47,25 @@ def create():
 
     combinations = itertools.product(*expanded_vars)
 
-    for combination in combinations:
+    jset = JettoSettings.from_directory(template_drc)
+
+    for i, combination in enumerate(combinations):
         for var in combination:
-            print('{source}: {key}={value}'.format(**var))
-        print()
+            debug('{source}: {key}={value}'.format(**var))
 
-        # create dir
-        # write jetto.jset, jetto.in
+        subdir = cfg.workspace / f'run_{i:04d}'
+        subdir.mkdir(parents=True, exist_ok=True)
 
-    # breakpoint()
+        patch = {
+            d['key']: d['value']
+            for d in combination if d['source'] == Sources.jetto_jset
+        }
+        jset_patched = jset.copy_and_patch(settings=patch)
+        jset_patched.to_directory(subdir)
 
-    # # Create all variations
-    # combinations = list(itertools.product(*val))
+        ids_data = {
+            d['key']: d['value']
+            for d in combination if d['source'] == Sources.ids
+        }
 
-    # for combination in combinations:
-    #     params = dict(zip(keys,combination))
-    #     print(params)
-    #     new_cfg = cfg
-    #     nicename = []
-    #     for key, val in params.items():
-    #         new_cfg[key[0]][key[1]] = val
-    #         nicename.append(key[1] + "=" + val)
-
-    #     # Write config
-    #     cfg_dir = os.path.dirname(sys.argv[1])
-    #     with open(cfg_dir + "/" + "-".join(nicename) + ".cfg", "w") as f:
-    #         new_cfg.write(f)
+        write_ids(subdir / 'ids.yaml', ids_data)
