@@ -1,6 +1,6 @@
 workspace: .
 create:
-  template: template_dir
+  template: template_model
   matrix:
     - source: jetto.jset
       key: SetUpPanel.shotNum
