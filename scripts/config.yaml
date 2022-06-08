@@ -1,0 +1,13 @@
+workspace: .
+create:
+  matrix:
+    - source: jetto.jset
+      key: some_value
+      values: [1, 2]
+    - source: jetto.in
+      key: toggle
+      values: [True, False]
+    - source: ids
+      key: temperature
+      values: [123, 456, 789]
+  template: .
