@@ -1,3 +1,3 @@
 def test_import():
-	import duqtools
-	assert duqtools.__version__
+    import duqtools
+    assert duqtools.__version__
