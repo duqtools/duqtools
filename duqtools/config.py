@@ -5,8 +5,24 @@ import yaml
 from pydantic import BaseModel, DirectoryPath
 
 from duqtools.create import ConfigCreate
-from duqtools.status import Status_config
-from duqtools.submit import Submit_config
+
+
+class Status_config(BaseModel):
+    """Status_config."""
+
+    msg_completed: str = 'Status : Completed successfully'
+    msg_failed: str = 'Status : Failed'
+    msg_running: str = 'Status : Running'
+
+
+class Submit_config(BaseModel):
+    """Submit_config.
+
+    Config class for submitting jobs
+    """
+
+    submit_script_name: str = '.llcmd'
+    status_file: str = 'jetto.status'
 
 
 class Config(BaseModel):
