@@ -2,11 +2,13 @@ from .ids_location import ImasLocation
 
 if __name__ == '__main__':
 
-    imas_loc = ImasLocation(db='jet', shot=92432, user='g2aho', run=1)
+    source = ImasLocation(db='jet', shot=92432, user='g2aho', run=1)
 
-    run_target = 1000
+    target = ImasLocation(db=source.db, shot=source.shot, run=1001)
 
-    imas_dst = imas_loc.copy_ids_entry_to_run(run=run_target)
+    source.copy_ids_entry_to(target)
+
+    core_profiles = target.get('core_profiles')
 
     # modify core profiles
     # core_profiles_mod = open_and_get_core_profiles(db, shot, run_source,

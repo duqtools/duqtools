@@ -32,11 +32,17 @@ class Parser(xml.sax.handler.ContentHandler):
         return parser
 
 
-def get_imas_major_version():
+def get_imas_ual_version():
+    """Get imas/ual versions.
+
+    Parsed from a string like: `imas_3_34_0_ual_4_9_3`
+    """
     vsplit = imas.names[0].split('_')
+
     imas_version = version.parse('.'.join(vsplit[1:4]))
-    imas_major_version = str(imas_version)[0]
-    return imas_major_version
+    ual_version = version.parse('.'.join(vsplit[5:8]))
+
+    return imas_version, ual_version
 
 
 def copy_ids_entry(source: ImasLocation, target: ImasLocation):
@@ -56,17 +62,17 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
     """
     assert target.user == getuser()
 
-    imas_major_version = get_imas_major_version()
+    imas_version, _ = get_imas_ual_version()
 
     idss_in = imas.ids(source.shot, source.run)
-    op = idss_in.open_env(source.user, source.db, imas_major_version)
+    op = idss_in.open_env(source.user, source.db, str(imas_version.major))
 
     ids_not_found = op[0] < 0
     if ids_not_found:
         raise KeyError('The entry you are trying to copy does not exist')
 
     idss_out = imas.ids(target.shot, target.run)
-    idss_out.create_env(target.user, source.db, imas_major_version)
+    idss_out.create_env(target.user, source.db, str(imas_version.major))
     idx = idss_out.expIdx
 
     parser = Parser.load_idsdef()

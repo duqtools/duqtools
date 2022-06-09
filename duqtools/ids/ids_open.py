@@ -8,7 +8,8 @@ from .ids_location import ImasLocation
 logger = logging.getLogger(__name__)
 
 
-def open_and_get_core_profiles(location: ImasLocation):
+def open_and_get_core_profiles(location: ImasLocation,
+                               key: str = 'core_profiles'):
     data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND,
                               location.db,
                               location.shot,
@@ -24,7 +25,7 @@ def open_and_get_core_profiles(location: ImasLocation):
     elif op[0] == 0:
         logger.info('data entry opened')
 
-    core_profiles = data_entry.get('core_profiles')
+    data = data_entry.get(key)
     data_entry.close()
 
-    return (core_profiles)
+    return data
