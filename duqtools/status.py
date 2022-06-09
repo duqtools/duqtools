@@ -112,7 +112,7 @@ def is_running(dir: Path) -> bool:
     return status_file_contains(dir, config.Config().status.msg_running)
 
 
-def status():
+def status(**kwargs):
     """status."""
     cfg = config.Config()
     if not cfg.submit:

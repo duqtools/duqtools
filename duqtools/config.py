@@ -19,8 +19,7 @@ class Config(BaseModel):
     submit: Submit_config = Submit_config()
     create: Optional[ConfigCreate]
     status: Status_config = Status_config()
-    workspace: DirectoryPath
-    force: bool = False
+    workspace: DirectoryPath = './workspace'
 
     def __init__(self, filename=None):
         """Initialize with optional filename argument."""
@@ -29,6 +28,8 @@ class Config(BaseModel):
                 datamap = yaml.safe_load(f)
                 debug(datamap)
                 BaseModel.__init__(self, **datamap)
+        else:  # Create an object with default fields
+            BaseModel.__init__(self)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
