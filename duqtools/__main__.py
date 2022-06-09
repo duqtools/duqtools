@@ -3,16 +3,13 @@ import logging
 
 import duqtools.config as cfg
 
+from .analyze import analyze
 from .create import create
 from .init import init
 from .status import status
 from .submit import submit
 
 logger = logging.getLogger(__name__)
-
-
-def analyze():
-    raise NotImplementedError
 
 
 def cmdline():

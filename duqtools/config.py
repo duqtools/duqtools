@@ -10,6 +10,10 @@ from typing_extensions import Literal
 logger = logging.getLogger(__name__)
 
 
+class Analyze_config(BaseModel):
+    pass
+
+
 class Status_config(BaseModel):
     """Status_config."""
 
