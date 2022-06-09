@@ -7,7 +7,7 @@ from typing import List
 
 from pydantic import BaseModel, DirectoryPath
 
-import duqtools.config
+from duqtools.config import Config as cfg
 
 from .ids import write_ids
 from .jetto import JettoSettings
@@ -79,9 +79,8 @@ def write_batchfile(target_drc: Path):
 
 
 def create(**kwargs):
-    cfg = duqtools.config.Config()
 
-    options = cfg.create
+    options = cfg().create
 
     template_drc = options.template
     matrix = options.matrix
@@ -97,7 +96,7 @@ def create(**kwargs):
             debug('{source}: {key}={value}'.format(**var))
 
         sub_drc = f'run_{i:04d}'
-        target_drc = cfg.workspace / sub_drc
+        target_drc = cfg().workspace / sub_drc
         target_drc.mkdir(parents=True, exist_ok=True)
 
         patch = {
