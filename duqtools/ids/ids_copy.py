@@ -1,7 +1,7 @@
 import io
 import xml.sax
 import xml.sax.handler
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr
 from getpass import getuser
 
 import imas
@@ -71,9 +71,9 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
 
     parser = Parser.load_idsdef()
 
-    # this loop is very spammy, capture stdout as f
+    # this loop is very spammy, capture stderr as f
     # we may do something with it using `_.getvalue()`
-    with redirect_stdout(io.StringIO()) as _:
+    with redirect_stderr(io.StringIO()) as _:
 
         for ids_info in parser.idss:
             name = ids_info['name']
