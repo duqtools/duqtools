@@ -1,4 +1,4 @@
-from logging import debug, error, info
+from logging import debug, info
 from pathlib import Path
 
 import yaml
@@ -21,9 +21,8 @@ def init(**kwargs):
     debug(cfg)
     config_filepath = Path(args.CONFIG)
     if config_filepath.exists() and not args.force:
-        error('Refusing to overwrite existing CONFIG, %s \
+        raise RuntimeError('Refusing to overwrite existing CONFIG, %s \
                     , use --force if you really want to' % config_filepath)
-        return
     info('Writing default config to %s' % config_filepath)
     with open(config_filepath, 'w') as f:
         f.write(yaml.dump(yaml.safe_load(cfg.json())))
