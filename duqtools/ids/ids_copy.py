@@ -59,8 +59,8 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
     idss_in = imas.ids(source.shot, source.run)
     op = idss_in.open_env(source.user, source.db, imas_major_version)
 
-    op_exists = op[0] >= 0
-    if not op_exists:
+    ids_not_found = op[0] < 0
+    if ids_not_found:
         raise KeyError('The entry you are trying to copy does not exist')
 
     idss_out = imas.ids(target.shot, target.run)
