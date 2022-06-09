@@ -2,17 +2,7 @@ from logging import debug, info
 from os import scandir
 from pathlib import Path
 
-from pydantic import BaseModel
-
-import duqtools.config as config
-
-
-class Status_config(BaseModel):
-    """Status_config."""
-
-    msg_completed: str = 'Status : Completed successfully'
-    msg_failed: str = 'Status : Failed'
-    msg_running: str = 'Status : Running'
+from .config import Config as cfg
 
 
 def has_submit_script(dir: Path) -> bool:
@@ -27,7 +17,7 @@ def has_submit_script(dir: Path) -> bool:
     -------
     bool
     """
-    return (dir / config.Config().submit.submit_script_name).exists()
+    return (dir / cfg().submit.submit_script_name).exists()
 
 
 def has_status(dir: Path) -> bool:
@@ -42,7 +32,7 @@ def has_status(dir: Path) -> bool:
     -------
     bool
     """
-    return (dir / config.Config().submit.status_file).exists()
+    return (dir / cfg().submit.status_file).exists()
 
 
 def status_file_contains(dir: Path, msg) -> bool:
@@ -59,7 +49,7 @@ def status_file_contains(dir: Path, msg) -> bool:
     -------
     bool
     """
-    sf = (dir / config.Config().submit.status_file)
+    sf = (dir / cfg().submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
         debug('Checking if content of %s file: %s contains %s' %
@@ -79,7 +69,7 @@ def is_completed(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, config.Config().status.msg_completed)
+    return status_file_contains(dir, cfg().status.msg_completed)
 
 
 def is_failed(dir: Path) -> bool:
@@ -94,7 +84,7 @@ def is_failed(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, config.Config().status.msg_failed)
+    return status_file_contains(dir, cfg().status.msg_failed)
 
 
 def is_running(dir: Path) -> bool:
@@ -109,17 +99,18 @@ def is_running(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, config.Config().status.msg_running)
+    return status_file_contains(dir, cfg().status.msg_running)
 
 
 def status(**kwargs):
     """status."""
-    cfg = config.Config()
-    if not cfg.submit:
+    if not cfg().submit:
         raise Exception('submit field required in config file')
-    debug('Submit config: %s' % cfg.submit)
+    debug('Submit config: %s' % cfg().submit)
 
-    dirs = [Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()]
+    dirs = [
+        Path(entry) for entry in scandir(cfg().workspace) if entry.is_dir()
+    ]
     debug('Case directories: %s' % dirs)
 
     info('Total number of directories: %i' % len(dirs))

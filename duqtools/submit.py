@@ -3,19 +3,7 @@ from logging import debug, error, info
 from os import scandir
 from pathlib import Path
 
-from pydantic import BaseModel
-
-import duqtools.config
-
-
-class Submit_config(BaseModel):
-    """Submit_config.
-
-    Config class for submitting jobs
-    """
-
-    submit_script_name: str = '.llcmd'
-    status_file: str = 'jetto.status'
+from duqtools.config import Config as cfg
 
 
 def submit(**kwargs):
@@ -25,18 +13,17 @@ def submit(**kwargs):
     cluster
     """
 
-    cfg = duqtools.config.Config()
-    if not cfg.submit:
+    if not cfg().submit:
         raise Exception('submit field required in config file')
-    debug('Submit config: %s' % cfg.submit)
+    debug('Submit config: %s' % cfg().submit)
 
     run_dirs = [
-        Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()
+        Path(entry) for entry in scandir(cfg().workspace) if entry.is_dir()
     ]
     debug('Case directories: %s' % run_dirs)
 
     for run_dir in run_dirs:
-        submission_script = run_dir / cfg.submit.submit_script_name
+        submission_script = run_dir / cfg().submit.submit_script_name
         if submission_script.is_file():
             info('Found submission script: %s ; Ready for submission' %
                  submission_script)
@@ -46,8 +33,8 @@ def submit(**kwargs):
                 submission_script)
             continue
 
-        status_file = run_dir / cfg.submit.status_file
-        if status_file.exists() and not cfg.force:
+        status_file = run_dir / cfg().submit.status_file
+        if status_file.exists() and not cfg().force:
             if not status_file.is_file():
                 error('Status file %s is not a file' % status_file)
             with open(status_file, 'r') as f:
