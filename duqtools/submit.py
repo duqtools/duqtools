@@ -13,6 +13,8 @@ def submit(**kwargs):
     cluster
     """
 
+    args = kwargs.args
+
     if not cfg().submit:
         raise Exception('submit field required in config file')
     debug('Submit config: %s' % cfg().submit)
@@ -34,7 +36,7 @@ def submit(**kwargs):
             continue
 
         status_file = run_dir / cfg().submit.status_file
-        if status_file.exists() and not cfg().force:
+        if status_file.exists() and not args.force:
             if not status_file.is_file():
                 error('Status file %s is not a file' % status_file)
             with open(status_file, 'r') as f:
