@@ -1,10 +1,9 @@
+from enum import Enum
 from logging import debug
-from typing import Optional
+from typing import List, Optional
 
 import yaml
 from pydantic import BaseModel, DirectoryPath
-
-from duqtools.create import ConfigCreate
 
 
 class Status_config(BaseModel):
@@ -23,6 +22,30 @@ class Submit_config(BaseModel):
 
     submit_script_name: str = '.llcmd'
     status_file: str = 'jetto.status'
+
+
+class Sources(Enum):
+    jetto_in = 'jetto.in'
+    jetto_jset = 'jetto.jset'
+    ids = 'ids'
+
+
+class Variable(BaseModel):
+    source: Sources
+    key: str
+    values: list
+
+    def expand(self):
+        return tuple({
+            'source': self.source,
+            'key': self.key,
+            'value': value
+        } for value in self.values)
+
+
+class ConfigCreate(BaseModel):
+    matrix: List[Variable] = []
+    template: DirectoryPath
 
 
 class Config(BaseModel):
@@ -44,11 +67,10 @@ class Config(BaseModel):
                 datamap = yaml.safe_load(f)
                 debug(datamap)
                 BaseModel.__init__(self, **datamap)
-        else:  # Create an object with default fields
-            BaseModel.__init__(self)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
         if not Config._instance:
+            print('XXX')
             Config._instance = object.__new__(cls)
         return Config._instance

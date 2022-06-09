@@ -2,6 +2,7 @@ from logging import debug, error, info
 from pathlib import Path
 
 import yaml
+from pydantic import BaseModel
 
 import duqtools.config
 
@@ -16,6 +17,7 @@ def init(**kwargs):
     """
     args = kwargs['args']
     cfg = duqtools.config.Config()
+    BaseModel.__init__(cfg)
     debug(cfg)
     config_filepath = Path(args.CONFIG)
     if config_filepath.exists() and not args.force:
