@@ -1,5 +1,7 @@
+import io
 import xml.sax
 import xml.sax.handler
+from contextlib import redirect_stdout
 from getpass import getuser
 
 import imas
@@ -69,18 +71,22 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
 
     parser = Parser.load_idsdef()
 
-    for ids_info in parser.idss:
-        name = ids_info['name']
-        maxoccur = int(ids_info['maxoccur'])
+    # this loop is very spammy, capture stdout as f
+    # we may do something with it using `_.getvalue()`
+    with redirect_stdout(io.StringIO()) as _:
 
-        if name in ('ec_launchers', 'numerics', 'sdn'):
-            continue
+        for ids_info in parser.idss:
+            name = ids_info['name']
+            maxoccur = int(ids_info['maxoccur'])
 
-        for i in range(maxoccur + 1):
-            ids = idss_in.__dict__[name]
-            ids.get(i)
-            ids.setExpIdx(idx)
-            ids.put(i)
+            if name in ('ec_launchers', 'numerics', 'sdn'):
+                continue
+
+            for i in range(maxoccur + 1):
+                ids = idss_in.__dict__[name]
+                ids.get(i)
+                ids.setExpIdx(idx)  # this line sets the index to the output
+                ids.put(i)
 
     idss_in.close()
     idss_out.close()
