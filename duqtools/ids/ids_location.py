@@ -5,8 +5,6 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .ids_copy import copy_ids_entry
-
 PATH_TEMPLATE = ('/afs/eufus.eu/user/g/{user}/public/imasdb/{db}'
                  '/3/0/ids_{shot}{run:04d}.xyz')
 
@@ -42,6 +40,7 @@ class ImasLocation(BaseModel):
         destination : ImasLocation
             Copy data to a new location.
         """
+        from .ids_copy import copy_ids_entry
         copy_ids_entry(self, destination)
 
     def copy_ids_entry_to_run(self, *, run: int) -> ImasLocation:
