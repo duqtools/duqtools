@@ -5,6 +5,7 @@ from logging import debug
 import duqtools.config as cfg
 
 from .create import create
+from .init import init
 from .status import status
 from .submit import submit
 
@@ -18,6 +19,11 @@ def cmdline():
 
     # Subparsers
     subparsers = parser.add_subparsers()
+
+    parser_init = subparsers.add_parser('init',
+                                        help='Create a default config file')
+    parser_init.set_defaults(func=init)
+
     parser_create = subparsers.add_parser('create',
                                           help='Create the UQ run files')
     parser_create.set_defaults(func=create)
@@ -60,10 +66,11 @@ def cmdline():
     debug('Arguments after parsing: %s' % args)
 
     # Load the config file
-    cfg.Config(args.CONFIG)
+    if not args.func == init:  # dont read it if we have to create it
+        cfg.Config(args.CONFIG)
 
     # Run the subcommand
-    args.func()
+    args.func(args=args)
 
 
 if __name__ == '__main__':

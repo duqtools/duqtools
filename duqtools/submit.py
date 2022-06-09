@@ -18,10 +18,11 @@ class Submit_config(BaseModel):
     status_file: str = 'jetto.status'
 
 
-def submit():
+def submit(**kwargs):
     """submit.
 
-    Function which implements the functionality to submit jobs to the cluster
+    Function which implements the functionality to submit jobs to the
+    cluster
     """
 
     cfg = duqtools.config.Config()

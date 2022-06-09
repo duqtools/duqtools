@@ -78,7 +78,7 @@ def write_batchfile(target_drc: Path):
 """)
 
 
-def create():
+def create(**kwargs):
     cfg = duqtools.config.Config()
 
     options = cfg.create
