@@ -10,10 +10,5 @@ core_profiles = target.get('core_profiles')
 
 core_profiles.profiles_1d[0].t_i_average *= 1.1
 
-data_entry_target = target.entry()
-
-op = data_entry_target.open()
-
-core_profiles.put(db_entry=data_entry_target)
-
-data_entry_target.close()
+with target.open() as data_entry_target:
+    core_profiles.put(db_entry=data_entry_target)

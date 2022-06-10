@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
@@ -70,7 +71,7 @@ class ImasLocation(BaseModel):
         return destination
 
     def get(self, key: str = 'core_profiles'):
-        """Summary.
+        """Get data from IDS entry.
 
         Parameters
         ----------
@@ -79,18 +80,27 @@ class ImasLocation(BaseModel):
 
         Returns
         -------
-        TYPE
-            Description
+        data
         """
-        data_entry = self.open()
-
-        data = data_entry.get(key)
-        data_entry.close()
+        with self.open() as data_entry:
+            data = data_entry.get(key)
 
         return data
 
+    @contextmanager
     def open(self, backend=imasdef.MDSPLUS_BACKEND):
-        """Open database entry."""
+        """Context manager to open database entry.
+
+        Parameters
+        ----------
+        backend : optional
+            Which IMAS backend to use
+
+        Yields
+        ------
+        entry : imas.DBEntry
+            IMAS database entry
+        """
         entry = imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
         op = entry.open()
 
@@ -101,4 +111,7 @@ class ImasLocation(BaseModel):
         elif op[0] == 0:
             logger.info('data entry opened')
 
-        return entry
+        try:
+            yield entry
+        finally:
+            entry.close()
