@@ -1,3 +1,0 @@
-# duqtools.io
-
-::: duqtools.io
