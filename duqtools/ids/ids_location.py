@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import logging
 from getpass import getuser
 from pathlib import Path
 
+import imas
+from imas import imasdef
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 PATH_TEMPLATE = ('/afs/eufus.eu/user/g/{user}/public/imasdb/{db}'
                  '/3/0/ids_{shot}{run:04d}.datafile')
@@ -63,3 +68,37 @@ class ImasLocation(BaseModel):
         destination = self.copy(update={'run': run, 'user': user})
         self.copy_ids_entry_to(destination)
         return destination
+
+    def get(self, key: str = 'core_profiles'):
+        """Summary.
+
+        Parameters
+        ----------
+        key : str, optional
+            Name of profiles to open.
+
+        Returns
+        -------
+        TYPE
+            Description
+        """
+        data_entry = self.open()
+
+        data = data_entry.get(key)
+        data_entry.close()
+
+        return data
+
+    def open(self, backend=imasdef.MDSPLUS_BACKEND):
+        """Open database entry."""
+        entry = imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
+        op = entry.open()
+
+        if op[0] < 0:
+            cp = entry.create()
+            if cp[0] == 0:
+                logger.info('data entry created')
+        elif op[0] == 0:
+            logger.info('data entry opened')
+
+        return entry
