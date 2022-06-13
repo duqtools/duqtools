@@ -1,40 +1,12 @@
 import itertools
 import shutil
-from enum import Enum
 from logging import debug
 from pathlib import Path
-from typing import List
-
-from pydantic import BaseModel, DirectoryPath
 
 from duqtools.config import Config as cfg
 
 from .ids import write_ids
 from .jetto import JettoSettings
-
-
-class Sources(Enum):
-    jetto_in = 'jetto.in'
-    jetto_jset = 'jetto.jset'
-    ids = 'ids'
-
-
-class Variable(BaseModel):
-    source: Sources
-    key: str
-    values: list
-
-    def expand(self):
-        return tuple({
-            'source': self.source,
-            'key': self.key,
-            'value': value
-        } for value in self.values)
-
-
-class ConfigCreate(BaseModel):
-    matrix: List[Variable] = []
-    template: DirectoryPath
 
 
 def copy_files(source_drc: Path, target_drc: Path):
@@ -101,14 +73,14 @@ def create(**kwargs):
 
         patch = {
             d['key']: d['value']
-            for d in combination if d['source'] == Sources.jetto_jset
+            for d in combination if d['source'] == 'jetto.jset'
         }
         jset_patched = jset.copy_and_patch(settings=patch)
         jset_patched.to_directory(target_drc)
 
         ids_data = {
             d['key']: d['value']
-            for d in combination if d['source'] == Sources.ids
+            for d in combination if d['source'] == 'ids'
         }
 
         write_ids(target_drc / 'ids.yaml', ids_data)

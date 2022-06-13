@@ -1,9 +1,9 @@
-from enum import Enum
 from logging import debug
 from typing import List, Optional
 
 import yaml
 from pydantic import BaseModel, DirectoryPath
+from typing_extensions import Literal
 
 
 class Status_config(BaseModel):
@@ -24,14 +24,8 @@ class Submit_config(BaseModel):
     status_file: str = 'jetto.status'
 
 
-class Sources(Enum):
-    jetto_in = 'jetto.in'
-    jetto_jset = 'jetto.jset'
-    ids = 'ids'
-
-
 class Variable(BaseModel):
-    source: Sources
+    source: Literal['jetto.in', 'jetto.jset', 'ids']
     key: str
     values: list
 
@@ -71,6 +65,5 @@ class Config(BaseModel):
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
         if not Config._instance:
-            print('XXX')
             Config._instance = object.__new__(cls)
         return Config._instance
