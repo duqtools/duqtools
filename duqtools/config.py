@@ -27,7 +27,7 @@ class Submit_config(BaseModel):
 
 
 class Variable(BaseModel):
-    source: Literal['jetto.in', 'jetto.jset', 'ids']
+    source: Literal['jetto.in', 'jetto.jset']
     key: str
     values: list
 

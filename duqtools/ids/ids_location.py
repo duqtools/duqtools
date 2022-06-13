@@ -111,9 +111,9 @@ class ImasLocation(BaseModel):
         if op[0] < 0:
             cp = entry.create()
             if cp[0] == 0:
-                logger.info('data entry created')
+                logger.debug('Data entry created: %s' % self.path())
         elif op[0] == 0:
-            logger.info('data entry opened')
+            logger.debug('Data entry opened: %s' % self.path())
 
         try:
             yield entry

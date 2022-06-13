@@ -1,13 +1,8 @@
 workspace: ./workspace
 create:
-  # template:
-  #   db: jet
-  #   run: 1
-  #   shot: 92432
-  #   user: g2aho
   template: template_model
   data:
-    db: uq_run
+    db: jet
     run_in_start_at: 7000
     run_out_start_at: 8000
   matrix:
