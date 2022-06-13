@@ -3,6 +3,7 @@ from logging import debug
 import yaml
 
 from .._types import PathLike
+from .ids_location import ImasLocation
 
 
 def write_ids(filename: PathLike, data: dict):
@@ -18,3 +19,9 @@ def write_ids(filename: PathLike, data: dict):
     with open(filename, 'w') as f:
         yaml.dump(data, f)
     debug('wrote %r' % filename)
+
+
+__all__ = [
+    'write_ids',
+    'ImasLocation',
+]

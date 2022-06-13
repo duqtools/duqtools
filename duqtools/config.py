@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from logging import debug
 from typing import List, Optional
 
@@ -37,9 +39,36 @@ class Variable(BaseModel):
         } for value in self.values)
 
 
+class IDSOperation(BaseModel):
+    ids: str
+    operator: Literal['add', 'multiply']
+    values: List[float]
+
+    def expand(self):
+        return tuple({
+            'ids': self.ids,
+            'operator': self.operator,
+            'value': value
+        } for value in self.values)
+
+
+class ImasLocation(BaseModel):
+    db: str
+    run: int
+    shot: int
+    user: str
+
+
+class DataLocation(BaseModel):
+    db: str
+    run_in_start_at: int
+    run_out_start_at: int
+
+
 class ConfigCreate(BaseModel):
-    matrix: List[Variable] = []
-    template: DirectoryPath
+    matrix: List[IDSOperation] = []
+    template: ImasLocation
+    data: DataLocation
 
 
 class Config(BaseModel):
