@@ -55,8 +55,41 @@ def write_batchfile(target_drc: Path):
 """)
 
 
-def create(**kwargs):
+def apply(operation: dict, core_profiles) -> None:
+    """Apply operation to core_profiles. Data is modified in-place.
 
+    Parameters
+    ----------
+    operation : dict
+        Dict with ids to modify, operator to apply, and value to use.
+    core_profiles : TYPE
+        Core profiles IMAS object.
+    """
+    ids = operation['ids']
+    operator = operation['operator']
+    assert operator in ('add', 'multiply', 'divide', 'power', 'subtract',
+                        'floor_divide', 'mod', 'remainder')
+
+    value = operation['value']
+
+    logger.info('Apply `%s = %s(%s, %s)`' % (ids, operator, ids, value))
+
+    npfunc = getattr(np, operator)
+    profile = getattr(core_profiles.profiles_1d[0], ids)
+
+    logger.debug('data range before: %s - %s' % (profile.min(), profile.max()))
+    npfunc(profile, value, out=profile)
+    logger.debug('data range after: %s - %s' % (profile.min(), profile.max()))
+
+
+def create(**kwargs):
+    """Create input for jetto and IDS data structures.
+
+    Parameters
+    ----------
+    **kwargs
+        Unused.
+    """
     options = cfg().create
 
     template_drc = options.template
@@ -72,9 +105,6 @@ def create(**kwargs):
     assert source.path().exists()
 
     for i, combination in enumerate(combinations):
-        # for var in combination:
-        #     debug('{source}: {key}={value}'.format(**var))
-
         sub_drc = f'run_{i:04d}'
         target_drc = cfg().workspace / sub_drc
         target_drc.mkdir(parents=True, exist_ok=True)
@@ -97,24 +127,7 @@ def create(**kwargs):
         core_profiles = target_in.get('core_profiles')
 
         for operation in combination:
-            ids = operation['ids']
-            operator = operation['operator']
-            assert operator in ('add', 'multiply', 'divide', 'power',
-                                'subtract', 'floor_divide', 'mod', 'remainder')
-
-            value = operation['value']
-
-            logger.info('Apply `%s = %s(%s, %s)`' %
-                        (ids, operator, ids, value))
-
-            npfunc = getattr(np, operator)
-            profile = getattr(core_profiles.profiles_1d[0], ids)
-
-            logger.debug('data range before: %s - %s' %
-                         (profile.min(), profile.max()))
-            npfunc(profile, value, out=profile)
-            logger.debug('data range after: %s - %s' %
-                         (profile.min(), profile.max()))
+            apply(operation, core_profiles)
 
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
