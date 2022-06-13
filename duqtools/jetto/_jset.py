@@ -4,9 +4,12 @@ from __future__ import annotations
 from copy import deepcopy
 from logging import debug
 from pathlib import Path
-from typing import Dict, List, TextIO, Tuple
+from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
 from .._types import PathLike
+
+if TYPE_CHECKING:
+    from duqtools.ids import ImasLocation
 
 DEFAULT_FILENAME = 'jetto.jset'
 
@@ -228,6 +231,10 @@ class JettoSettings:
 
         return super().__new__(cls)
 
+    def copy(self):
+        """Return a copy of this instance."""
+        return deepcopy(self)
+
     @property
     def components(self):
         """Active components e.g. EDGE2D, JETTO, HCD (uppercase)"""
@@ -304,7 +311,7 @@ class JettoSettings:
         jset_copy : JettoSettings
             Patched copy.
         """
-        jset_copy = deepcopy(self)
+        jset_copy = self.copy()
 
         if settings:
             jset_copy.settings.update(settings)
@@ -312,3 +319,32 @@ class JettoSettings:
             jset_copy.metadata.update(metadata)
 
         return jset_copy
+
+    def set_imas_locations(self, inp: ImasLocation,
+                           out: ImasLocation) -> JettoSettings:
+        """Make a copy with updated IDS locations for input / output.
+
+        Parameters
+        ----------
+        inp : ImasLocation
+            IMAS description of where the input data is stored.
+        out : ImasLocation
+            IMAS description of where the output data should be stored.
+
+        Returns
+        -------
+        jset_new : JettoSettings
+            Copy of the jetto settings with updated IDS locations.
+        """
+        jset_new = self.copy()
+
+        jset_new.user_in = inp.user
+        jset_new.machine_in = inp.db
+        jset_new.shot_in = inp.shot
+        jset_new.run_in = inp.run
+
+        jset_new.machine_out = out.db
+        jset_new.shot_out = out.shot
+        jset_new.run_out = out.run
+
+        return jset_new
