@@ -4,10 +4,14 @@ import logging
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import imas
 from imas import imasdef
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from duqtools.jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
 
@@ -115,3 +119,42 @@ class ImasLocation(BaseModel):
             yield entry
         finally:
             entry.close()
+
+    @classmethod
+    def from_jset_input(cls, jset: JettoSettings) -> ImasLocation:
+        """Get IMAS input location from jetto settings.
+
+        Parameters
+        ----------
+        jset : JettoSettings
+            Jetto settings.
+
+        Returns
+        -------
+        destination : ImasLocation
+            Returns the destination.
+        """
+        return cls(
+            db=jset.machine_in,  # type: ignore
+            user=jset.user_in,  # type: ignore
+            run=jset.run_in,  # type: ignore
+            shot=jset.shot_in)  # type: ignore
+
+    @classmethod
+    def from_jset_output(cls, jset: JettoSettings) -> ImasLocation:
+        """Get IMAS output location from jetto settings.
+
+        Parameters
+        ----------
+        jset : JettoSettings
+            Jetto settings.
+
+        Returns
+        -------
+        destination : ImasLocation
+            Returns the destination.
+        """
+        return cls(
+            db=jset.machine_out,  # type: ignore
+            run=jset.run_out,  # type: ignore
+            shot=jset.shot_out)  # type: ignore

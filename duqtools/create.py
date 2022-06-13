@@ -5,7 +5,7 @@ from pathlib import Path
 
 from duqtools.config import Config as cfg
 
-from .ids import write_ids
+from .ids import ImasLocation, write_ids
 from .jetto import JettoSettings
 
 
@@ -62,6 +62,8 @@ def create(**kwargs):
     combinations = itertools.product(*expanded_vars)
 
     jset = JettoSettings.from_directory(template_drc)
+
+    template_data_in = ImasLocation.from_jset_input(jset)
 
     for i, combination in enumerate(combinations):
         for var in combination:

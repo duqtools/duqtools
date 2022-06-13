@@ -52,13 +52,6 @@ class IDSOperation(BaseModel):
         } for value in self.values)
 
 
-class ImasLocation(BaseModel):
-    db: str
-    run: int
-    shot: int
-    user: str
-
-
 class DataLocation(BaseModel):
     db: str
     run_in_start_at: int
@@ -67,7 +60,8 @@ class DataLocation(BaseModel):
 
 class ConfigCreate(BaseModel):
     matrix: List[IDSOperation] = []
-    template: ImasLocation
+    # template: ImasLocation
+    template: DirectoryPath
     data: DataLocation
 
 

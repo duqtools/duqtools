@@ -1,10 +1,11 @@
 workspace: ./workspace
 create:
-  template:
-    db: jet
-    run: 1
-    shot: 92432
-    user: g2aho
+  # template:
+  #   db: jet
+  #   run: 1
+  #   shot: 92432
+  #   user: g2aho
+  template: template_model
   data:
     db: uq_run
     run_in_start_at: 7000
