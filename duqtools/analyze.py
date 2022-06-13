@@ -8,15 +8,15 @@ from .status import has_status, is_completed
 mockids = [{
     'db': 'duqtools',
     'shot': 1,
-    'index': 1
+    'run': 1
 }, {
     'db': 'duqtools',
     'shot': 1,
-    'index': 2
+    'run': 2
 }, {
     'db': 'duqtools',
     'shot': 1,
-    'index': 3
+    'run': 3
 }]
 
 
@@ -42,6 +42,9 @@ def analyze(**kwargs):
 
     # TODO get IDS locations, use mockids now
 
+    # Gather all results and put them in a in-memory format (they should be small enough so that we can analyze them)
     for entry in mockids:
-        # data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, index)
-        pass
+        db, shot, run = entry.values()
+        source = ImasLocation(db=db, shot=shot, run=run)
+
+        core_profiles = source.get('core_profiles')
