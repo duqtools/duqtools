@@ -17,10 +17,25 @@ class Plot(BaseModel):
     # TODO, make y axis time-variable by replacing "0" with "*" for example
     y: str = 'profiles_1d/0/electrons/density_thermal'
 
-    xlabel: Optional[str]
-    ylabel: Optional[str]
+    _xlabel: str
+    _ylabel: str
 
     add_time_slider: bool = False
+
+    def __get_xlabel(self):
+        return self._xlabel if hasattr(self, '_xlabel') else self.x
+
+    def __set_xlabel(self, var: str):
+        self._xlabel = var
+
+    def __get_ylabel(self):
+        return self._ylabel if hasattr(self, '_ylabel') else self.y
+
+    def __set_ylabel(self, var: str):
+        self._ylabel = var
+
+    xlabel = property(__get_xlabel, __set_xlabel)
+    ylabel = property(__get_ylabel, __set_ylabel)
 
 
 class Plot_config(BaseModel):
