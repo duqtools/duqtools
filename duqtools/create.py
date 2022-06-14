@@ -1,4 +1,3 @@
-import itertools
 import logging
 import shutil
 from pathlib import Path
@@ -66,8 +65,6 @@ def apply(operation: dict, core_profiles) -> None:
     """
     ids = operation['ids']
     operator = operation['operator']
-    assert operator in ('add', 'multiply', 'divide', 'power', 'subtract',
-                        'floor_divide', 'mod', 'remainder')
 
     value = operation['value']
 
@@ -93,15 +90,15 @@ def create(**kwargs):
 
     template_drc = options.template
     matrix = options.matrix
-
-    expanded_vars = tuple(var.expand() for var in matrix)
-
-    combinations = itertools.product(*expanded_vars)
+    sampler = options.sampler
 
     jset = JettoSettings.from_directory(template_drc)
 
     source = ImasLocation.from_jset_input(jset)
     assert source.path().exists()
+
+    variables = tuple(var.expand() for var in matrix)
+    combinations = sampler(*variables)
 
     for i, combination in enumerate(combinations):
         sub_drc = f'run_{i:04d}'

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import yaml
-from pydantic import BaseModel, DirectoryPath
+from pydantic import BaseModel, DirectoryPath, Field
 from typing_extensions import Literal
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,8 @@ class Variable(BaseModel):
 
 class IDSOperation(BaseModel):
     ids: str
-    operator: Literal['add', 'multiply']
+    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
+                      'floor_divide', 'mod', 'remainder']
     values: List[float]
 
     def expand(self):
@@ -60,9 +61,28 @@ class DataLocation(BaseModel):
     run_out_start_at: int
 
 
+class LHSSampler(BaseModel):
+    method: Literal['latin-hypercube']
+    n_samples: int
+
+    def __call__(self, *args):
+        from duqtools.samplers import latin_hypercube
+        return latin_hypercube(*args, n_samples=self.n_samples)
+
+
+class CartesianProduct(BaseModel):
+    method: Literal['cartesian-product'] = 'cartesian-product'
+
+    def __call__(self, *args):
+        from duqtools.samplers import cartesian_product
+        return cartesian_product(*args)
+
+
 class ConfigCreate(BaseModel):
     matrix: List[IDSOperation] = []
-    # template: ImasLocation
+    sampler: Union[LHSSampler,
+                   CartesianProduct] = Field(default=CartesianProduct(),
+                                             discriminator='method')
     template: DirectoryPath
     data: DataLocation
 

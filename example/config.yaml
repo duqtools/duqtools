@@ -5,6 +5,9 @@ create:
     db: jet
     run_in_start_at: 7000
     run_out_start_at: 8000
+  sampler:
+    method: latin-hypercube
+    n_samples: 3
   matrix:
     - ids: zeff
       operator: add
