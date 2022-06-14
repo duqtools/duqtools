@@ -7,7 +7,7 @@ def recursive_defaultdict():
     return defaultdict(recursive_defaultdict)
 
 
-class SimpleCoreIDS:
+class Simple_IDS:
     # All fields in the core profile in a single dict
     flat_fields: dict = {}
     # All fields, in the core profile in a nested dict

@@ -9,6 +9,8 @@ import imas
 from imas import imasdef
 from pydantic import BaseModel
 
+from .ids_simplify import Simple_IDS
+
 logger = logging.getLogger(__name__)
 
 PATH_TEMPLATE = ('/afs/eufus.eu/user/g/{user}/public/imasdb/{db}'
@@ -86,6 +88,20 @@ class ImasLocation(BaseModel):
             data = data_entry.get(key)
 
         return data
+
+    def get_simple_IDS(self, key: str = 'core_profiles') -> Simple_IDS:
+        """get the data as a simple ids (all values in memory, in a dict).
+
+        Parameters
+        ----------
+        key : str, optional
+            Name of profiles to open
+
+        Returns
+        -------
+        Simple_IDS
+        """
+        return Simple_IDS(self.get(key))
 
     @contextmanager
     def open(self, backend=imasdef.MDSPLUS_BACKEND):
