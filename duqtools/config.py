@@ -1,9 +1,13 @@
-from logging import debug
+from __future__ import annotations
+
+import logging
 from typing import List, Optional
 
 import yaml
 from pydantic import BaseModel, DirectoryPath
 from typing_extensions import Literal
+
+logger = logging.getLogger(__name__)
 
 
 class Status_config(BaseModel):
@@ -25,7 +29,7 @@ class Submit_config(BaseModel):
 
 
 class Variable(BaseModel):
-    source: Literal['jetto.in', 'jetto.jset', 'ids']
+    source: Literal['jetto.in', 'jetto.jset']
     key: str
     values: list
 
@@ -37,9 +41,30 @@ class Variable(BaseModel):
         } for value in self.values)
 
 
+class IDSOperation(BaseModel):
+    ids: str
+    operator: Literal['add', 'multiply']
+    values: List[float]
+
+    def expand(self):
+        return tuple({
+            'ids': self.ids,
+            'operator': self.operator,
+            'value': value
+        } for value in self.values)
+
+
+class DataLocation(BaseModel):
+    db: str
+    run_in_start_at: int
+    run_out_start_at: int
+
+
 class ConfigCreate(BaseModel):
-    matrix: List[Variable] = []
+    matrix: List[IDSOperation] = []
+    # template: ImasLocation
     template: DirectoryPath
+    data: DataLocation
 
 
 class Config(BaseModel):
@@ -59,7 +84,7 @@ class Config(BaseModel):
         if filename:
             with open(filename, 'r') as f:
                 datamap = yaml.safe_load(f)
-                debug(datamap)
+                logger.debug(datamap)
                 BaseModel.__init__(self, **datamap)
 
     def __new__(cls, *args, **kwargs):

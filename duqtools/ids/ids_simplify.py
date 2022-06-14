@@ -3,6 +3,7 @@ from collections import defaultdict
 import numpy as np
 
 
+
 def recursive_defaultdict():
     return defaultdict(recursive_defaultdict)
 
