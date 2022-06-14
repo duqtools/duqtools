@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from logging import debug
+import logging
 from typing import List, Optional
 
 import yaml
 from pydantic import BaseModel, DirectoryPath
 from typing_extensions import Literal
+
+logger = logging.getLogger(__name__)
 
 
 class Status_config(BaseModel):
@@ -82,7 +84,7 @@ class Config(BaseModel):
         if filename:
             with open(filename, 'r') as f:
                 datamap = yaml.safe_load(f)
-                debug(datamap)
+                logger.debug(datamap)
                 BaseModel.__init__(self, **datamap)
 
     def __new__(cls, *args, **kwargs):

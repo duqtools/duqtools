@@ -1,7 +1,6 @@
 import itertools
 import logging
 import shutil
-from logging import debug
 from pathlib import Path
 
 import numpy as np
@@ -37,7 +36,7 @@ def copy_files(source_drc: Path, target_drc: Path):
         src = source_drc / filename
         dst = target_drc / filename
         shutil.copyfile(src, dst)
-    debug('copied files to %s' % target_drc)
+    logger.debug('copied files to %s' % target_drc)
 
 
 def write_batchfile(target_drc: Path):
