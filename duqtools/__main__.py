@@ -5,14 +5,11 @@ import duqtools.config as cfg
 
 from .create import create
 from .init import init
+from .plot import plot
 from .status import status
 from .submit import submit
 
 logger = logging.getLogger(__name__)
-
-
-def analyze():
-    raise NotImplementedError
 
 
 def cmdline():
@@ -36,9 +33,9 @@ def cmdline():
         'status', help='Print the status of the UQ runs')
     parser_status.set_defaults(func=status)
 
-    parser_analyze = subparsers.add_parser(
-        'analyze', help='Analyze the results and generate a report')
-    parser_analyze.set_defaults(func=analyze)
+    parser_plot = subparsers.add_parser(
+        'plot', help='Analyze the results and generate a report')
+    parser_plot.set_defaults(func=plot)
 
     # Globally required options
     parser.add_argument('CONFIG', type=str, help='path to store run files')

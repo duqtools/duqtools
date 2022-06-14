@@ -7,7 +7,38 @@ import yaml
 from pydantic import BaseModel, DirectoryPath
 from typing_extensions import Literal
 
+from duqtools.ids.ids_location import ImasLocation
+
 logger = logging.getLogger(__name__)
+
+
+class Plot(BaseModel):
+    x: Optional[str]
+    # TODO, make y axis time-variable by replacing "0" with "*" for example
+    y: str = 'profiles_1d/0/electrons/density_thermal'
+
+    xlabel: Optional[str]
+    ylabel: Optional[str]
+
+    add_time_slider: bool = False
+
+    def get_xlabel(self):
+        return self.xlabel if self.xlabel else self.x
+
+    def get_ylabel(self):
+        return self.ylabel if self.ylabel else self.y
+
+
+class Plot_config(BaseModel):
+    data: List[ImasLocation] = [
+        ImasLocation(**{
+            'db': 'jet',
+            'shot': 94875,
+            'run': 251,
+            'user': 'g2vazizi'
+        })
+    ]
+    plots: List[Plot] = [Plot()]
 
 
 class Status_config(BaseModel):
@@ -77,6 +108,7 @@ class Config(BaseModel):
     submit: Submit_config = Submit_config()
     create: Optional[ConfigCreate]
     status: Status_config = Status_config()
+    plot: Plot_config = Plot_config()
     workspace: DirectoryPath = './workspace'
 
     def __init__(self, filename=None):

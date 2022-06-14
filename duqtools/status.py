@@ -5,6 +5,7 @@ from pathlib import Path
 from .config import Config as cfg
 
 logger = logging.getLogger(__name__)
+info, debug = logger.info, logger.debug
 
 
 def has_submit_script(dir: Path) -> bool:
@@ -54,8 +55,8 @@ def status_file_contains(dir: Path, msg) -> bool:
     sf = (dir / cfg().submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
-        logger.debug('Checking if content of %s file: %s contains %s' %
-                     (sf, content, msg))
+        debug('Checking if content of %s file: %s contains %s' %
+              (sf, content, msg))
         return msg in content
 
 
@@ -108,14 +109,14 @@ def status(**kwargs):
     """status."""
     if not cfg().submit:
         raise Exception('submit field required in config file')
-    logger.debug('Submit config: %s' % cfg().submit)
+    debug('Submit config: %s' % cfg().submit)
 
     dirs = [
         Path(entry) for entry in scandir(cfg().workspace) if entry.is_dir()
     ]
-    logger.debug('Case directories: %s' % dirs)
+    debug('Case directories: %s' % dirs)
 
-    logger.info('Total number of directories: %i' % len(dirs))
+    info('Total number of directories: %i' % len(dirs))
 
     dirs_submit = [dir for dir in dirs if has_submit_script(dir)]
     dirs_status = [dir for dir in dirs if has_status(dir)]
@@ -129,17 +130,17 @@ def status(**kwargs):
             dir in dirs_completed or dir in dirs_failed or dir in dirs_running)
     ]
 
-    logger.info('Total number of directories with submission script : %i' %
-                len(dirs_submit))
-    logger.info('      number of not submitted jobs                 : %i' %
-                (len(dirs_submit) - len(dirs_status)))
-    logger.info('Total number of directories with status     script : %i' %
-                len(dirs_status))
-    logger.info('Total number of directories with Completed status  : %i' %
-                len(dirs_completed))
-    logger.info('Total number of directories with Failed    status  : %i' %
-                len(dirs_failed))
-    logger.info('Total number of directories with Running   status  : %i' %
-                len(dirs_running))
-    logger.info('Total number of directories with Unknown   status  : %i' %
-                len(dirs_unknown))
+    info('Total number of directories with submission script : %i' %
+         len(dirs_submit))
+    info('      number of not submitted jobs                 : %i' %
+         (len(dirs_submit) - len(dirs_status)))
+    info('Total number of directories with status     script : %i' %
+         len(dirs_status))
+    info('Total number of directories with Completed status  : %i' %
+         len(dirs_completed))
+    info('Total number of directories with Failed    status  : %i' %
+         len(dirs_failed))
+    info('Total number of directories with Running   status  : %i' %
+         len(dirs_running))
+    info('Total number of directories with Unknown   status  : %i' %
+         len(dirs_unknown))
