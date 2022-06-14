@@ -36,8 +36,8 @@ def plot(**kwargs):
             else:
                 x = np.linspace(0, 1, len(y))
 
-            plt.xlabel(plot.xlabel)
-            plt.ylabel(plot.ylabel)
+            plt.xlabel(plot.get_xlabel())
+            plt.ylabel(plot.get_ylabel())
 
             plt.plot(x, y)
         plt.savefig('plot_%04i.png' % i)
