@@ -3,7 +3,6 @@ from os import scandir
 from pathlib import Path
 
 from duqtools.ids.ids_location import ImasLocation
-from duqtools.ids.ids_simplify import SimpleCoreIDS
 
 from .config import Config as cfg
 from .status import has_status, is_completed
@@ -42,9 +41,4 @@ def analyze(**kwargs):
         db, shot, run = entry.values()
         debug(db, shot, run)
         source = ImasLocation(db=db, shot=shot, run=run)
-
-        profiles.append(source.get('core_profiles'))
-
-    temp = SimpleCoreIDS(profiles[0])
-    import pdb
-    pdb.set_trace()
+        profiles.append(source.get_simple_IDS('core_profiles'))
