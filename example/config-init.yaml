@@ -1,0 +1,21 @@
+create: null
+plot:
+  data:
+  - db: jet
+    run: 251
+    shot: 94875
+    user: g2vazizi
+  plots:
+  - add_time_slider: false
+    x: null
+    xlabel: null
+    y: profiles_1d/0/electrons/density_thermal
+    ylabel: null
+status:
+  msg_completed: 'Status : Completed successfully'
+  msg_failed: 'Status : Failed'
+  msg_running: 'Status : Running'
+submit:
+  status_file: jetto.status
+  submit_script_name: .llcmd
+workspace: ./workspace
