@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from logging import debug
 from typing import List, Optional
 
@@ -25,7 +27,7 @@ class Submit_config(BaseModel):
 
 
 class Variable(BaseModel):
-    source: Literal['jetto.in', 'jetto.jset', 'ids']
+    source: Literal['jetto.in', 'jetto.jset']
     key: str
     values: list
 
@@ -37,9 +39,30 @@ class Variable(BaseModel):
         } for value in self.values)
 
 
+class IDSOperation(BaseModel):
+    ids: str
+    operator: Literal['add', 'multiply']
+    values: List[float]
+
+    def expand(self):
+        return tuple({
+            'ids': self.ids,
+            'operator': self.operator,
+            'value': value
+        } for value in self.values)
+
+
+class DataLocation(BaseModel):
+    db: str
+    run_in_start_at: int
+    run_out_start_at: int
+
+
 class ConfigCreate(BaseModel):
-    matrix: List[Variable] = []
+    matrix: List[IDSOperation] = []
+    # template: ImasLocation
     template: DirectoryPath
+    data: DataLocation
 
 
 class Config(BaseModel):
