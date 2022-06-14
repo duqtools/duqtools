@@ -1,12 +1,12 @@
-import io
+import logging
 import xml.sax
 import xml.sax.handler
-from contextlib import redirect_stderr
 from getpass import getuser
 
 import imas
 from packaging import version
 
+from .._logging_utils import LoggingContext
 from .ids_location import ImasLocation
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
@@ -77,9 +77,8 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
 
     parser = Parser.load_idsdef()
 
-    # this loop is very spammy, capture stderr as f
-    # we may do something with it using `_.getvalue()`
-    with redirect_stderr(io.StringIO()) as _:
+    # Temporarily hide warnings, because this loop is very spammy
+    with LoggingContext(level=logging.CRITICAL):
 
         for ids_info in parser.idss:
             name = ids_info['name']

@@ -1,6 +1,5 @@
 import argparse
 import logging
-from logging import debug
 
 import duqtools.config as cfg
 
@@ -8,6 +7,8 @@ from .create import create
 from .init import init
 from .status import status
 from .submit import submit
+
+logger = logging.getLogger(__name__)
 
 
 def analyze():
@@ -58,12 +59,10 @@ def cmdline():
     args = parser.parse_args()
 
     # Set the debug level
-    if (args.debug):
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
-    debug('Arguments after parsing: %s' % args)
+    logger.debug('Arguments after parsing: %s' % args)
 
     # Load the config file
     if not args.func == init:  # dont read it if we have to create it
