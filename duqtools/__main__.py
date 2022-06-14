@@ -8,7 +8,6 @@ from .init import init
 from .status import status
 from .submit import submit
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
@@ -60,10 +59,8 @@ def cmdline():
     args = parser.parse_args()
 
     # Set the debug level
-    if (args.debug):
+    if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
     logger.debug('Arguments after parsing: %s' % args)
 
