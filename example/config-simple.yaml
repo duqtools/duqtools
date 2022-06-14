@@ -1,0 +1,14 @@
+workspace: ./workspace
+create:
+  template: template_model
+  data:
+    db: jet
+    run_in_start_at: 7000
+    run_out_start_at: 8000
+  matrix:
+    - ids: zeff
+      operator: add
+      values: [1,]
+    - ids: t_i_average
+      operator: multiply
+      values: [1.1,]
