@@ -3,7 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .config import Config as cfg
+from .config import cfg
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -22,11 +22,11 @@ def plot(**kwargs):
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
     profiles = []
-    for entry in cfg().plot.data:
+    for entry in cfg.plot.data:
         debug('Extracting database: %s' % entry)
         profiles.append(entry.get_simple_IDS('core_profiles'))
 
-    for i, plot in enumerate(cfg().plot.plots):
+    for i, plot in enumerate(cfg.plot.plots):
         info('Creating plot number %04i' % i)
         for profile in profiles:
             y = profile.flat_fields[plot.y]

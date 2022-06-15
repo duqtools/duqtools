@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-import duqtools.config as cfg
+from duqtools.config import cfg
 
 from .create import create
 from .init import init
@@ -63,7 +63,7 @@ def cmdline():
 
     # Load the config file
     if not args.func == init:  # dont read it if we have to create it
-        cfg.Config(args.CONFIG)
+        cfg.read(args.CONFIG)
 
     # Run the subcommand
     args.func(args=args)
