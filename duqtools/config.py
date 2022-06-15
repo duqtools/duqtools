@@ -70,6 +70,15 @@ class LHSSampler(BaseModel):
         return latin_hypercube(*args, n_samples=self.n_samples)
 
 
+class Halton(BaseModel):
+    method: Literal['halton']
+    n_samples: int
+
+    def __call__(self, *args):
+        from duqtools.samplers import halton
+        return halton(*args, n_samples=self.n_samples)
+
+
 class SobolSampler(BaseModel):
     method: Literal['sobol', 'low-discrepancy-sequence']
     n_samples: int
@@ -89,7 +98,7 @@ class CartesianProduct(BaseModel):
 
 class ConfigCreate(BaseModel):
     matrix: List[IDSOperation] = []
-    sampler: Union[LHSSampler, SobolSampler,
+    sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method')
     template: DirectoryPath

@@ -86,3 +86,25 @@ def sobol(*iterables, n_samples: int, **kwargs):
         List of sampled input arguments.
     """
     return _sampler(qmc.Sobol, *iterables, n_samples=n_samples, **kwargs)
+
+
+def halton(*iterables, n_samples: int, **kwargs):
+    """Sample input iterables using the Halton sampling method.
+
+    Uses `scipy.stats.qmc.Halton`.
+
+    Parameters
+    ----------
+    *iterables
+        Iterables to sample from.
+    n_samples : int
+        Number of samples to return.
+    **kwargs
+        These keyword arguments are passed to `scipy.stats.qmc.Halton`
+
+    Returns
+    -------
+    samples : list[Any]
+        List of sampled input arguments.
+    """
+    return _sampler(qmc.Halton, *iterables, n_samples=n_samples, **kwargs)
