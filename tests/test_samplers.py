@@ -1,4 +1,4 @@
-from duqtools.samplers import cartesian_product, latin_hypercube
+from duqtools.samplers import cartesian_product, latin_hypercube, sobol
 
 
 def test_cartesian_product():
@@ -19,3 +19,14 @@ def test_latin_hypercube():
     ret = latin_hypercube(i, j, k, n_samples=3, seed=123)
 
     assert ret == [('b', 'e', 'h'), ('b', 'd', 'h'), ('a', 'c', 'f')]
+
+
+def test_sobol():
+    i = 'ab'
+    j = 'cde'
+    k = 'fghi'
+
+    ret = sobol(i, j, k, n_samples=4, seed=123)
+
+    assert ret == [('b', 'd', 'g'), ('a', 'c', 'i'), ('a', 'e', 'f'),
+                   ('b', 'c', 'h')]
