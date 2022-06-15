@@ -9,6 +9,8 @@ from typing_extensions import Literal
 
 from duqtools.ids.ids_location import ImasLocation
 
+from ._types import PathLike
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,16 +154,20 @@ class Config(BaseModel):
     def __init__(self, filename=None):
         """Initialize with optional filename argument."""
         if filename:
-            with open(filename, 'r') as f:
-                datamap = yaml.safe_load(f)
-                logger.debug(datamap)
-                BaseModel.__init__(self, **datamap)
+            self.read(filename)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
         if not Config._instance:
             Config._instance = object.__new__(cls)
         return Config._instance
+
+    def read(self, filename: PathLike):
+        """Read config from file."""
+        with open(filename, 'r') as f:
+            datamap = yaml.safe_load(f)
+            logger.debug(datamap)
+            BaseModel.__init__(self, **datamap)
 
 
 cfg = Config()
