@@ -2,7 +2,7 @@ import logging
 from os import scandir
 from pathlib import Path
 
-from .config import Config as cfg
+from .config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def has_submit_script(dir: Path) -> bool:
     -------
     bool
     """
-    return (dir / cfg().submit.submit_script_name).exists()
+    return (dir / cfg.submit.submit_script_name).exists()
 
 
 def has_status(dir: Path) -> bool:
@@ -34,7 +34,7 @@ def has_status(dir: Path) -> bool:
     -------
     bool
     """
-    return (dir / cfg().submit.status_file).exists()
+    return (dir / cfg.submit.status_file).exists()
 
 
 def status_file_contains(dir: Path, msg) -> bool:
@@ -51,7 +51,7 @@ def status_file_contains(dir: Path, msg) -> bool:
     -------
     bool
     """
-    sf = (dir / cfg().submit.status_file)
+    sf = (dir / cfg.submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
         logger.debug('Checking if content of %s file: %s contains %s' %
@@ -71,7 +71,7 @@ def is_completed(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, cfg().status.msg_completed)
+    return status_file_contains(dir, cfg.status.msg_completed)
 
 
 def is_failed(dir: Path) -> bool:
@@ -86,7 +86,7 @@ def is_failed(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, cfg().status.msg_failed)
+    return status_file_contains(dir, cfg.status.msg_failed)
 
 
 def is_running(dir: Path) -> bool:
@@ -101,18 +101,16 @@ def is_running(dir: Path) -> bool:
     -------
     bool
     """
-    return status_file_contains(dir, cfg().status.msg_running)
+    return status_file_contains(dir, cfg.status.msg_running)
 
 
 def status(**kwargs):
     """status."""
-    if not cfg().submit:
+    if not cfg.submit:
         raise Exception('submit field required in config file')
-    logger.debug('Submit config: %s' % cfg().submit)
+    logger.debug('Submit config: %s' % cfg.submit)
 
-    dirs = [
-        Path(entry) for entry in scandir(cfg().workspace) if entry.is_dir()
-    ]
+    dirs = [Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()]
     logger.debug('Case directories: %s' % dirs)
 
     logger.info('Total number of directories: %i' % len(dirs))

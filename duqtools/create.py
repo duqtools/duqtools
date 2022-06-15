@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from duqtools.config import Config as cfg
+from duqtools.config import cfg
 
 from .ids import ImasLocation
 from .jetto import JettoSettings
@@ -86,7 +86,7 @@ def create(**kwargs):
     **kwargs
         Unused.
     """
-    options = cfg().create
+    options = cfg.create
 
     template_drc = options.template
     matrix = options.matrix
@@ -102,7 +102,7 @@ def create(**kwargs):
 
     for i, combination in enumerate(combinations):
         sub_drc = f'run_{i:04d}'
-        target_drc = cfg().workspace / sub_drc
+        target_drc = cfg.workspace / sub_drc
         target_drc.mkdir(parents=True, exist_ok=True)
 
         copy_files(template_drc, target_drc)

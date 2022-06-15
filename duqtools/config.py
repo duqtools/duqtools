@@ -10,7 +10,7 @@ from typing_extensions import Literal
 logger = logging.getLogger(__name__)
 
 
-class Status_config(BaseModel):
+class StatusConfig(BaseModel):
     """Status_config."""
 
     msg_completed: str = 'Status : Completed successfully'
@@ -18,7 +18,7 @@ class Status_config(BaseModel):
     msg_running: str = 'Status : Running'
 
 
-class Submit_config(BaseModel):
+class SubmitConfig(BaseModel):
     """Submit_config.
 
     Config class for submitting jobs
@@ -96,7 +96,7 @@ class CartesianProduct(BaseModel):
         return cartesian_product(*args)
 
 
-class ConfigCreate(BaseModel):
+class CreateConfig(BaseModel):
     matrix: List[IDSOperation] = []
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
@@ -112,9 +112,9 @@ class Config(BaseModel):
     _instance = None
 
     # pydantic members
-    submit: Submit_config = Submit_config()
-    create: Optional[ConfigCreate]
-    status: Status_config = Status_config()
+    submit: SubmitConfig = SubmitConfig()
+    create: Optional[CreateConfig]
+    status: StatusConfig = StatusConfig()
     workspace: DirectoryPath = './workspace'
 
     def __init__(self, filename=None):
@@ -130,3 +130,6 @@ class Config(BaseModel):
         if not Config._instance:
             Config._instance = object.__new__(cls)
         return Config._instance
+
+
+cfg = Config()

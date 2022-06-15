@@ -3,7 +3,7 @@ import subprocess
 from os import scandir
 from pathlib import Path
 
-from duqtools.config import Config as cfg
+from duqtools.config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -17,17 +17,17 @@ def submit(**kwargs):
 
     args = kwargs.args
 
-    if not cfg().submit:
+    if not cfg.submit:
         raise Exception('submit field required in config file')
-    logger.debug('Submit config: %s' % cfg().submit)
+    logger.debug('Submit config: %s' % cfg.submit)
 
     run_dirs = [
-        Path(entry) for entry in scandir(cfg().workspace) if entry.is_dir()
+        Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()
     ]
     logger.debug('Case directories: %s' % run_dirs)
 
     for run_dir in run_dirs:
-        submission_script = run_dir / cfg().submit.submit_script_name
+        submission_script = run_dir / cfg.submit.submit_script_name
         if submission_script.is_file():
             logger.info('Found submission script: %s ; Ready for submission' %
                         submission_script)
@@ -37,7 +37,7 @@ def submit(**kwargs):
                 submission_script)
             continue
 
-        status_file = run_dir / cfg().submit.status_file
+        status_file = run_dir / cfg.submit.status_file
         if status_file.exists() and not args.force:
             if not status_file.is_file():
                 logger.error('Status file %s is not a file' % status_file)
