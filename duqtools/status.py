@@ -110,7 +110,7 @@ def status(**kwargs):
     if not cfg.submit:
         raise Exception('submit field required in config file')
 
-    debug('Submit config: %s' % cfg().submit)
+    debug('Submit config: %s' % cfg.submit)
 
     dirs = [Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()]
     debug('Case directories: %s' % dirs)
