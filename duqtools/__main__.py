@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-import duqtools.config as cfg
+from duqtools.config import cfg
 
 from .create import create
 from .init import init
