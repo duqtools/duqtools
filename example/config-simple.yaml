@@ -6,9 +6,9 @@ create:
     run_in_start_at: 7000
     run_out_start_at: 8000
   matrix:
-    - ids: zeff
+    - ids: profiles_1d/0/zeff
       operator: add
       values: [1,]
-    - ids: t_i_average
+    - ids: profiles_1d/0/t_i_average
       operator: multiply
       values: [1.1,]

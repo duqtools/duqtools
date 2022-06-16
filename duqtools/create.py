@@ -6,8 +6,7 @@ import numpy as np
 
 from duqtools.config import cfg
 
-from .ids import ImasLocation
-from .ids import IDSTree
+from .ids import IDSTree, ImasLocation
 from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
@@ -72,7 +71,8 @@ def apply(operation: dict, idstree: IDSTree) -> None:
     logger.info('Apply `%s = %s(%s, %s)`' % (ids, operator, ids, value))
 
     npfunc = getattr(np, operator)
-    profile = getattr(core_profiles.profiles_1d[0], ids)
+
+    profile = idstree.flat_fields[ids]
 
     logger.debug('data range before: %s - %s' % (profile.min(), profile.max()))
     npfunc(profile, value, out=profile)
@@ -122,9 +122,10 @@ def create(**kwargs):
         source.copy_ids_entry_to(target_in)
 
         core_profiles = target_in.get('core_profiles')
+        idstree = IDSTree(core_profiles)
 
         for operation in combination:
-            apply(operation, core_profiles)
+            apply(operation, idstree)
 
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
