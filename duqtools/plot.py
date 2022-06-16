@@ -24,7 +24,7 @@ def plot(**kwargs):
     profiles = []
     for entry in cfg.plot.data:
         debug('Extracting database: %s' % entry)
-        profiles.append(entry.get_simple_IDS('core_profiles'))
+        profiles.append(entry.get_ids_tree('core_profiles'))
 
     for i, plot in enumerate(cfg.plot.plots):
         info('Creating plot number %04i' % i)

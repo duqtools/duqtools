@@ -10,11 +10,10 @@ import imas
 from imas import imasdef
 from pydantic import BaseModel
 
+from .ids_simplify import IDSTree
 
-from .ids_simplify import Simple_IDS
 if TYPE_CHECKING:
     from duqtools.jetto import JettoSettings
-
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +93,7 @@ class ImasLocation(BaseModel):
 
         return data
 
-    def get_simple_IDS(self, key: str = 'core_profiles') -> Simple_IDS:
+    def get_ids_tree(self, key: str = 'core_profiles') -> IDSTree:
         """get the data as a simple ids (all values in memory, in a dict).
 
         Parameters
@@ -104,9 +103,9 @@ class ImasLocation(BaseModel):
 
         Returns
         -------
-        Simple_IDS
+        IDSTree
         """
-        return Simple_IDS(self.get(key))
+        return IDSTree(self.get(key))
 
     @contextmanager
     def open(self, backend=imasdef.MDSPLUS_BACKEND):

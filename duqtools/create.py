@@ -7,6 +7,7 @@ import numpy as np
 from duqtools.config import cfg
 
 from .ids import ImasLocation
+from .ids import IDSTree
 from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
@@ -53,15 +54,15 @@ def write_batchfile(target_drc: Path):
 """)
 
 
-def apply(operation: dict, core_profiles) -> None:
-    """Apply operation to core_profiles. Data is modified in-place.
+def apply(operation: dict, idstree: IDSTree) -> None:
+    """Apply operation to IDS. Data are modified in-place.
 
     Parameters
     ----------
     operation : dict
         Dict with ids to modify, operator to apply, and value to use.
-    core_profiles : TYPE
-        Core profiles IMAS object.
+    idstree : IDSTree
+        Core profiles IDSTree.
     """
     ids = operation['ids']
     operator = operation['operator']
