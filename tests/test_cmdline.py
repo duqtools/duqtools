@@ -27,7 +27,8 @@ def cmdline_workdir(tmp_path_factory):
     # Create working directory for cmdline tests, and set up input files
     workdir = tmp_path_factory.mktemp('test_cmdline')
     (workdir / Path('workspace')).mkdir()
-    shutil.copy(os.getcwd() + '/example/config.yaml', workdir)
+    shutil.copy(os.getcwd() + '/tests/test_cmdline_config.yaml',
+                workdir / 'config.yaml')
     shutil.copytree(os.getcwd() + '/example/template_model',
                     workdir / Path('template_model'))
     return workdir
@@ -37,6 +38,13 @@ def cmdline_workdir(tmp_path_factory):
 def test_example_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
         result = subprocess.run(['duqtools', 'create', 'config.yaml'])
+        assert (result.returncode == 0)
+
+
+@pytest.mark.dependency(depends=['test_example_create'])
+def test_example_submit(cmdline_workdir):
+    with work_directory(cmdline_workdir):
+        result = subprocess.run(['duqtools', 'submit', 'config.yaml'])
         assert (result.returncode == 0)
 
 

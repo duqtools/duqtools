@@ -59,6 +59,7 @@ class SubmitConfig(BaseModel):
 
     submit_script_name: str = '.llcmd'
     status_file: str = 'jetto.status'
+    submit_command: List[str] = ['sbatch']
 
 
 class Variable(BaseModel):
@@ -150,11 +151,6 @@ class Config(BaseModel):
     create: Optional[CreateConfig]
     status: StatusConfig = StatusConfig()
     workspace: DirectoryPath = './workspace'
-
-    def __init__(self, filename=None):
-        """Initialize with optional filename argument."""
-        if filename:
-            self.read(filename)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
