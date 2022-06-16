@@ -2,8 +2,6 @@ import logging
 import shutil
 from pathlib import Path
 
-import numpy as np
-
 from duqtools.config import cfg
 
 from .ids import IDSTree, ImasLocation
@@ -53,32 +51,6 @@ def write_batchfile(target_drc: Path):
 """)
 
 
-def apply(operation: dict, idstree: IDSTree) -> None:
-    """Apply operation to IDS. Data are modified in-place.
-
-    Parameters
-    ----------
-    operation : dict
-        Dict with ids to modify, operator to apply, and value to use.
-    idstree : IDSTree
-        Core profiles IDSTree.
-    """
-    ids = operation['ids']
-    operator = operation['operator']
-
-    value = operation['value']
-
-    logger.info('Apply `%s = %s(%s, %s)`' % (ids, operator, ids, value))
-
-    npfunc = getattr(np, operator)
-
-    profile = idstree.flat_fields[ids]
-
-    logger.debug('data range before: %s - %s' % (profile.min(), profile.max()))
-    npfunc(profile, value, out=profile)
-    logger.debug('data range after: %s - %s' % (profile.min(), profile.max()))
-
-
 def create(**kwargs):
     """Create input for jetto and IDS data structures.
 
@@ -125,7 +97,7 @@ def create(**kwargs):
         idstree = IDSTree(core_profiles)
 
         for operation in combination:
-            apply(operation, idstree)
+            operation.apply(idstree)
 
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
