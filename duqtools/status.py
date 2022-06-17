@@ -19,6 +19,10 @@ def has_status(dir: Path) -> bool:
     return (dir / cfg.submit.status_file).exists()
 
 
+def is_submitted(dir: Path) -> bool:
+    return (dir / 'duqtools.lock').exists()
+
+
 def status_file_contains(dir: Path, msg) -> bool:
     sf = (dir / cfg.submit.status_file)
     with open(sf, 'r') as f:
@@ -65,6 +69,7 @@ class Status():
 
         self.dirs_submit = [dir for dir in self.dirs if has_submit_script(dir)]
         self.dirs_status = [dir for dir in self.dirs if has_status(dir)]
+        self.dirs_submitted = [dir for dir in self.dirs if is_submitted(dir)]
 
         self.dirs_completed = [
             dir for dir in self.dirs_status if is_completed(dir)
@@ -100,14 +105,18 @@ class Status():
 
     def progress_status(self):
         """Monitor the directory for status changes."""
-        pbar_a = tqdm(total=len(self.dirs_submit), position=0)
-        pbar_a.set_description('Running jobs              ...')
-        pbar_c = tqdm(total=len(self.dirs_submit), position=1)
-        pbar_c.set_description('Monitoring run completion ...')
+        pbar_a = tqdm(total=len(self.dirs), position=0)
+        pbar_a.set_description('Submitted jobs            ...')
+        pbar_b = tqdm(total=len(self.dirs_submit), position=1)
+        pbar_b.set_description('Running jobs              ...')
+        pbar_c = tqdm(total=len(self.dirs_submit), position=2)
+        pbar_c.set_description('Completed jobs            ...')
         while len(self.dirs_completed) < len(self.dirs_submit):
-            pbar_a.n = len(self.dirs_running) + len(self.dirs_completed)
+            pbar_a.n = len(self.dirs_submitted)
+            pbar_b.n = len(self.dirs_running) + len(self.dirs_completed)
             pbar_c.n = len(self.dirs_completed)
             pbar_a.refresh()
+            pbar_b.refresh()
             pbar_c.refresh()
             sleep(5)
             self.update_status()
