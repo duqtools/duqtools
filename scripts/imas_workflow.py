@@ -1,4 +1,4 @@
-from duqtools.ids.ids_location import ImasLocation
+from duqtools.ids._location import ImasLocation
 
 source = ImasLocation(db='jet', shot=92432, user='g2aho', run=1)
 

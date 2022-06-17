@@ -7,12 +7,12 @@ import yaml
 from pydantic import BaseModel, DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids.ids_location import ImasLocation
+from duqtools.ids._location import ImasLocation
 
 from ._types import PathLike
 
 if TYPE_CHECKING:
-    from .ids import IDSTree
+    from .ids import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -83,19 +83,19 @@ class IDSOperation(BaseModel):
                       'floor_divide', 'mod', 'remainder']
     value: float
 
-    def apply(self, idstree: IDSTree) -> None:
+    def apply(self, IDSMapping: IDSMapping) -> None:
         """Apply operation to IDS. Data are modified in-place.
 
         Parameters
         ----------
-        idstree : IDSTree
-            Core profiles IDSTree, data to apply operation to. Must contain the
-            IDS path.
+        IDSMapping : IDSMapping
+            Core profiles IDSMapping, data to apply operation to.
+            Must contain the IDS path.
         """
         logger.info('Apply `%s(%s, %s)`' %
                     (self.ids, self.operator, self.value))
 
-        profile = idstree.flat_fields[self.ids]
+        profile = IDSMapping.flat_fields[self.ids]
 
         logger.debug('data range before: %s - %s' %
                      (profile.min(), profile.max()))

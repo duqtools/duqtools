@@ -3,8 +3,8 @@ import logging
 import yaml
 
 from .._types import PathLike
-from .ids_location import ImasLocation
-from .ids_simplify import IDSTree
+from ._location import ImasLocation
+from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -26,5 +26,5 @@ def write_ids(filename: PathLike, data: dict):
 
 __all__ = [
     'ImasLocation',
-    'IDSTree',
+    'IDSMapping',
 ]

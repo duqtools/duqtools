@@ -4,7 +4,7 @@ from pathlib import Path
 
 from duqtools.config import cfg
 
-from .ids import IDSTree, ImasLocation
+from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
@@ -94,10 +94,10 @@ def create(**kwargs):
         source.copy_ids_entry_to(target_in)
 
         core_profiles = target_in.get('core_profiles')
-        idstree = IDSTree(core_profiles)
+        ids_mapping = IDSMapping(core_profiles)
 
         for operation in combination:
-            operation.apply(idstree)
+            operation.apply(ids_mapping)
 
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)

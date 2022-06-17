@@ -10,7 +10,7 @@ import imas
 from imas import imasdef
 from pydantic import BaseModel
 
-from .ids_simplify import IDSTree
+from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
     from duqtools.jetto import JettoSettings
@@ -52,7 +52,7 @@ class ImasLocation(BaseModel):
         destination : ImasLocation
             Copy data to a new location.
         """
-        from .ids_copy import copy_ids_entry
+        from ._copy import copy_ids_entry
         copy_ids_entry(self, destination)
 
     def copy_ids_entry_to_run(self, *, run: int) -> ImasLocation:
@@ -93,7 +93,7 @@ class ImasLocation(BaseModel):
 
         return data
 
-    def get_ids_tree(self, key: str = 'core_profiles') -> IDSTree:
+    def get_ids_tree(self, key: str = 'core_profiles') -> IDSMapping:
         """get the data as a simple ids (all values in memory, in a dict).
 
         Parameters
@@ -103,9 +103,9 @@ class ImasLocation(BaseModel):
 
         Returns
         -------
-        IDSTree
+        IDSMapping
         """
-        return IDSTree(self.get(key))
+        return IDSMapping(self.get(key))
 
     @contextmanager
     def open(self, backend=imasdef.MDSPLUS_BACKEND):
