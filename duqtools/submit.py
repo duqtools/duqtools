@@ -50,6 +50,15 @@ def submit(**kwargs):
                  run_dir)
             continue
 
+        lockfile = run_dir / 'duqtools.lock'
+        if lockfile.exists() and not args.force:
+            info('Skipping %s, lockfile exists, \
+                        enable --force to submit again' % run_dir)
+            continue
+
+        debug('put lockfile in place for %s' % submission_script)
+        lockfile.touch()
+
         info('submitting script %s' %
              str(cfg.submit.submit_command + [submission_script]))
         ret = subprocess.run(cfg.submit.submit_command + [submission_script],
