@@ -8,7 +8,7 @@ from duqtools.config import cfg
 from .create import create
 from .init import init
 from .plot import plot
-from .status import status
+from .status import Status
 from .submit import submit
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,12 @@ def cmdline():
 
     parser_status = subparsers.add_parser(
         'status', help='Print the status of the UQ runs')
-    parser_status.set_defaults(func=status)
+    parser_status.set_defaults(func=Status.status)
+    parser_status.add_argument('--progress',
+                               action='store_const',
+                               const=True,
+                               default=False,
+                               help='Fancy progress bar')
 
     parser_plot = subparsers.add_parser(
         'plot', help='Analyze the results and generate a report')

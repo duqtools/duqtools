@@ -1,6 +1,9 @@
 import logging
 from os import scandir
 from pathlib import Path
+from time import sleep
+
+from tqdm import tqdm
 
 from .config import cfg
 
@@ -9,49 +12,14 @@ info, debug = logger.info, logger.debug
 
 
 def has_submit_script(dir: Path) -> bool:
-    """has_submit_script.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-
-    Returns
-    -------
-    bool
-    """
     return (dir / cfg.submit.submit_script_name).exists()
 
 
 def has_status(dir: Path) -> bool:
-    """has_status.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-
-    Returns
-    -------
-    bool
-    """
     return (dir / cfg.submit.status_file).exists()
 
 
 def status_file_contains(dir: Path, msg) -> bool:
-    """status_file_contains.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-    msg :
-        msg
-
-    Returns
-    -------
-    bool
-    """
     sf = (dir / cfg.submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
@@ -61,87 +29,94 @@ def status_file_contains(dir: Path, msg) -> bool:
 
 
 def is_completed(dir: Path) -> bool:
-    """is_completed.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-
-    Returns
-    -------
-    bool
-    """
     return status_file_contains(dir, cfg.status.msg_completed)
 
 
 def is_failed(dir: Path) -> bool:
-    """is_failed.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-
-    Returns
-    -------
-    bool
-    """
     return status_file_contains(dir, cfg.status.msg_failed)
 
 
 def is_running(dir: Path) -> bool:
-    """is_running.
-
-    Parameters
-    ----------
-    dir : Path
-        dir
-
-    Returns
-    -------
-    bool
-    """
     return status_file_contains(dir, cfg.status.msg_running)
 
 
-def status(**kwargs):
-    """status."""
-    if not cfg.submit:
-        raise Exception('submit field required in config file')
+class Status():
 
-    debug('Submit config: %s' % cfg.submit)
+    dirs: list
+    dirs_submit: list
+    dirs_status: list
+    dirs_failed: list
+    dirs_running: list
+    dirs_unknown: list
 
-    dirs = [
-        Path(entry) for entry in scandir(cfg.workspace.path) if entry.is_dir()
-    ]
-    debug('Case directories: %s' % dirs)
+    def __init__(self):
+        debug('Submit config: %s' % cfg.submit)
 
-    info('Total number of directories: %i' % len(dirs))
+        self.dirs = [
+            Path(entry) for entry in scandir(cfg.workspace.path)
+            if entry.is_dir()
+        ]
+        debug('Case directories: %s' % self.dirs)
 
-    dirs_submit = [dir for dir in dirs if has_submit_script(dir)]
-    dirs_status = [dir for dir in dirs if has_status(dir)]
+        debug('Total number of directories: %i' % len(self.dirs))
+        self.update_status()
 
-    dirs_completed = [dir for dir in dirs_status if is_completed(dir)]
-    dirs_failed = [dir for dir in dirs_status if is_failed(dir)]
-    dirs_running = [dir for dir in dirs_status if is_running(dir)]
+    def update_status(self):
 
-    dirs_unknown = [
-        dir for dir in dirs_status if not (
-            dir in dirs_completed or dir in dirs_failed or dir in dirs_running)
-    ]
+        self.dirs_submit = [dir for dir in self.dirs if has_submit_script(dir)]
+        self.dirs_status = [dir for dir in self.dirs if has_status(dir)]
 
-    info('Total number of directories with submission script : %i' %
-         len(dirs_submit))
-    info('      number of not submitted jobs                 : %i' %
-         (len(dirs_submit) - len(dirs_status)))
-    info('Total number of directories with status     script : %i' %
-         len(dirs_status))
-    info('Total number of directories with Completed status  : %i' %
-         len(dirs_completed))
-    info('Total number of directories with Failed    status  : %i' %
-         len(dirs_failed))
-    info('Total number of directories with Running   status  : %i' %
-         len(dirs_running))
-    info('Total number of directories with Unknown   status  : %i' %
-         len(dirs_unknown))
+        self.dirs_completed = [
+            dir for dir in self.dirs_status if is_completed(dir)
+        ]
+        self.dirs_failed = [dir for dir in self.dirs_status if is_failed(dir)]
+        self.dirs_running = [
+            dir for dir in self.dirs_status if is_running(dir)
+        ]
+
+        self.dirs_unknown = [
+            dir for dir in self.dirs_status
+            if not (dir in self.dirs_completed or dir in self.dirs_failed
+                    or dir in self.dirs_running)
+        ]
+
+    def simple_status(self):
+        """stateless status."""
+
+        info('Total number of directories with submission script : %i' %
+             len(self.dirs_submit))
+        info('      number of not submitted jobs                 : %i' %
+             (len(self.dirs_submit) - len(self.dirs_status)))
+        info('Total number of directories with status     script : %i' %
+             len(self.dirs_status))
+        info('Total number of directories with Completed status  : %i' %
+             len(self.dirs_completed))
+        info('Total number of directories with Failed    status  : %i' %
+             len(self.dirs_failed))
+        info('Total number of directories with Running   status  : %i' %
+             len(self.dirs_running))
+        info('Total number of directories with Unknown   status  : %i' %
+             len(self.dirs_unknown))
+
+    def progress_status(self):
+        """Monitor the directory for status changes."""
+        pbar_a = tqdm(total=len(self.dirs_submit), position=0)
+        pbar_a.set_description('Running jobs              ...')
+        pbar_c = tqdm(total=len(self.dirs_submit), position=1)
+        pbar_c.set_description('Monitoring run completion ...')
+        while len(self.dirs_completed) < len(self.dirs_submit):
+            pbar_a.n = len(self.dirs_running) + len(self.dirs_completed)
+            pbar_c.n = len(self.dirs_completed)
+            pbar_a.refresh()
+            pbar_c.refresh()
+            sleep(5)
+            self.update_status()
+
+    def status(**kwargs):
+        self = Status()
+
+        args = kwargs['args']
+        if (args.progress):
+            self.progress_status()
+        else:
+            self.simple_status()
