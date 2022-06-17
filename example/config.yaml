@@ -1,4 +1,6 @@
-workspace: ./workspace
+workspace:
+  root: /pfs/work/g2ssmee/jetto/runs
+  subdirectory: workspace
 create:
   template: template_model
   data:
@@ -15,3 +17,10 @@ create:
     - ids: profiles_1d/0/t_i_average
       operator: multiply
       values: [1.1, 1.2, 1.3]
+status:
+  msg_completed: 'Status : Completed successfully'
+  msg_failed: 'Status : Failed'
+  msg_running: 'Status : Running'
+submit:
+  status_file: jetto.status
+  submit_script_name: .llcmd
