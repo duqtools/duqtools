@@ -111,13 +111,17 @@ class Status():
         pbar_b.set_description('Running jobs              ...')
         pbar_c = tqdm(total=len(self.dirs_submit), position=2)
         pbar_c.set_description('Completed jobs            ...')
+        pbar_d = tqdm(total=len(self.dirs_submit), position=3)
+        pbar_d.set_description('Failed? jobs              ...')
         while len(self.dirs_completed) < len(self.dirs_submit):
             pbar_a.n = len(self.dirs_submitted)
-            pbar_b.n = len(self.dirs_running) + len(self.dirs_completed)
+            pbar_b.n = len(self.dirs_running)
             pbar_c.n = len(self.dirs_completed)
+            pbar_d.n = len(self.dirs_failed) + len(self.dirs_unknown)
             pbar_a.refresh()
             pbar_b.refresh()
             pbar_c.refresh()
+            pbar_d.refresh()
             sleep(5)
             self.update_status()
 
