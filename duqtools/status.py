@@ -112,7 +112,9 @@ def status(**kwargs):
 
     debug('Submit config: %s' % cfg.submit)
 
-    dirs = [Path(entry) for entry in scandir(cfg.workspace) if entry.is_dir()]
+    dirs = [
+        Path(entry) for entry in scandir(cfg.workspace.path) if entry.is_dir()
+    ]
     debug('Case directories: %s' % dirs)
 
     info('Total number of directories: %i' % len(dirs))

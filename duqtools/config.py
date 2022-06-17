@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from getpass import getuser
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import yaml
@@ -174,6 +176,15 @@ class CreateConfig(BaseModel):
     data: DataLocation
 
 
+class WorkDirectory(BaseModel):
+    root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
+    subdir: Path = Path('workspace')
+
+    @property
+    def path(self):
+        return self.root / self.subdir
+
+
 class Config(BaseModel):
     """Config class containing all configs, is a singleton and can be used with
     import duqtools.config.Config as Cfg Cfg().<variable you want>"""
@@ -185,7 +196,7 @@ class Config(BaseModel):
     submit: SubmitConfig = SubmitConfig()
     create: Optional[CreateConfig]
     status: StatusConfig = StatusConfig()
-    workspace: DirectoryPath = './workspace'
+    workspace: WorkDirectory = WorkDirectory()
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton

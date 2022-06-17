@@ -1,4 +1,6 @@
-workspace: ./workspace
+workspace:
+  root: .
+  subdir: workspace
 create:
   template: template_model
   data:
@@ -9,10 +11,10 @@ create:
     method: latin-hypercube
     n_samples: 3
   matrix:
-    - ids: zeff
+    - ids: profiles_1d/0/zeff
       operator: add
       values: [1, 2, 3]
-    - ids: t_i_average
+    - ids: profiles_1d/0/t_i_average
       operator: multiply
       values: [1.1, 1.2, 1.3]
 submit:
