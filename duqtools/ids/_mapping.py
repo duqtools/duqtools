@@ -11,10 +11,27 @@ class IDSMapping:
     # All fields in the core profile in a single dict
     flat_fields: dict = {}
     # All fields, in the core profile in a nested dict
-    fields: defaultdict = defaultdict(recursive_defaultdict)
+    fields: dict = defaultdict(recursive_defaultdict)
 
     def __init__(self, ids):
         self.dive(ids, [])
+        self.fields = self.ddict_to_dict(self.fields)
+
+    def ddict_to_dict(self, ddict: defaultdict):
+        """ddict_to_dict, turns a nested defaultdict into a nested dict.
+
+        Parameters
+        ----------
+        ddict : defaultdict
+            ddict
+        """
+
+        # Convert members to dict first
+        for k, v in ddict.items():
+            if isinstance(v, defaultdict):
+                ddict[k] = self.ddict_to_dict(v)
+        # Finally convert self to dict
+        return dict(ddict)
 
     def dive(self, val, path: list):
         """Recursively store the important bits of the imas structure in dicts.
