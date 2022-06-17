@@ -50,8 +50,9 @@ def submit(**kwargs):
                  run_dir)
             continue
 
-        info('executing: sbatch %s' % submission_script)
-        ret = subprocess.run(['sbatch', submission_script],
+        info('submitting script %s' %
+             str(cfg.submit.submit_command + [submission_script]))
+        ret = subprocess.run(cfg.submit.submit_command + [submission_script],
                              check=True,
                              capture_output=True)
-        info('sbatch returned: %s' % ret.stdout)
+        info('submission returned: %s' % ret.stdout)

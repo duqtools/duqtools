@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+import coverage
+
 from duqtools.config import cfg
 
 from .create import create
@@ -10,9 +12,11 @@ from .status import status
 from .submit import submit
 
 logger = logging.getLogger(__name__)
+coverage.process_startup()
 
 
 def cmdline():
+
     parser = argparse.ArgumentParser()
 
     # Subparsers
