@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import yaml
 from pydantic import BaseModel, DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids.ids_location import ImasLocation
+from duqtools.ids._location import ImasLocation
 
 from ._types import PathLike
+
+if TYPE_CHECKING:
+    from .ids import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +82,46 @@ class IDSOperation(BaseModel):
     ids: str
     operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
                       'floor_divide', 'mod', 'remainder']
+    value: float
+
+    def apply(self, IDSMapping: IDSMapping) -> None:
+        """Apply operation to IDS. Data are modified in-place.
+
+        Parameters
+        ----------
+        IDSMapping : IDSMapping
+            Core profiles IDSMapping, data to apply operation to.
+            Must contain the IDS path.
+        """
+        logger.info('Apply `%s(%s, %s)`' %
+                    (self.ids, self.operator, self.value))
+
+        profile = IDSMapping.flat_fields[self.ids]
+
+        logger.debug('data range before: %s - %s' %
+                     (profile.min(), profile.max()))
+        self._npfunc(profile, self.value, out=profile)
+        logger.debug('data range after: %s - %s' %
+                     (profile.min(), profile.max()))
+
+    @property
+    def _npfunc(self):
+        """Grab numpy function."""
+        import numpy as np
+        return getattr(np, self.operator)
+
+
+class IDSOperationSet(BaseModel):
+    ids: str
+    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
+                      'floor_divide', 'mod', 'remainder']
     values: List[float]
 
-    def expand(self):
-        return tuple({
-            'ids': self.ids,
-            'operator': self.operator,
-            'value': value
-        } for value in self.values)
+    def expand(self) -> Tuple[IDSOperation, ...]:
+        """Expand list of values into operations with its components."""
+        return tuple(
+            IDSOperation(ids=self.ids, operator=self.operator, value=value)
+            for value in self.values)
 
 
 class DataLocation(BaseModel):
@@ -131,7 +166,7 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperation] = []
+    matrix: List[IDSOperationSet] = []
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method')

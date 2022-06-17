@@ -3,12 +3,11 @@ from collections import defaultdict
 import numpy as np
 
 
-
 def recursive_defaultdict():
     return defaultdict(recursive_defaultdict)
 
 
-class Simple_IDS:
+class IDSMapping:
     # All fields in the core profile in a single dict
     flat_fields: dict = {}
     # All fields, in the core profile in a nested dict

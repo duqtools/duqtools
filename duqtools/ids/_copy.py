@@ -7,7 +7,7 @@ import imas
 from packaging import version
 
 from .._logging_utils import LoggingContext
-from .ids_location import ImasLocation
+from ._location import ImasLocation
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
 

@@ -2,11 +2,9 @@ import logging
 import shutil
 from pathlib import Path
 
-import numpy as np
-
 from duqtools.config import cfg
 
-from .ids import ImasLocation
+from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
@@ -53,31 +51,6 @@ def write_batchfile(target_drc: Path):
 """)
 
 
-def apply(operation: dict, core_profiles) -> None:
-    """Apply operation to core_profiles. Data is modified in-place.
-
-    Parameters
-    ----------
-    operation : dict
-        Dict with ids to modify, operator to apply, and value to use.
-    core_profiles : TYPE
-        Core profiles IMAS object.
-    """
-    ids = operation['ids']
-    operator = operation['operator']
-
-    value = operation['value']
-
-    logger.info('Apply `%s = %s(%s, %s)`' % (ids, operator, ids, value))
-
-    npfunc = getattr(np, operator)
-    profile = getattr(core_profiles.profiles_1d[0], ids)
-
-    logger.debug('data range before: %s - %s' % (profile.min(), profile.max()))
-    npfunc(profile, value, out=profile)
-    logger.debug('data range after: %s - %s' % (profile.min(), profile.max()))
-
-
 def create(**kwargs):
     """Create input for jetto and IDS data structures.
 
@@ -121,9 +94,10 @@ def create(**kwargs):
         source.copy_ids_entry_to(target_in)
 
         core_profiles = target_in.get('core_profiles')
+        ids_mapping = IDSMapping(core_profiles)
 
         for operation in combination:
-            apply(operation, core_profiles)
+            operation.apply(ids_mapping)
 
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
