@@ -9,8 +9,6 @@ import yaml
 from pydantic import BaseModel, DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids._location import ImasLocation
-
 from ._types import PathLike
 
 if TYPE_CHECKING:
@@ -37,14 +35,6 @@ class Plot(BaseModel):
 
 
 class PlotConfig(BaseModel):
-    data: List[ImasLocation] = [
-        ImasLocation(**{
-            'db': 'jet',
-            'shot': 94875,
-            'run': 251,
-            'user': 'g2vazizi'
-        })
-    ]
     plots: List[Plot] = [Plot()]
 
 
