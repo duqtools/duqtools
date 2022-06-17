@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from getpass import getuser
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import yaml
@@ -177,11 +178,11 @@ class CreateConfig(BaseModel):
 
 class WorkDirectory(BaseModel):
     root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
-    subdirectory: str = 'workspace'
+    subdir: Path = Path('workspace')
 
     @property
     def path(self):
-        return self.root / self.subdirectory
+        return self.root / self.subdir
 
 
 class Config(BaseModel):

@@ -3,7 +3,7 @@ import shutil
 import stat
 from pathlib import Path
 
-from duqtools.config import cfg
+from duqtools.config import WorkDirectory, cfg
 
 from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
@@ -42,7 +42,7 @@ def copy_files(source_drc: Path, target_drc: Path):
     logger.debug('copied files to %s' % target_drc)
 
 
-def write_batchfile(target_drc: Path):
+def write_batchfile(workspace: WorkDirectory, run_name: str):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
@@ -50,10 +50,27 @@ def write_batchfile(target_drc: Path):
     target_drc : Path
         Directory to place batch file into.
     """
-    drc_name = target_drc.name
-    with open(target_drc / '.llcmd', 'w') as f:
+    run_drc = workspace.path / run_name
+    llcmd_path = run_drc / '.llcmd'
+
+    full_path = workspace.path / run_name
+    rjettov_path = full_path / 'rjettov'
+    rel_path = workspace.subdir / run_name
+
+    with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
-./rjettov -S -I -p -xmpi -x64 {drc_name} v210921_gateway_imas g2fkoech
+#SBATCH -J jetto.{run_name}
+#SBATCH -i /dev/null
+#SBATCH -o ll.out
+#SBATCH -e ll.err
+#SBATCH -p gw
+
+#SBATCH -N 1
+#SBATCH -n 2
+#SBATCH -t 24:00:00
+
+cd {full_path}
+{rjettov_path} -S -I -p -xmpi -x64 {rel_path} v210921_gateway_imas g2fkoech
 """)
 
 
@@ -80,12 +97,12 @@ def create(**kwargs):
     combinations = sampler(*variables)
 
     for i, combination in enumerate(combinations):
-        sub_drc = f'run_{i:04d}'
-        target_drc = cfg.workspace / sub_drc
-        target_drc.mkdir(parents=True, exist_ok=True)
+        run_name = f'run_{i:04d}'
+        run_drc = cfg.workspace.path / run_name
+        run_drc.mkdir(parents=True, exist_ok=True)
 
-        copy_files(template_drc, target_drc)
-        write_batchfile(target_drc)
+        copy_files(template_drc, run_drc)
+        write_batchfile(cfg.workspace, run_name)
 
         target_in = ImasLocation(db=options.data.db,
                                  shot=source.shot,
@@ -95,7 +112,7 @@ def create(**kwargs):
                                   run=options.data.run_out_start_at + i)
 
         jset_copy = jset.set_imas_locations(inp=target_in, out=target_out)
-        jset_copy.to_directory(target_drc)
+        jset_copy.to_directory(run_drc)
 
         source.copy_ids_entry_to(target_in)
 
