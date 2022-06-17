@@ -1,5 +1,6 @@
 import logging
 import shutil
+import stat
 from pathlib import Path
 
 from duqtools.config import cfg
@@ -33,6 +34,11 @@ def copy_files(source_drc: Path, target_drc: Path):
         src = source_drc / filename
         dst = target_drc / filename
         shutil.copyfile(src, dst)
+
+    for filename in ('rjettov', 'utils_jetto'):
+        path = target_drc / filename
+        path.chmod(path.stat().st_mode | stat.S_IEXEC)
+
     logger.debug('copied files to %s' % target_drc)
 
 
