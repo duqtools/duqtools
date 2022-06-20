@@ -8,12 +8,13 @@ def recursive_defaultdict():
 
 
 class IDSMapping:
-    # All fields in the core profile in a single dict
-    flat_fields: dict = {}
-    # All fields, in the core profile in a nested dict
-    fields: dict = defaultdict(recursive_defaultdict)
 
     def __init__(self, ids):
+        # All fields in the core profile in a single dict
+        self.flat_fields: dict = {}
+        # All fields, in the core profile in a nested dict
+        self.fields: dict = defaultdict(recursive_defaultdict)
+
         self.dive(ids, [])
         self.fields = self.ddict_to_dict(self.fields)
 
