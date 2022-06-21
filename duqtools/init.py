@@ -22,7 +22,7 @@ def init(**kwargs):
     cfg = duqtools.config.Config()
     BaseModel.__init__(cfg)
     logger.debug(cfg)
-    config_filepath = Path(args.CONFIG)
+    config_filepath = Path(args.config)
     if config_filepath.exists() and not args.force:
         raise RuntimeError('Refusing to overwrite existing CONFIG, %s \
                     , use --force if you really want to' % config_filepath)
