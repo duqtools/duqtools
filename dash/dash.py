@@ -29,7 +29,7 @@ def load_profile(jset_file):
     return profile
 
 
-jset_files = list(cfg.workspace.path.glob('*/*.jset'))
+jset_files = list(cfg.workspace.cwd.glob('*/*.jset'))
 
 profiles = []
 for jset_file in jset_files:

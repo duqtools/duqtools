@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import yaml
-from pydantic import DirectoryPath, Field
+from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
 from ._types import BaseModel, PathLike
@@ -168,11 +168,23 @@ class CreateConfig(BaseModel):
 
 class WorkDirectory(BaseModel):
     root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
-    subdir: Path = Path('workspace')
 
     @property
-    def path(self):
-        return self.root / self.subdir
+    def cwd(self):
+        cwd = Path.cwd()
+        if not cwd.relative_to(self.root):
+            raise IOError(
+                f'Work directory must be a subdirectory of {self.root}')
+        return cwd
+
+    @property
+    def subdir(self):
+        """Get subdirectory relative to root."""
+        return self.cwd.relative_to(self.root)
+
+    @validator('root')
+    def resolve_root(cls, v):
+        return v.resolve()
 
 
 class Config(BaseModel):
