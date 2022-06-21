@@ -24,7 +24,7 @@ def plot(**kwargs):
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
     profiles = []
-    jset_files = list(cfg.workspace.path.glob('*/*.jset'))
+    jset_files = list(cfg.workspace.cwd.glob('*/*.jset'))
 
     for jset_file in jset_files:
         jset = JettoSettings.from_file(jset_file)

@@ -57,7 +57,7 @@ class Status():
         debug('Submit config: %s' % cfg.submit)
 
         self.dirs = [
-            Path(entry) for entry in scandir(cfg.workspace.path)
+            Path(entry) for entry in scandir(cfg.workspace.cwd)
             if entry.is_dir()
         ]
         debug('Case directories: %s' % self.dirs)

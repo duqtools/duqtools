@@ -50,10 +50,10 @@ def write_batchfile(workspace: WorkDirectory, run_name: str):
     target_drc : Path
         Directory to place batch file into.
     """
-    run_drc = workspace.path / run_name
+    run_drc = workspace.cwd / run_name
     llcmd_path = run_drc / '.llcmd'
 
-    full_path = workspace.path / run_name
+    full_path = workspace.cwd / run_name
     rjettov_path = full_path / 'rjettov'
     rel_path = workspace.subdir / run_name
 
@@ -98,7 +98,7 @@ def create(**kwargs):
 
     for i, combination in enumerate(combinations):
         run_name = f'run_{i:04d}'
-        run_drc = cfg.workspace.path / run_name
+        run_drc = cfg.workspace.cwd / run_name
         run_drc.mkdir(parents=True, exist_ok=True)
 
         copy_files(template_drc, run_drc)

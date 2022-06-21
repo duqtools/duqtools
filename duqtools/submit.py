@@ -24,7 +24,7 @@ def submit(**kwargs):
     debug('Submit config: %s' % cfg.submit)
 
     run_dirs = [
-        Path(entry) for entry in scandir(cfg.workspace.path) if entry.is_dir()
+        Path(entry) for entry in scandir(cfg.workspace.cwd) if entry.is_dir()
     ]
     debug('Case directories: %s' % run_dirs)
 
