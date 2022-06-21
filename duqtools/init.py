@@ -2,9 +2,10 @@ import logging
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel
 
 import duqtools.config
+
+from ._types import BaseModel
 
 logger = logging.getLogger(__name__)
 
