@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import yaml
-from pydantic import BaseModel, DirectoryPath, Field
+from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from ._types import PathLike
+from ._types import BaseModel, PathLike
 
 if TYPE_CHECKING:
     from .ids import IDSMapping

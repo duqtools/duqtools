@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import imas
 from imas import imasdef
-from pydantic import BaseModel
 
+from .._types import BaseModel
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
