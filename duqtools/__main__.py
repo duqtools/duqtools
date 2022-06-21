@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 
 import coverage
 
@@ -17,7 +18,26 @@ coverage.process_startup()
 
 def cmdline():
 
-    parser = argparse.ArgumentParser(conflict_handler='resolve')
+    parser = argparse.ArgumentParser()
+    parser.set_defaults(func=None)
+
+    # Global optional options
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        help='Path to config',
+                        default='duqtools.yaml')
+    parser.add_argument('--debug',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        help='Enable debug print statements')
+    parser.add_argument('-f',
+                        '--force',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        help='Force the action you want to take')
 
     # Subparsers
     subparsers = parser.add_subparsers()
@@ -56,24 +76,6 @@ def cmdline():
         'plot', help='Analyze the results and generate a report')
     parser_plot.set_defaults(func=plot)
 
-    # Global optional options
-    parser.add_argument('-c',
-                        '--config',
-                        type=str,
-                        help='Path to config',
-                        default='duqtools.yaml')
-    parser.add_argument('--debug',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='Enable debug print statements')
-    parser.add_argument('-f',
-                        '--force',
-                        action='store_const',
-                        const=True,
-                        default=False,
-                        help='Force the action you want to take')
-
     # parse the arguments
     args = parser.parse_args()
 
@@ -82,6 +84,10 @@ def cmdline():
         logging.getLogger().setLevel(logging.DEBUG)
 
     logger.debug('Arguments after parsing: %s' % args)
+
+    if not args.func:
+        parser.print_help()
+        sys.exit(0)
 
     # Load the config file
     if not args.func == init:  # dont read it if we have to create it
