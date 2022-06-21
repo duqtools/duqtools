@@ -9,14 +9,12 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def submit(**kwargs):
+def submit(force: bool = False, **kwargs):
     """submit.
 
     Function which implements the functionality to submit jobs to the
     cluster
     """
-
-    args = kwargs['args']
 
     if not cfg.submit:
         raise Exception('submit field required in config file')
@@ -40,7 +38,7 @@ def submit(**kwargs):
             continue
 
         status_file = run_dir / cfg.submit.status_file
-        if status_file.exists() and not args.force:
+        if status_file.exists() and not force:
             if not status_file.is_file():
                 info('Status file %s is not a file' % status_file)
             with open(status_file, 'r') as f:
@@ -51,7 +49,7 @@ def submit(**kwargs):
             continue
 
         lockfile = run_dir / 'duqtools.lock'
-        if lockfile.exists() and not args.force:
+        if lockfile.exists() and not force:
             info('Skipping %s, lockfile exists, \
                         enable --force to submit again' % run_dir)
             continue
