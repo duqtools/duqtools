@@ -77,24 +77,24 @@ def cmdline():
     parser_plot.set_defaults(func=plot)
 
     # parse the arguments
-    args = parser.parse_args()
+    options = parser.parse_args()
 
     # Set the debug level
-    if args.debug:
+    if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logger.debug('Arguments after parsing: %s' % args)
+    logger.debug('Arguments after parsing: %s' % options)
 
-    if not args.func:
+    if not options.func:
         parser.print_help()
         sys.exit(0)
 
     # Load the config file
-    if not args.func == init:  # dont read it if we have to create it
-        cfg.read(args.config)
+    if not options.func == init:  # dont read it if we have to create it
+        cfg.read(options.config)
 
     # Run the subcommand
-    args.func(args=args)
+    options.func(**vars(options))
 
 
 if __name__ == '__main__':

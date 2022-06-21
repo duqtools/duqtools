@@ -186,6 +186,11 @@ class WorkDirectory(BaseModel):
     def resolve_root(cls, v):
         return v.resolve()
 
+    @property
+    def runs_yaml(self):
+        """Location of runs.yaml."""
+        return self.cwd / 'runs.yaml'
+
 
 class Config(BaseModel):
     """Config class containing all configs, is a singleton and can be used with
