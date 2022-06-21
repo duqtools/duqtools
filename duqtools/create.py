@@ -116,6 +116,7 @@ def create(force: bool = False, **kwargs):
     """
     options = cfg.create
     if not options:
+        logger.warning('No create options specified.')
         return
 
     template_drc = options.template
