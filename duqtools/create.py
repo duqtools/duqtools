@@ -2,7 +2,7 @@ import logging
 import shutil
 import stat
 from pathlib import Path
-from typing import List
+from typing import Iterable, List
 
 import yaml
 from pydantic import DirectoryPath
@@ -15,6 +15,8 @@ from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
 
+RUN_PREFIX = 'run_'
+
 
 class Run(BaseModel):
     dirname: DirectoryPath
@@ -24,6 +26,19 @@ class Run(BaseModel):
 
 class Runs(BaseModel):
     __root__: List[Run] = []
+
+
+def fail_if_locations_exist(locations: Iterable[ImasLocation]):
+    """Check IDS coordinates and raise if any exist."""
+    any_exists = False
+    for location in locations:
+        if location.exists():
+            logger.info('Target %s already exists', location)
+            any_exists = True
+    if any_exists:
+        raise IOError(
+            'Found existing target location(s), use `duqtools clean` to '
+            'remove or `--force` to override.')
 
 
 def copy_files(source_drc: Path, target_drc: Path):
@@ -89,20 +104,19 @@ cd {full_path}
 """)
 
 
-def create(**kwargs):
+def create(force: bool = False, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
+    force : bool
+        Override protection if data and directories already exist.
     **kwargs
         Unused.
     """
     options = cfg.create
-
-    if cfg.workspace.runs_yaml.exists():
-        raise IOError(
-            'Directory is not empty, use `duqtools clean` to clear or '
-            '`--force` to override.')
+    if not options:
+        return
 
     template_drc = options.template
     matrix = options.matrix
@@ -116,27 +130,25 @@ def create(**kwargs):
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)
 
-    locations = (ImasLocation(db=options.data.db,
-                              shot=source.shot,
-                              run=options.data.run_in_start_at + i)
-                 for i in range(len(combinations)))
+    if not force:
+        if cfg.workspace.runs_yaml.exists():
+            raise IOError(
+                'Directory is not empty, use `duqtools clean` to clear or '
+                '`--force` to override.')
 
-    any_exists = False
-    for location in locations:
-        if location.exists():
-            logger.info('Target %s already exists', location)
-            any_exists = True
-    if any_exists:
-        raise IOError(
-            'Found existing target location(s), use `duqtools clean` to '
-            'remove or `--force` to override.')
+        locations = (ImasLocation(db=options.data.db,
+                                  shot=source.shot,
+                                  run=options.data.run_in_start_at + i)
+                     for i in range(len(combinations)))
+
+        fail_if_locations_exist(locations)
 
     runs = []
 
     for i, combination in enumerate(combinations):
-        run_name = f'run_{i:04d}'
+        run_name = f'{RUN_PREFIX}{i:04d}'
         run_drc = cfg.workspace.cwd / run_name
-        run_drc.mkdir(parents=True, exist_ok=True)
+        run_drc.mkdir(parents=True, exist_ok=force)
 
         target_in = ImasLocation(db=options.data.db,
                                  shot=source.shot,
@@ -165,8 +177,8 @@ def create(**kwargs):
 
         runs.append({
             'dirname': run_name,
-            'data': target_in.dict(),
-            'operations': [op.dict() for op in combination]
+            'data': target_in,
+            'operations': combination
         })
 
     runs = Runs.parse_obj(runs)
