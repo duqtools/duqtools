@@ -125,11 +125,10 @@ class Status():
             sleep(5)
             self.update_status()
 
-    def status(**kwargs):
+    def status(progress: bool, **kwargs):
         self = Status()
 
-        args = kwargs['args']
-        if (args.progress):
+        if (progress):
             self.progress_status()
         else:
             self.simple_status()

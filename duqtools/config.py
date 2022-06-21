@@ -104,10 +104,10 @@ class IDSOperation(BaseModel):
 
 
 class IDSOperationSet(BaseModel):
-    ids: str
+    ids: str = 'profiles_1d/0/t_i_average'
     operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder']
-    values: List[float]
+                      'floor_divide', 'mod', 'remainder'] = 'multiply'
+    values: List[float] = [1.1, 1.2, 1.3]
 
     def expand(self) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
@@ -117,14 +117,14 @@ class IDSOperationSet(BaseModel):
 
 
 class DataLocation(BaseModel):
-    db: str
-    run_in_start_at: int
-    run_out_start_at: int
+    db: str = 'jet'
+    run_in_start_at: int = 7000
+    run_out_start_at: int = 8000
 
 
 class LHSSampler(BaseModel):
     method: Literal['latin-hypercube']
-    n_samples: int
+    n_samples: int = 3
 
     def __call__(self, *args):
         from duqtools.samplers import latin_hypercube
@@ -158,12 +158,12 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = []
+    matrix: List[IDSOperationSet] = [IDSOperationSet()]
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method')
-    template: DirectoryPath
-    data: DataLocation
+    template: DirectoryPath = '/pfs/work/g2ssmee/jetto/runs/duqtools_template'
+    data: DataLocation = DataLocation()
 
 
 class WorkDirectory(BaseModel):
@@ -198,10 +198,9 @@ class Config(BaseModel):
 
     _instance = None
 
-    # pydantic members
     plot: PlotConfig = PlotConfig()
     submit: SubmitConfig = SubmitConfig()
-    create: Optional[CreateConfig]
+    create: CreateConfig = CreateConfig()
     status: StatusConfig = StatusConfig()
     workspace: WorkDirectory = WorkDirectory()
 
