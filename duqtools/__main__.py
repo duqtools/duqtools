@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 
 import coverage
 
@@ -18,6 +19,7 @@ coverage.process_startup()
 def cmdline():
 
     parser = argparse.ArgumentParser()
+    parser.set_defaults(func=None)
 
     # Global optional options
     parser.add_argument('-c',
@@ -82,6 +84,10 @@ def cmdline():
         logging.getLogger().setLevel(logging.DEBUG)
 
     logger.debug('Arguments after parsing: %s' % args)
+
+    if not args.func:
+        parser.print_help()
+        sys.exit(0)
 
     # Load the config file
     if not args.func == init:  # dont read it if we have to create it
