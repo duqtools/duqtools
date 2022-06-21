@@ -3,6 +3,8 @@ import shutil
 import stat
 from pathlib import Path
 
+import yaml
+
 from duqtools.config import WorkDirectory, cfg
 
 from .ids import IDSMapping, ImasLocation
@@ -96,6 +98,8 @@ def create(**kwargs):
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)
 
+    runs_dict = {}
+
     for i, combination in enumerate(combinations):
         run_name = f'run_{i:04d}'
         run_drc = cfg.workspace.cwd / run_name
@@ -125,3 +129,8 @@ def create(**kwargs):
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
             core_profiles.put(db_entry=data_entry_target)
+
+        runs_dict[run_name] = [op.dict() for op in combination]
+
+    with open('runs.yaml', 'w') as f:
+        yaml.dump(runs_dict, stream=f)
