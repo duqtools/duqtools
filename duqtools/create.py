@@ -2,15 +2,28 @@ import logging
 import shutil
 import stat
 from pathlib import Path
+from typing import List
 
 import yaml
+from pydantic import DirectoryPath
 
-from duqtools.config import WorkDirectory, cfg
+from duqtools.config import IDSOperation, WorkDirectory, cfg
 
+from ._types import BaseModel
 from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
 
 logger = logging.getLogger(__name__)
+
+
+class Run(BaseModel):
+    dirname: DirectoryPath
+    data: ImasLocation
+    operations: List[IDSOperation]
+
+
+class Runs(BaseModel):
+    __root__: List[Run] = []
 
 
 def copy_files(source_drc: Path, target_drc: Path):
@@ -86,6 +99,11 @@ def create(**kwargs):
     """
     options = cfg.create
 
+    if cfg.workspace.runs_yaml.exists():
+        raise IOError(
+            'Directory is not empty, use `duqtools clean` to clear or '
+            '`--force` to override.')
+
     template_drc = options.template
     matrix = options.matrix
     sampler = options.sampler
@@ -98,15 +116,27 @@ def create(**kwargs):
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)
 
-    runs_dict = {}
+    locations = (ImasLocation(db=options.data.db,
+                              shot=source.shot,
+                              run=options.data.run_in_start_at + i)
+                 for i in range(len(combinations)))
+
+    any_exists = False
+    for location in locations:
+        if location.exists():
+            logger.info('Target %s already exists', location)
+            any_exists = True
+    if any_exists:
+        raise IOError(
+            'Found existing target location(s), use `duqtools clean` to '
+            'remove or `--force` to override.')
+
+    runs = []
 
     for i, combination in enumerate(combinations):
         run_name = f'run_{i:04d}'
         run_drc = cfg.workspace.cwd / run_name
         run_drc.mkdir(parents=True, exist_ok=True)
-
-        copy_files(template_drc, run_drc)
-        write_batchfile(cfg.workspace, run_name)
 
         target_in = ImasLocation(db=options.data.db,
                                  shot=source.shot,
@@ -130,7 +160,16 @@ def create(**kwargs):
             logger.info('Writing data entry: %s' % target_in)
             core_profiles.put(db_entry=data_entry_target)
 
-        runs_dict[run_name] = [op.dict() for op in combination]
+        copy_files(template_drc, run_drc)
+        write_batchfile(cfg.workspace, run_name)
 
-    with open('runs.yaml', 'w') as f:
-        yaml.dump(runs_dict, stream=f)
+        runs.append({
+            'dirname': run_name,
+            'data': target_in.dict(),
+            'operations': [op.dict() for op in combination]
+        })
+
+    runs = Runs.parse_obj(runs)
+
+    with open(cfg.workspace.runs_yaml, 'w') as f:
+        yaml.dump(yaml.safe_load(runs.json()), stream=f)
