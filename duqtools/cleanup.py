@@ -3,8 +3,8 @@ from pathlib import Path
 
 import yaml
 
-from ._types import BaseModel
 from .config import cfg
+from .models import BaseModel, Runs
 
 logger = logging.getLogger(__name__)
 
@@ -22,3 +22,5 @@ def cleanup(force: bool = False, **kwargs):
     # runs_yaml
 
     print('hello world')
+
+    # read runs.yaml

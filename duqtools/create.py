@@ -2,30 +2,19 @@ import logging
 import shutil
 import stat
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable
 
 import yaml
-from pydantic import DirectoryPath
 
-from duqtools.config import IDSOperation, WorkDirectory, cfg
+from duqtools.config import WorkDirectory, cfg
 
-from ._types import BaseModel
 from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
+from .models import Runs
 
 logger = logging.getLogger(__name__)
 
 RUN_PREFIX = 'run_'
-
-
-class Run(BaseModel):
-    dirname: DirectoryPath
-    data: ImasLocation
-    operations: List[IDSOperation]
-
-
-class Runs(BaseModel):
-    __root__: List[Run] = []
 
 
 def fail_if_locations_exist(locations: Iterable[ImasLocation]):

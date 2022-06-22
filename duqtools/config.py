@@ -3,16 +3,15 @@ from __future__ import annotations
 import logging
 from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import yaml
 from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
-from ._types import BaseModel, PathLike
-
-if TYPE_CHECKING:
-    from .ids import IDSMapping
+from ._types import PathLike
+from .ids import IDSOperation
+from .models import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -55,52 +54,6 @@ class SubmitConfig(BaseModel):
     submit_script_name: str = '.llcmd'
     status_file: str = 'jetto.status'
     submit_command: List[str] = ['sbatch']
-
-
-class Variable(BaseModel):
-    source: Literal['jetto.in', 'jetto.jset']
-    key: str
-    values: list
-
-    def expand(self):
-        return tuple({
-            'source': self.source,
-            'key': self.key,
-            'value': value
-        } for value in self.values)
-
-
-class IDSOperation(BaseModel):
-    ids: str
-    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder']
-    value: float
-
-    def apply(self, IDSMapping: IDSMapping) -> None:
-        """Apply operation to IDS. Data are modified in-place.
-
-        Parameters
-        ----------
-        IDSMapping : IDSMapping
-            Core profiles IDSMapping, data to apply operation to.
-            Must contain the IDS path.
-        """
-        logger.info('Apply `%s(%s, %s)`' %
-                    (self.ids, self.operator, self.value))
-
-        profile = IDSMapping.flat_fields[self.ids]
-
-        logger.debug('data range before: %s - %s' %
-                     (profile.min(), profile.max()))
-        self._npfunc(profile, self.value, out=profile)
-        logger.debug('data range after: %s - %s' %
-                     (profile.min(), profile.max()))
-
-    @property
-    def _npfunc(self):
-        """Grab numpy function."""
-        import numpy as np
-        return getattr(np, self.operator)
 
 
 class IDSOperationSet(BaseModel):
