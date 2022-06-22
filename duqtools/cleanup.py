@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import shutil
 from typing import List
 
 import yaml
@@ -11,6 +11,8 @@ from duqtools.ids import IDSOperation, ImasLocation
 
 from .basemodel import BaseModel
 from .config import cfg
+
+logger = logging.getLogger(__name__)
 
 
 class Run(BaseModel):
@@ -22,8 +24,8 @@ class Run(BaseModel):
 class Runs(BaseModel):
     __root__: List[Run] = []
 
-
-logger = logging.getLogger(__name__)
+    def __iter__(self):
+        yield from self.__root__
 
 
 def cleanup(force: bool = False, **kwargs):
@@ -36,15 +38,18 @@ def cleanup(force: bool = False, **kwargs):
     kwargs :
         Unused.
     """
-    # runs_yaml
+    runs_yaml = cfg.workspace.runs_yaml
 
-    print('hello world')
+    with open(runs_yaml) as f:
+        mapping = yaml.safe_load(f)
+        runs = Runs.parse_obj(mapping)
 
-    breakpoint()
+    for run in runs:
+        logger.info('Removing %s', run.data)
+        run.data.delete()
 
-    with open('runs.yaml') as f:
-        d = yaml.safe_load(f)
+        logger.info('Removing run dir %s', run.dirname.resolve())
+        shutil.rmtree(run.dirname)
 
-    runs = Runs.parse_obj(d)
-
-    # read runs.yaml
+    logger.info('Removing %s', runs_yaml)
+    runs_yaml.unlink()
