@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import imas
 from imas import imasdef
 
-from duqtools.models import BaseModel
+from duqtools.basemodel import BaseModel
 
 from ._mapping import IDSMapping
 

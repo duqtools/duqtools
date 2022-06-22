@@ -5,7 +5,7 @@ import yaml
 
 import duqtools.config
 
-from .models import BaseModel
+from .basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 

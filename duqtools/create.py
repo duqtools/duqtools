@@ -8,9 +8,9 @@ import yaml
 
 from duqtools.config import WorkDirectory, cfg
 
+from .cleanup import Runs
 from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
-from .models import Runs
 
 logger = logging.getLogger(__name__)
 

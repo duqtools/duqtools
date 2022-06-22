@@ -10,8 +10,8 @@ from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
 from ._types import PathLike
+from .basemodel import BaseModel
 from .ids import IDSOperation
-from .models import BaseModel
 
 logger = logging.getLogger(__name__)
 
