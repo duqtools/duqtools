@@ -1,6 +1,5 @@
 workspace:
   root: .
-  subdir: workspace
 create:
   template: template_model
   data:
