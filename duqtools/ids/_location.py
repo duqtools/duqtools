@@ -164,8 +164,9 @@ class ImasLocation(BaseModel):
             if cpcode == 0:
                 logger.debug('Data entry created: %s', self.path())
             else:
-                raise IOError(f'Cannot create data entry: {self.path()}'
-                              'Create a new db first using `imasdb {self.db}')
+                raise IOError(
+                    f'Cannot create data entry: {self.path()}. '
+                    f'Create a new db first using `imasdb {self.db}`')
         elif opcode == 0:
             logger.debug('Data entry opened: %s', self.path())
 
