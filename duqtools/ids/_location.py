@@ -157,14 +157,18 @@ class ImasLocation(BaseModel):
             Opened IMAS database entry
         """
         entry = self.entry(backend=backend)
-        op = entry.open()
+        opcode, _ = entry.open()
 
-        if op[0] < 0:
-            cp = entry.create()
-            if cp[0] == 0:
-                logger.debug('Data entry created: %s' % self.path())
-        elif op[0] == 0:
-            logger.debug('Data entry opened: %s' % self.path())
+        if opcode < 0:
+            cpcode, _ = entry.create()
+            if cpcode == 0:
+                logger.debug('Data entry created: %s', self.path())
+            else:
+                raise IOError(
+                    f'Cannot create data entry: {self.path()}. '
+                    f'Create a new db first using `imasdb {self.db}`')
+        elif opcode == 0:
+            logger.debug('Data entry opened: %s', self.path())
 
         try:
             yield entry
