@@ -3,18 +3,15 @@ from __future__ import annotations
 import logging
 from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import yaml
-from pydantic import BaseModel, DirectoryPath, Field
+from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
-from duqtools.ids._location import ImasLocation
-
 from ._types import PathLike
-
-if TYPE_CHECKING:
-    from .ids import IDSMapping
+from .basemodel import BaseModel
+from .ids import IDSOperation
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +34,6 @@ class Plot(BaseModel):
 
 
 class PlotConfig(BaseModel):
-    data: List[ImasLocation] = [
-        ImasLocation(**{
-            'db': 'jet',
-            'shot': 94875,
-            'run': 251,
-            'user': 'g2vazizi'
-        })
-    ]
     plots: List[Plot] = [Plot()]
 
 
@@ -69,57 +58,11 @@ class SubmitConfig(BaseModel):
     submit_command: List[str] = ['sbatch']
 
 
-class Variable(BaseModel):
-    source: Literal['jetto.in', 'jetto.jset']
-    key: str
-    values: list
-
-    def expand(self):
-        return tuple({
-            'source': self.source,
-            'key': self.key,
-            'value': value
-        } for value in self.values)
-
-
-class IDSOperation(BaseModel):
-    ids: str
-    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder']
-    value: float
-
-    def apply(self, IDSMapping: IDSMapping) -> None:
-        """Apply operation to IDS. Data are modified in-place.
-
-        Parameters
-        ----------
-        IDSMapping : IDSMapping
-            Core profiles IDSMapping, data to apply operation to.
-            Must contain the IDS path.
-        """
-        logger.info('Apply `%s(%s, %s)`' %
-                    (self.ids, self.operator, self.value))
-
-        profile = IDSMapping.flat_fields[self.ids]
-
-        logger.debug('data range before: %s - %s' %
-                     (profile.min(), profile.max()))
-        self._npfunc(profile, self.value, out=profile)
-        logger.debug('data range after: %s - %s' %
-                     (profile.min(), profile.max()))
-
-    @property
-    def _npfunc(self):
-        """Grab numpy function."""
-        import numpy as np
-        return getattr(np, self.operator)
-
-
 class IDSOperationSet(BaseModel):
-    ids: str
+    ids: str = 'profiles_1d/0/t_i_average'
     operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder']
-    values: List[float]
+                      'floor_divide', 'mod', 'remainder'] = 'multiply'
+    values: List[float] = [1.1, 1.2, 1.3]
 
     def expand(self) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
@@ -129,14 +72,14 @@ class IDSOperationSet(BaseModel):
 
 
 class DataLocation(BaseModel):
-    db: str
-    run_in_start_at: int
-    run_out_start_at: int
+    db: str = 'jet'
+    run_in_start_at: int = 7000
+    run_out_start_at: int = 8000
 
 
 class LHSSampler(BaseModel):
     method: Literal['latin-hypercube']
-    n_samples: int
+    n_samples: int = 3
 
     def __call__(self, *args):
         from duqtools.samplers import latin_hypercube
@@ -170,21 +113,38 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = []
+    matrix: List[IDSOperationSet] = [IDSOperationSet()]
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method')
-    template: DirectoryPath
-    data: DataLocation
+    template: DirectoryPath = '/pfs/work/g2ssmee/jetto/runs/duqtools_template'
+    data: DataLocation = DataLocation()
 
 
 class WorkDirectory(BaseModel):
     root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
-    subdir: Path = Path('workspace')
 
     @property
-    def path(self):
-        return self.root / self.subdir
+    def cwd(self):
+        cwd = Path.cwd()
+        if not cwd.relative_to(self.root):
+            raise IOError(
+                f'Work directory must be a subdirectory of {self.root}')
+        return cwd
+
+    @property
+    def subdir(self):
+        """Get subdirectory relative to root."""
+        return self.cwd.relative_to(self.root)
+
+    @validator('root')
+    def resolve_root(cls, v):
+        return v.resolve()
+
+    @property
+    def runs_yaml(self):
+        """Location of runs.yaml."""
+        return self.cwd / 'runs.yaml'
 
 
 class Config(BaseModel):
@@ -193,10 +153,9 @@ class Config(BaseModel):
 
     _instance = None
 
-    # pydantic members
     plot: PlotConfig = PlotConfig()
     submit: SubmitConfig = SubmitConfig()
-    create: Optional[CreateConfig]
+    create: CreateConfig = CreateConfig()
     status: StatusConfig = StatusConfig()
     workspace: WorkDirectory = WorkDirectory()
 

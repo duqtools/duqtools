@@ -2,13 +2,32 @@ import logging
 import shutil
 import stat
 from pathlib import Path
+from typing import Iterable
+
+import yaml
 
 from duqtools.config import WorkDirectory, cfg
 
 from .ids import IDSMapping, ImasLocation
 from .jetto import JettoSettings
+from .models._runs import Runs
 
 logger = logging.getLogger(__name__)
+
+RUN_PREFIX = 'run_'
+
+
+def fail_if_locations_exist(locations: Iterable[ImasLocation]):
+    """Check IDS coordinates and raise if any exist."""
+    any_exists = False
+    for location in locations:
+        if location.exists():
+            logger.info('Target %s already exists', location)
+            any_exists = True
+    if any_exists:
+        raise IOError(
+            'Found existing target location(s), use `duqtools clean` to '
+            'remove or `--force` to override.')
 
 
 def copy_files(source_drc: Path, target_drc: Path):
@@ -50,10 +69,10 @@ def write_batchfile(workspace: WorkDirectory, run_name: str):
     target_drc : Path
         Directory to place batch file into.
     """
-    run_drc = workspace.path / run_name
+    run_drc = workspace.cwd / run_name
     llcmd_path = run_drc / '.llcmd'
 
-    full_path = workspace.path / run_name
+    full_path = workspace.cwd / run_name
     rjettov_path = full_path / 'rjettov'
     rel_path = workspace.subdir / run_name
 
@@ -74,15 +93,20 @@ cd {full_path}
 """)
 
 
-def create(**kwargs):
+def create(force: bool = False, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
+    force : bool
+        Override protection if data and directories already exist.
     **kwargs
         Unused.
     """
     options = cfg.create
+    if not options:
+        logger.warning('No create options specified.')
+        return
 
     template_drc = options.template
     matrix = options.matrix
@@ -96,13 +120,25 @@ def create(**kwargs):
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)
 
-    for i, combination in enumerate(combinations):
-        run_name = f'run_{i:04d}'
-        run_drc = cfg.workspace.path / run_name
-        run_drc.mkdir(parents=True, exist_ok=True)
+    if not force:
+        if cfg.workspace.runs_yaml.exists():
+            raise IOError(
+                'Directory is not empty, use `duqtools clean` to clear or '
+                '`--force` to override.')
 
-        copy_files(template_drc, run_drc)
-        write_batchfile(cfg.workspace, run_name)
+        locations = (ImasLocation(db=options.data.db,
+                                  shot=source.shot,
+                                  run=options.data.run_in_start_at + i)
+                     for i in range(len(combinations)))
+
+        fail_if_locations_exist(locations)
+
+    runs = []
+
+    for i, combination in enumerate(combinations):
+        run_name = f'{RUN_PREFIX}{i:04d}'
+        run_drc = cfg.workspace.cwd / run_name
+        run_drc.mkdir(parents=True, exist_ok=force)
 
         target_in = ImasLocation(db=options.data.db,
                                  shot=source.shot,
@@ -125,3 +161,17 @@ def create(**kwargs):
         with target_in.open() as data_entry_target:
             logger.info('Writing data entry: %s' % target_in)
             core_profiles.put(db_entry=data_entry_target)
+
+        copy_files(template_drc, run_drc)
+        write_batchfile(cfg.workspace, run_name)
+
+        runs.append({
+            'dirname': run_name,
+            'data': target_in,
+            'operations': combination
+        })
+
+    runs = Runs.parse_obj(runs)
+
+    with open(cfg.workspace.runs_yaml, 'w') as f:
+        yaml.dump(yaml.safe_load(runs.json()), stream=f)

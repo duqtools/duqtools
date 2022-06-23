@@ -80,7 +80,7 @@ class Status():
         debug('Submit config: %s' % cfg.submit)
 
         self.dirs = [
-            Path(entry) for entry in scandir(cfg.workspace.path)
+            Path(entry) for entry in scandir(cfg.workspace.cwd)
             if entry.is_dir()
         ]
         debug('Case directories: %s' % self.dirs)
@@ -178,14 +178,14 @@ class Status():
             sleep(5)
             self.update_status()
 
-    def status(**kwargs):
-        self = Status()
+    @staticmethod
+    def status(progress: bool, detailed: bool, **kwargs):
+        tracker = Status()
 
-        args = kwargs['args']
-        if (args.detailed):
-            self.detailed_status()
+        if (detailed):
+            tracker.detailed_status()
             return
-        if (args.progress):
-            self.progress_status()
+        if (progress):
+            tracker.progress_status()
         else:
-            self.simple_status()
+            tracker.simple_status()

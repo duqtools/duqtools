@@ -2,6 +2,7 @@ import logging
 import subprocess
 from os import scandir
 from pathlib import Path
+from typing import Any, List
 
 from duqtools.config import cfg
 
@@ -9,14 +10,12 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def submit(**kwargs):
+def submit(force: bool = False, **kwargs):
     """submit.
 
     Function which implements the functionality to submit jobs to the
     cluster
     """
-
-    args = kwargs['args']
 
     if not cfg.submit:
         raise Exception('submit field required in config file')
@@ -24,7 +23,7 @@ def submit(**kwargs):
     debug('Submit config: %s' % cfg.submit)
 
     run_dirs = [
-        Path(entry) for entry in scandir(cfg.workspace.path) if entry.is_dir()
+        Path(entry) for entry in scandir(cfg.workspace.cwd) if entry.is_dir()
     ]
     debug('Case directories: %s' % run_dirs)
 
@@ -40,7 +39,7 @@ def submit(**kwargs):
             continue
 
         status_file = run_dir / cfg.submit.status_file
-        if status_file.exists() and not args.force:
+        if status_file.exists() and not force:
             if not status_file.is_file():
                 info('Status file %s is not a file' % status_file)
             with open(status_file, 'r') as f:
@@ -51,7 +50,7 @@ def submit(**kwargs):
             continue
 
         lockfile = run_dir / 'duqtools.lock'
-        if lockfile.exists() and not args.force:
+        if lockfile.exists() and not force:
             info('Skipping %s, lockfile exists, \
                         enable --force to submit again' % run_dir)
             continue
@@ -59,9 +58,8 @@ def submit(**kwargs):
         debug('put lockfile in place for %s' % submission_script)
         lockfile.touch()
 
-        info('submitting script %s' %
-             str(cfg.submit.submit_command + [submission_script]))
-        ret = subprocess.run(cfg.submit.submit_command + [submission_script],
-                             check=True,
-                             capture_output=True)
-        info('submission returned: %s' % ret.stdout)
+        cmd: List[Any] = [*cfg.submit.submit_command, submission_script]
+
+        info('submitting script %s', str(cmd))
+        ret = subprocess.run(cmd, check=True, capture_output=True)
+        info('submission returned: %s', ret.stdout)

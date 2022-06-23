@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 
 import imas
 from imas import imasdef
-from pydantic import BaseModel
+
+from duqtools.basemodel import BaseModel
 
 from ._mapping import IDSMapping
 
@@ -18,7 +19,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 PATH_TEMPLATE = ('/afs/eufus.eu/user/g/{user}/public/imasdb/{db}'
-                 '/3/0/ids_{shot}{run:04d}.datafile')
+                 '/3/0/ids_{shot}{run:04d}{suffix}')
+SUFFIXES = (
+    '.datafile',
+    '.characteristics',
+    '.tree',
+)
 
 
 class ImasLocation(BaseModel):
@@ -33,7 +39,8 @@ class ImasLocation(BaseModel):
             PATH_TEMPLATE.format(user=self.user,
                                  db=self.db,
                                  shot=self.shot,
-                                 run=self.run))
+                                 run=self.run,
+                                 suffix=SUFFIXES[0]))
 
     def exists(self) -> bool:
         """Return true if the directory exists.
@@ -42,7 +49,8 @@ class ImasLocation(BaseModel):
         -------
         bool
         """
-        return self.path().exists()
+        path = self.path()
+        return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
     def copy_ids_entry_to(self, destination: ImasLocation):
         """Copy ids entry to given destination.
@@ -54,6 +62,18 @@ class ImasLocation(BaseModel):
         """
         from ._copy import copy_ids_entry
         copy_ids_entry(self, destination)
+
+    def delete(self):
+        """Remove data from entry."""
+        # ERASE_PULSE operation is yet supported by IMAS as of June 2022
+        path = self.path()
+        for suffix in SUFFIXES:
+            to_delete = path.with_suffix(suffix)
+            logger.debug('Removing %s', to_delete)
+            try:
+                to_delete.unlink()
+            except FileNotFoundError:
+                logger.warning('%s does not exist', to_delete)
 
     def copy_ids_entry_to_run(self, *, run: int) -> ImasLocation:
         """Copy ids entry to destination with given run number.
@@ -107,6 +127,21 @@ class ImasLocation(BaseModel):
         """
         return IDSMapping(self.get(key))
 
+    def entry(self, backend=imasdef.MDSPLUS_BACKEND):
+        """Return reference to `imas.DBEntry.`
+
+        Parameters
+        ----------
+        backend : optional
+            Which IMAS backend to use
+
+        Returns
+        ------
+        entry : imas.DBEntry
+            IMAS database entry
+        """
+        return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
+
     @contextmanager
     def open(self, backend=imasdef.MDSPLUS_BACKEND):
         """Context manager to open database entry.
@@ -119,9 +154,9 @@ class ImasLocation(BaseModel):
         Yields
         ------
         entry : imas.DBEntry
-            IMAS database entry
+            Opened IMAS database entry
         """
-        entry = imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
+        entry = self.entry(backend=backend)
         op = entry.open()
 
         if op[0] < 0:
