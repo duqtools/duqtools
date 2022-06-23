@@ -6,6 +6,7 @@ from time import sleep
 from tqdm import tqdm
 
 from .config import cfg
+from .jetto import read_namelist
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -42,6 +43,28 @@ def is_failed(dir: Path) -> bool:
 
 def is_running(dir: Path) -> bool:
     return status_file_contains(dir, cfg.status.msg_running)
+
+
+def completion_percentage(dir: Path) -> float:
+    of = (dir / cfg.submit.out_file)
+    infile = (dir / cfg.submit.in_file)
+    if not of.exists():
+        debug('%s does not exists, but the job is running' % of)
+        return 0.
+    if not infile.exists():
+        debug('%s does not exists, but the job is running' % infile)
+        return 0.
+
+    with open(of, 'r') as f:
+        lines = f.readlines()
+        for i in range(len(lines) - 1, 0, -1):
+            if 'STEP' in lines[i]:
+                time = float(lines[i].split('=')[2].lstrip(' ').split(' ')[0])
+                break
+    nml = read_namelist(infile)
+    start = nml['nlist1']['tbeg']
+    end = nml['nlist1']['tmax']
+    return int(100 * (time - start) / (end - start))
 
 
 class Status():
@@ -125,10 +148,43 @@ class Status():
             sleep(5)
             self.update_status()
 
+    def get_status(self, dir):
+        if dir not in self.dirs_submit:
+            return 'Unsubmitted '
+        if dir in self.dirs_running:
+            return 'Running     '
+        if dir in self.dirs_failed:
+            return 'FAILED      '
+        if dir in self.dirs_completed:
+            return 'COMPLETED   '
+        return 'UNKNOWN'
+
+    def detailed_status(self):
+        """detailed_status of all separate runs."""
+        pbars = []
+        for i, dir in enumerate(self.dirs):
+            pbars.append(tqdm(total=100, position=i))
+            status = self.get_status(dir)
+            pbars[-1].set_description('%8s, status: %12s' % (dir.name, status))
+
+        while len(self.dirs_completed) < len(self.dirs_submit):
+            for i, dir in enumerate(self.dirs):
+                status = self.get_status(dir)
+                pbars[i].set_description('%8s, status: %12s' %
+                                         (dir.name, status))
+                if dir in self.dirs_running:
+                    pbars[i].n = completion_percentage(dir)
+                pbars[i].refresh()
+            sleep(5)
+            self.update_status()
+
     def status(**kwargs):
         self = Status()
 
         args = kwargs['args']
+        if (args.detailed):
+            self.detailed_status()
+            return
         if (args.progress):
             self.progress_status()
         else:

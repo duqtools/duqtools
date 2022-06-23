@@ -41,6 +41,11 @@ def cmdline():
                                const=True,
                                default=False,
                                help='Fancy progress bar')
+    parser_status.add_argument('--detailed',
+                               action='store_const',
+                               const=True,
+                               default=False,
+                               help='detailed info on progress')
 
     parser_plot = subparsers.add_parser(
         'plot', help='Analyze the results and generate a report')
