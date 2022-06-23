@@ -45,15 +45,15 @@ def is_running(dir: Path) -> bool:
     return status_file_contains(dir, cfg.status.msg_running)
 
 
-def completion_percentage(dir: Path) -> float:
+def completion_percentage(dir: Path) -> int:
     of = (dir / cfg.submit.out_file)
     infile = (dir / cfg.submit.in_file)
     if not of.exists():
         debug('%s does not exists, but the job is running' % of)
-        return 0.
+        return 0
     if not infile.exists():
         debug('%s does not exists, but the job is running' % infile)
-        return 0.
+        return 0
 
     with open(of, 'r') as f:
         lines = f.readlines()
