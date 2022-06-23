@@ -1,11 +1,13 @@
 import logging
-from os import scandir
 from pathlib import Path
 from time import sleep
 
+import yaml
 from tqdm import tqdm
 
 from .config import cfg
+from .jetto import read_namelist
+from .models._runs import Runs
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -44,6 +46,28 @@ def is_running(dir: Path) -> bool:
     return status_file_contains(dir, cfg.status.msg_running)
 
 
+def completion_percentage(dir: Path) -> int:
+    of = (dir / cfg.submit.out_file)
+    infile = (dir / cfg.submit.in_file)
+    if not of.exists():
+        debug('%s does not exists, but the job is running' % of)
+        return 0
+    if not infile.exists():
+        debug('%s does not exists, but the job is running' % infile)
+        return 0
+
+    with open(of, 'r') as f:
+        lines = f.readlines()
+        for i in range(len(lines) - 1, 0, -1):
+            if 'STEP' in lines[i]:
+                time = float(lines[i].split('=')[2].lstrip(' ').split(' ')[0])
+                break
+    nml = read_namelist(infile)
+    start = nml['nlist1']['tbeg']
+    end = nml['nlist1']['tmax']
+    return int(100 * (time - start) / (end - start))
+
+
 class Status():
 
     dirs: list
@@ -56,10 +80,17 @@ class Status():
     def __init__(self):
         debug('Submit config: %s' % cfg.submit)
 
-        self.dirs = [
-            Path(entry) for entry in scandir(cfg.workspace.cwd)
-            if entry.is_dir()
-        ]
+        runs_yaml = cfg.workspace.runs_yaml
+
+        if not runs_yaml.exists():
+            raise IOError('Cannot find %s, therefore cannot show the status' %
+                          runs_yaml)
+
+        with open(runs_yaml) as f:
+            mapping = yaml.safe_load(f)
+            runs = Runs.parse_obj(mapping)
+
+        self.dirs = [Path(run.dirname) for run in runs]
         debug('Case directories: %s' % self.dirs)
 
         debug('Total number of directories: %i' % len(self.dirs))
@@ -125,10 +156,43 @@ class Status():
             sleep(5)
             self.update_status()
 
+    def get_status(self, dir):
+        if dir not in self.dirs_submit:
+            return 'Unsubmitted '
+        if dir in self.dirs_running:
+            return 'Running     '
+        if dir in self.dirs_failed:
+            return 'FAILED      '
+        if dir in self.dirs_completed:
+            return 'COMPLETED   '
+        return 'UNKNOWN'
+
+    def detailed_status(self):
+        """detailed_status of all separate runs."""
+        pbars = []
+        for i, dir in enumerate(self.dirs):
+            pbars.append(tqdm(total=100, position=i))
+            status = self.get_status(dir)
+            pbars[-1].set_description('%8s, status: %12s' % (dir.name, status))
+
+        while len(self.dirs_completed) < len(self.dirs_submit):
+            for i, dir in enumerate(self.dirs):
+                status = self.get_status(dir)
+                pbars[i].set_description('%8s, status: %12s' %
+                                         (dir.name, status))
+                if dir in self.dirs_running:
+                    pbars[i].n = completion_percentage(dir)
+                pbars[i].refresh()
+            sleep(5)
+            self.update_status()
+
     @staticmethod
-    def status(progress: bool, **kwargs):
+    def status(progress: bool, detailed: bool, **kwargs):
         tracker = Status()
 
+        if (detailed):
+            tracker.detailed_status()
+            return
         if (progress):
             tracker.progress_status()
         else:

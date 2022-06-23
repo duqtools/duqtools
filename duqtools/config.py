@@ -53,6 +53,8 @@ class SubmitConfig(BaseModel):
 
     submit_script_name: str = '.llcmd'
     status_file: str = 'jetto.status'
+    out_file: str = 'jetto.out'
+    in_file: str = 'jetto.in'
     submit_command: List[str] = ['sbatch']
 
 
