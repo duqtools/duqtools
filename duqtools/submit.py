@@ -2,6 +2,7 @@ import logging
 import subprocess
 from os import scandir
 from pathlib import Path
+from typing import Any, List
 
 from duqtools.config import cfg
 
@@ -57,9 +58,8 @@ def submit(force: bool = False, **kwargs):
         debug('put lockfile in place for %s' % submission_script)
         lockfile.touch()
 
-        info('submitting script %s' %
-             str(cfg.submit.submit_command + [submission_script]))
-        ret = subprocess.run(cfg.submit.submit_command + [submission_script],
-                             check=True,
-                             capture_output=True)
-        info('submission returned: %s' % ret.stdout)
+        cmd: List[Any] = [*cfg.submit.submit_command, submission_script]
+
+        info('submitting script %s', str(cmd))
+        ret = subprocess.run(cmd, check=True, capture_output=True)
+        info('submission returned: %s', ret.stdout)

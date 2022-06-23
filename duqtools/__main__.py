@@ -6,6 +6,7 @@ import coverage
 
 from duqtools.config import cfg
 
+from .cleanup import cleanup
 from .create import create
 from .init import init
 from .plot import plot
@@ -75,6 +76,13 @@ def cmdline():
     parser_plot = subparsers.add_parser(
         'plot', help='Analyze the results and generate a report')
     parser_plot.set_defaults(func=plot)
+
+    parser_clean = subparsers.add_parser(
+        'clean',
+        help='Delete generated IDS data and the run dirs',
+        parents=[parser],
+        conflict_handler='resolve')
+    parser_clean.set_defaults(func=cleanup)
 
     # parse the arguments
     options = parser.parse_args()

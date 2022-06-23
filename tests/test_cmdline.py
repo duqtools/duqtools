@@ -37,27 +37,28 @@ def cmdline_workdir(tmp_path_factory):
 @pytest.mark.dependency()
 def test_example_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        result = subprocess.run(['duqtools', 'create', 'config.yaml'])
+        result = subprocess.run(
+            ['duqtools', 'create', '-c', 'config.yaml', '--force'])
         assert (result.returncode == 0)
 
 
 @pytest.mark.dependency(depends=['test_example_create'])
 def test_example_submit(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        result = subprocess.run(['duqtools', 'submit', 'config.yaml'])
+        result = subprocess.run(['duqtools', 'submit', '-c', 'config.yaml'])
         assert (result.returncode == 0)
 
 
 @pytest.mark.dependency(depends=['test_example_create'])
 def test_example_status(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        result = subprocess.run(['duqtools', 'status', 'config.yaml'])
+        result = subprocess.run(['duqtools', 'status', '-c', 'config.yaml'])
         assert (result.returncode == 0)
 
 
 @pytest.mark.dependency(depends=['test_example_status'])
 def test_example_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        result = subprocess.run(['duqtools', 'plot', 'config.yaml'])
+        result = subprocess.run(['duqtools', 'plot', '-c', 'config.yaml'])
         assert (result.returncode == 0)
         assert (os.path.exists('plot_0000.png'))

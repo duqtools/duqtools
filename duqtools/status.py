@@ -125,10 +125,11 @@ class Status():
             sleep(5)
             self.update_status()
 
+    @staticmethod
     def status(progress: bool, **kwargs):
-        self = Status()
+        tracker = Status()
 
         if (progress):
-            self.progress_status()
+            tracker.progress_status()
         else:
-            self.simple_status()
+            tracker.simple_status()
