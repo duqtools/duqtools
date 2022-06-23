@@ -22,7 +22,7 @@ def write_ids(filename: PathLike, data: dict):
     """
     with open(filename, 'w') as f:
         yaml.dump(data, f)
-    logger.debug('wrote %r' % filename)
+    logger.debug('wrote %r', filename)
 
 
 __all__ = [

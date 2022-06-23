@@ -29,16 +29,14 @@ class IDSOperation(BaseModel):
             Core profiles IDSMapping, data to apply operation to.
             Must contain the IDS path.
         """
-        logger.info('Apply `%s(%s, %s)`' %
-                    (self.ids, self.operator, self.value))
+        logger.info('Apply `%s(%s, %s)`', self.ids, self.operator, self.value)
 
         profile = ids_mapping.flat_fields[self.ids]
 
-        logger.debug('data range before: %s - %s' %
-                     (profile.min(), profile.max()))
+        logger.debug('data range before: %s - %s', profile.min(),
+                     profile.max())
         self._npfunc(profile, self.value, out=profile)
-        logger.debug('data range after: %s - %s' %
-                     (profile.min(), profile.max()))
+        logger.debug('data range after: %s - %s', profile.min(), profile.max())
 
     @property
     def _npfunc(self):

@@ -34,7 +34,7 @@ def plot(**kwargs):
         profiles.append(profile)
 
     for i, plot in enumerate(cfg.plot.plots):
-        info('Creating plot number %04i' % i)
+        info('Creating plot number %04i', i)
 
         fig, ax = plt.subplots()
 
@@ -52,4 +52,4 @@ def plot(**kwargs):
             ax.plot(x, y, label=j)
 
         ax.legend()
-        fig.savefig('plot_%04i.png' % i)
+        fig.savefig('plot_%04i.png', i)
