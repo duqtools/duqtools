@@ -1,6 +1,5 @@
 workspace:
-  root: /pfs/work/g2ssmee/jetto/runs
-  subdir: workspace
+  root: ./
 create:
   template: template_model
   data:
