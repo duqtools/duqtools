@@ -3,9 +3,9 @@ from pathlib import Path
 
 import yaml
 
-import duqtools.config
+from duqtools.config import Config
 
-from .basemodel import BaseModel
+from .config.basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def init(config: str = 'config.yaml', force: bool = False, **kwargs):
     kwargs :
         kwargs, optional stuff.
     """
-    cfg = duqtools.config.Config()
+    cfg = Config()
 
     BaseModel.__init__(cfg)
 
