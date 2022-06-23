@@ -83,7 +83,7 @@ def cmdline():
         'plot', help='Analyze the results and generate a report')
     parser_plot.set_defaults(func=plot)
 
-    parser_init = subparsers.add_parser(
+    parser_clean = subparsers.add_parser(
         'clean',
         help='Delete generated IDS data and the run dirs',
         parents=[parser],
