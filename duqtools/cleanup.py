@@ -2,30 +2,13 @@ from __future__ import annotations
 
 import logging
 import shutil
-from typing import List
 
 import yaml
-from pydantic import DirectoryPath
 
-from duqtools.ids import IDSOperation, ImasLocation
-
-from .basemodel import BaseModel
 from .config import cfg
+from .models._runs import Runs
 
 logger = logging.getLogger(__name__)
-
-
-class Run(BaseModel):
-    dirname: DirectoryPath
-    data: 'ImasLocation'
-    operations: 'List[IDSOperation]'
-
-
-class Runs(BaseModel):
-    __root__: List[Run] = []
-
-    def __iter__(self):
-        yield from self.__root__
 
 
 def cleanup(force: bool = False, **kwargs):
