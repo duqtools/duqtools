@@ -73,12 +73,6 @@ def cmdline():
                                default=False,
                                help='Fancy progress bar')
 
-    parser_init = subparsers.add_parser('init',
-                                        help='Create a default config file',
-                                        parents=[parser],
-                                        conflict_handler='resolve')
-    parser_init.set_defaults(func=init)
-
     parser_plot = subparsers.add_parser(
         'plot', help='Analyze the results and generate a report')
     parser_plot.set_defaults(func=plot)
