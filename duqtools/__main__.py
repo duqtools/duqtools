@@ -88,7 +88,7 @@ def cmdline():
         help='Delete generated IDS data and the run dirs',
         parents=[parser],
         conflict_handler='resolve')
-    parser_init.set_defaults(func=cleanup)
+    parser_clean.set_defaults(func=cleanup)
 
     # parse the arguments
     options = parser.parse_args()
