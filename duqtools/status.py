@@ -163,12 +163,13 @@ class Status():
         for i, dir in enumerate(self.dirs):
             pbars.append(tqdm(total=100, position=i))
             status = self.get_status(dir)
-            pbars[-1].set_description('%8s, status: %12s', dir.name, status)
+            pbars[-1].set_description(f'{dir.name:8s}, status: {dir.name:12s}')
 
         while len(self.dirs_completed) < len(self.dirs_submit):
             for i, dir in enumerate(self.dirs):
                 status = self.get_status(dir)
-                pbars[i].set_description('%8s, status: %12s', dir.name, status)
+                pbars[i].set_description(
+                    f'{dir.name:8s}, status: {status:12s}')
                 if dir in self.dirs_running:
                     pbars[i].n = completion_percentage(dir)
                 pbars[i].refresh()
