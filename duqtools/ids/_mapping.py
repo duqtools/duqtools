@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 from collections.abc import Mapping
 
@@ -100,3 +101,22 @@ class IDSMapping(Mapping):
         for item in path[:-1]:
             cur = cur[item]
         cur[path[-1]] = val
+
+    def findall(self, pattern: str):
+        """Find keys matching regex pattern.
+
+        Parameters
+        ----------
+        pattern : str
+            Regex pattern
+
+        Returns
+        -------
+        dict
+            New dict with all matching key/value pairs.
+        """
+        pat = re.compile(pattern)
+        return {
+            key: self.flat_fields[key]
+            for key in self.flat_fields if pat.match(key)
+        }
