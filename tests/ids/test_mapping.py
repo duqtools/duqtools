@@ -3,6 +3,8 @@ import pytest
 
 from duqtools.ids import IDSMapping
 
+assert_equal = np.testing.assert_array_equal
+
 
 class Sample:
     a = np.array((1, 2))
@@ -22,8 +24,6 @@ class Sample:
 def test_mapping():
     s = IDSMapping(Sample)
 
-    assert_equal = np.testing.assert_array_equal
-
     assert_equal(s.flat_fields['a'], np.array([1, 2]))
     assert_equal(s.flat_fields['b/c/d'], np.array([4, 5]))
     assert_equal(s.flat_fields['b/f/0'], np.array([6, 7]))
@@ -36,8 +36,34 @@ def test_mapping():
     assert_equal(s.fields['b']['f']['0'], np.array([6, 7]))
 
 
-@pytest.mark.xfail(reason='Unknown keys should raise a KeyError')
 def test_mapping_unknown_key_fail():
     s = IDSMapping(Sample)
     with pytest.raises(KeyError):
         s.fields['this key does not exist']
+
+
+def test_find_all():
+    s = IDSMapping(Sample)
+    d = s.findall('b/f/[0-9]')
+
+    assert len(d) == 2
+    assert 'b/f/0' in d
+    assert 'b/f/1' in d
+
+
+def test_find_group():
+    s = IDSMapping(Sample)
+    d = s.find_by_group(r'(b/f)/(\d)')
+
+    assert len(d) == 2
+    assert ('b/f', '0') in d
+    assert ('b/f', '1') in d
+
+
+def test_find_index():
+    s = IDSMapping(Sample)
+    lst = s.find_by_index('b/f/$i')
+
+    assert len(lst) == 2
+    assert_equal(lst[0], np.array([6, 7]))
+    assert_equal(lst[1], np.array([8, 9]))

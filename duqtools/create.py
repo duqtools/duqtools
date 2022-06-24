@@ -167,7 +167,8 @@ def create(force: bool = False, **kwargs):
 
         runs.append({
             'dirname': run_name,
-            'data': target_in,
+            'data_in': target_in,
+            'data_out': target_out,
             'operations': combination
         })
 

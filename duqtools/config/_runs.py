@@ -4,13 +4,15 @@ from typing import List
 
 from pydantic import DirectoryPath
 
-from .basemodel import BaseModel
 from duqtools.ids import IDSOperation, ImasLocation
+
+from .basemodel import BaseModel
 
 
 class Run(BaseModel):
     dirname: DirectoryPath
-    data: ImasLocation
+    data_in: ImasLocation
+    data_out: ImasLocation
     operations: List[IDSOperation]
 
 

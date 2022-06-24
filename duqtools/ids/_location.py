@@ -42,10 +42,10 @@ def _patch_str_repr(obj: object):
 
 
 class ImasLocation(BaseModel):
-    db: str
-    run: int
-    shot: int
     user: str = getuser()
+    db: str
+    shot: int
+    run: int
 
     def path(self) -> Path:
         """Return location as Path."""
@@ -110,19 +110,21 @@ class ImasLocation(BaseModel):
         self.copy_ids_entry_to(destination)
         return destination
 
-    def get(self, key: str = 'core_profiles'):
+    def get(self, key: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 
         Parameters
         ----------
         key : str, optional
             Name of profiles to open.
+        **kwargs
+            These keyword parametes are passed to `ImasLocation.open()`.
 
         Returns
         -------
         data
         """
-        with self.open() as data_entry:
+        with self.open(**kwargs) as data_entry:
             data = data_entry.get(key)
 
         # reset string representation because output is extremely lengthy
@@ -160,13 +162,15 @@ class ImasLocation(BaseModel):
         return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
 
     @contextmanager
-    def open(self, backend=imasdef.MDSPLUS_BACKEND):
+    def open(self, backend=imasdef.MDSPLUS_BACKEND, create: bool = False):
         """Context manager to open database entry.
 
         Parameters
         ----------
         backend : optional
             Which IMAS backend to use
+        create : bool, optional
+            Create empty database entry if it does not exist.
 
         Yields
         ------
@@ -176,16 +180,18 @@ class ImasLocation(BaseModel):
         entry = self.entry(backend=backend)
         opcode, _ = entry.open()
 
-        if opcode < 0:
+        if opcode == 0:
+            logger.debug('Data entry opened: %s', self)
+        elif create:
             cpcode, _ = entry.create()
             if cpcode == 0:
-                logger.debug('Data entry created: %s', self.path())
+                logger.debug('Data entry created: %s', self)
             else:
                 raise IOError(
-                    f'Cannot create data entry: {self.path()}. '
+                    f'Cannot create data entry: {self}. '
                     f'Create a new db first using `imasdb {self.db}`')
-        elif opcode == 0:
-            logger.debug('Data entry opened: %s', self.path())
+        else:
+            raise IOError(f'Data entry does not exist: {self}')
 
         try:
             yield entry

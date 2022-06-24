@@ -8,7 +8,7 @@ from .config import cfg
 logger = logging.getLogger(__name__)
 
 
-def cleanup(force: bool = False, **kwargs):
+def cleanup(force: bool = False, out: bool = False, **kwargs):
     """Read runs.yaml and clean the current directory.
 
     Parameters
@@ -20,8 +20,12 @@ def cleanup(force: bool = False, **kwargs):
     """
 
     for run in cfg.workspace.runs:
-        logger.info('Removing %s', run.data)
-        run.data.delete()
+        logger.info('Removing %s', run.data_in)
+        run.data_in.delete()
+
+        if out:
+            logger.info('Removing %s', run.data_out)
+            run.data_out.delete()
 
         logger.info('Removing run dir %s', run.dirname.resolve())
         shutil.rmtree(run.dirname)
