@@ -1,38 +1,68 @@
 from collections import defaultdict
+from collections.abc import Mapping
 
 import numpy as np
 
 
 def recursive_defaultdict():
+    """Recursive defaultdict."""
     return defaultdict(recursive_defaultdict)
 
 
-class IDSMapping:
+def defaultdict_to_dict(ddict: defaultdict):
+    """defaultdict_to_dict, turns a nested defaultdict into a nested dict.
+
+    Parameters
+    ----------
+    ddict : defaultdict
+        ddict
+    """
+
+    # Convert members to dict first
+    for k, v in ddict.items():
+        if isinstance(v, defaultdict):
+            ddict[k] = defaultdict_to_dict(v)
+    # Finally convert self to dict
+    return dict(ddict)
+
+
+class IDSMapping(Mapping):
 
     def __init__(self, ids):
+        self._ids = ids
+
         # All fields in the core profile in a single dict
         self.flat_fields: dict = {}
+
         # All fields, in the core profile in a nested dict
         self.fields: dict = defaultdict(recursive_defaultdict)
 
         self.dive(ids, [])
-        self.fields = self.ddict_to_dict(self.fields)
+        self.fields = defaultdict_to_dict(self.fields)
 
-    def ddict_to_dict(self, ddict: defaultdict):
-        """ddict_to_dict, turns a nested defaultdict into a nested dict.
+    def __repr__(self):
+        s = f'{self.__class__.__name__}(\n'
+        for key in self.fields.keys():
+            s += f'  {key} = ...\n'
+        s += ')\n'
 
-        Parameters
-        ----------
-        ddict : defaultdict
-            ddict
-        """
+        return s
 
-        # Convert members to dict first
-        for k, v in ddict.items():
-            if isinstance(v, defaultdict):
-                ddict[k] = self.ddict_to_dict(v)
-        # Finally convert self to dict
-        return dict(ddict)
+    def __getitem__(self, key: str):
+        try:
+            return self.flat_fields[key]
+        except KeyError:
+            pass
+        try:
+            return self.fields[key]
+        except KeyError:
+            raise
+
+    def __iter__(self):
+        yield from self.fields
+
+    def __len__(self):
+        return len(self.fields)
 
     def dive(self, val, path: list):
         """Recursively store the important bits of the imas structure in dicts.
