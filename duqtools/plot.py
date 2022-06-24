@@ -30,6 +30,7 @@ def plot(**kwargs):
         jset = JettoSettings.from_file(jset_file)
         imas_loc = ImasLocation.from_jset_output(jset)
         info('Reading %s', imas_loc)
+
         profile = imas_loc.get_ids_tree('core_profiles')
         profiles.append(profile)
 
@@ -37,6 +38,10 @@ def plot(**kwargs):
         info('Creating plot number %04i', i)
 
         fig, ax = plt.subplots()
+
+        ax.set_title(plot.y)
+        ax.set_xlabel(plot.get_xlabel())
+        ax.set_ylabel(plot.get_ylabel())
 
         for j, profile in enumerate(profiles):
             y = profile.flat_fields[plot.y]
@@ -46,10 +51,7 @@ def plot(**kwargs):
             else:
                 x = np.linspace(0, 1, len(y))
 
-            ax.set_xlabel(plot.get_xlabel())
-            ax.set_ylabel(plot.get_ylabel())
-
             ax.plot(x, y, label=j)
 
         ax.legend()
-        fig.savefig(f'plot_{i:04d}.png', i)
+        fig.savefig(f'plot_{i:04d}.png')
