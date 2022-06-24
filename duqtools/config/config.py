@@ -51,8 +51,7 @@ class WorkDirectory(BaseModel):
         runs_yaml = cfg.workspace.runs_yaml
 
         if not runs_yaml.exists():
-            raise IOError('Cannot find %s, therefore cannot show the status' %
-                          runs_yaml)
+            raise IOError(f'Cannot find {runs_yaml}, therefore cannot show the status')
 
         with open(runs_yaml) as f:
             mapping = yaml.safe_load(f)
