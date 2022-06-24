@@ -27,8 +27,8 @@ def status_file_contains(dir: Path, msg) -> bool:
     sf = (dir / cfg.submit.status_file)
     with open(sf, 'r') as f:
         content = f.read()
-        debug('Checking if content of %s file: %s contains %s' %
-              (sf, content, msg))
+        debug('Checking if content of %s file: %s contains %s', sf, content,
+              msg)
         return msg in content
 
 
@@ -48,10 +48,10 @@ def completion_percentage(dir: Path) -> int:
     of = (dir / cfg.submit.out_file)
     infile = (dir / cfg.submit.in_file)
     if not of.exists():
-        debug('%s does not exists, but the job is running' % of)
+        debug('%s does not exists, but the job is running', of)
         return 0
     if not infile.exists():
-        debug('%s does not exists, but the job is running' % infile)
+        debug('%s does not exists, but the job is running', infile)
         return 0
 
     with open(of, 'r') as f:
@@ -76,13 +76,14 @@ class Status():
     dirs_unknown: list
 
     def __init__(self):
-        debug('Submit config: %s' % cfg.submit)
+        debug('Submit config: %s', cfg.submit)
 
         runs = cfg.workspace.runs
+
         self.dirs = [Path(run.dirname) for run in runs]
         debug('Case directories: %s', self.dirs)
 
-        debug('Total number of directories: %i' % len(self.dirs))
+        debug('Total number of directories: %i', len(self.dirs))
         self.update_status()
 
     def update_status(self):
@@ -108,19 +109,19 @@ class Status():
     def simple_status(self):
         """stateless status."""
 
-        info('Total number of directories with submission script : %i' %
+        info('Total number of directories with submission script : %i',
              len(self.dirs_submit))
-        info('      number of not submitted jobs                 : %i' %
+        info('      number of not submitted jobs                 : %i',
              (len(self.dirs_submit) - len(self.dirs_status)))
-        info('Total number of directories with status     script : %i' %
+        info('Total number of directories with status     script : %i',
              len(self.dirs_status))
-        info('Total number of directories with Completed status  : %i' %
+        info('Total number of directories with Completed status  : %i',
              len(self.dirs_completed))
-        info('Total number of directories with Failed    status  : %i' %
+        info('Total number of directories with Failed    status  : %i',
              len(self.dirs_failed))
-        info('Total number of directories with Running   status  : %i' %
+        info('Total number of directories with Running   status  : %i',
              len(self.dirs_running))
-        info('Total number of directories with Unknown   status  : %i' %
+        info('Total number of directories with Unknown   status  : %i',
              len(self.dirs_unknown))
 
     def progress_status(self):
@@ -162,13 +163,12 @@ class Status():
         for i, dir in enumerate(self.dirs):
             pbars.append(tqdm(total=100, position=i))
             status = self.get_status(dir)
-            pbars[-1].set_description('%8s, status: %12s' % (dir.name, status))
+            pbars[-1].set_description('%8s, status: %12s', dir.name, status)
 
         while len(self.dirs_completed) < len(self.dirs_submit):
             for i, dir in enumerate(self.dirs):
                 status = self.get_status(dir)
-                pbars[i].set_description('%8s, status: %12s' %
-                                         (dir.name, status))
+                pbars[i].set_description('%8s, status: %12s', dir.name, status)
                 if dir in self.dirs_running:
                     pbars[i].n = completion_percentage(dir)
                 pbars[i].refresh()

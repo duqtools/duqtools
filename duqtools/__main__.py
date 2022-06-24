@@ -99,7 +99,7 @@ def cmdline():
     if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logger.debug('Arguments after parsing: %s' % options)
+    logger.debug('Arguments after parsing: %s', options)
 
     if not options.func:
         parser.print_help()

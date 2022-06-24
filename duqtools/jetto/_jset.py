@@ -257,7 +257,7 @@ class JettoSettings:
         """
         filename = Path(directory) / DEFAULT_FILENAME
         write_jset(filename, self.raw_mapping)
-        debug('write %s' % filename)
+        debug('write %s', filename)
 
     @classmethod
     def from_file(cls, path: PathLike) -> JettoSettings:

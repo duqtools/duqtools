@@ -58,7 +58,7 @@ def copy_files(source_drc: Path, target_drc: Path):
         path = target_drc / filename
         path.chmod(path.stat().st_mode | stat.S_IEXEC)
 
-    logger.debug('copied files to %s' % target_drc)
+    logger.debug('copied files to %s', target_drc)
 
 
 def write_batchfile(workspace: WorkDirectory, run_name: str):
@@ -159,7 +159,7 @@ def create(force: bool = False, **kwargs):
             operation.apply(ids_mapping)
 
         with target_in.open() as data_entry_target:
-            logger.info('Writing data entry: %s' % target_in)
+            logger.info('Writing data entry: %s', target_in)
             core_profiles.put(db_entry=data_entry_target)
 
         copy_files(template_drc, run_drc)
