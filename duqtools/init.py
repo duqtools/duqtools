@@ -10,7 +10,10 @@ from .config.basemodel import BaseModel
 logger = logging.getLogger(__name__)
 
 
-def init(config: str = 'config.yaml', force: bool = False, **kwargs):
+def init(config: str = 'config.yaml',
+         full: bool = False,
+         force: bool = False,
+         **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
@@ -19,11 +22,13 @@ def init(config: str = 'config.yaml', force: bool = False, **kwargs):
         Filename of the config.
     force : bool
         Overwrite config if it already exists.
+    full : bool
+        Make a config with all the default values
+        (otherwise just selected important ones)
     kwargs :
         kwargs, optional stuff.
     """
     cfg = Config()
-
     BaseModel.__init__(cfg)
 
     logger.debug(cfg)
@@ -37,5 +42,15 @@ def init(config: str = 'config.yaml', force: bool = False, **kwargs):
 
     logger.info('Writing default config to %s', config_filepath)
 
+    if full:
+        cfg_json = cfg.json()
+    else:
+        cfg_json = cfg.json(
+            include={
+                'workspace': True,
+                'create': {'matrix', 'sampler', 'template'},
+                'plot': {'plots'}
+            })
+
     with open(config_filepath, 'w') as f:
-        f.write(yaml.dump(yaml.safe_load(cfg.json())))
+        f.write(yaml.dump(yaml.safe_load(cfg_json)))

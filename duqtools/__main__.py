@@ -48,6 +48,12 @@ def cmdline():
                                         parents=[parser],
                                         conflict_handler='resolve')
     parser_init.set_defaults(func=init)
+    parser_init.add_argument(
+        '--full',
+        action='store_const',
+        const=True,
+        default=False,
+        help='Create a config file with all possible config values')
 
     parser_create = subparsers.add_parser('create',
                                           help='Create the UQ run files',
