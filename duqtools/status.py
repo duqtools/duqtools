@@ -2,12 +2,10 @@ import logging
 from pathlib import Path
 from time import sleep
 
-import yaml
 from tqdm import tqdm
 
 from .config import cfg
 from .jetto import read_namelist
-from .models._runs import Runs
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -80,18 +78,9 @@ class Status():
     def __init__(self):
         debug('Submit config: %s' % cfg.submit)
 
-        runs_yaml = cfg.workspace.runs_yaml
-
-        if not runs_yaml.exists():
-            raise IOError('Cannot find %s, therefore cannot show the status' %
-                          runs_yaml)
-
-        with open(runs_yaml) as f:
-            mapping = yaml.safe_load(f)
-            runs = Runs.parse_obj(mapping)
-
+        runs = cfg.workspace.runs
         self.dirs = [Path(run.dirname) for run in runs]
-        debug('Case directories: %s' % self.dirs)
+        debug('Case directories: %s', self.dirs)
 
         debug('Total number of directories: %i' % len(self.dirs))
         self.update_status()

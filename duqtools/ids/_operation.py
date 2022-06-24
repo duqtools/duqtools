@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from typing_extensions import Literal
 
-from duqtools.basemodel import BaseModel
+from duqtools.config.basemodel import BaseModel
 
 if TYPE_CHECKING:
     from .ids import IDSMapping
