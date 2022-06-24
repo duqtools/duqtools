@@ -80,7 +80,7 @@ class Status():
 
         runs = cfg.workspace.runs
         self.dirs = [Path(run.dirname) for run in runs]
-        debug('Case directories: %s' % self.dirs)
+        debug('Case directories: %s', self.dirs)
 
         debug('Total number of directories: %i' % len(self.dirs))
         self.update_status()
