@@ -4,7 +4,7 @@ from typing import List
 
 from pydantic import DirectoryPath
 
-from duqtools.basemodel import BaseModel
+from .basemodel import BaseModel
 from duqtools.ids import IDSOperation, ImasLocation
 
 
