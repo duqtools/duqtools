@@ -32,6 +32,10 @@ def plot(**kwargs):
         info('Reading %s', imas_loc)
 
         profile = imas_loc.get_ids_tree('core_profiles')
+        if 'profiles_1d' not in profile:
+            logger.warning('No data in entry, skipping...')
+            continue
+
         profiles.append(profile)
 
     for i, plot in enumerate(cfg.plot.plots):
