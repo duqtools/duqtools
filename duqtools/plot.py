@@ -52,4 +52,4 @@ def plot(**kwargs):
             ax.plot(x, y, label=j)
 
         ax.legend()
-        fig.savefig('plot_%04i.png', i)
+        fig.savefig(f'plot_{i:04d}.png', i)

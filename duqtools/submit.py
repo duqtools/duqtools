@@ -42,8 +42,8 @@ def submit(force: bool = False, **kwargs):
             if not status_file.is_file():
                 info('Status file %s is not a file', status_file)
             with open(status_file, 'r') as f:
-                info('Status of %s: %sTo rerun please enable the force flag',
-                     (status_file, f.read()))
+                info('Status of %s: %s. To rerun enable the --force flag',
+                     status_file, f.read())
             info('Skipping directory %s ; due to existing status file',
                  run_dir)
             continue
@@ -51,11 +51,11 @@ def submit(force: bool = False, **kwargs):
         lockfile = run_dir / 'duqtools.lock'
         if lockfile.exists() and not force:
             info(
-                'Skipping %s, lockfile exists, \
-                        enable --force to submit again', run_dir)
+                'Skipping %s, lockfile exists, enable --force to submit again',
+                run_dir)
             continue
 
-        debug('put lockfile in place for %s', submission_script)
+        debug('Put lockfile in place for %s', submission_script)
         lockfile.touch()
 
         cmd: List[Any] = [*cfg.submit.submit_command, submission_script]
