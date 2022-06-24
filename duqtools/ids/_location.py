@@ -27,6 +27,20 @@ SUFFIXES = (
 )
 
 
+def _patch_str_repr(obj: object):
+    """Reset str/repr methods to default."""
+    import types
+
+    def true_repr(x):
+        type_ = type(x)
+        module = type_.__module__
+        qualname = type_.__qualname__
+        return f'<{module}.{qualname} object at {hex(id(x))}>'
+
+    obj.__str__ = types.MethodType(true_repr, obj)  # type: ignore
+    obj.__repr__ = types.MethodType(true_repr, obj)  # type: ignore
+
+
 class ImasLocation(BaseModel):
     db: str
     run: int
@@ -110,6 +124,9 @@ class ImasLocation(BaseModel):
         """
         with self.open() as data_entry:
             data = data_entry.get(key)
+
+        # reset string representation because output is extremely lengthy
+        _patch_str_repr(data)
 
         return data
 
