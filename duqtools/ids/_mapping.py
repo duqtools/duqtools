@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from collections.abc import Mapping
+from typing import Any, Dict, Union
 
 import numpy as np
 
@@ -102,7 +103,7 @@ class IDSMapping(Mapping):
             cur = cur[item]
         cur[path[-1]] = val
 
-    def findall(self, pattern: str):
+    def findall(self, pattern: str) -> Dict[str, Any]:
         """Find keys matching regex pattern.
 
         Parameters
@@ -120,3 +121,63 @@ class IDSMapping(Mapping):
             key: self.flat_fields[key]
             for key in self.flat_fields if pat.match(key)
         }
+
+    def find_by_group(self, pattern: str) -> Dict[Union[tuple, str], Any]:
+        """Find keys matching regex pattern by group.
+
+        The dict key is defined by `match.groups()`.
+        Dict entries will be overwritten if the groups are not unique.
+
+        Parameters
+        ----------
+        pattern : str
+            Regex pattern (must contain groups)
+
+        Returns
+        -------
+        dict
+            New dict with all matching key/value pairs.
+        """
+        pat = re.compile(pattern)
+
+        new = {}
+        for key in self.flat_fields:
+            m = pat.match(key)
+            if m:
+                groups = m.groups()
+                idx = groups[0] if len(groups) == 1 else groups
+                new[idx] = self.flat_fields[key]
+
+        return new
+
+    def find_by_index(self, pattern: str) -> tuple:
+        """Find keys matching regex pattern.
+
+        i.e. `ids.find_by_index('^profiles_1d/(\\d+)/zeff$')`
+        returns a sorted list of all arrays
+
+        `$i` is a special character that can be used instead of `(\\d+)`.
+
+        Parameters`
+        ----------
+        pattern : str
+            Regex pattern, must include a group matching a digit.
+
+        Returns
+        -------
+        dict
+            New dict with all matching key/value pairs.
+        """
+        pattern = pattern.replace('$i', r'(\d+)')
+        pat = re.compile(pattern)
+
+        new = {}
+        for key in self.flat_fields:
+            m = pat.match(key)
+            if m:
+                i = int(m.groups()[0])
+                new[i] = self.flat_fields[key]
+
+        ret = tuple(new[i] for i in sorted(new))
+
+        return ret
