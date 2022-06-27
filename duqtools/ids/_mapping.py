@@ -30,8 +30,9 @@ def defaultdict_to_dict(ddict: defaultdict):
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids):
+    def __init__(self, ids, exclude_empty: bool = True):
         self._ids = ids
+        self.exclude_empty = exclude_empty
 
         # All fields in the core profile in a single dict
         self.flat_fields: dict = {}
@@ -94,6 +95,9 @@ class IDSMapping(Mapping):
             return
 
         if not isinstance(val, (np.ndarray, np.generic)):
+            return
+
+        if self.exclude_empty and val.size == 0:
             return
 
         # We made it here, the value can be stored

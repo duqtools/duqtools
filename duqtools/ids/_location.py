@@ -132,19 +132,21 @@ class ImasLocation(BaseModel):
 
         return data
 
-    def get_ids_tree(self, key: str = 'core_profiles') -> IDSMapping:
+    def get_ids_tree(self, key: str = 'core_profiles', **kwargs) -> IDSMapping:
         """get the data as a simple ids (all values in memory, in a dict).
 
         Parameters
         ----------
         key : str, optional
             Name of profiles to open
+        **kwargs
+            These parameters are passed to initialize `IDSMapping`.
 
         Returns
         -------
         IDSMapping
         """
-        return IDSMapping(self.get(key))
+        return IDSMapping(self.get(key), **kwargs)
 
     def entry(self, backend=imasdef.MDSPLUS_BACKEND):
         """Return reference to `imas.DBEntry.`
