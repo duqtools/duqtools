@@ -1,76 +1,72 @@
+import os
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
 import streamlit as st
+from bokeh.plotting import figure
 
-from duqtools.config import cfg
-from duqtools.ids import ImasLocation
-from duqtools.jetto import JettoSettings
+from duqtools.config._runs import Runs
 
 st.title('Plot IDS')
+with st.sidebar:
+    workdir = st.text_input(
+        'Work directory', '/afs/eufus.eu/user/g/g2ssmee/jetto_runs/workspace3')
+    runs_yaml = Path(workdir) / 'runs.yaml'
 
-config_path = st.text_input(
-    'Path to config',
-    '/afs/eufus.eu/user/g/g2ssmee/jetto_runs/workspace/config.yaml')
-config_path = Path(config_path)
+if not runs_yaml.exists():
+    raise ValueError('`runs.yaml` does not exists!')
 
-if not config_path.exists():
-    raise ValueError('Config does not exists!')
+os.chdir(workdir)
 
-cfg.read(config_path)
+runs = Runs.from_yaml(runs_yaml)
 
+runs_df = pd.DataFrame([run.data_out.dict() for run in runs])
 
-@st.experimental_memo
-def load_profile(jset_file):
-    jset = JettoSettings.from_file(jset_file)
-    imas_loc = ImasLocation.from_jset_output(jset)
-    profile = imas_loc.get_ids_tree('core_profiles')
-    return profile
+with st.expander('IDS data'):
+    st.dataframe(runs_df)
 
-
-jset_files = list(cfg.workspace.cwd.glob('*/*.jset'))
-
-profiles = []
-for jset_file in jset_files:
-    profile = load_profile(jset_file)
-    profiles.append(profile)
-    st.write(jset_file)
-
-keys = ('t_i_average', 'zeff')
-
-y_val = st.selectbox('Select IDS', keys, index=0)
+prefix = 'profiles_1d/$i'
 
 
-@st.experimental_memo
-def get_data(y_val):
-    plots = []
-
-    for profile in profiles:
-        p1d = profile.fields['profiles_1d']
-        slices = tuple(p1d[k][y_val] for k in p1d)
-        plots.append(slices)
-
-    return plots
+def ffmt(s):
+    return s.replace(prefix + '/', '')
 
 
-data = get_data(y_val)
+with st.sidebar:
+    profiles = tuple(
+        run.data_out.get_ids_tree(exclude_empty=True) for run in runs)
 
-time_idx = st.slider('Step', min_value=0, max_value=len(data[0]), step=1)
+    options = sorted(profiles[0].find_by_index(f'{prefix}/.*').keys())
 
-fig, ax = plt.subplots()
+    time = profiles[0]['time']
 
-for j, y_vals in enumerate(data):
+    default_x_val = options.index(f'{prefix}/grid/rho_tor')
+    default_y_val = f'{prefix}/t_i_average'
 
-    y = y_vals[time_idx]
+    x_val = st.selectbox('Select IDS (x)',
+                         options,
+                         index=default_x_val,
+                         format_func=ffmt)
+    y_vals = st.multiselect('Select IDS (y)',
+                            options,
+                            default=default_y_val,
+                            format_func=ffmt)
 
-    x = np.linspace(0, 1, len(y))
+    t = st.slider('Time step', max_value=len(time) - 1)
 
-    ax.set_xlabel('x')
-    ax.set_ylabel(y_val)
+for y_val in y_vals:
+    st.header(f'{ffmt(x_val)} vs. {ffmt(y_val)}')
 
-    ax.plot(x, y, label=j)
+    p = figure(title=f'{ffmt(x_val)} vs {ffmt(y_val)} at t={t}')
 
-ax.legend()
+    for run in runs:
+        d = run.data_out.get_ids_tree()
 
-st.pyplot(fig)
+        # xs = np.arange(len(ys))
+        xs = d[x_val.replace('$i', str(t))]
+
+        ys = d[y_val.replace('$i', str(t))]
+
+        p.line(xs, ys, legend_label=str(run.dirname))
+
+    st.bokeh_chart(p)
