@@ -1,6 +1,5 @@
 import logging
 import subprocess
-from os import scandir
 from pathlib import Path
 from typing import Any, List
 
@@ -11,10 +10,15 @@ info, debug = logger.info, logger.debug
 
 
 def submit(force: bool = False, **kwargs):
-    """submit.
+    """submit. Function which implements the functionality to submit jobs to
+    the cluster.
 
-    Function which implements the functionality to submit jobs to the
-    cluster
+    Parameters
+    ----------
+    force : bool
+        force the submission even in the presence of lockfiles
+    kwargs :
+        kwargs
     """
 
     if not cfg.submit:
@@ -22,9 +26,9 @@ def submit(force: bool = False, **kwargs):
 
     debug('Submit config: %s', cfg.submit)
 
-    run_dirs = [
-        Path(entry) for entry in scandir(cfg.workspace.cwd) if entry.is_dir()
-    ]
+    runs = cfg.workspace.runs
+
+    run_dirs = [Path(run.dirname) for run in runs]
     debug('Case directories: %s', run_dirs)
 
     for run_dir in run_dirs:
@@ -33,8 +37,8 @@ def submit(force: bool = False, **kwargs):
             info('Found submission script: %s ; Ready for submission',
                  submission_script)
         else:
-            debug('Did not found submission script %s ; Skipping directory...',
-                  submission_script)
+            info('Did not found submission script %s ; Skipping directory...',
+                 submission_script)
             continue
 
         status_file = run_dir / cfg.submit.status_file
@@ -48,7 +52,7 @@ def submit(force: bool = False, **kwargs):
                  run_dir)
             continue
 
-        lockfile = run_dir / 'duqtools.lock'
+        lockfile = run_dir / 'duqtools.submit.lock'
         if lockfile.exists() and not force:
             info(
                 'Skipping %s, lockfile exists, enable --force to submit again',
