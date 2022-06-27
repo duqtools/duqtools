@@ -20,7 +20,7 @@ def has_status(dir: Path) -> bool:
 
 
 def is_submitted(dir: Path) -> bool:
-    return (dir / 'duqtools.lock').exists()
+    return (dir / 'duqtools.submit.lock').exists()
 
 
 def status_file_contains(dir: Path, msg) -> bool:
