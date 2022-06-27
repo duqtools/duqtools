@@ -168,13 +168,14 @@ class IDSMapping(Mapping):
 
         return new
 
-    def find_by_index(self, pattern: str) -> tuple:
-        """Find keys matching regex pattern.
+    def find_by_index(self, pattern: str) -> Dict[str, Dict[int, np.ndarray]]:
+        """Find keys matching regex pattern using time index.
 
-        i.e. `ids.find_by_index('^profiles_1d/(\\d+)/zeff$')`
-        returns a sorted list of all arrays
+        Must include $i, which is a special character that matches
+        an integer (`\\d+`)
 
-        `$i` is a special character that can be used instead of `(\\d+)`.
+        i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
+        returns a dict with `zeff` and error attributes.
 
         Parameters`
         ----------
@@ -186,18 +187,26 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        idx_str = '$i'
+
+        if idx_str not in pattern:
+            raise ValueError(f'Pattern must include {idx_str} to match index.')
+
         pattern = insert_re_caret_dollar(pattern)
 
-        pattern = pattern.replace('$i', r'(\d+)')
+        pattern = pattern.replace(idx_str, r'(?P<idx>\d+)')
         pat = re.compile(pattern)
 
-        new = {}
+        new_dict: Dict[str, Dict[int, np.ndarray]] = defaultdict(dict)
+
         for key in self.flat_fields:
             m = pat.match(key)
+
             if m:
-                i = int(m.groups()[0])
-                new[i] = self.flat_fields[key]
+                si, sj = m.span('idx')
+                new_key = key[:si] + idx_str + key[sj:]
 
-        ret = tuple(new[i] for i in sorted(new))
+                idx = int(m.group('idx'))
+                new_dict[new_key][idx] = self.flat_fields[key]
 
-        return ret
+        return new_dict
