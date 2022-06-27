@@ -6,6 +6,15 @@ from typing import Any, Dict, Union
 import numpy as np
 
 
+def insert_re_caret_dollar(string: str) -> str:
+    """Insert regex start (^) / end ($) of line matching characters."""
+    if not string.startswith('^'):
+        string = f'^{string}'
+    if not string.endswith('$'):
+        string = f'{string}$'
+    return string
+
+
 def recursive_defaultdict():
     """Recursive defaultdict."""
     return defaultdict(recursive_defaultdict)
@@ -120,7 +129,10 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        pattern = insert_re_caret_dollar(pattern)
+
         pat = re.compile(pattern)
+
         return {
             key: self.flat_fields[key]
             for key in self.flat_fields if pat.match(key)
@@ -142,6 +154,8 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        pattern = insert_re_caret_dollar(pattern)
+
         pat = re.compile(pattern)
 
         new = {}
@@ -172,6 +186,8 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        pattern = insert_re_caret_dollar(pattern)
+
         pattern = pattern.replace('$i', r'(\d+)')
         pat = re.compile(pattern)
 
