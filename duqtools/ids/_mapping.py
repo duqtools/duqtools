@@ -6,6 +6,15 @@ from typing import Any, Dict, Union
 import numpy as np
 
 
+def insert_re_caret_dollar(string: str) -> str:
+    """Insert regex start (^) / end ($) of line matching characters."""
+    if not string.startswith('^'):
+        string = f'^{string}'
+    if not string.endswith('$'):
+        string = f'{string}$'
+    return string
+
+
 def recursive_defaultdict():
     """Recursive defaultdict."""
     return defaultdict(recursive_defaultdict)
@@ -30,8 +39,9 @@ def defaultdict_to_dict(ddict: defaultdict):
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids):
+    def __init__(self, ids, exclude_empty: bool = True):
         self._ids = ids
+        self.exclude_empty = exclude_empty
 
         # All fields in the core profile in a single dict
         self.flat_fields: dict = {}
@@ -96,6 +106,9 @@ class IDSMapping(Mapping):
         if not isinstance(val, (np.ndarray, np.generic)):
             return
 
+        if self.exclude_empty and val.size == 0:
+            return
+
         # We made it here, the value can be stored
         self.flat_fields['/'.join(path)] = val
         cur = self.fields
@@ -116,7 +129,10 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        pattern = insert_re_caret_dollar(pattern)
+
         pat = re.compile(pattern)
+
         return {
             key: self.flat_fields[key]
             for key in self.flat_fields if pat.match(key)
@@ -138,6 +154,8 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
+        pattern = insert_re_caret_dollar(pattern)
+
         pat = re.compile(pattern)
 
         new = {}
@@ -150,13 +168,14 @@ class IDSMapping(Mapping):
 
         return new
 
-    def find_by_index(self, pattern: str) -> tuple:
-        """Find keys matching regex pattern.
+    def find_by_index(self, pattern: str) -> Dict[str, Dict[int, np.ndarray]]:
+        """Find keys matching regex pattern using time index.
 
-        i.e. `ids.find_by_index('^profiles_1d/(\\d+)/zeff$')`
-        returns a sorted list of all arrays
+        Must include $i, which is a special character that matches
+        an integer (`\\d+`)
 
-        `$i` is a special character that can be used instead of `(\\d+)`.
+        i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
+        returns a dict with `zeff` and error attributes.
 
         Parameters`
         ----------
@@ -168,16 +187,26 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
-        pattern = pattern.replace('$i', r'(\d+)')
+        idx_str = '$i'
+
+        if idx_str not in pattern:
+            raise ValueError(f'Pattern must include {idx_str} to match index.')
+
+        pattern = insert_re_caret_dollar(pattern)
+
+        pattern = pattern.replace(idx_str, r'(?P<idx>\d+)')
         pat = re.compile(pattern)
 
-        new = {}
+        new_dict: Dict[str, Dict[int, np.ndarray]] = defaultdict(dict)
+
         for key in self.flat_fields:
             m = pat.match(key)
+
             if m:
-                i = int(m.groups()[0])
-                new[i] = self.flat_fields[key]
+                si, sj = m.span('idx')
+                new_key = key[:si] + idx_str + key[sj:]
 
-        ret = tuple(new[i] for i in sorted(new))
+                idx = int(m.group('idx'))
+                new_dict[new_key][idx] = self.flat_fields[key]
 
-        return ret
+        return new_dict

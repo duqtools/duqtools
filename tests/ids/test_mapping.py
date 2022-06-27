@@ -62,8 +62,10 @@ def test_find_group():
 
 def test_find_index():
     s = IDSMapping(Sample)
-    lst = s.find_by_index('b/f/$i')
+    inp = 'b/f/$i'
+    d = s.find_by_index(inp)
 
-    assert len(lst) == 2
-    assert_equal(lst[0], np.array([6, 7]))
-    assert_equal(lst[1], np.array([8, 9]))
+    assert len(d) == 1
+    assert inp in d
+    assert_equal(d[inp][0], np.array([6, 7]))
+    assert_equal(d[inp][1], np.array([8, 9]))
