@@ -60,6 +60,8 @@ def completion_percentage(dir: Path) -> int:
             if 'STEP' in lines[i]:
                 time = float(lines[i].split('=')[2].lstrip(' ').split(' ')[0])
                 break
+        else:
+            time = 0.
     nml = read_namelist(infile)
     start = nml['nlist1']['tbeg']
     end = nml['nlist1']['tmax']
