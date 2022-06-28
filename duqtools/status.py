@@ -178,14 +178,13 @@ class Status():
             sleep(5)
             self.update_status()
 
-    @staticmethod
-    def status(progress: bool, detailed: bool, **kwargs):
-        tracker = Status()
 
-        if (detailed):
-            tracker.detailed_status()
-            return
-        if (progress):
-            tracker.progress_status()
-        else:
-            tracker.simple_status()
+def status(progress: bool, detailed: bool, **kwargs):
+    tracker = Status()
+
+    if detailed:
+        tracker.detailed_status()
+    elif progress:
+        tracker.progress_status()
+    else:
+        tracker.simple_status()
