@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def dash(**kwargs):
+    """Start streamlit dashboard."""
     dashboard_path = Path(__file__).parents[1] / 'dash' / 'dash.py'
     workdir = Path('.').resolve()
 
