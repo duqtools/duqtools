@@ -1,1 +1,4 @@
+bokeh==2.4.1
+duqtools
+pandas
 streamlit>=1.10.0

@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -7,10 +8,14 @@ from bokeh.plotting import figure
 
 from duqtools.config._runs import Runs
 
+try:
+    default_workdir = sys.argv[1]
+except IndexError:
+    default_workdir = '/afs/eufus.eu/user/g/g2ssmee/jetto_runs/workspace3'
+
 st.title('Plot IDS')
 with st.sidebar:
-    workdir = st.text_input(
-        'Work directory', '/afs/eufus.eu/user/g/g2ssmee/jetto_runs/workspace3')
+    workdir = st.text_input('Work directory', default_workdir)
     runs_yaml = Path(workdir) / 'runs.yaml'
 
 if not runs_yaml.exists():
