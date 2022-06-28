@@ -1,133 +1,110 @@
-import argparse
 import logging
-import sys
-from functools import partial
+from functools import wraps
 
+import click
 import coverage
 
 from duqtools.config import cfg
-
-from .cleanup import cleanup
-from .create import create
-from .dash import dash
-from .init import init
-from .plot import plot
-from .status import status
-from .submit import submit
 
 logger = logging.getLogger(__name__)
 coverage.process_startup()
 
 
-def cmdline():
+def global_params(func):
 
-    parser = argparse.ArgumentParser()
-    parser.set_defaults(func=None)
+    @click.option('-c',
+                  '--config',
+                  default='duqtools.yaml',
+                  help='Path to config.')
+    @click.option('--debug',
+                  is_flag=True,
+                  help='Enable debug print statements.')
+    @click.option('--force',
+                  is_flag=True,
+                  help='Force the action you want to take.')
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
 
-    # Global optional options
-    parser.add_argument('-c',
-                        '--config',
-                        type=str,
-                        help='Path to config',
-                        default='duqtools.yaml')
-    parser.add_argument('--debug',
-                        action='store_true',
-                        default=False,
-                        help='Enable debug print statements')
-    parser.add_argument('-f',
-                        '--force',
-                        action='store_true',
-                        default=False,
-                        help='Force the action you want to take')
+    return wrapper
 
-    # Subparsers
-    subparsers = parser.add_subparsers()
 
-    add_subparser = partial(subparsers.add_parser,
-                            parents=[parser],
-                            conflict_handler='resolve')
-
-    parser_init = add_subparser(
-        'init',
-        help='Create a default config file',
-    )
-    parser_init.set_defaults(func=init)
-    parser_init.add_argument(
-        '--full',
-        action='store_true',
-        default=False,
-        help='Create a config file with all possible config values')
-
-    parser_create = add_subparser(
-        'create',
-        help='Create the UQ run files',
-    )
-    parser_create.set_defaults(func=create)
-
-    parser_submit = add_subparser(
-        'submit',
-        help='Submit the UQ runs',
-    )
-    parser_submit.set_defaults(func=submit)
-
-    parser_status = add_subparser(
-        'status',
-        help='Print the status of the UQ runs',
-    )
-    parser_status.set_defaults(func=status)
-    parser_status.add_argument('--progress',
-                               action='store_true',
-                               default=False,
-                               help='Fancy progress bar')
-    parser_status.add_argument('--detailed',
-                               action='store_true',
-                               default=False,
-                               help='detailed info on progress')
-
-    parser_plot = add_subparser(
-        'plot',
-        help='Analyze the results and generate a report',
-    )
-    parser_plot.set_defaults(func=plot)
-
-    parser_clean = add_subparser(
-        'clean',
-        help='Delete generated IDS data and the run dirs',
-    )
-
-    parser_clean.add_argument('--out',
-                              action='store_true',
-                              default=False,
-                              help='Remove output data.')
-
-    parser_clean.set_defaults(func=cleanup)
-
-    parser_dash = add_subparser(
-        'dash',
-        help='Open dashboard for evaluating IDS data',
-    )
-    parser_dash.set_defaults(func=dash)
-
-    # parse the arguments
-    options = parser.parse_args()
-
-    # Set the debug level
-    if options.debug:
+@click.group()
+@global_params
+@click.pass_context
+def cli(ctx, config='duqtools.yaml', debug=False, **kwargs):
+    """This is the docstring for duqtools."""
+    if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logger.debug('Arguments after parsing: %s', options)
+    logger.debug('Params: %s', ctx.params)
+    logger.debug('Subcommand: %s', ctx.invoked_subcommand)
 
-    if not options.func:
-        parser.print_help()
-        sys.exit(0)
+    if ctx.invoked_subcommand != 'init':
+        cfg.read(config)
 
-    # Load the config file
-    if not options.func == init:  # dont read it if we have to create it
-        cfg.read(options.config)
 
-    # Run the subcommand
-    options.func(**vars(options))
+@cli.command('init')
+@click.option('--full',
+              is_flag=True,
+              help='Create a config file with all possible config values.')
+@global_params
+def cli_init(**kwargs):
+    """Create a default config file."""
+    from .init import init
+    init(**kwargs)
+
+
+@cli.command('create')
+@global_params
+def cli_create(**kwargs):
+    """Create the UQ run files."""
+    from .create import create
+    create(**kwargs)
+
+
+@cli.command('submit')
+@global_params
+def cli_submit(**kwargs):
+    """Submit the UQ runs."""
+    from .submit import submit
+    submit(**kwargs)
+
+
+@cli.command('status')
+@click.option('--detailed', is_flag=True, help='Detailed info on progress')
+@click.option('--progress', is_flag=True, help='Fancy progress bar')
+@global_params
+def cli_status(**kwargs):
+    """Print the status of the UQ runs."""
+    from .status import status
+    status(**kwargs)
+
+
+@cli.command('plot')
+@global_params
+def cli_plot(**kwargs):
+    """Analyze the results and generate a report'."""
+    from .plot import plot
+    plot(**kwargs)
+
+
+@cli.command('clean')
+@click.option('--out', is_flag=True, help='Remove output data.')
+@global_params
+def cli_clean(**kwargs):
+    """Delete generated IDS data and the run dir."""
+    from .cleanup import cleanup
+    cleanup(**kwargs)
+
+
+@cli.command('dash')
+@global_params
+def cli_dash(**kwargs):
+    """Open dashboard for evaluating IDS data."""
+    from .dash import dash
+    dash(**kwargs)
 
 
 if __name__ == '__main__':
-    cmdline()
+    cli()
