@@ -180,6 +180,16 @@ class Status():
 
 
 def status(progress: bool, detailed: bool, **kwargs):
+    """Show status of runs.
+
+    Parameters
+    ----------
+    progress : bool
+        Show progress bar.
+    detailed : bool
+        Show detailed progress for every job.
+    """
+
     tracker = Status()
 
     if detailed:

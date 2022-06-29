@@ -4,12 +4,10 @@ __version__ = '0.0.1'
 
 import logging
 
-from .__main__ import cmdline, create, plot
+from .__main__ import cli
 
 logging.basicConfig(level=logging.INFO)
 
 __all__ = [
-    'create',
-    'plot',
-    'cmdline',
+    'cli',
 ]

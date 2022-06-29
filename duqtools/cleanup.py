@@ -8,15 +8,13 @@ from .config import cfg
 logger = logging.getLogger(__name__)
 
 
-def cleanup(force: bool = False, out: bool = False, **kwargs):
+def cleanup(out: bool = False, **kwargs):
     """Read runs.yaml and clean the current directory.
 
     Parameters
     ----------
-    force : bool
-        Overwrite config if it already exists.
-    kwargs :
-        Unused.
+    out : bool
+        Remove output IDS.
     """
 
     for run in cfg.workspace.runs:
