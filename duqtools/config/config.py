@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 import yaml
-from pydantic import DirectoryPath, validator
+from pydantic import DirectoryPath, Field, validator
 
 from duqtools._types import PathLike
 
@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class WorkDirectory(BaseModel):
-    root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
+    root: DirectoryPath = Field(
+        f'/pfs/work/{getuser()}/jetto/runs/',
+        description='The folder from which experiments have to be run,'
+        ' rjettov runs relative to this folder')
 
     @property
     def cwd(self):
@@ -63,10 +66,14 @@ class Config(BaseModel):
 
     _instance = None
 
-    plot: PlotConfig = PlotConfig()
-    submit: SubmitConfig = SubmitConfig()
-    create: CreateConfig = CreateConfig()
-    status: StatusConfig = StatusConfig()
+    plot: PlotConfig = Field(
+        PlotConfig(), description='Configuration for the plotting subcommand')
+    submit: SubmitConfig = Field(
+        SubmitConfig(), description='Configuration for the submit subcommand')
+    create: CreateConfig = Field(
+        CreateConfig(), description='Configuration for the create subcommand')
+    status: StatusConfig = Field(
+        StatusConfig(), description='Configuration for the status subcommand')
     workspace: WorkDirectory = WorkDirectory()
 
     def __new__(cls, *args, **kwargs):

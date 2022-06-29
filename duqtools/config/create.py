@@ -9,10 +9,18 @@ from .basemodel import BaseModel
 
 
 class IDSOperationSet(BaseModel):
-    ids: str = 'profiles_1d/0/t_i_average'
+    ids: str = Field(
+        'profiles_1d/0/t_i_average',
+        description='field within ids described in template dir from which'
+        ' to sample')
     operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder'] = 'multiply'
-    values: List[float] = [1.1, 1.2, 1.3]
+                      'floor_divide', 'mod', 'remainder'] = Field(
+                          'multiply',
+                          description='Operation used for sampling')
+    values: List[float] = Field(
+        [1.1, 1.2, 1.3],
+        description='values to use with operator on field to create sampling'
+        ' space')
 
     def expand(self) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
@@ -28,8 +36,11 @@ class DataLocation(BaseModel):
 
 
 class LHSSampler(BaseModel):
-    method: Literal['latin-hypercube']
-    n_samples: int = 3
+    method: Literal['latin-hypercube'] = Field(
+        'latin-hypercube',
+        description='Method to select samples, default: latin-hypercube, also'
+        ' supports: halton, sobol, cartesian-product')
+    n_samples: int = Field(3, description='Number of samples to take')
 
     def __call__(self, *args):
         from duqtools.samplers import latin_hypercube
@@ -63,9 +74,13 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = [IDSOperationSet()]
+    matrix: List[IDSOperationSet] = Field(
+        [IDSOperationSet()], description='Defines the space to sample')
     sampler: Union[LHSSampler, Halton, SobolSampler,
-                   CartesianProduct] = Field(default=CartesianProduct(),
+                   CartesianProduct] = Field(default=LHSSampler(),
                                              discriminator='method')
-    template: DirectoryPath = '/pfs/work/g2ssmee/jetto/runs/duqtools_template'
-    data: DataLocation = DataLocation()
+    template: DirectoryPath = Field(
+        '/pfs/work/g2ssmee/jetto/runs/duqtools_template',
+        description='jetto run-case to use as template for all the other runs')
+    data: DataLocation = Field(
+        DataLocation(), description='Where to store the in/output IDS data')

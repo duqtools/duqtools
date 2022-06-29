@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 
-import yaml
-
 from duqtools.config import Config
 
 from .config.basemodel import BaseModel
@@ -43,14 +41,14 @@ def init(config: str = 'config.yaml',
     logger.info('Writing default config to %s', config_filepath)
 
     if full:
-        cfg_json = cfg.json()
+        cfg_yaml = cfg.yaml(descriptions=True)
     else:
-        cfg_json = cfg.json(
-            include={
-                'workspace': True,
-                'create': {'matrix', 'sampler', 'template'},
-                'plot': {'plots'}
-            })
+        cfg_yaml = cfg.yaml(descriptions=True,
+                            include={
+                                'workspace': True,
+                                'create': {'matrix', 'sampler', 'template'},
+                                'plot': {'plots'}
+                            })
 
     with open(config_filepath, 'w') as f:
-        f.write(yaml.dump(yaml.safe_load(cfg_json)))
+        f.write(cfg_yaml)

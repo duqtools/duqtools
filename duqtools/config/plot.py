@@ -1,17 +1,19 @@
 from typing import List, Optional
 
+from pydantic import Field
+
 from .basemodel import BaseModel
 
 
 class Plot(BaseModel):
-    x: Optional[str]
+    x: Optional[str] = Field(
+        None, description='data on x-axis, default is rho-thoroidal')
     # TODO, make y axis time-variable by replacing "0" with "*" for example
-    y: str = 'profiles_1d/0/electrons/density_thermal'
+    y: str = Field('profiles_1d/0/electrons/density_thermal',
+                   description='data on y-axis')
 
-    xlabel: Optional[str]
-    ylabel: Optional[str]
-
-    add_time_slider: bool = False
+    xlabel: Optional[str] = Field(None, description='custom label for x-axis')
+    ylabel: Optional[str] = Field(None, description='custom label for y-axis')
 
     def get_xlabel(self):
         return self.xlabel if self.xlabel else self.x
