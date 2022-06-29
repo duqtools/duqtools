@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from time import sleep
 
-from tqdm import tqdm
-
 from .config import cfg
 from .jetto import read_namelist
 
@@ -128,6 +126,7 @@ class Status():
 
     def progress_status(self):
         """Monitor the directory for status changes."""
+        from tqdm import tqdm
         pbar_a = tqdm(total=len(self.dirs), position=0)
         pbar_a.set_description('Submitted jobs            ...')
         pbar_b = tqdm(total=len(self.dirs_submit), position=1)
@@ -160,6 +159,7 @@ class Status():
         return 'UNKNOWN'
 
     def detailed_status(self):
+        from tqdm import tqdm
         """detailed_status of all separate runs."""
         pbars = []
         for i, dir in enumerate(self.dirs):

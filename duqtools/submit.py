@@ -66,4 +66,4 @@ def submit(force: bool = False, **kwargs):
         ret = subprocess.run(cmd, check=True, capture_output=True)
         info('submission returned: %s', ret.stdout)
         with open(lockfile, 'wb') as f:
-            f.write(ret.stdout.split()[-1])
+            f.write(ret.stdout)
