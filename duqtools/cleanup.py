@@ -13,8 +13,8 @@ def cleanup(out: bool = False, **kwargs):
 
     Parameters
     ----------
-    kwargs :
-        Unused.
+    out : bool
+        Remove output IDS.
     """
 
     for run in cfg.workspace.runs:

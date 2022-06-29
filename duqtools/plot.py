@@ -13,13 +13,7 @@ info, debug = logger.info, logger.debug
 
 
 def plot(**kwargs):
-    """Plot subroutine to create plots from datas.
-
-    Parameters
-    ----------
-    kwargs :
-        kwargs
-    """
+    """Plot subroutine to create plots from datas."""
     info('Extracting imas data')
     # Gather all results and put them in a in-memory format
     # (they should be small enough)

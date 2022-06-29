@@ -17,8 +17,6 @@ def submit(force: bool = False, **kwargs):
     ----------
     force : bool
         force the submission even in the presence of lockfiles
-    kwargs :
-        kwargs
     """
 
     if not cfg.submit:
