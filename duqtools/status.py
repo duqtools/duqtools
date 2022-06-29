@@ -189,3 +189,12 @@ def status(progress: bool, detailed: bool, **kwargs):
     detailed : bool
         Show detailed progress for every job.
     """
+
+    tracker = Status()
+
+    if detailed:
+        tracker.detailed_status()
+    elif progress:
+        tracker.progress_status()
+    else:
+        tracker.simple_status()
