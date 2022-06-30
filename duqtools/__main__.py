@@ -9,29 +9,53 @@ logger = logging.getLogger(__name__)
 coverage.process_startup()
 
 
+def config_option(f):
+
+    def callback(ctx, param, config):
+        logger.debug('Subcommand: %s', ctx.invoked_subcommand)
+        if ctx.command.name != 'init':
+            cfg.parse_file(config)
+
+        return config
+
+    return click.option('-c',
+                        '--config',
+                        default='duqtools.yaml',
+                        help='Path to config.',
+                        callback=callback)(f)
+
+
+def debug_option(f):
+
+    def callback(ctx, param, debug):
+        if debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
+        return debug
+
+    return click.option('--debug',
+                        is_flag=True,
+                        help='Enable debug print statements.',
+                        callback=callback)(f)
+
+
+def common_options(func):
+    for wrapper in (debug_option, config_option):
+        func = wrapper(func)
+    return func
+
+
 @click.group()
-@click.option('-c',
-              '--config',
-              default='duqtools.yaml',
-              help='Path to config.')
-@click.option('--debug', is_flag=True, help='Enable debug print statements.')
-@click.pass_context
-def cli(ctx, config='duqtools.yaml', debug=False, **kwargs):
+def cli(**kwargs):
     """For more information, check out the documentation:
 
     https://duqtools.readthedocs.io
     """
-    if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    logger.debug('Params: %s', ctx.params)
-    logger.debug('Subcommand: %s', ctx.invoked_subcommand)
-
-    if ctx.invoked_subcommand != 'init':
-        cfg.parse_file(config)
+    pass
 
 
 @cli.command('init')
+@common_options
 @click.option('--full',
               is_flag=True,
               help='Create a config file with all possible config values.')
@@ -43,6 +67,7 @@ def cli_init(**kwargs):
 
 
 @cli.command('create')
+@common_options
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
@@ -53,6 +78,7 @@ def cli_create(**kwargs):
 
 
 @cli.command('submit')
+@common_options
 @click.option('--force', is_flag=True, help='Re-submit running jobs.')
 def cli_submit(**kwargs):
     """Submit the UQ runs."""
@@ -61,6 +87,7 @@ def cli_submit(**kwargs):
 
 
 @cli.command('status')
+@common_options
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 def cli_status(**kwargs):
@@ -70,6 +97,7 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
+@common_options
 def cli_plot(**kwargs):
     """Analyze the results and generate a report'."""
     from .plot import plot
@@ -77,6 +105,7 @@ def cli_plot(**kwargs):
 
 
 @cli.command('clean')
+@common_options
 @click.option('--out', is_flag=True, help='Remove output data.')
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
@@ -85,6 +114,7 @@ def cli_clean(**kwargs):
 
 
 @cli.command('dash')
+@common_options
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
     from .dash import dash
