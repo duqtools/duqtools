@@ -1,8 +1,5 @@
 import logging
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 from duqtools.ids import ImasLocation
 from duqtools.jetto import JettoSettings
 
@@ -14,6 +11,8 @@ info, debug = logger.info, logger.debug
 
 def plot(**kwargs):
     """Plot subroutine to create plots from datas."""
+    import matplotlib.pyplot as plt
+    import numpy as np
     info('Extracting imas data')
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
