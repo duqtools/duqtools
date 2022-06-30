@@ -5,10 +5,7 @@ from getpass import getuser
 from pathlib import Path
 from typing import List
 
-import yaml
 from pydantic import DirectoryPath, Field, validator
-
-from duqtools._types import PathLike
 
 from ._runs import Run, Runs
 from .basemodel import BaseModel
@@ -57,7 +54,7 @@ class WorkDirectory(BaseModel):
             raise IOError(
                 f'Cannot find {runs_yaml}, therefore cannot show the status')
 
-        return Runs.from_yaml(runs_yaml)
+        return Runs.parse_file(runs_yaml)
 
 
 class Config(BaseModel):
@@ -81,13 +78,6 @@ class Config(BaseModel):
         if not Config._instance:
             Config._instance = object.__new__(cls)
         return Config._instance
-
-    def read(self, filename: PathLike):
-        """Read config from file."""
-        with open(filename, 'r') as f:
-            datamap = yaml.safe_load(f)
-            logger.debug(datamap)
-            BaseModel.__init__(self, **datamap)
 
 
 cfg = Config()

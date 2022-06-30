@@ -4,4 +4,8 @@ mkdocs-material
 mkdocstrings[python]
 numpy
 pydantic
-pyyaml
+scipy
+typing-extensions
+tqdm
+ruamel.yaml
+pydantic-yaml @ https://github.com/v1kko/pydantic-yaml/archive/yaml_commented.zip

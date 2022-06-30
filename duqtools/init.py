@@ -35,7 +35,7 @@ def init(config: str = 'config.yaml',
 
     if config_filepath.exists() and not force:
         raise RuntimeError(
-            'Refusing to overwrite existing CONFIG, {config_filepath}, '
+            f'Refusing to overwrite existing CONFIG, {config_filepath}, '
             'use --force if you really want to')
 
     logger.info('Writing default config to %s', config_filepath)
