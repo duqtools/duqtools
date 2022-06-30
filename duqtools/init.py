@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 
-import yaml
-
 from duqtools.config import Config
 
 from .config.basemodel import BaseModel
@@ -37,20 +35,20 @@ def init(config: str = 'config.yaml',
 
     if config_filepath.exists() and not force:
         raise RuntimeError(
-            'Refusing to overwrite existing CONFIG, {config_filepath}, '
+            f'Refusing to overwrite existing CONFIG, {config_filepath}, '
             'use --force if you really want to')
 
     logger.info('Writing default config to %s', config_filepath)
 
     if full:
-        cfg_json = cfg.json()
+        cfg_yaml = cfg.yaml(descriptions=True)
     else:
-        cfg_json = cfg.json(
-            include={
-                'workspace': True,
-                'create': {'matrix', 'sampler', 'template'},
-                'plot': {'plots'}
-            })
+        cfg_yaml = cfg.yaml(descriptions=True,
+                            include={
+                                'workspace': True,
+                                'create': {'matrix', 'sampler', 'template'},
+                                'plot': {'plots'}
+                            })
 
     with open(config_filepath, 'w') as f:
-        f.write(yaml.dump(yaml.safe_load(cfg_json)))
+        f.write(cfg_yaml)

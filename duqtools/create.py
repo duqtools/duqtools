@@ -4,8 +4,6 @@ import stat
 from pathlib import Path
 from typing import Iterable
 
-import yaml
-
 from duqtools.config import WorkDirectory, cfg
 
 from .config._runs import Runs
@@ -175,4 +173,4 @@ def create(force: bool = False, **kwargs):
     runs = Runs.parse_obj(runs)
 
     with open(cfg.workspace.runs_yaml, 'w') as f:
-        yaml.dump(yaml.safe_load(runs.json()), stream=f)
+        runs.yaml(stream=f, descriptions=True)

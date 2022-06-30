@@ -1,6 +1,6 @@
 import logging
 
-import yaml
+import ruamel.yaml as yaml
 
 from .._types import PathLike
 from ._location import ImasLocation
@@ -20,8 +20,9 @@ def write_ids(filename: PathLike, data: dict):
     data : dict
         Dictionary with keys to write.
     """
+    ruamel_obj = yaml.YAML(typ='safe', pure=True)
     with open(filename, 'w') as f:
-        yaml.dump(data, f)
+        ruamel_obj.dump(data, stream=f)
     logger.debug('wrote %r', filename)
 
 

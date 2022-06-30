@@ -28,7 +28,7 @@ def cli(ctx, config='duqtools.yaml', debug=False, **kwargs):
     logger.debug('Subcommand: %s', ctx.invoked_subcommand)
 
     if ctx.invoked_subcommand != 'init':
-        cfg.read(config)
+        cfg.parse_file(config)
 
 
 @cli.command('init')

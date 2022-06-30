@@ -5,10 +5,7 @@ from getpass import getuser
 from pathlib import Path
 from typing import List
 
-import yaml
-from pydantic import DirectoryPath, validator
-
-from duqtools._types import PathLike
+from pydantic import DirectoryPath, Field, validator
 
 from ._runs import Run, Runs
 from .basemodel import BaseModel
@@ -21,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class WorkDirectory(BaseModel):
-    root: DirectoryPath = f'/pfs/work/{getuser()}/jetto/runs/'
+    root: DirectoryPath = Field(
+        f'/pfs/work/{getuser()}/jetto/runs/',
+        description='The folder from which experiments have to be run,'
+        ' rjettov runs relative to this folder')
 
     @property
     def cwd(self):
@@ -54,7 +54,7 @@ class WorkDirectory(BaseModel):
             raise IOError(
                 f'Cannot find {runs_yaml}, therefore cannot show the status')
 
-        return Runs.from_yaml(runs_yaml)
+        return Runs.parse_file(runs_yaml)
 
 
 class Config(BaseModel):
@@ -63,10 +63,14 @@ class Config(BaseModel):
 
     _instance = None
 
-    plot: PlotConfig = PlotConfig()
-    submit: SubmitConfig = SubmitConfig()
-    create: CreateConfig = CreateConfig()
-    status: StatusConfig = StatusConfig()
+    plot: PlotConfig = Field(
+        PlotConfig(), description='Configuration for the plotting subcommand')
+    submit: SubmitConfig = Field(
+        SubmitConfig(), description='Configuration for the submit subcommand')
+    create: CreateConfig = Field(
+        CreateConfig(), description='Configuration for the create subcommand')
+    status: StatusConfig = Field(
+        StatusConfig(), description='Configuration for the status subcommand')
     workspace: WorkDirectory = WorkDirectory()
 
     def __new__(cls, *args, **kwargs):
@@ -74,13 +78,6 @@ class Config(BaseModel):
         if not Config._instance:
             Config._instance = object.__new__(cls)
         return Config._instance
-
-    def read(self, filename: PathLike):
-        """Read config from file."""
-        with open(filename, 'r') as f:
-            datamap = yaml.safe_load(f)
-            logger.debug(datamap)
-            BaseModel.__init__(self, **datamap)
 
 
 cfg = Config()
