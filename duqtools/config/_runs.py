@@ -24,7 +24,7 @@ class Runs(BaseModel):
     def __iter__(self):
         yield from self.__root__
 
-    def __get_item(self, index: int):
+    def __getitem__(self, index: int):
         return self.__root__[index]
 
     @classmethod
