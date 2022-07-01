@@ -243,12 +243,12 @@ class IDSMapping(Mapping):
         if df.empty:
             raise IndexError(f'pattern: `{pattern} yielded no results.')
 
-        df.columns = df.columns.set_names(('time', 'key'))
+        df.columns = df.columns.set_names(('tstep', 'key'))
 
-        df = df.T.unstack('time').T
-        df = df.reset_index('time').reset_index(
+        df = df.T.unstack('tstep').T
+        df = df.reset_index('tstep').reset_index(
             drop=True)  # .reset_index(drop=True)
 
-        df['time'] = df['time'].apply(int)
+        df['tstep'] = df['tstep'].apply(int)
 
         return df
