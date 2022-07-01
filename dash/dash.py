@@ -1,14 +1,10 @@
-import itertools
 import os
 import sys
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
-from bokeh.layouts import column
-from bokeh.models import CustomJS, Slider
-from bokeh.palettes import Plasma as palette
-from bokeh.plotting import ColumnDataSource, figure
 
 from duqtools.config._runs import Runs
 
@@ -29,7 +25,7 @@ if not runs_yaml.exists():
 
 os.chdir(workdir)
 
-runs = Runs.from_yaml(runs_yaml)
+runs = Runs.parse_file(runs_yaml)
 
 runs_df = pd.DataFrame([run.data_out.dict() for run in runs])
 
@@ -68,71 +64,44 @@ with st.sidebar:
                             default=default_y_val,
                             format_func=ffmt)
 
-
-@st.cache
-def get_data_sources(profiles, *, x_val: str, y_val: str):
-    data_sets = []
-
-    for profile in profiles:
-        data = {}
-        for k, v in profile.find_by_index(x_val)[x_val].items():
-            data[f'x{k}'] = v
-        for k, v in profile.find_by_index(y_val)[y_val].items():
-            data[f'y{k}'] = v
-        data_sets.append(data)
-
-    return data_sets
-
-
-n_time_steps = len(profiles[0]['time'])
-
 for y_val in y_vals:
     st.header(f'{ffmt(x_val)} vs. {ffmt(y_val)}')
 
-    data_sets = get_data_sources(profiles, x_val=x_val, y_val=y_val)
-    sources = tuple(ColumnDataSource(data=data) for data in data_sets)
+    key = f'profiles_1d/(\\d+)/({ffmt(x_val)}|{ffmt(y_val)})'
 
-    plot = figure(title=f'{ffmt(x_val)} vs {ffmt(y_val)}')
+    d = {}
 
-    time_slider = Slider(start=0,
-                         end=n_time_steps - 1,
-                         value=0,
-                         step=1,
-                         title='Time step')
+    for run, profile in zip(runs, profiles):
+        ret = profile.find_by_group(key)
+        df = pd.DataFrame(ret)
+        df.columns = df.columns.set_names(('time_step', 'key'))
+        df = df.T.unstack('time_step').T
+        df = df.reset_index('time_step')  # .reset_index(drop=True)
+        d[run.dirname] = df
 
-    colors = itertools.cycle(palette.get(len(sources), palette[11]))
+    df = pd.concat(d,
+                   names=('run',
+                          'index')).reset_index('run').reset_index(drop=True)
 
-    for i, source in enumerate(sources):
-        color = next(colors)
+    df['run'] = df['run'].apply(str)
+    df['time_step'] = df['time_step'].apply(int)
 
-        line = plot.line(x='x0',
-                         y='y0',
-                         source=source,
-                         color=color,
-                         line_width=3,
-                         line_alpha=0.6,
-                         legend_label=str(runs[i].dirname))
+    x = ffmt(x_val)
+    y = ffmt(y_val)
 
-        callback = CustomJS(args=dict(source=source,
-                                      time_step=time_slider,
-                                      line=line),
-                            code="""
+    source = df
 
-            const T = time_step.value;
-            var x_column = 'x' + T;
-            var y_column = 'y' + T;
+    slider = alt.binding_range(min=0, max=source['time_step'].max(), step=1)
+    select_step = alt.selection_single(name='time_step',
+                                       fields=['time_step'],
+                                       bind=slider,
+                                       init={'time_step': 0})
 
-            line.glyph.x.field = x_column;
-            line.glyph.y.field = y_column;
+    chart = alt.Chart(source).mark_line().encode(
+        x=f'{x}:Q',
+        y=f'{y}:Q',
+        color=alt.Color('run:N'),
+        tooltip='run',
+    ).add_selection(select_step).transform_filter(select_step).interactive()
 
-            source.change.emit();
-        """)
-
-        time_slider.js_on_change('value', callback)
-
-    layout = column(
-        plot,
-        column(time_slider),
-    )
-
-    st.bokeh_chart(layout)
+    st.altair_chart(chart, use_container_width=True)
