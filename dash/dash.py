@@ -28,6 +28,7 @@ os.chdir(workdir)
 runs = Runs.parse_file(runs_yaml)
 
 runs_df = pd.DataFrame([run.data_out.dict() for run in runs])
+runs_df.index = [str(run.dirname) for run in runs]
 
 with st.expander('IDS data'):
     st.dataframe(runs_df)
@@ -39,18 +40,14 @@ def ffmt(s):
     return s.replace(prefix + '/', '')
 
 
-# @st.cache
-def load_ids_data(runs):
-    return tuple(run.data_out.get_ids_tree(exclude_empty=True) for run in runs)
+def get_options(a_run):
+    a_profile = runs[0].data_out.get_ids_tree(exclude_empty=True)
+    return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
-profiles = load_ids_data(runs)
+options = get_options(a_run=runs[0])
 
 with st.sidebar:
-
-    options = sorted(profiles[0].find_by_index(f'{prefix}/.*').keys())
-
-    time = profiles[0]['time']
 
     default_x_val = options.index(f'{prefix}/grid/rho_tor')
     default_y_val = f'{prefix}/t_i_average'
@@ -64,38 +61,37 @@ with st.sidebar:
                             default=default_y_val,
                             format_func=ffmt)
 
+
+@st.cache
+def get_run_data(run, *, x, y):
+    """Get data for single run."""
+    profile = run.data_out.get_ids_tree(exclude_empty=True)
+    return profile.query((x, y))
+
+
+@st.cache
+def get_data(runs, **kwargs):
+    """Get and concatanate data for all runs."""
+    runs_data = {str(run.dirname): get_run_data(run, **kwargs) for run in runs}
+
+    return pd.concat(runs_data,
+                     names=('run',
+                            'index')).reset_index('run').reset_index(drop=True)
+
+
 for y_val in y_vals:
-    st.header(f'{ffmt(x_val)} vs. {ffmt(y_val)}')
-
-    key = f'profiles_1d/(\\d+)/({ffmt(x_val)}|{ffmt(y_val)})'
-
-    d = {}
-
-    for run, profile in zip(runs, profiles):
-        ret = profile.find_by_group(key)
-        df = pd.DataFrame(ret)
-        df.columns = df.columns.set_names(('time_step', 'key'))
-        df = df.T.unstack('time_step').T
-        df = df.reset_index('time_step')  # .reset_index(drop=True)
-        d[run.dirname] = df
-
-    df = pd.concat(d,
-                   names=('run',
-                          'index')).reset_index('run').reset_index(drop=True)
-
-    df['run'] = df['run'].apply(str)
-    df['time_step'] = df['time_step'].apply(int)
-
     x = ffmt(x_val)
     y = ffmt(y_val)
 
-    source = df
+    st.header(f'{x} vs. {y}')
 
-    slider = alt.binding_range(min=0, max=source['time_step'].max(), step=1)
-    select_step = alt.selection_single(name='time_step',
-                                       fields=['time_step'],
+    source = get_data(runs, x=x, y=y)
+
+    slider = alt.binding_range(min=0, max=source['time'].max(), step=1)
+    select_step = alt.selection_single(name='time',
+                                       fields=['time'],
                                        bind=slider,
-                                       init={'time_step': 0})
+                                       init={'time': 0})
 
     chart = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',

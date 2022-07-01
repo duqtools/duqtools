@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any, Dict, Union
 
 import numpy as np
+import pandas as pd
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -210,3 +211,44 @@ class IDSMapping(Mapping):
                 new_dict[new_key][idx] = self.flat_fields[key]
 
         return new_dict
+
+    def query(self,
+              variables: tuple,
+              *,
+              prefix: str = 'profiles_1d',
+              time: str = r'\d+') -> pd.DataFrame:
+        """Query mapping for variables, indexed by time.
+
+        Search string:
+        `{prefix}/{time}/{variable}`
+
+        Parameters
+        ----------
+        variables : tuple
+            Keys to extract, i.e. `zeff`, `t_i_average`
+        prefix : str, optional
+            First part of the data path
+        time : str, optional
+            Regex substring to match time steps.
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Contains a column for the time and each of the variables.
+        """
+        keys = '|'.join(variables)
+        pattern = f'{prefix}/({time})/({keys})'
+        df = pd.DataFrame(self.find_by_group(pattern))
+
+        if df.empty:
+            raise IndexError(f'pattern: `{pattern} yielded no results.')
+
+        df.columns = df.columns.set_names(('time', 'key'))
+
+        df = df.T.unstack('time').T
+        df = df.reset_index('time').reset_index(
+            drop=True)  # .reset_index(drop=True)
+
+        df['time'] = df['time'].apply(int)
+
+        return df
