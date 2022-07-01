@@ -124,13 +124,20 @@ for y_val in y_vals:
         source = put_on_common_basis(source)
 
         line = alt.Chart(source).mark_line().encode(
-            x=f'{x}:Q', y=f'mean({y}):Q',
-            color=alt.Color('tstep:N')).add_selection(
-                select_step).transform_filter(select_step).interactive()
+            x=f'{x}:Q',
+            y=f'mean({y}):Q',
+            color=alt.Color('tstep:N'),
+        ).add_selection(select_step).transform_filter(
+            select_step).interactive()
 
-        band = alt.Chart(source).mark_errorband(extent='ci').encode(
-            x=f'{x}:Q', y=f'{y}:Q', color=alt.Color('tstep:N')).add_selection(
-                select_step).transform_filter(select_step).interactive()
+        # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
+        band = alt.Chart(source).mark_errorband(
+            extent='ci', interpolate='linear').encode(
+                x=f'{x}:Q',
+                y=f'{y}:Q',
+                color=alt.Color('tstep:N'),
+            ).add_selection(select_step).transform_filter(
+                select_step).interactive()
 
         chart = line + band
 
