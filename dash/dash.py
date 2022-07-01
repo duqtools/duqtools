@@ -91,8 +91,8 @@ def get_data(runs, **kwargs):
 @st.experimental_memo
 def put_on_common_basis(source):
     n = sum((source['run'] == 'run_0000') & (source['tstep'] == 0))
-    mn = source['grid/rho_tor'].min()
-    mx = source['grid/rho_tor'].max()
+    mn = source[x].min()
+    mx = source[x].max()
     common = np.linspace(mn, mx, n)
 
     def f(gb):
