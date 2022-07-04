@@ -1,14 +1,12 @@
-import itertools
 import os
 import sys
 from pathlib import Path
 
+import altair as alt
+import numpy as np
 import pandas as pd
 import streamlit as st
-from bokeh.layouts import column
-from bokeh.models import CustomJS, Slider
-from bokeh.palettes import Plasma as palette
-from bokeh.plotting import ColumnDataSource, figure
+from scipy.interpolate import interp1d
 
 from duqtools.config._runs import Runs
 
@@ -29,9 +27,10 @@ if not runs_yaml.exists():
 
 os.chdir(workdir)
 
-runs = Runs.from_yaml(runs_yaml)
+runs = Runs.parse_file(runs_yaml)
 
 runs_df = pd.DataFrame([run.data_out.dict() for run in runs])
+runs_df.index = [str(run.dirname) for run in runs]
 
 with st.expander('IDS data'):
     st.dataframe(runs_df)
@@ -43,18 +42,14 @@ def ffmt(s):
     return s.replace(prefix + '/', '')
 
 
-# @st.cache
-def load_ids_data(runs):
-    return tuple(run.data_out.get_ids_tree(exclude_empty=True) for run in runs)
+def get_options(a_run):
+    a_profile = runs[0].data_out.get_ids_tree(exclude_empty=True)
+    return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
-profiles = load_ids_data(runs)
+options = get_options(a_run=runs[0])
 
 with st.sidebar:
-
-    options = sorted(profiles[0].find_by_index(f'{prefix}/.*').keys())
-
-    time = profiles[0]['time']
 
     default_x_val = options.index(f'{prefix}/grid/rho_tor')
     default_y_val = f'{prefix}/t_i_average'
@@ -63,76 +58,99 @@ with st.sidebar:
                          options,
                          index=default_x_val,
                          format_func=ffmt)
+
     y_vals = st.multiselect('Select IDS (y)',
                             options,
                             default=default_y_val,
                             format_func=ffmt)
 
+    show_error_bar = st.checkbox(
+        'Show errorbar',
+        help=(
+            'Show 95\\% confidence interval band around mean y-value. All '
+            'y-values are interpolated to put them on a common basis for x.'))
+
 
 @st.cache
-def get_data_sources(profiles, *, x_val: str, y_val: str):
-    data_sets = []
-
-    for profile in profiles:
-        data = {}
-        for k, v in profile.find_by_index(x_val)[x_val].items():
-            data[f'x{k}'] = v
-        for k, v in profile.find_by_index(y_val)[y_val].items():
-            data[f'y{k}'] = v
-        data_sets.append(data)
-
-    return data_sets
+def get_run_data(run, *, x, y):
+    """Get data for single run."""
+    profile = run.data_out.get_ids_tree(exclude_empty=True)
+    return profile.to_dataframe(x, y)
 
 
-n_time_steps = len(profiles[0]['time'])
+@st.cache
+def get_data(runs, **kwargs):
+    """Get and concatanate data for all runs."""
+    runs_data = {str(run.dirname): get_run_data(run, **kwargs) for run in runs}
+
+    return pd.concat(runs_data,
+                     names=('run',
+                            'index')).reset_index('run').reset_index(drop=True)
+
+
+@st.experimental_memo
+def put_on_common_basis(source):
+    n = sum((source['run'] == 'run_0000') & (source['tstep'] == 0))
+    mn = source[x].min()
+    mx = source[x].max()
+    common = np.linspace(mn, mx, n)
+
+    def refit(gb):
+        f = interp1d(gb[x],
+                     gb[y],
+                     fill_value='extrapolate',
+                     bounds_error=False)
+        new_x = common
+        new_y = f(common)
+        return pd.DataFrame((new_x, new_y), index=[x, y]).T
+
+    grouped = source.groupby(['run', 'tstep'])
+    return grouped.apply(refit).reset_index(
+        ('run', 'tstep')).reset_index(drop=True)
+
 
 for y_val in y_vals:
-    st.header(f'{ffmt(x_val)} vs. {ffmt(y_val)}')
+    x = ffmt(x_val)
+    y = ffmt(y_val)
 
-    data_sets = get_data_sources(profiles, x_val=x_val, y_val=y_val)
-    sources = tuple(ColumnDataSource(data=data) for data in data_sets)
+    st.header(f'{x} vs. {y}')
 
-    plot = figure(title=f'{ffmt(x_val)} vs {ffmt(y_val)}')
+    source = get_data(runs, x=x, y=y)
 
-    time_slider = Slider(start=0,
-                         end=n_time_steps - 1,
-                         value=0,
-                         step=1,
-                         title='Time step')
+    slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
+    select_step = alt.selection_single(name='tstep',
+                                       fields=['tstep'],
+                                       bind=slider,
+                                       init={'tstep': 0})
 
-    colors = itertools.cycle(palette.get(len(sources), palette[11]))
+    if show_error_bar:
+        source = put_on_common_basis(source)
 
-    for i, source in enumerate(sources):
-        color = next(colors)
+        line = alt.Chart(source).mark_line().encode(
+            x=f'{x}:Q',
+            y=f'mean({y}):Q',
+            color=alt.Color('tstep:N'),
+        ).add_selection(select_step).transform_filter(
+            select_step).interactive()
 
-        line = plot.line(x='x0',
-                         y='y0',
-                         source=source,
-                         color=color,
-                         line_width=3,
-                         line_alpha=0.6,
-                         legend_label=str(runs[i].dirname))
+        # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
+        band = alt.Chart(source).mark_errorband(
+            extent='ci', interpolate='linear').encode(
+                x=f'{x}:Q',
+                y=f'{y}:Q',
+                color=alt.Color('tstep:N'),
+            ).add_selection(select_step).transform_filter(
+                select_step).interactive()
 
-        callback = CustomJS(args=dict(source=source,
-                                      time_step=time_slider,
-                                      line=line),
-                            code="""
+        chart = line + band
 
-            const T = time_step.value;
-            var x_column = 'x' + T;
-            var y_column = 'y' + T;
+    else:
+        chart = alt.Chart(source).mark_line().encode(
+            x=f'{x}:Q',
+            y=f'{y}:Q',
+            color=alt.Color('run:N'),
+            tooltip='run',
+        ).add_selection(select_step).transform_filter(
+            select_step).interactive()
 
-            line.glyph.x.field = x_column;
-            line.glyph.y.field = y_column;
-
-            source.change.emit();
-        """)
-
-        time_slider.js_on_change('value', callback)
-
-    layout = column(
-        plot,
-        column(time_slider),
-    )
-
-    st.bokeh_chart(layout)
+    st.altair_chart(chart, use_container_width=True)
