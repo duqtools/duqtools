@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import Any, Dict, Union
+from typing import Any, Dict, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -212,43 +212,45 @@ class IDSMapping(Mapping):
 
         return new_dict
 
-    def query(self,
-              variables: tuple,
-              *,
-              prefix: str = 'profiles_1d',
-              time: str = r'\d+') -> pd.DataFrame:
-        """Query mapping for variables, indexed by time.
+    def to_dataframe(self,
+                     *variables: str,
+                     prefix: str = 'profiles_1d',
+                     time_steps: Sequence[int] = None) -> pd.DataFrame:
+        """Return long format dataframe for given variables.
 
         Search string:
-        `{prefix}/{time}/{variable}`
+        `{prefix}/{time_step}/{variable}`
 
         Parameters
         ----------
-        variables : tuple
-            Keys to extract, i.e. `zeff`, `t_i_average`
+        *variables : str
+            Keys to extract, i.e. `zeff`, `grid/rho_tor`
         prefix : str, optional
             First part of the data path
-        time : str, optional
-            Regex substring to match time steps.
+        time : Sequence[int], optional
+            List or array of integer time steps to extract.
+            Defaults to all time steps.
 
         Returns
         -------
         df : pd.DataFrame
             Contains a column for the time and each of the variables.
         """
-        keys = '|'.join(variables)
-        pattern = f'{prefix}/({time})/({keys})'
-        df = pd.DataFrame(self.find_by_group(pattern))
+        if not time_steps:
+            n_time_steps = len(self['time'])
+            time_steps = range(n_time_steps)
 
-        if df.empty:
-            raise IndexError(f'pattern: `{pattern} yielded no results.')
+        d = {}
 
-        df.columns = df.columns.set_names(('tstep', 'key'))
+        for i, t in enumerate(time_steps):
+            for variable in variables:
+                flat_variable = f'{prefix}/{t}/{variable}'
+                d[i, variable] = self.flat_fields[flat_variable]
 
-        df = df.T.unstack('tstep').T
-        df = df.reset_index('tstep').reset_index(
-            drop=True)  # .reset_index(drop=True)
+        df = pd.DataFrame(d)
+        df.columns = df.columns.set_names(('tstep', 'variable'))
 
-        df['tstep'] = df['tstep'].apply(int)
+        df = df.T.unstack('tstep').T.reset_index('tstep').reset_index(
+            drop=True)
 
         return df
