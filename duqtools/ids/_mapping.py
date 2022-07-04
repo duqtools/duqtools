@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import Any, Dict, Sequence, Union
+from typing import Any, Dict, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -234,23 +234,62 @@ class IDSMapping(Mapping):
         Returns
         -------
         df : pd.DataFrame
-            Contains a column for the time and each of the variables.
+            Contains a column for the time step and each of the variables.
         """
-        if not time_steps:
-            n_time_steps = len(self['time'])
-            time_steps = range(n_time_steps)
+        columns, arr = self.to_numpy(*variables,
+                                     prefix=prefix,
+                                     time_steps=time_steps)
 
-        d = {}
-
-        for i, t in enumerate(time_steps):
-            for variable in variables:
-                flat_variable = f'{prefix}/{t}/{variable}'
-                d[i, variable] = self.flat_fields[flat_variable]
-
-        df = pd.DataFrame(d)
-        df.columns = df.columns.set_names(('tstep', 'variable'))
-
-        df = df.T.unstack('tstep').T.reset_index('tstep').reset_index(
-            drop=True)
+        df = pd.DataFrame(arr, columns=['tstep'] + list(variables))
 
         return df
+
+    def to_numpy(
+        self,
+        *variables: str,
+        prefix: str = 'profiles_1d',
+        time_steps: Sequence[int] = None
+    ) -> Tuple[Tuple[str, ...], np.ndarray]:
+        """Return numpy array containing data for given variables.
+
+        Search string:
+        `{prefix}/{time_step}/{variable}`
+
+        Parameters
+        ----------
+        *variables : str
+            Keys to extract, i.e. `zeff`, `grid/rho_tor`
+        prefix : str, optional
+            First part of the data path
+        time_steps : Sequence[int], optional
+            List or array of integer time steps to extract.
+            Defaults to all time steps.
+
+        Returns
+        -------
+        columns, array : Tuple[Tuple[str], np.ndarray]
+            Numpy array with a column for the time step and each of the
+            variables.
+        """
+        n_time_steps = len(self['time'])
+        points_per_var = len(self.flat_fields[f'{prefix}/0/{variables[0]}'])
+
+        if not time_steps:
+            time_steps = range(n_time_steps)
+
+        columns = ('tstep', *variables)
+        n_vars = len(columns)
+
+        arr = np.empty((n_time_steps * points_per_var, n_vars))
+
+        for t in time_steps:
+            for j, variable in enumerate(variables):
+                flat_variable = f'{prefix}/{t}/{variable}'
+
+                i_begin = t * points_per_var
+                i_end = i_begin + points_per_var
+
+                arr[i_begin:i_end, j + 1] = self.flat_fields[flat_variable]
+                arr[i_begin:i_end, 0] = t
+
+        return columns, arr

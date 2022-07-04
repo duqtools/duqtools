@@ -75,7 +75,7 @@ with st.sidebar:
 def get_run_data(run, *, x, y):
     """Get data for single run."""
     profile = run.data_out.get_ids_tree(exclude_empty=True)
-    return profile.query((x, y))
+    return profile.to_dataframe(x, y)
 
 
 @st.cache
