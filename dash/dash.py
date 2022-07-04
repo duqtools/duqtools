@@ -95,14 +95,17 @@ def put_on_common_basis(source):
     mx = source[x].max()
     common = np.linspace(mn, mx, n)
 
-    def f(gb):
-        f = interp1d(gb[x], gb[y], fill_value=np.nan, bounds_error=False)
+    def refit(gb):
+        f = interp1d(gb[x],
+                     gb[y],
+                     fill_value='extrapolate',
+                     bounds_error=False)
         new_x = common
         new_y = f(common)
         return pd.DataFrame((new_x, new_y), index=[x, y]).T
 
     grouped = source.groupby(['run', 'tstep'])
-    return grouped.apply(f).reset_index(
+    return grouped.apply(refit).reset_index(
         ('run', 'tstep')).reset_index(drop=True)
 
 
