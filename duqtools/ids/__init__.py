@@ -5,7 +5,7 @@ import ruamel.yaml as yaml
 from .._types import PathLike
 from ._location import ImasLocation
 from ._mapping import IDSMapping
-from ._operation import IDSOperation
+from ._operation import IDSOperation, IDSSampler, IDSSamplerSet
 
 logger = logging.getLogger(__name__)
 
@@ -30,4 +30,6 @@ __all__ = [
     'ImasLocation',
     'IDSMapping',
     'IDSOperation',
+    'IDSSamplerSet',
+    'IDSSampler',
 ]

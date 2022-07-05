@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from typing import List, Tuple, Union
 
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids import IDSOperation
+from duqtools.ids import IDSOperation, IDSSamplerSet
 
 from .basemodel import BaseModel
 
@@ -22,7 +24,9 @@ class IDSOperationSet(BaseModel):
         description='values to use with operator on field to create sampling'
         ' space')
 
-    def expand(self) -> Tuple[IDSOperation, ...]:
+    # factor: Optional[Union[int, str]] = None
+
+    def expand(self, *args, **kwargs) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
             IDSOperation(ids=self.ids, operator=self.operator, value=value)
@@ -74,7 +78,7 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = Field(
+    matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
         [IDSOperationSet()], description='Defines the space to sample')
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
