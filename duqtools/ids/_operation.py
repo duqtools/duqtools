@@ -92,14 +92,7 @@ class IDSSampler(BaseModel):
         profile[:] = new_profile
 
 
-class IDSSamplerSet(BaseModel):
-    ids: str
-
-    # these follow the same api as normal: gumbel, laplace, logistic, uniform
-    sampling: Literal['normal'] = 'normal'
-    bounds: Literal['symmetric', 'asymmetric'] = 'symmetric'
-    upper = '_error_upper'
-    lower: Optional[str] = None
+class IDSSamplerSet(IDSSampler):
     n_samples: int = 5
 
     def expand(self):
