@@ -114,6 +114,7 @@ def create(force: bool = False, **kwargs):
 
     source = ImasLocation.from_jset_input(jset)
     assert source.path().exists()
+    logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)

@@ -33,7 +33,6 @@ class IDSSamplerMixin(BaseModel):
 
 
 class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
-    # seed: int = Field(description='Random seed for the sampler')
 
     def apply(self, ids_mapping: IDSMapping) -> None:
         """Apply operation to IDS. Data are modified in-place.
@@ -63,7 +62,8 @@ class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
         elif self.bounds == 'asymmetric':
             raise NotImplementedError
 
-        new_profile = np.random.normal(loc=profile, scale=mean_sigma)
+        rng = np.random.default_rng()
+        new_profile = rng.normal(loc=profile, scale=mean_sigma)
 
         # update in-place
         profile[:] = new_profile
