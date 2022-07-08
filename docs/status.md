@@ -6,6 +6,12 @@ To run the command:
 
 `duqtools status`
 
+::: mkdocs-click
+    :module: duqtools.cli
+    :command: cli_status
+    :style: table
+    :depth: 2
+
 ## The `status` config
 
 The options of the status subcommand are stored under the `status` key in the config. These only need to be changed if the modeling softare changes.

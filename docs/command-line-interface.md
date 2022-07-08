@@ -1,6 +1,6 @@
 # Command-line interface
 
-This page documents the command line interface for `duqtools`
+This page documents the command line interface for `duqtools`.
 
 ::: mkdocs-click
     :module: duqtools.cli

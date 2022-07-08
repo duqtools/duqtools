@@ -13,3 +13,9 @@ or, when installing the development version:
 To run the command:
 
 `duqtools dash`
+
+::: mkdocs-click
+    :module: duqtools.cli
+    :command: cli_dash
+    :style: table
+    :depth: 2

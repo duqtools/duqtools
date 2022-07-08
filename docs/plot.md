@@ -7,6 +7,13 @@ To run the command:
 `duqtools plot`
 
 
+::: mkdocs-click
+    :module: duqtools.cli
+    :command: cli_plot
+    :style: table
+    :depth: 2
+
+
 ## The `plot` config
 
 The options of the plot subcommand are stored under the `plot` key in the config. The plots will be stored as png files in the current directory.

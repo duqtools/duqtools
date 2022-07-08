@@ -6,6 +6,12 @@ To run the command:
 
 `duqtools create`
 
+::: mkdocs-click
+    :module: duqtools.cli
+    :command: cli_create
+    :style: table
+    :depth: 2
+
 ## The `create` config
 
 The options of the create subcommand are stored in the `create` key in the config. For example:
