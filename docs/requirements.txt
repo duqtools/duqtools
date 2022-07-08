@@ -1,6 +1,7 @@
 f90nml
 mkdocs
 mkdocs-material
+mkdocs-click
 mkdocstrings[python]
 numpy
 pydantic
