@@ -23,10 +23,15 @@ status: # Configuration for the status subcommand
 ```
 
 `status_file`: Name of the status file, for jetto: `jetto.status`
+
 `msg_completed`: Parse `status_file` for this message to check whether the process has completed.
+
 `msg_failed`: Parse `status_file` for this message to check whether the process has failed.
+
 `msg_running`: Parse `status_file` for this message to check whether the process is still running.
+
 `out_file`: Name of the modelling output file, will be used to check if the software is running
+
 `in_file`: Name of the modelling output file, will be used to check if the software has started
 
 Both `out_file` and `in_file` may be parsed to track the progress of the individual runs.

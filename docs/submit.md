@@ -21,6 +21,7 @@ submit:
 ```
 
 `submit_script_name`: Name of the submission script
+
 `submit_command`: This option specifies the submission command.
 
 In addition, `submit` uses `status.status_file` to prevent re-submitting a running job.

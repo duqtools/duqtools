@@ -28,8 +28,11 @@ plots:
 
 
 `x`: Path of the data to plot on the x-axis, default is rho-toroidal.
+
 `y`: Path of the data to plot on the y-axis
+
 `xlabel`: # custom label for x-axis
+
 `ylabel`: # custom label for y-axis
 
 !!! note

@@ -99,7 +99,7 @@ def cli_status(**kwargs):
 @cli.command('plot')
 @common_options
 def cli_plot(**kwargs):
-    """Analyze the results and generate a report'."""
+    """Analyze the results and generate a report."""
     from .plot import plot
     plot(**kwargs)
 
