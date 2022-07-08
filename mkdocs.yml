@@ -21,6 +21,8 @@ extra_css:
 
 markdown_extensions:
   - admonition
+  - mkdocs-click
+  - attr_list
 
 plugins:
 - search
