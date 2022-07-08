@@ -74,7 +74,9 @@ values: [1.1, 1.2, 1.3]
 
 will generate another 3 entries, `t_i_average *= 1.1`, `t_i_average *= 1.2`, and `t_i_average *= 1.3`.
 
-!!! note The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
+!!! note
+
+    The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
 
 #### Error bound sampling
 

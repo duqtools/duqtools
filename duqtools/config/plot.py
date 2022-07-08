@@ -7,13 +7,14 @@ from .basemodel import BaseModel
 
 class Plot(BaseModel):
     x: Optional[str] = Field(
-        None, description='data on x-axis, default is rho-thoroidal')
+        'profiles_1d/0/grid/rho_tor',
+        description='Data on x-axis, default is the toroidal flux coordiante')
     # TODO, make y axis time-variable by replacing "0" with "*" for example
     y: str = Field('profiles_1d/0/electrons/density_thermal',
-                   description='data on y-axis')
+                   description='Data on y-axis')
 
-    xlabel: Optional[str] = Field(None, description='custom label for x-axis')
-    ylabel: Optional[str] = Field(None, description='custom label for y-axis')
+    xlabel: Optional[str] = Field(None, description='Custom label for x-axis')
+    ylabel: Optional[str] = Field(None, description='Custom label for y-axis')
 
     def get_xlabel(self):
         return self.xlabel if self.xlabel else self.x
