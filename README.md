@@ -1,4 +1,6 @@
+[![Documentation Status](https://readthedocs.org/projects/duqtools/badge/?version=latest)](https://duqtools.readthedocs.io/en/latest/?badge=latest)
 [![Tests](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml/badge.svg)](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml)
+
 
 # Duqtools
 
