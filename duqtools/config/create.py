@@ -56,7 +56,8 @@ class CartesianProduct(BaseModel):
 
 class CreateConfig(BaseModel):
     matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
-        [IDSOperationSet()], description='Defines the space to sample')
+        [IDSOperationSet(), IDSSamplerSet()],
+        description='Defines the space to sample')
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
                                              discriminator='method')

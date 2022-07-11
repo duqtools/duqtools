@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import numpy as np
 from pydantic import Field
@@ -21,15 +21,14 @@ class IDSSamplerMixin(BaseModel):
     # these follow the same api as normal: gumbel, laplace, logistic, uniform
     sampling: Literal['normal'] = Field('normal',
                                         description='Sampling method.')
-    bounds: Literal['symmetric', 'asymmetric'] = Field(
-        'symmetric', description='Use symmetric or asymmetric sampling.')
-    upper: str = Field('_error_upper',
-                       description='Suffix appended to the ids '
-                       'to access upper error values')
-    lower: Optional[str] = Field(
-        None,
-        description='Suffix appended to the ids '
-        'to access lower error values. Defaults to `upper` if not defined.')
+    bounds: Literal['symmetric', 'asymmetric', 'auto'] = Field(
+        'auto',
+        description='Specify `symmetric` or `asymmetric` sampling. Use `auto`'
+        ' to choose `asymmetric` if the lower bounds are defined,'
+        ' else `symmetric`.')
+
+    _upper_suffix: str = '_error_upper'
+    _lower_suffix: str = '_error_upper'
 
 
 class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
@@ -43,27 +42,41 @@ class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
             Core profiles IDSMapping, data to apply operation to.
             Must contain the IDS path.
         """
+        upper_key = self.ids + self._upper_suffix
+        lower_key = self.ids + self._lower_suffix
+
         logger.info('Apply %s', self)
 
         profile = ids_mapping.flat_fields[self.ids]
 
-        upper = ids_mapping.flat_fields[self.ids + self.upper]
+        upper = ids_mapping.flat_fields[upper_key]
         sigma_upper = abs(upper - profile)
 
-        if self.lower:
-            lower = ids_mapping.flat_fields[self.ids + self.lower]
-            sigma_lower = abs(profile - lower)
+        has_lower = lower_key in ids_mapping.flat_fields
+
+        if self.bounds == 'auto':
+            bounds = 'asymmetric' if has_lower else 'symmetric'
         else:
-            sigma_lower = sigma_upper
+            bounds = self.bounds
 
         # this is only ever necessary if upper/lower are different
-        if self.bounds == 'symmetric':
-            mean_sigma = (sigma_upper + sigma_lower) / 2
-        elif self.bounds == 'asymmetric':
-            raise NotImplementedError
+        if bounds == 'symmetric':
 
-        rng = np.random.default_rng()
-        new_profile = rng.normal(loc=profile, scale=mean_sigma)
+            if has_lower:
+                lower = ids_mapping.flat_fields[lower_key]
+                sigma_lower = abs(profile - lower)
+                mean_sigma = (sigma_upper + sigma_lower) / 2
+            else:
+                mean_sigma = sigma_upper
+
+            rng = np.random.default_rng()
+            new_profile = rng.normal(loc=profile, scale=mean_sigma)
+
+        elif bounds == 'asymmetric':
+            raise NotImplementedError
+        else:
+            raise ValueError(
+                f'Unknown value for argument: bounds={self.bounds}')
 
         # update in-place
         profile[:] = new_profile
@@ -74,8 +87,6 @@ class IDSSamplerSet(IDSPathMixin, IDSSamplerMixin, BaseModel):
 
     def expand(self):
         return tuple(
-            IDSSampler(ids=self.ids,
-                       sampling=self.sampling,
-                       bounds=self.bounds,
-                       upper=self.upper,
-                       lower=self.lower) for _ in range(self.n_samples))
+            IDSSampler(
+                ids=self.ids, sampling=self.sampling, bounds=self.bounds)
+            for _ in range(self.n_samples))
