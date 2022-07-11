@@ -39,7 +39,7 @@ def submit(force: bool = False, **kwargs):
                  submission_script)
             continue
 
-        status_file = run_dir / cfg.submit.status_file
+        status_file = run_dir / cfg.status.status_file
         if status_file.exists() and not force:
             if not status_file.is_file():
                 info('Status file %s is not a file', status_file)

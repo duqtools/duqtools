@@ -1,3 +1,5 @@
+from pydantic import Field
+
 from .basemodel import BaseModel
 
 
@@ -7,8 +9,6 @@ class SubmitConfig(BaseModel):
     Config class for submitting jobs
     """
 
-    submit_script_name: str = '.llcmd'
-    status_file: str = 'jetto.status'
-    out_file: str = 'jetto.out'
-    in_file: str = 'jetto.in'
-    submit_command: str = 'sbatch'
+    submit_script_name: str = Field(
+        '.llcmd', description='Name of the submission script.')
+    submit_command: str = Field('sbatch', description='Submission command.')

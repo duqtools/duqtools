@@ -14,7 +14,7 @@ def has_submit_script(dir: Path) -> bool:
 
 
 def has_status(dir: Path) -> bool:
-    return (dir / cfg.submit.status_file).exists()
+    return (dir / cfg.status.status_file).exists()
 
 
 def is_submitted(dir: Path) -> bool:
@@ -22,7 +22,7 @@ def is_submitted(dir: Path) -> bool:
 
 
 def status_file_contains(dir: Path, msg) -> bool:
-    sf = (dir / cfg.submit.status_file)
+    sf = (dir / cfg.status.status_file)
     with open(sf, 'r') as f:
         content = f.read()
         debug('Checking if content of %s file: %s contains %s', sf, content,
@@ -43,8 +43,8 @@ def is_running(dir: Path) -> bool:
 
 
 def completion_percentage(dir: Path) -> int:
-    of = (dir / cfg.submit.out_file)
-    infile = (dir / cfg.submit.in_file)
+    of = (dir / cfg.status.out_file)
+    infile = (dir / cfg.status.in_file)
     if not of.exists():
         debug('%s does not exists, but the job is running', of)
         return 0
