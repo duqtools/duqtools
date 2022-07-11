@@ -19,8 +19,7 @@ To run the command:
 The options of the submit subcommand are stored under the `submit` key in the config. For example:
 
 
-```yaml
-# duqtools.yaml
+```yaml title="duqtools.yaml"
 submit:
   submit_script_name: .llcmd
   submit_command:
