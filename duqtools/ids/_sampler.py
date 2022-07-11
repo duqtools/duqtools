@@ -22,7 +22,7 @@ class IDSSamplerMixin(BaseModel):
     sampling: Literal['normal'] = Field('normal',
                                         description='Sampling method.')
     bounds: Literal['symmetric', 'asymmetric', 'auto'] = Field(
-        'auto',
+        'symmetric',
         description='Specify `symmetric` or `asymmetric` sampling. Use `auto`'
         ' to choose `asymmetric` if the lower bounds are defined,'
         ' else `symmetric`.')
