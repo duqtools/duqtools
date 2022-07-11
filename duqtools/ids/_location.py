@@ -6,16 +6,9 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-try:
-    import imas
-    from imas import imasdef
-except ImportError:
-    from unittest.mock import MagicMock as Mock
-    imas = Mock()
-    imasdef = Mock()
-
 from duqtools.config.basemodel import BaseModel
 
+from ._imas import imas, imasdef
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:

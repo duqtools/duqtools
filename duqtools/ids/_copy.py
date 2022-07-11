@@ -3,15 +3,10 @@ import xml.sax
 import xml.sax.handler
 from getpass import getuser
 
-try:
-    import imas
-except ImportError:
-    from unittest.mock import MagicMock as Mock
-    imas = Mock()
-
 from packaging import version
 
 from .._logging_utils import LoggingContext
+from ._imas import imas
 from ._location import ImasLocation
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
