@@ -1,3 +1,0 @@
-# duqtools.jetto
-
-::: duqtools.jetto

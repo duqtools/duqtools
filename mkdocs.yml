@@ -21,6 +21,9 @@ extra_css:
 
 markdown_extensions:
   - admonition
+  - mkdocs-click
+  - attr_list
+  - pymdownx.superfences
 
 plugins:
 - search

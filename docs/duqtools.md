@@ -1,3 +1,0 @@
-# duqtools
-
-::: duqtools

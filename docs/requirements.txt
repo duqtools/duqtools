@@ -1,11 +1,14 @@
+coverage
 f90nml
 mkdocs
+mkdocs-click
 mkdocs-material
 mkdocstrings[python]
 numpy
+pandas
 pydantic
-scipy
-typing-extensions
-tqdm
+pydantic-yaml @ https://github.com/v1kko/pydantic-yaml/archive/for_duqtools.zip
 ruamel.yaml
-pydantic-yaml @ https://github.com/v1kko/pydantic-yaml/archive/yaml_commented.zip
+scipy
+tqdm
+typing-extensions
