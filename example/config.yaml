@@ -1,32 +1,20 @@
-workspace:
-  root: ./
-create:
-  template: template_model
-  data:
-    db: jet
-    run_in_start_at: 7000
-    run_out_start_at: 8000
-  sampler:
-    method: latin-hypercube
-    n_samples: 3
-  matrix:
-    - ids: profiles_1d/0/zeff
-      operator: add
-      values: [1, 2, 3]
-    - ids: profiles_1d/0/t_i_average
-      operator: multiply
-      values: [1.1, 1.2, 1.3]
-status:
-  msg_completed: 'Status : Completed successfully'
-  msg_failed: 'Status : Failed'
-  msg_running: 'Status : Running'
-submit:
-  status_file: jetto.status
-  submit_script_name: .llcmd
-plot:
+plot:  # Configuration for the plotting subcommand
   plots:
-  - add_time_slider: false
-    x: null
-    xlabel: null
-    y: profiles_1d/0/electrons/density_thermal
-    ylabel: null
+  - x:  # data on x-axis, default is rho-thoroidal
+    y: profiles_1d/0/electrons/density_thermal # data on y-axis
+    xlabel: # custom label for x-axis
+    ylabel: # custom label for y-axis
+create: # Configuration for the create subcommand
+  matrix:  # Defines the space to sample
+  - ids: profiles_1d/0/t_i_average  # field within ids described in template dir from which to sample
+    operator: multiply # Operation used for sampling
+    values: # values to use with operator on field to create sampling space
+    - 1.1
+    - 1.2
+    - 1.3
+  sampler:
+    method: latin-hypercube  # Method to select samples, default: latin-hypercube, also supports: latin-hypercube, halton, sobol, cartesian-product
+    n_samples: 1 # Number of samples to take
+  template: /pfs/work/g2ssmee/jetto/runs/duqtools_template # jetto run-case to use as template for all the other runs
+workspace:
+  root: ./  # The folder from which experiments have to be run, rjettov runs relative to this folder
