@@ -17,9 +17,8 @@ To run the command:
 The options of the status subcommand are stored under the `status` key in the config. These only need to be changed if the modeling softare changes.
 
 
-```yaml
-# duqtools.yaml
-status: # Configuration for the status subcommand
+```yaml title="duqtools.yaml"
+status:
   status_file: jetto.status
   msg_completed: 'Status : Completed successfully'
   msg_failed: 'Status : Failed'

@@ -20,8 +20,7 @@ The options of the plot subcommand are stored under the `plot` key in the config
 
 For example:
 
-```yaml
-# duqtools.yaml
+```yaml title="duqtools.yaml"
 plots:
   - x:
     y: profiles_1d/0/electrons/density_thermal
