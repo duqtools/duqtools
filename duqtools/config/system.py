@@ -46,5 +46,25 @@ class AbstractSystem(ABC):
         pass
 
 
-class DummySystem(BaseModel):
+class DummySystem(BaseModel, AbstractSystem):
     name: Literal['dummy'] = 'dummy'
+
+    @staticmethod
+    def write_batchfile(workspace: WorkDirectory, run_name: str):
+        pass
+
+    @staticmethod
+    def get_imas_location(run: Run):
+        pass
+
+    @staticmethod
+    def copy_from_template(source_drc: Path, target_drc: Path):
+        pass
+
+    @staticmethod
+    def imas_from_path(template_drc: Path):
+        pass
+
+    @staticmethod
+    def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
+        pass
