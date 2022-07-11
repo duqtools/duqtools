@@ -5,6 +5,7 @@ mkdocs-click
 mkdocs-material
 mkdocstrings[python]
 numpy
+pandas
 pydantic
 pydantic-yaml @ https://github.com/v1kko/pydantic-yaml/archive/for_duqtools.zip
 ruamel.yaml

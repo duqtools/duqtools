@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import Any, Dict, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple, Union
 
 import numpy as np
-import pandas as pd
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -236,6 +240,7 @@ class IDSMapping(Mapping):
         df : pd.DataFrame
             Contains a column for the time step and each of the variables.
         """
+        import pandas as pd
         columns, arr = self.to_numpy(*variables,
                                      prefix=prefix,
                                      time_steps=time_steps)
