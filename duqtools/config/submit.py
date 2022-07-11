@@ -1,5 +1,3 @@
-from typing import List
-
 from .basemodel import BaseModel
 
 
@@ -13,4 +11,4 @@ class SubmitConfig(BaseModel):
     status_file: str = 'jetto.status'
     out_file: str = 'jetto.out'
     in_file: str = 'jetto.in'
-    submit_command: List[str] = ['sbatch']
+    submit_command: str = 'sbatch'

@@ -22,8 +22,7 @@ The options of the submit subcommand are stored under the `submit` key in the co
 ```yaml title="duqtools.yaml"
 submit:
   submit_script_name: .llcmd
-  submit_command:
-  - sbatch
+  submit_command: sbatch
 ```
 
 `submit_script_name`: Name of the submission script
