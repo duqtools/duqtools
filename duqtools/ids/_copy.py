@@ -3,7 +3,12 @@ import xml.sax
 import xml.sax.handler
 from getpass import getuser
 
-import imas
+try:
+    import imas
+except ImportError:
+    from unittest.mock import MagicMock as Mock
+    imas = Mock()
+
 from packaging import version
 
 from .._logging_utils import LoggingContext
