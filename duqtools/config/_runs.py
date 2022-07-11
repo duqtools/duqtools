@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Union
 
 from pydantic import DirectoryPath, Field
 
-from ._create import IDSOperation
+from ..ids.operation import IDSOperation
+from ..ids.sampler import IDSSampler
 from .basemodel import BaseModel
 from .imaslocation import ImasLocation
 
@@ -13,7 +14,7 @@ class Run(BaseModel):
     dirname: DirectoryPath = Field(None, description='Directory of run')
     data_in: ImasLocation
     data_out: ImasLocation
-    operations: List[IDSOperation]
+    operations: List[Union[IDSOperation, IDSSampler]]
 
 
 class Runs(BaseModel):

@@ -1,69 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import List, Union
 
-import numpy as np
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-if TYPE_CHECKING:
-    from ..ids import IDSMapping
-
+from ..ids.operation import IDSOperationSet
+from ..ids.sampler import IDSSamplerSet
 from .basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
-
-
-class IDSOperation(BaseModel):
-    ids: str
-    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder']
-    value: float
-
-    def apply(self, ids_mapping: IDSMapping) -> None:
-        """Apply operation to IDS. Data are modified in-place.
-
-        Parameters
-        ----------
-        ids_mapping : IDSMapping
-            Core profiles IDSMapping, data to apply operation to.
-            Must contain the IDS path.
-        """
-        logger.info('Apply `%s(%s, %s)`', self.ids, self.operator, self.value)
-
-        profile = ids_mapping.flat_fields[self.ids]
-
-        logger.debug('data range before: %s - %s', profile.min(),
-                     profile.max())
-        self._npfunc(profile, self.value, out=profile)
-        logger.debug('data range after: %s - %s', profile.min(), profile.max())
-
-    @property
-    def _npfunc(self):
-        """Grab numpy function."""
-        return getattr(np, self.operator)
-
-
-class IDSOperationSet(BaseModel):
-    ids: str = Field(
-        'profiles_1d/0/t_i_average',
-        description='field within ids described in template dir from which'
-        ' to sample')
-    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder'] = Field(
-                          'multiply',
-                          description='Operation used for sampling')
-    values: List[float] = Field(
-        [1.1, 1.2, 1.3],
-        description='values to use with operator on field to create sampling'
-        ' space')
-
-    def expand(self) -> Tuple[IDSOperation, ...]:
-        """Expand list of values into operations with its components."""
-        return tuple(
-            IDSOperation(ids=self.ids, operator=self.operator, value=value)
-            for value in self.values)
 
 
 class DataLocation(BaseModel):
@@ -111,8 +58,9 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = Field(
-        [IDSOperationSet()], description='Defines the space to sample')
+    matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
+        [IDSOperationSet(), IDSSamplerSet()],
+        description='Defines the space to sample')
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
                                              discriminator='method')

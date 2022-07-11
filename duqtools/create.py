@@ -45,6 +45,7 @@ def create(force: bool = False, **kwargs):
     sampler = options.sampler
 
     source = cfg.system.imas_from_path(template_drc)
+    logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)

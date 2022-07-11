@@ -39,7 +39,7 @@ def submit(force: bool = False, **kwargs):
                  submission_script)
             continue
 
-        status_file = run_dir / cfg.submit.status_file
+        status_file = run_dir / cfg.status.status_file
         if status_file.exists() and not force:
             if not status_file.is_file():
                 info('Status file %s is not a file', status_file)
@@ -60,7 +60,8 @@ def submit(force: bool = False, **kwargs):
         debug('Put lockfile in place for %s', submission_script)
         lockfile.touch()
 
-        cmd: List[Any] = [*cfg.submit.submit_command, submission_script]
+        submit_cmd = cfg.submit.submit_command.split()
+        cmd: List[Any] = [*submit_cmd, submission_script]
 
         info('submitting script %s', str(cmd))
         ret = subprocess.run(cmd, check=True, capture_output=True)

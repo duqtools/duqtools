@@ -27,7 +27,7 @@ def write_ids(filename: PathLike, data: dict):
 
 
 __all__ = [
-    'IDSMapping',
     'get_ids_tree',
     'copy_ids_entry',
+    'IDSMapping',
 ]

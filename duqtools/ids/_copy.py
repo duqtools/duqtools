@@ -6,10 +6,10 @@ import xml.sax.handler
 from getpass import getuser
 from typing import TYPE_CHECKING
 
-import imas
 from packaging import version
 
 from .._logging_utils import LoggingContext
+from ._imas import imas
 
 if TYPE_CHECKING:
     from ..config.imaslocation import ImasLocation

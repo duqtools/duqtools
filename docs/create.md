@@ -16,9 +16,7 @@ To run the command:
 
 The options of the create subcommand are stored in the `create` key in the config. For example:
 
-
-```yaml
-# duqtools.yaml
+```yaml title="duqtools.yaml"
 create:
   template: template_model
   data:
@@ -35,8 +33,9 @@ create:
   sampler:
     method: latin-hypercube
     n_samples: 5
-
 ```
+
+
 
 `template`: The create subroutine takes as a template directory. This can be a directory with a finished run, or one just stored by JAMS (but not yet started). `duqtools` uses the input IDS machine (`db`) name, `user`, `shot`, `run` number from `jetto.in` to find the data to modify for the UQ runs.
 
