@@ -1,32 +1,13 @@
-from typing import List, Tuple, Union
+from __future__ import annotations
+
+from typing import List, Union
 
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids import IDSOperation
+from duqtools.ids import IDSOperationSet, IDSSamplerSet
 
 from .basemodel import BaseModel
-
-
-class IDSOperationSet(BaseModel):
-    ids: str = Field(
-        'profiles_1d/0/t_i_average',
-        description='field within ids described in template dir from which'
-        ' to sample')
-    operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'remainder'] = Field(
-                          'multiply',
-                          description='Operation used for sampling')
-    values: List[float] = Field(
-        [1.1, 1.2, 1.3],
-        description='values to use with operator on field to create sampling'
-        ' space')
-
-    def expand(self) -> Tuple[IDSOperation, ...]:
-        """Expand list of values into operations with its components."""
-        return tuple(
-            IDSOperation(ids=self.ids, operator=self.operator, value=value)
-            for value in self.values)
 
 
 class DataLocation(BaseModel):
@@ -74,8 +55,9 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
-    matrix: List[IDSOperationSet] = Field(
-        [IDSOperationSet()], description='Defines the space to sample')
+    matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
+        [IDSOperationSet(), IDSSamplerSet()],
+        description='Defines the space to sample')
     sampler: Union[LHSSampler, Halton, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
                                              discriminator='method')
