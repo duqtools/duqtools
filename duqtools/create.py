@@ -1,15 +1,11 @@
 import logging
-import shutil
-import stat
-from pathlib import Path
 from typing import Iterable
 
 from duqtools.config import cfg
 
 from .config._runs import Runs
-from .ids import IDSMapping, ImasLocation
-from .jetto import JettoSettings
-from .jetto._llcmd import write_batchfile
+from .ids._location import ImasLocation
+from .ids._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -27,37 +23,6 @@ def fail_if_locations_exist(locations: Iterable[ImasLocation]):
         raise IOError(
             'Found existing target location(s), use `duqtools clean` to '
             'remove or `--force` to override.')
-
-
-def copy_files(source_drc: Path, target_drc: Path):
-    """Copy files for jetto run to destination directory.
-
-    Parameters
-    ----------
-    source_drc : Path
-        Source (template) directory.
-    target_drc : Path
-        Target directory.
-    """
-    for filename in (
-            # '.llcmd',
-            'jetto.in',
-            'rjettov',
-            'utils_jetto',
-            'jetto.ex',
-            'jetto.sin',
-            'jetto.sgrid',
-            # 'jetto.jset',
-    ):
-        src = source_drc / filename
-        dst = target_drc / filename
-        shutil.copyfile(src, dst)
-
-    for filename in ('rjettov', 'utils_jetto'):
-        path = target_drc / filename
-        path.chmod(path.stat().st_mode | stat.S_IEXEC)
-
-    logger.debug('copied files to %s', target_drc)
 
 
 def create(force: bool = False, **kwargs):
@@ -79,10 +44,7 @@ def create(force: bool = False, **kwargs):
     matrix = options.matrix
     sampler = options.sampler
 
-    jset = JettoSettings.from_directory(template_drc)
-
-    source = ImasLocation.from_jset_input(jset)
-    assert source.path().exists()
+    source = cfg.system.imas_from_path(template_drc)
 
     variables = tuple(var.expand() for var in matrix)
     combinations = sampler(*variables)
@@ -114,9 +76,6 @@ def create(force: bool = False, **kwargs):
                                   shot=source.shot,
                                   run=options.data.run_out_start_at + i)
 
-        jset_copy = jset.set_imas_locations(inp=target_in, out=target_out)
-        jset_copy.to_directory(run_drc)
-
         source.copy_ids_entry_to(target_in)
 
         core_profiles = target_in.get('core_profiles')
@@ -129,8 +88,12 @@ def create(force: bool = False, **kwargs):
             logger.info('Writing data entry: %s', target_in)
             core_profiles.put(db_entry=data_entry_target)
 
-        copy_files(template_drc, run_drc)
-        write_batchfile(cfg.workspace, run_name)
+        cfg.system.copy_from_template(template_drc, run_drc)
+        cfg.system.write_batchfile(cfg.workspace, run_name)
+
+        cfg.system.update_imas_locations(run=run_drc,
+                                         inp=target_in,
+                                         out=target_out)
 
         runs.append({
             'dirname': run_name,

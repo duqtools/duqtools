@@ -1,8 +1,5 @@
 import logging
 
-from duqtools.ids import ImasLocation
-from duqtools.jetto import JettoSettings
-
 from .config import cfg
 
 logger = logging.getLogger(__name__)
@@ -17,11 +14,10 @@ def plot(**kwargs):
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
     profiles = []
-    jset_files = list(cfg.workspace.cwd.glob('*/*.jset'))
+    runs = cfg.workspace.runs
 
-    for jset_file in jset_files:
-        jset = JettoSettings.from_file(jset_file)
-        imas_loc = ImasLocation.from_jset_output(jset)
+    for run in runs:
+        imas_loc = cfg.system.get_imas_location(run)
         info('Reading %s', imas_loc)
 
         profile = imas_loc.get_ids_tree('core_profiles')

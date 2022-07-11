@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from duqtools.ids import IDSMapping
+from duqtools.ids._mapping import IDSMapping
 
 assert_equal = np.testing.assert_array_equal
 

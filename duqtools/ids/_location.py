@@ -14,7 +14,7 @@ from duqtools.config.basemodel import BaseModel
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
-    from duqtools.jetto import JettoSettings
+    from duqtools.jetto._jset import JettoSettings
 
 logger = logging.getLogger(__name__)
 

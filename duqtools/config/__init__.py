@@ -1,4 +1,3 @@
-from .config import Config, cfg
-from .workdir import WorkDirectory
+from .config import cfg
 
-__all__ = ['cfg', 'WorkDirectory', 'Config']
+__all__ = ['cfg']

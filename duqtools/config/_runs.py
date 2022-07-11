@@ -4,9 +4,10 @@ from typing import List
 
 from pydantic import DirectoryPath, Field
 
-from duqtools.ids import IDSOperation, ImasLocation
+from duqtools.ids._location import ImasLocation
 
 from .basemodel import BaseModel
+from .create import IDSOperation
 
 
 class Run(BaseModel):

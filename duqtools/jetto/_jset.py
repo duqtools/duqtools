@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 from .._types import PathLike
 
 if TYPE_CHECKING:
-    from duqtools.ids import ImasLocation
+    from duqtools.ids._location import ImasLocation
 
 DEFAULT_FILENAME = 'jetto.jset'
 
