@@ -1,6 +1,7 @@
 import logging
 
 from .config import cfg
+from .ids import get_ids_tree
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -20,7 +21,7 @@ def plot(**kwargs):
         imas_loc = cfg.system.get_imas_location(run)
         info('Reading %s', imas_loc)
 
-        profile = imas_loc.get_ids_tree('core_profiles')
+        profile = get_ids_tree(imas_loc, 'core_profiles')
         if 'profiles_1d' not in profile:
             logger.warning('No data in entry, skipping...')
             continue

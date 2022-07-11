@@ -1,5 +1,10 @@
 """Function to create llcmd file."""
-from duqtools.config.workdir import WorkDirectory
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from duqtools.config import WorkDirectory
 
 
 def write_batchfile(workspace: WorkDirectory, run_name: str):

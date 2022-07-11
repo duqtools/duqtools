@@ -3,7 +3,7 @@ from pathlib import Path
 from time import sleep
 
 from .config import cfg
-from .jetto._namelist import read_namelist
+from .jetto import read_namelist
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

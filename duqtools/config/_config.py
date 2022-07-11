@@ -4,13 +4,14 @@ from typing import Union
 
 from pydantic import Field
 
+from ..jetto.system import JettoSystem
+from ._create import CreateConfig
+from ._plot import PlotConfig
+from ._status import StatusConfig
+from ._submit import SubmitConfig
+from ._workdir import WorkDirectory
 from .basemodel import BaseModel
-from .create import CreateConfig
-from .plot import PlotConfig
-from .status import StatusConfig
-from .submit import SubmitConfig
-from .system import DummySystem, JettoSystem
-from .workdir import WorkDirectory
+from .system import DummySystem
 
 
 class Config(BaseModel):

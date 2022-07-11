@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import logging
-from typing import List, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids._mapping import IDSMapping
+if TYPE_CHECKING:
+    from ..ids import IDSMapping
 
 from .basemodel import BaseModel
 

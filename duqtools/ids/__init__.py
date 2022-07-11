@@ -3,6 +3,9 @@ import logging
 import ruamel.yaml as yaml
 
 from .._types import PathLike
+from ._copy import copy_ids_entry
+from ._get_ids_tree import get_ids_tree
+from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -21,3 +24,10 @@ def write_ids(filename: PathLike, data: dict):
     with open(filename, 'w') as f:
         ruamel_obj.dump(data, stream=f)
     logger.debug('wrote %r', filename)
+
+
+__all__ = [
+    'IDSMapping',
+    'get_ids_tree',
+    'copy_ids_entry',
+]

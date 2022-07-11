@@ -6,10 +6,9 @@ from logging import debug
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
-from .._types import PathLike
-
 if TYPE_CHECKING:
-    from duqtools.ids._location import ImasLocation
+    from .._types import PathLike
+    from ..config.imaslocation import ImasLocation
 
 DEFAULT_FILENAME = 'jetto.jset'
 

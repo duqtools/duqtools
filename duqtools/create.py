@@ -3,9 +3,9 @@ from typing import Iterable
 
 from duqtools.config import cfg
 
-from .config._runs import Runs
-from .ids._location import ImasLocation
-from .ids._mapping import IDSMapping
+from .config import Runs
+from .config.imaslocation import ImasLocation
+from .ids import IDSMapping
 
 logger = logging.getLogger(__name__)
 
