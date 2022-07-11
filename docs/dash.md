@@ -8,7 +8,7 @@ This requires duqtools to be installed with additional dependencies:
 
 or, when installing the development version:
 
-`pip install -e .[dash]
+`pip install -e .[dash]`
 
 To run the command:
 
