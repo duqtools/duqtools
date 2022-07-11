@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import logging
 from typing import List, Union
 
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from duqtools.ids import IDSOperationSet, IDSSamplerSet
-
+from ..ids.operation import IDSOperationSet
+from ..ids.sampler import IDSSamplerSet
 from .basemodel import BaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class DataLocation(BaseModel):
@@ -63,6 +66,6 @@ class CreateConfig(BaseModel):
                                              discriminator='method')
     template: DirectoryPath = Field(
         '/pfs/work/g2ssmee/jetto/runs/duqtools_template',
-        description='jetto run-case to use as template for all the other runs')
+        description='run-case to use as template for all the other runs')
     data: DataLocation = Field(
         DataLocation(), description='Where to store the in/output IDS data')

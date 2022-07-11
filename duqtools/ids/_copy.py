@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import logging
 import xml.sax
 import xml.sax.handler
 from getpass import getuser
+from typing import TYPE_CHECKING
 
 from packaging import version
 
 from .._logging_utils import LoggingContext
 from ._imas import imas
-from ._location import ImasLocation
+
+if TYPE_CHECKING:
+    from ..config.imaslocation import ImasLocation
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
 

@@ -4,15 +4,11 @@ import logging
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from duqtools.config.basemodel import BaseModel
+import imas
+from imas import imasdef
 
-from ._imas import imas, imasdef
-from ._mapping import IDSMapping
-
-if TYPE_CHECKING:
-    from duqtools.jetto import JettoSettings
+from .basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +68,7 @@ class ImasLocation(BaseModel):
         destination : ImasLocation
             Copy data to a new location.
         """
-        from ._copy import copy_ids_entry
+        from ..ids import copy_ids_entry
         copy_ids_entry(self, destination)
 
     def delete(self):
@@ -130,22 +126,6 @@ class ImasLocation(BaseModel):
 
         return data
 
-    def get_ids_tree(self, key: str = 'core_profiles', **kwargs) -> IDSMapping:
-        """get the data as a simple ids (all values in memory, in a dict).
-
-        Parameters
-        ----------
-        key : str, optional
-            Name of profiles to open
-        **kwargs
-            These parameters are passed to initialize `IDSMapping`.
-
-        Returns
-        -------
-        IDSMapping
-        """
-        return IDSMapping(self.get(key), **kwargs)
-
     def entry(self, backend=imasdef.MDSPLUS_BACKEND):
         """Return reference to `imas.DBEntry.`
 
@@ -197,42 +177,3 @@ class ImasLocation(BaseModel):
             yield entry
         finally:
             entry.close()
-
-    @classmethod
-    def from_jset_input(cls, jset: JettoSettings) -> ImasLocation:
-        """Get IMAS input location from jetto settings.
-
-        Parameters
-        ----------
-        jset : JettoSettings
-            Jetto settings.
-
-        Returns
-        -------
-        destination : ImasLocation
-            Returns the destination.
-        """
-        return cls(
-            db=jset.machine_in,  # type: ignore
-            user=jset.user_in,  # type: ignore
-            run=jset.run_in,  # type: ignore
-            shot=jset.shot_in)  # type: ignore
-
-    @classmethod
-    def from_jset_output(cls, jset: JettoSettings) -> ImasLocation:
-        """Get IMAS output location from jetto settings.
-
-        Parameters
-        ----------
-        jset : JettoSettings
-            Jetto settings.
-
-        Returns
-        -------
-        destination : ImasLocation
-            Returns the destination.
-        """
-        return cls(
-            db=jset.machine_out,  # type: ignore
-            run=jset.run_out,  # type: ignore
-            shot=jset.shot_out)  # type: ignore

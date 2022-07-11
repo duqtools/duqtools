@@ -1,4 +1,5 @@
-from duqtools.jetto import patch_namelist, read_namelist, write_namelist
+from duqtools.jetto._namelist import (patch_namelist, read_namelist,
+                                      write_namelist)
 
 NML = {'nlist1': {'a': 123, 'b': 456}, 'nlist2': {'c': [1, 2, 3], 'd': None}}
 

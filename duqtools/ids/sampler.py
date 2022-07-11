@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 from duqtools.config.basemodel import BaseModel
 
-from ._operation import IDSPathMixin
+from .operation import IDSPathMixin
 
 if TYPE_CHECKING:
     from .ids import IDSMapping

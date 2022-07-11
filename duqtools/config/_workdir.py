@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-import logging
 from getpass import getuser
 from pathlib import Path
 from typing import List
@@ -9,12 +6,6 @@ from pydantic import DirectoryPath, Field, validator
 
 from ._runs import Run, Runs
 from .basemodel import BaseModel
-from .create import CreateConfig
-from .plot import PlotConfig
-from .status import StatusConfig
-from .submit import SubmitConfig
-
-logger = logging.getLogger(__name__)
 
 
 class WorkDirectory(BaseModel):
@@ -48,36 +39,10 @@ class WorkDirectory(BaseModel):
     @property
     def runs(self) -> List[Run]:
         """Get a list of the runs currently created from this config."""
-        runs_yaml = cfg.workspace.runs_yaml
+        runs_yaml = self.runs_yaml
 
         if not runs_yaml.exists():
             raise IOError(
                 f'Cannot find {runs_yaml}, therefore cannot show the status')
 
         return Runs.parse_file(runs_yaml)
-
-
-class Config(BaseModel):
-    """Config class containing all configs, is a singleton and can be used with
-    import duqtools.config.Config as Cfg Cfg().<variable you want>"""
-
-    _instance = None
-
-    plot: PlotConfig = Field(
-        PlotConfig(), description='Configuration for the plotting subcommand')
-    submit: SubmitConfig = Field(
-        SubmitConfig(), description='Configuration for the submit subcommand')
-    create: CreateConfig = Field(
-        CreateConfig(), description='Configuration for the create subcommand')
-    status: StatusConfig = Field(
-        StatusConfig(), description='Configuration for the status subcommand')
-    workspace: WorkDirectory = WorkDirectory()
-
-    def __new__(cls, *args, **kwargs):
-        # Make it a singleton
-        if not Config._instance:
-            Config._instance = object.__new__(cls)
-        return Config._instance
-
-
-cfg = Config()
