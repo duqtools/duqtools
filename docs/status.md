@@ -6,37 +6,47 @@ To run the command:
 
 `duqtools status`
 
-::: mkdocs-click
-    :module: duqtools.cli
-    :command: cli_status
-    :style: table
-    :depth: 2
+Check out [the command-line interface](/command-line-interface/#status) for more info on how to use this command.
+
 
 ## The `status` config
 
-The options of the status subcommand are stored under the `status` key in the config. These only need to be changed if the modeling softare changes.
+The options of the `status` subcommand are stored under the `status` key
+in the config.
 
+These only need to be changed if the modeling software changes.
+
+`status_file`
+: Name of the status file. (default: `jetto.status`)
+
+`in_file`
+: Name of the modelling input file, will be used to checkif the subprocess has started. (default: `jetto.in`)
+
+`out_file`
+: Name of the modelling output file, will be used tocheck if the software is running. (default: `jetto.out`)
+
+`msg_completed`
+: Parse `status_file` for this message to check forcompletion. (default: `Status : Completed successfully`)
+
+`msg_failed`
+: Parse `status_file` for this message to check forfailures. (default: `Status : Failed`)
+
+`msg_running`
+: Parse `status_file` for this message to check forrunning status. (default: `Status : Running`)
+
+!!! note
+
+    Both `out_file` and `in_file` may be parsed to track the progress of the individual runs.
+
+### Example
 
 ```yaml title="duqtools.yaml"
 status:
-  status_file: jetto.status
+  in_file: jetto.in
   msg_completed: 'Status : Completed successfully'
   msg_failed: 'Status : Failed'
   msg_running: 'Status : Running'
   out_file: jetto.out
-  in_file: jetto.in
+  status_file: jetto.status
+
 ```
-
-`status_file`: Name of the status file, for jetto: `jetto.status`
-
-`msg_completed`: Parse `status_file` for this message to check whether the process has completed.
-
-`msg_failed`: Parse `status_file` for this message to check whether the process has failed.
-
-`msg_running`: Parse `status_file` for this message to check whether the process is still running.
-
-`out_file`: Name of the modelling output file, will be used to check if the software is running
-
-`in_file`: Name of the modelling output file, will be used to check if the software has started
-
-Both `out_file` and `in_file` may be parsed to track the progress of the individual runs.

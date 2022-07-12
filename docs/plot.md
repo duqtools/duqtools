@@ -6,12 +6,7 @@ To run the command:
 
 `duqtools plot`
 
-
-::: mkdocs-click
-    :module: duqtools.cli
-    :command: cli_plot
-    :style: table
-    :depth: 2
+Check out [the command-line interface](/command-line-interface/#plot) for more info on how to use this command.
 
 
 ## The `plot` config
@@ -33,13 +28,17 @@ plots:
 ```
 
 
-`x`: Path of the data to plot on the x-axis, default is rho-toroidal.
+`x`
+: IDS of the data to plot on the x-axis, default is rho-toroidal.
 
-`y`: Path of the data to plot on the y-axis
+`y`
+: IDS of the data to plot on the y-axis
 
-`xlabel`: # custom label for x-axis
+`xlabel`
+: Custom label for x-axis
 
-`ylabel`: # custom label for y-axis
+`ylabel`
+: Custom label for y-axis
 
 !!! note
 

@@ -6,27 +6,31 @@ To run the command:
 
 `duqtools submit`
 
-
-::: mkdocs-click
-    :module: duqtools.cli
-    :command: cli_submit
-    :style: table
-    :depth: 2
+Check out [the command-line interface](/command-line-interface/#clean) for more info on how to use this command.
 
 
 ## The `submit` config
 
-The options of the submit subcommand are stored under the `submit` key in the config. For example:
+The options of the `submit` subcommand are stored under the `submit` key
+in the config.
 
+The config describes the commands to start the UQ runs.
+
+`submit_script_name`
+: Name of the submission script. (default: `.llcmd`)
+
+`submit_command`
+: Submission command. (default: `sbatch`)
+
+!!! note
+
+    In addition, `submit` uses `status.status_file` to prevent re-submitting a running job.
+
+### Example
 
 ```yaml title="duqtools.yaml"
 submit:
-  submit_script_name: .llcmd
   submit_command: sbatch
+  submit_script_name: .llcmd
+
 ```
-
-`submit_script_name`: Name of the submission script
-
-`submit_command`: This option specifies the submission command.
-
-In addition, `submit` uses `status.status_file` to prevent re-submitting a running job.
