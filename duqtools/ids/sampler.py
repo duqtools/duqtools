@@ -23,9 +23,12 @@ class IDSSamplerMixin(BaseModel):
                                         description='Sampling method.')
     bounds: Literal['symmetric', 'asymmetric', 'auto'] = Field(
         'symmetric',
-        description='Specify `symmetric` or `asymmetric` sampling. Use `auto`'
-        ' to choose `asymmetric` if the lower bounds are defined,'
-        ' else `symmetric`.')
+        description='Specify `symmetric` or `asymmetric` sampling. Use'
+        ' `auto` to choose `asymmetric` if the lower bounds are defined,'
+        ' else `symmetric`. The bounds are defiend by `$IDS_error_upper`'
+        ' and `$IDS_error_lower` in the data specification. Symmetric'
+        ' sampling sampling when both the lower and upper error bounds'
+        ' are present, takes the average of the two.')
 
     _upper_suffix: str = '_error_upper'
     _lower_suffix: str = '_error_upper'
