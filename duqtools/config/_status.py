@@ -1,14 +1,7 @@
-from textwrap import dedent
-
 from pydantic import Field
 
+from ._description_helpers import formatter as f
 from .basemodel import BaseModel
-
-
-def f(s):
-    """Dedent and remove newlines."""
-    s = dedent(s)
-    return s.replace('\n', '')
 
 
 class StatusConfig(BaseModel):
