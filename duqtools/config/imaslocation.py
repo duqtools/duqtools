@@ -5,9 +5,7 @@ from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
-import imas
-from imas import imasdef
-
+from ..ids._imas import imas, imasdef
 from .basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
