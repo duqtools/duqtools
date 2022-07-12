@@ -29,7 +29,7 @@ The config describes the commands to start the UQ runs.
 ### Example
 
 ```yaml title="duqtools.yaml"
-status:
+submit:
   submit_command: sbatch
   submit_script_name: .llcmd
 

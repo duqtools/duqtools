@@ -6,15 +6,18 @@ Usage:
 Where <config> object must be a top-level config object, i.e. status, submit
 """
 
-import sys
-
 from ruamel import yaml
 
 from duqtools.config import cfg
 
 schema = cfg.schema()
 
-models = sys.argv[1:]
+models = ['create']
+
+definitions = [
+    'IDSOperationSet',
+    'IDSSamplerSet',
+]
 
 for model_str in models:
     model = getattr(cfg, model_str)
@@ -27,12 +30,31 @@ for model_str in models:
     for name, prop in schema['properties'].items():
         print()
         print(f'`{name}`')
-        print(f": {prop['description']} (default: `{prop['default']}`)")
+        print(f": {prop['description']}")
 
     print()
     print('### Example')
     print()
     print('```yaml title="duqtools.yaml"')
-    print(yaml.dump({'status': model.dict()}, default_flow_style=False))
+    print(yaml.dump({model_str: model.dict()}, default_flow_style=False))
     print('```')
+    print()
+
+print('### Definitions')
+print()
+
+for defn_str in definitions:
+
+    defn = schema['definitions'][defn_str]
+
+    print(f'#### `{defn["title"]}`')
+    print()
+    print(f"{defn['description']}")
+
+    for name, prop in defn['properties'].items():
+        desc = prop['description']
+        print()
+        print(f'`{name}`')
+        print(f': {desc}')
+
     print()

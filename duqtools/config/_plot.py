@@ -6,6 +6,7 @@ from .basemodel import BaseModel
 
 
 class Plot(BaseModel):
+    """Description of the plot to produce."""
     x: Optional[str] = Field(
         'profiles_1d/0/grid/rho_tor',
         description='Data on x-axis, default is the toroidal flux coordiante')
@@ -24,4 +25,5 @@ class Plot(BaseModel):
 
 
 class PlotConfig(BaseModel):
+    """List of plots to make."""
     plots: List[Plot] = [Plot()]

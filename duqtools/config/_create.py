@@ -8,22 +8,36 @@ from typing_extensions import Literal
 
 from ..ids.operation import IDSOperationSet
 from ..ids.sampler import IDSSamplerSet
+from ._description_helpers import formatter as f
 from .basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
 class DataLocation(BaseModel):
-    db: str = 'jet'
-    run_in_start_at: int = 7000
-    run_out_start_at: int = 8000
+    """Location of the data."""
+
+    db: str = Field('jet', description='IMAS database or machine name.')
+
+    run_in_start_at: int = Field(7000,
+                                 description=f("""
+            Write the input data files for UQ start
+            with the run number given by.
+            """))
+
+    run_out_start_at: int = Field(8000,
+                                  description=f("""
+            Write the output data files for UQ start with the
+            run number given by.
+            """))
 
 
 class LHSSampler(BaseModel):
-    method: Literal['latin-hypercube'] = Field(
-        'latin-hypercube',
-        description='Method to select samples, default: latin-hypercube, also'
-        ' supports: halton, sobol, cartesian-product')
+    """Select the Latin Hypercube sampler by specifying
+    `method: latin-hypercube`."""
+
+    method: Literal['latin-hypercube'] = 'latin-hypercube'
+
     n_samples: int = Field(3, description='Number of samples to take')
 
     def __call__(self, *args):
@@ -31,9 +45,12 @@ class LHSSampler(BaseModel):
         return latin_hypercube(*args, n_samples=self.n_samples)
 
 
-class Halton(BaseModel):
+class HaltonSampler(BaseModel):
+    """Select the Sobol sampler by specifying `method: halton`."""
+
     method: Literal['halton']
-    n_samples: int
+
+    n_samples: int = Field(3, description='Number of samples to take')
 
     def __call__(self, *args):
         from duqtools.samplers import halton
@@ -41,8 +58,11 @@ class Halton(BaseModel):
 
 
 class SobolSampler(BaseModel):
+    """Select the Sobol sampler by specifying `method: sobol`."""
+
     method: Literal['sobol', 'low-discrepancy-sequence']
-    n_samples: int
+
+    n_samples: int = Field(3, description='Number of samples to take')
 
     def __call__(self, *args):
         from duqtools.samplers import sobol
@@ -50,6 +70,9 @@ class SobolSampler(BaseModel):
 
 
 class CartesianProduct(BaseModel):
+    """Select the Cartesian product sampler by specifying
+    `method: cartesian-product`."""
+
     method: Literal['cartesian-product'] = 'cartesian-product'
 
     def __call__(self, *args):
@@ -58,14 +81,54 @@ class CartesianProduct(BaseModel):
 
 
 class CreateConfig(BaseModel):
+    """The options of the `create` subcommand are stored in the `create` key in
+    the config."""
     matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
         [IDSOperationSet(), IDSSamplerSet()],
-        description='Defines the space to sample')
-    sampler: Union[LHSSampler, Halton, SobolSampler,
+        description=f("""
+        The `matrix` specifies the operations to apply. These are compound
+        operations which are expanded to fill a matrix of all possible
+        combinations. This generates the
+        [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
+        of all operations. By specifying a different `sampler`, a subset of
+        this hypercube can be efficiently sampled.
+"""))
+
+    sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
-                                             discriminator='method')
+                                             discriminator='method',
+                                             description=f("""
+        For efficient UQ, it may not be necessary to sample the entire matrix
+        or hypercube. By default, the cartesian product is taken. For more
+        efficient sampling of the space, the following `method` choices are
+        available:
+        [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling),
+        [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
+        [`halton`](en.wikipedia.org/wiki/Halton_sequence).
+        Where `n_samples` gives the number of samples to extract.
+                                                """))
+
     template: DirectoryPath = Field(
         '/pfs/work/g2ssmee/jetto/runs/duqtools_template',
-        description='run-case to use as template for all the other runs')
-    data: DataLocation = Field(
-        DataLocation(), description='Where to store the in/output IDS data')
+        description=f("""
+        The create subroutine takes as a template directory. This can be a
+        directory with a finished run, or one just stored by JAMS (but not yet
+        started). Duqtools uses the input IDS machine (db) name, user, shot,
+        run number from e.g. `jetto.in` to find the data to modify for the
+        UQ runs.
+        """))
+
+    data: DataLocation = Field(DataLocation(),
+                               description=f("""
+        Where to store the in/output IDS data.
+        The data key specifies the machine or imas
+        `db` name where to store the data (`db`). duqtools will write the input
+        data files for UQ start with the run number given by `run_in_start_at`.
+        The data generated by the UQ runs (e.g. from jetto) will be stored
+        starting by the run number given by `run_out_start_at`.
+        These are generated in sequence.
+
+        e.g. with `run_in_start_at: 7000` and `run_out_start_at: 8000`,
+        the generated input stored at run number 7000 would correspond to
+        output 8000, 7001 to 8001, 7002 to 8002, etc.
+        """))
