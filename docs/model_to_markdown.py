@@ -21,7 +21,7 @@ for model_str in models:
 
     schema = model.schema()
 
-    print(f'### The `{model_str}` config')
+    print(f'## The `{model_str}` config')
     print()
     print(schema['description'])
     for name, prop in schema['properties'].items():
