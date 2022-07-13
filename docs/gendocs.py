@@ -3,7 +3,29 @@ from templates import get_template
 
 from duqtools.config import cfg
 
-models = {'status': cfg.status, 'submit': cfg.submit, 'plot': cfg.plot}
+models = {
+    'status': cfg.status, 
+    'submit': cfg.submit, 
+    'plot': cfg.plot, 
+    'create': cfg.create,
+}
+
+extra_schemas = {}
+
+# plot
+
+from duqtools.config.plot import Plot
+
+extra_schemas['plot_schema'] = Plot.schema()
+
+# create
+
+from duqtools.ids.operation import IDSOperationSet
+from duqtools.ids.sampler import IDSSamplerSet
+
+extra_schemas['ops_schema'] = IDSOperationSet.schema()
+extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
+
 
 for name, model in models.items():
     template = get_template(f'template_{name}.md')
@@ -14,22 +36,13 @@ for name, model in models.items():
         },
         default_flow_style=False).strip()
 
-    if name == 'plot':
-        plot_schema = model.plots[0].schema()  # type: ignore
+    kwargs = extra_schemas[name]
 
-        rendered = template.render(
-            model=model,
-            schema=model.schema(),
-            plot_schema=plot_schema,
-            yaml_example=yaml_example,
-        )
-
-    else:
-        rendered = template.render(
-            model=model,
-            schema=model.schema(),
-            yaml_example=yaml_example,
-        )
+    rendered = template.render(
+        schema=model.schema(),
+        yaml_example=yaml_example,
+        **kwargs,
+    )
 
     filename = f'{name}.md'
 
