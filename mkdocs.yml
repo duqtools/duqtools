@@ -8,6 +8,7 @@ nav:
     - config/submit.md
     - config/status.md
     - config/plot.md
+  - Dashboard: dash.md
   - CLI: command-line-interface.md
 
 
