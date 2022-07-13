@@ -13,7 +13,7 @@ Check out [the command-line interface](/command-line-interface/#plot) for more i
 
 {{ schema['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in plot_schema['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

@@ -15,15 +15,21 @@ for name, model in models.items():
         default_flow_style=False).strip()
 
     if name == 'plot':
-        schema = model.plots[0].schema()  # type: ignore
-    else:
-        schema = model.schema()  # type: ignore
+        plot_schema = model.plots[0].schema()  # type: ignore
 
-    rendered = template.render(
-        model=model,
-        schema=schema,
-        yaml_example=yaml_example,
-    )
+        rendered = template.render(
+            model=model,
+            schema=model.schema(),
+            plot_schema=plot_schema,
+            yaml_example=yaml_example,
+        )
+
+    else:
+        rendered = template.render(
+            model=model,
+            schema=model.schema(),
+            yaml_example=yaml_example,
+        )
 
     filename = f'{name}.md'
 
