@@ -11,16 +11,12 @@ Check out [the command-line interface](/command-line-interface/#clean) for more 
 
 ## The `submit` config
 
-The options of the `submit` subcommand are stored under the `submit` key
-in the config.
+{{ schema['description'] }}
 
-The config describes the commands to start the UQ runs.
-
-`submit_script_name`
-: Name of the submission script. (default: `.llcmd`)
-
-`submit_command`
-: Submission command. (default: `sbatch`)
+{% for name, prop in schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
 
 !!! note
 
@@ -29,8 +25,5 @@ The config describes the commands to start the UQ runs.
 ### Example
 
 ```yaml title="duqtools.yaml"
-submit:
-  submit_command: sbatch
-  submit_script_name: .llcmd
-
+{{ yaml_example }}
 ```

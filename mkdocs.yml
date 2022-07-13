@@ -1,5 +1,16 @@
 site_name: dUQtools
 
+nav:
+  - Home: index.md
+  - Configuration:
+    - Getting Started: config/introduction.md
+    - config/create.md
+    - config/submit.md
+    - config/status.md
+    - config/plot.md
+  - CLI: command-line-interface.md
+
+
 theme:
   name: material
   primary: blue

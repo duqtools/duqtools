@@ -16,23 +16,25 @@ in the config.
 
 These only need to be changed if the modeling software changes.
 
+
 `status_file`
-: Name of the status file. (default: `jetto.status`)
+: Name of the status file.
 
 `in_file`
-: Name of the modelling input file, will be used to checkif the subprocess has started. (default: `jetto.in`)
+: Name of the modelling input file, will be used to check if the subprocess has started.
 
 `out_file`
-: Name of the modelling output file, will be used tocheck if the software is running. (default: `jetto.out`)
+: Name of the modelling output file, will be used to check if the software is running.
 
 `msg_completed`
-: Parse `status_file` for this message to check forcompletion. (default: `Status : Completed successfully`)
+: Parse `status_file` for this message to check for completion.
 
 `msg_failed`
-: Parse `status_file` for this message to check forfailures. (default: `Status : Failed`)
+: Parse `status_file` for this message to check for failures.
 
 `msg_running`
-: Parse `status_file` for this message to check forrunning status. (default: `Status : Running`)
+: Parse `status_file` for this message to check for running status.
+
 
 !!! note
 
@@ -48,5 +50,4 @@ status:
   msg_running: 'Status : Running'
   out_file: jetto.out
   status_file: jetto.status
-
 ```

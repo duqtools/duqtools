@@ -1,10 +1,5 @@
 create: null
 plot:
-  data:
-  - db: jet
-    run: 251
-    shot: 94875
-    user: g2vazizi
   plots:
   - add_time_slider: false
     x: null

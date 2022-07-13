@@ -1,4 +1,4 @@
-# Dash
+# Dashboard
 
 The dash subcommand opens a dashboard to explore the results of the UQ runs.
 
