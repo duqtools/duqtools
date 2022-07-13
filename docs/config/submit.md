@@ -16,11 +16,13 @@ in the config.
 
 The config describes the commands to start the UQ runs.
 
+
 `submit_script_name`
-: Name of the submission script. (default: `.llcmd`)
+: Name of the submission script.
 
 `submit_command`
-: Submission command. (default: `sbatch`)
+: Submission command.
+
 
 !!! note
 
@@ -32,5 +34,4 @@ The config describes the commands to start the UQ runs.
 submit:
   submit_command: sbatch
   submit_script_name: .llcmd
-
 ```

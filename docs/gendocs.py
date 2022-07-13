@@ -1,12 +1,21 @@
+"""This script read the jinja2 templates from the ./templates directory, and
+auto-fills the place-hodlers with the pydantic models defined in this file.
+
+To generate the docs:
+
+    python gendocs.py
+"""
+
 from ruamel import yaml
 from templates import get_template
 
 from duqtools.config import cfg
 
 models = {
-    'status': cfg.status, 
-    'submit': cfg.submit, 
-    'plot': cfg.plot, 
+    'introduction': cfg,
+    'status': cfg.status,
+    'submit': cfg.submit,
+    'plot': cfg.plot,
     'create': cfg.create,
 }
 
@@ -14,7 +23,7 @@ extra_schemas = {}
 
 # plot
 
-from duqtools.config.plot import Plot
+from duqtools.config._plot import Plot
 
 extra_schemas['plot_schema'] = Plot.schema()
 
@@ -26,7 +35,6 @@ from duqtools.ids.sampler import IDSSamplerSet
 extra_schemas['ops_schema'] = IDSOperationSet.schema()
 extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
 
-
 for name, model in models.items():
     template = get_template(f'template_{name}.md')
 
@@ -36,15 +44,14 @@ for name, model in models.items():
         },
         default_flow_style=False).strip()
 
-    kwargs = extra_schemas[name]
-
     rendered = template.render(
         schema=model.schema(),
         yaml_example=yaml_example,
-        **kwargs,
+        **extra_schemas,
     )
 
-    filename = f'{name}.md'
+    filename = f'config/{name}.md'
 
     with open(filename, 'w') as file:
+        print(f'Writing {filename}')
         file.write(rendered)
