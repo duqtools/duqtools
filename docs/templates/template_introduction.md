@@ -2,7 +2,24 @@
 
 UQ run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the -c/--config option (see `duqtools help` or the [cli](/command-line-interface/)).
 
-As a minimum, this configuration file must contain the working directory. All other settings are optional.
+As a minimum, this configuration file must define the root workspace (see below). All other settings are (in principle) optional.
+
+
+## Workspace
+
+{{ wd_schema['description'] }}
+
+{% for name, prop in wd_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+```yaml title="duqtools.yaml"
+{{ wd_yaml }}
+```
+
+
+## Starting from scratch
 
 To help initialize a starting config to modify, you can run [`duqtools init`](/command-line-interface/#init).
 

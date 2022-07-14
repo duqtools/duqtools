@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from getpass import getuser
 from typing import List, Union
 
 from pydantic import DirectoryPath, Field
@@ -109,7 +110,7 @@ class CreateConfig(BaseModel):
                                                 """))
 
     template: DirectoryPath = Field(
-        '/pfs/work/g2ssmee/jetto/runs/duqtools_template',
+        f'/pfs/work/{getuser()}/jetto/runs/duqtools_template',
         description=f("""
         The create subroutine takes as a template directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
