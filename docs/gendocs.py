@@ -54,6 +54,9 @@ if 'create' in models:
 
     extra_schemas['ops_schema'] = IDSOperationSet.schema()
     extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
+    extra_schemas['data_loc_schema'] = cfg.create.data.schema()
+
+    extra_yamls['data_loc_yaml'] = model2config('data', cfg.create.data)
 
 if 'introduction' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()

@@ -24,6 +24,21 @@ Check out [the command-line interface](/command-line-interface/#create) for more
 {{ yaml_example }}
 ```
 
+### Data location
+
+{{ data_loc_schema['description'] }}
+
+{% for name, prop in data_loc_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+For example:
+
+```yaml title="duqtools.yaml"
+{{ data_loc_yaml }}
+```
+
 ### IDS operations
 
 These instructions operate on the template model. Note that these are compound operations, so they are expanded to fill the matrix with possible entries for data modifications (depending on the sampling method).
