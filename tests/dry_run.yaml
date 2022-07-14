@@ -1,0 +1,24 @@
+plot:  # Configuration for the plotting subcommand
+  plots:
+  - x: profiles_1d/0/grid/rho_tor  # Data on x-axis, default is the toroidal flux coordiante
+    y: profiles_1d/0/electrons/density_thermal # Data on y-axis
+    xlabel: # Custom label for x-axis
+    ylabel: # Custom label for y-axis
+create: # Configuration for the create subcommand
+  matrix:  # Defines the space to sample
+  - operator: multiply  # Operation applied to the ids
+    ids: profiles_1d/0/t_i_average # Field within ids described in template dir from which to sample.
+    values: # Values to use with operator on field to create sampling space.
+    - 1.1
+    - 1.2
+    - 1.3
+  - sampling: normal  # Sampling method.
+    bounds: symmetric # Specify `symmetric` or `asymmetric` sampling. Use `auto` to choose `asymmetric` if the lower bounds are defined, else `symmetric`.
+    ids: profiles_1d/0/t_i_average # Field within ids described in template dir from which to sample.
+    n_samples: 5 # Number of samples to get.
+  sampler:
+    method: latin-hypercube  # Method to select samples, default: latin-hypercube, also supports: halton, sobol, cartesian-product
+    n_samples: 3 # Number of samples to take
+  template: /pfs/work/g2ssmee/jetto/runs/duqtools_template # run-case to use as template for all the other runs
+workspace:
+  root: . # The folder from which experiments have to be run, rjettov runs relative to this folder

@@ -39,8 +39,22 @@ def debug_option(f):
                         callback=callback)(f)
 
 
+def dry_run_option(f):
+
+    def callback(ctx, param, dry_run):
+        if dry_run:
+            logger.info('--dry-run enabled')
+
+        return dry_run
+
+    return click.option('--dry-run',
+                        is_flag=True,
+                        help='Execute without any side-effects.',
+                        callback=callback)(f)
+
+
 def common_options(func):
-    for wrapper in (debug_option, config_option):
+    for wrapper in (debug_option, config_option, dry_run_option):
         func = wrapper(func)
     return func
 
