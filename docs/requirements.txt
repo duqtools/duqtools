@@ -4,6 +4,7 @@ mkdocs
 mkdocs-click
 mkdocs-material
 mkdocstrings[python]
+mkdocs-gen-files
 numpy
 pandas
 pydantic
