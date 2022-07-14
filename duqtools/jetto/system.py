@@ -3,9 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pydantic import Field
 from typing_extensions import Literal
 
-from ..config.basemodel import BaseModel
 from ..config.system import AbstractSystem
 from ._imas_functions import imas_from_jset_input
 from ._jset import JettoSettings
@@ -15,8 +15,17 @@ if TYPE_CHECKING:
     from ..config.imaslocation import ImasLocation
 
 
-class JettoSystem(BaseModel, AbstractSystem):
-    name: Literal['jetto'] = 'jetto'
+class JettoSystem(AbstractSystem):
+    """This system implements a wrapper around JETTO, which is part of the
+    JINTRAC modelling framework for integrated simulation of Tokamaks.
+
+    For more information:
+
+    - G. Cenacchi, A. Taroni, JETTO: A free-boundary plasma transport code,
+        JET-IR (1988)
+    - M. Romanelli  2014, Plasma and Fusion research 9, 3403023-3403023
+    """
+    name: Literal['jetto'] = Field('jetto', description='Name of the system.')
 
     @staticmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str):

@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from pydantic import Field
 from typing_extensions import Literal
 
 from .basemodel import BaseModel
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AbstractSystem(ABC):
+class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
@@ -46,8 +47,14 @@ class AbstractSystem(ABC):
         pass
 
 
-class DummySystem(BaseModel, AbstractSystem):
-    name: Literal['dummy'] = 'dummy'
+class DummySystem(AbstractSystem):
+    """This is a dummy system that implements the basic interfaces.
+
+    It exists for testing purposes in absence of actual modelling
+    software.
+    """
+
+    name: Literal['dummy'] = Field('dummy', description='Name of the system.')
 
     @staticmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str):

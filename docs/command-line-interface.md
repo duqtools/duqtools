@@ -2,6 +2,10 @@
 
 This page documents the command line interface for `duqtools`.
 
+To get started:
+
+    duqtools --help
+
 ::: mkdocs-click
     :module: duqtools.cli
     :command: cli
