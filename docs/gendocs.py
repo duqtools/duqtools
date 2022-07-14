@@ -6,10 +6,21 @@ To generate the docs:
     python gendocs.py
 """
 
+import sys
+from pathlib import Path
+
+import mkdocs_gen_files
 from ruamel import yaml
-from templates import get_template
 
 from duqtools.config import cfg
+
+this_dir = Path(__file__).parent
+
+sys.path.append(str(this_dir))
+
+from templates import get_template  # noqa
+
+SUBDIR = 'config'
 
 models = {
     'introduction': cfg,
@@ -21,19 +32,17 @@ models = {
 
 extra_schemas = {}
 
-# plot
+if 'plot' in models:
+    from duqtools.config._plot import Plot
 
-from duqtools.config._plot import Plot
+    extra_schemas['plot_schema'] = Plot.schema()
 
-extra_schemas['plot_schema'] = Plot.schema()
+if 'create' in models:
+    from duqtools.ids.operation import IDSOperationSet
+    from duqtools.ids.sampler import IDSSamplerSet
 
-# create
-
-from duqtools.ids.operation import IDSOperationSet
-from duqtools.ids.sampler import IDSSamplerSet
-
-extra_schemas['ops_schema'] = IDSOperationSet.schema()
-extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
+    extra_schemas['ops_schema'] = IDSOperationSet.schema()
+    extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
 
 for name, model in models.items():
     template = get_template(f'template_{name}.md')
@@ -50,8 +59,8 @@ for name, model in models.items():
         **extra_schemas,
     )
 
-    filename = f'config/{name}.md'
+    filename = f'{SUBDIR}/{name}.md'
 
-    with open(filename, 'w') as file:
-        print(f'Writing {filename}')
+    with mkdocs_gen_files.open(filename, 'w') as file:
+        print(f'Writing {file.name}')
         file.write(rendered)

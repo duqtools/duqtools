@@ -10,6 +10,8 @@ nav:
     - config/plot.md
   - Dashboard: dash.md
   - CLI: command-line-interface.md
+  - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
+  - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
 
 theme:
@@ -56,3 +58,6 @@ plugins:
           members_order: alphabetical
           show_category_heading: no
           merge_init_into_class: yes
+- gen-files:
+    scripts:
+      - docs/gendocs.py
