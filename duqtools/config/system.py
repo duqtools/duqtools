@@ -48,7 +48,11 @@ class AbstractSystem(ABC, BaseModel):
 
 
 class DummySystem(AbstractSystem):
-    """Dummy system."""
+    """This is a dummy system that implements the basic interfaces.
+
+    It exists for testing purposes in absence of actual modelling
+    software.
+    """
 
     name: Literal['dummy'] = Field('dummy', description='Name of the system.')
 

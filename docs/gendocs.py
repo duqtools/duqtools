@@ -66,8 +66,8 @@ if 'introduction' in models:
     from duqtools.jetto.system import JettoSystem
 
     extra_schemas['system_schema'] = cfg.system.schema()
-    extra_schemas['jetto_schema'] = DummySystem.schema()
-    extra_schemas['dummy_schema'] = JettoSystem.schema()
+    extra_schemas['jetto_schema'] = JettoSystem.schema()
+    extra_schemas['dummy_schema'] = DummySystem.schema()
     extra_yamls['system_yaml'] = model2config('system', cfg.system)
 
 for name, model in models.items():

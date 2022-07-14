@@ -16,7 +16,15 @@ if TYPE_CHECKING:
 
 
 class JettoSystem(AbstractSystem):
-    """Jetto system."""
+    """This system implements a wrapper around JETTO, which is part of the
+    JINTRAC modelling framework for integrated simulation of Tokamaks.
+
+    For more information:
+
+    - G. Cenacchi, A. Taroni, JETTO: A free-boundary plasma transport code,
+        JET-IR (1988)
+    - M. Romanelli  2014, Plasma and Fusion research 9, 3403023-3403023
+    """
     name: Literal['jetto'] = Field('jetto', description='Name of the system.')
 
     @staticmethod

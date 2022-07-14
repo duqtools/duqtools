@@ -24,7 +24,7 @@ Check out [the command-line interface](/command-line-interface/#create) for more
 {{ yaml_example }}
 ```
 
-### Data location
+## Data location
 
 {{ data_loc_schema['description'] }}
 
@@ -39,11 +39,11 @@ For example:
 {{ data_loc_yaml }}
 ```
 
-### IDS operations
+## IDS operations
 
 These instructions operate on the template model. Note that these are compound operations, so they are expanded to fill the matrix with possible entries for data modifications (depending on the sampling method).
 
-#### Arithmetic operations
+### Arithmetic operations
 
 {{ ops_schema['description'] }}
 
@@ -78,7 +78,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
     The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
 
-#### Error bound sampling
+### Error bound sampling
 
 {{ sampler_schema['description'] }}
 
