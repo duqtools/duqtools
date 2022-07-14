@@ -62,6 +62,14 @@ if 'introduction' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()
     extra_yamls['wd_yaml'] = model2config('workspace', cfg.workspace)
 
+    from duqtools.config.system import DummySystem
+    from duqtools.jetto.system import JettoSystem
+
+    extra_schemas['system_schema'] = cfg.system.schema()
+    extra_schemas['jetto_schema'] = DummySystem.schema()
+    extra_schemas['dummy_schema'] = JettoSystem.schema()
+    extra_yamls['system_yaml'] = model2config('system', cfg.system)
+
 for name, model in models.items():
     template = get_template(f'template_{name}.md')
 

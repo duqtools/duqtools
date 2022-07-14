@@ -19,6 +19,21 @@ As a minimum, this configuration file must define the root workspace (see below)
 ```
 
 
+## System
+
+{{ system_schema['description'] }}
+
+{% for name, prop in system_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+```yaml title="duqtools.yaml"
+{{ system_yaml }}
+```
+
+
+
 ## Starting from scratch
 
 To help initialize a starting config to modify, you can run [`duqtools init`](/command-line-interface/#init).
