@@ -39,6 +39,7 @@ def test_init(cmdline_workdir):
         assert (not Path('./duqtools.yaml').exists())
 
 
+@pytest.mark.dependency()
 def test_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
         cli_create(['-c', 'config.yaml', '--dry-run', '--force'],
@@ -50,9 +51,10 @@ def test_create(cmdline_workdir):
 
 
 @pytest.mark.dependency(depends=['test_create'])
+@pytest.mark.dependency()
 def test_real_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        cli_create(['-c', 'config.yaml'], standalone_mode=False)
+        cli_create(['-c', 'config.yaml', '--force'], standalone_mode=False)
         assert (Path('./run_0000').exists())
         assert (Path('./run_0001').exists())
         assert (Path('./run_0002').exists())

@@ -25,7 +25,7 @@ def fail_if_locations_exist(locations: Iterable[ImasLocation]):
             'remove or `--force` to override.')
 
 
-def create(force: bool = False, **kwargs):
+def create(force, dry_run, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -68,7 +68,8 @@ def create(force: bool = False, **kwargs):
     for i, combination in enumerate(combinations):
         run_name = f'{RUN_PREFIX}{i:04d}'
         run_drc = cfg.workspace.cwd / run_name
-        run_drc.mkdir(parents=True, exist_ok=force)
+        if not dry_run:
+            run_drc.mkdir(parents=True, exist_ok=force)
 
         target_in = ImasLocation(db=options.data.db,
                                  shot=source.shot,
@@ -77,17 +78,19 @@ def create(force: bool = False, **kwargs):
                                   shot=source.shot,
                                   run=options.data.run_out_start_at + i)
 
-        source.copy_ids_entry_to(target_in)
+        if not dry_run:
+            source.copy_ids_entry_to(target_in)
 
-        core_profiles = target_in.get('core_profiles')
-        ids_mapping = IDSMapping(core_profiles)
+            core_profiles = target_in.get('core_profiles')
+            ids_mapping = IDSMapping(core_profiles)
 
-        for operation in combination:
-            operation.apply(ids_mapping)
+            for operation in combination:
+                operation.apply(ids_mapping)
 
-        with target_in.open() as data_entry_target:
-            logger.info('Writing data entry: %s', target_in)
-            core_profiles.put(db_entry=data_entry_target)
+        logger.info('Writing data entry: %s', target_in)
+        if not dry_run:
+            with target_in.open() as data_entry_target:
+                core_profiles.put(db_entry=data_entry_target)
 
         cfg.system.copy_from_template(template_drc, run_drc)
         cfg.system.write_batchfile(cfg.workspace, run_name)
@@ -103,7 +106,8 @@ def create(force: bool = False, **kwargs):
             'operations': combination
         })
 
-    runs = Runs.parse_obj(runs)
+    if not dry_run:
+        runs = Runs.parse_obj(runs)
 
-    with open(cfg.workspace.runs_yaml, 'w') as f:
-        runs.yaml(stream=f, descriptions=True)
+        with open(cfg.workspace.runs_yaml, 'w') as f:
+            runs.yaml(stream=f, descriptions=True)
