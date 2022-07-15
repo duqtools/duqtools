@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(**kwargs):
+def plot(*, dry_run, **kwargs):
     """Plot subroutine to create plots from datas."""
     import matplotlib.pyplot as plt
     import numpy as np
@@ -48,4 +48,5 @@ def plot(**kwargs):
             ax.plot(x, y, label=j)
 
         ax.legend()
-        fig.savefig(f'plot_{i:04d}.png')
+        if not dry_run:
+            fig.savefig(f'plot_{i:04d}.png')

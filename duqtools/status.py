@@ -179,7 +179,7 @@ class Status():
             self.update_status()
 
 
-def status(progress: bool, detailed: bool, **kwargs):
+def status(*, progress: bool, detailed: bool, **kwargs):
     """Show status of runs.
 
     Parameters

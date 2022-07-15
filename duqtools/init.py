@@ -8,10 +8,7 @@ from .config.basemodel import BaseModel
 logger = logging.getLogger(__name__)
 
 
-def init(config: str = 'config.yaml',
-         full: bool = False,
-         force: bool = False,
-         **kwargs):
+def init(*, dry_run, config, full, force, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
@@ -50,5 +47,6 @@ def init(config: str = 'config.yaml',
                                 'plot': {'plots'}
                             })
 
-    with open(config_filepath, 'w') as f:
-        f.write(cfg_yaml)
+    if not dry_run:
+        with open(config_filepath, 'w') as f:
+            f.write(cfg_yaml)

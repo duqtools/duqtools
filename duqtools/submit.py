@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def submit(force: bool = False, **kwargs):
+def submit(*, force: bool, **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 

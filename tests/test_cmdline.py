@@ -68,4 +68,4 @@ def test_example_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
         assert (result.returncode == 0)
-        assert (os.path.exists('plot_0000.png'))
+        assert (Path('./plot_0000.png').exists())

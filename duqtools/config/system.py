@@ -8,13 +8,13 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from .basemodel import BaseModel
+from .imaslocation import ImasLocation
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ._runs import Run
     from ._workdir import WorkDirectory
-    from .imaslocation import ImasLocation
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def get_imas_location(run: Run):
-        pass
+        return run.data_out
 
     @staticmethod
     def copy_from_template(source_drc: Path, target_drc: Path):
@@ -70,7 +70,7 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def imas_from_path(template_drc: Path):
-        pass
+        return ImasLocation(db='', shot='-1', run='-1')
 
     @staticmethod
     def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
