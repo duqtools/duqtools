@@ -163,3 +163,77 @@ for y_val in y_vals:
             select_step).interactive()
 
     st.altair_chart(chart, use_container_width=True)
+
+with st.form('Save to new IMAS DB entry'):
+    a_run = df.iloc[0]
+
+    st.subheader('Template IMAS entry:')
+
+    cols = st.columns(4)
+
+    template = {
+        'user': cols[0].text_input('User',
+                                   value=a_run.user,
+                                   key='user_template'),
+        'db': cols[1].text_input('Machine', value=a_run.db, key='db_template'),
+        'shot': cols[2].number_input('Shot',
+                                     value=a_run.shot,
+                                     key='shot_template'),
+        'run': cols[3].number_input('Run', value=a_run.run,
+                                    key='run_template'),
+    }
+
+    template = ImasLocation(**template)
+
+    st.subheader('Target IMAS entry:')
+
+    cols = st.columns(4)
+
+    target = {
+        'user':
+        cols[0].text_input('User',
+                           value=a_run.user,
+                           key='user_target',
+                           disabled=True),
+        'db':
+        cols[1].text_input('Machine', value=a_run.db, key='db_target'),
+        'shot':
+        cols[2].number_input('Shot', value=a_run.shot, key='shot_target'),
+        'run':
+        cols[3].number_input('Run', step=1, key='run_target'),
+    }
+
+    target = ImasLocation(**target)
+
+    submitted = st.form_submit_button('Save')
+    if submitted:
+        template_data = get_ids_tree(template)
+
+        # pick first time step as basis
+        common_basis = template_data.to_dataframe(x_val,
+                                                  time_steps=(0, ))[x_val]
+
+        # TODO:
+        # Extract x_val, because we need it to se the basis
+        # Expand `put_on_common_basis` to work with multiple y cols
+        # Set to common time basis
+
+        data = get_data(df, keys=y_vals, prefix='profiles_1d')
+
+        data = put_on_common_basis(data, *y_val, common_basis=common_basis)
+
+        # data = put_on_common_time(data)
+
+        # template.copy_ids_entry_to(target)
+
+        # core_profiles = target_in.get('core_profiles')
+        # ids_mapping = IDSMapping(core_profiles)
+
+        # for y_val in y_keys:
+        #     pass
+
+        # with target.open() as data_entry_target:
+        #     core_profiles.put(db_entry=data_entry_target)
+
+        st.success('Success!')
+        st.balloons()
