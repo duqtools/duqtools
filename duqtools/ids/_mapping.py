@@ -231,7 +231,7 @@ class IDSMapping(Mapping):
             Keys to extract, i.e. `zeff`, `grid/rho_tor`
         prefix : str, optional
             First part of the data path
-        time : Sequence[int], optional
+        time_steps : Sequence[int], optional
             List or array of integer time steps to extract.
             Defaults to all time steps.
 
@@ -276,11 +276,13 @@ class IDSMapping(Mapping):
             Numpy array with a column for the time step and each of the
             variables.
         """
-        n_time_steps = len(self['time'])
         points_per_var = len(self.flat_fields[f'{prefix}/0/{variables[0]}'])
 
         if not time_steps:
+            n_time_steps = len(self['time'])
             time_steps = range(n_time_steps)
+        else:
+            n_time_steps = len(time_steps)
 
         columns = ('tstep', *variables)
         n_vars = len(columns)
