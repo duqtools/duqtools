@@ -56,15 +56,15 @@ options = get_options(a_run=df.iloc[0])
 
 with st.sidebar:
 
-    default_x_val = options.index(f'{prefix}/grid/rho_tor_norm')
+    default_x_key = options.index(f'{prefix}/grid/rho_tor_norm')
     default_y_val = f'{prefix}/t_i_average'
 
-    x_val = st.selectbox('Select IDS (x)',
+    x_key = st.selectbox('Select IDS (x)',
                          options,
-                         index=default_x_val,
+                         index=default_x_key,
                          format_func=ffmt)
 
-    y_vals = st.multiselect('Select IDS (y)',
+    y_keys = st.multiselect('Select IDS (y)',
                             options,
                             default=default_y_val,
                             format_func=ffmt)
@@ -77,10 +77,10 @@ with st.sidebar:
 
 
 @st.experimental_memo
-def get_run_data(row, *, x, y):
+def get_run_data(row, *, keys, **kwargs):
     """Get data for single run."""
     profile = get_ids_tree(ImasLocation(**row), exclude_empty=True)
-    return profile.to_dataframe(x, y)
+    return profile.to_dataframe(*keys, **kwargs)
 
 
 @st.experimental_memo
@@ -97,19 +97,20 @@ def get_data(df, **kwargs):
 
 
 @st.experimental_memo
-def put_on_common_basis(source):
-    n = sum((source['run'] == 'run_0000') & (source['tstep'] == 0))
-    mn = source[x].min()
-    mx = source[x].max()
-    common = np.linspace(mn, mx, n)
+def put_on_common_basis(source, *, x, y, common_basis=None):
+    if common_basis is None:
+        n = sum((source['run'] == 'run_0000') & (source['tstep'] == 0))
+        mn = source[x].min()
+        mx = source[x].max()
+        common_basis = np.linspace(mn, mx, n)
 
     def refit(gb):
         f = interp1d(gb[x],
                      gb[y],
                      fill_value='extrapolate',
                      bounds_error=False)
-        new_x = common
-        new_y = f(common)
+        new_x = common_basis
+        new_y = f(common_basis)
         return pd.DataFrame((new_x, new_y), index=[x, y]).T
 
     grouped = source.groupby(['run', 'tstep'])
@@ -117,13 +118,13 @@ def put_on_common_basis(source):
         ('run', 'tstep')).reset_index(drop=True)
 
 
+y_vals = tuple(ffmt(y_key) for y_key in y_keys)
+x_val = ffmt(x_key)
+
 for y_val in y_vals:
-    x = ffmt(x_val)
-    y = ffmt(y_val)
+    st.header(f'{x_val} vs. {y_val}')
 
-    st.header(f'{x} vs. {y}')
-
-    source = get_data(df, x=x, y=y)
+    source = get_data(df, keys=(x_val, y_val), prefix='profiles_1d')
 
     slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
     select_step = alt.selection_single(name='tstep',
@@ -132,11 +133,11 @@ for y_val in y_vals:
                                        init={'tstep': 0})
 
     if show_error_bar:
-        source = put_on_common_basis(source)
+        source = put_on_common_basis(source, x=x_val, y=y_val)
 
         line = alt.Chart(source).mark_line().encode(
-            x=f'{x}:Q',
-            y=f'mean({y}):Q',
+            x=f'{x_val}:Q',
+            y=f'mean({y_val}):Q',
             color=alt.Color('tstep:N'),
         ).add_selection(select_step).transform_filter(
             select_step).interactive()
@@ -144,8 +145,8 @@ for y_val in y_vals:
         # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
         band = alt.Chart(source).mark_errorband(
             extent='ci', interpolate='linear').encode(
-                x=f'{x}:Q',
-                y=f'{y}:Q',
+                x=f'{x_val}:Q',
+                y=f'{y_val}:Q',
                 color=alt.Color('tstep:N'),
             ).add_selection(select_step).transform_filter(
                 select_step).interactive()
@@ -154,8 +155,8 @@ for y_val in y_vals:
 
     else:
         chart = alt.Chart(source).mark_line().encode(
-            x=f'{x}:Q',
-            y=f'{y}:Q',
+            x=f'{x_val}:Q',
+            y=f'{y_val}:Q',
             color=alt.Color('run:N'),
             tooltip='run',
         ).add_selection(select_step).transform_filter(
