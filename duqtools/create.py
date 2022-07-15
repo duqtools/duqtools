@@ -25,7 +25,7 @@ def fail_if_locations_exist(locations: Iterable[ImasLocation]):
             'remove or `--force` to override.')
 
 
-def create(force, dry_run, **kwargs):
+def create(*, force, dry_run, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters

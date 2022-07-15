@@ -8,7 +8,7 @@ from .config.basemodel import BaseModel
 logger = logging.getLogger(__name__)
 
 
-def init(dry_run, config, full, force, **kwargs):
+def init(*, dry_run, config, full, force, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
