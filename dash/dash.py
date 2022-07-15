@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -8,32 +7,38 @@ import pandas as pd
 import streamlit as st
 from scipy.interpolate import interp1d
 
-from duqtools.config._runs import Runs
+from duqtools.config import Runs
+from duqtools.config.imaslocation import ImasLocation
+from duqtools.ids import get_ids_tree
 
 try:
     default_workdir = sys.argv[1]
 except IndexError:
-    default_workdir = '/afs/eufus.eu/user/g/g2ssmee/jetto_runs/workspace3'
+    default_workdir = str(Path.cwd())
 
 st.title('Plot IDS')
 
 with st.sidebar:
     st.header('Input data')
-    workdir = st.text_input('Work directory', default_workdir)
-    runs_yaml = Path(workdir) / 'runs.yaml'
+    work_dir = st.text_input('Work directory', default_workdir)
+    data_file = st.text_input('Data file', 'runs.yaml')
 
-if not runs_yaml.exists():
-    raise ValueError('`runs.yaml` does not exists!')
+inp = Path(work_dir) / data_file
 
-os.chdir(workdir)
+if not inp.exists():
+    raise ValueError(f'{inp} does not exist!')
 
-runs = Runs.parse_file(runs_yaml)
-
-runs_df = pd.DataFrame([run.data_out.dict() for run in runs])
-runs_df.index = [str(run.dirname) for run in runs]
+if inp.suffix == '.csv':
+    df = pd.read_csv(inp, index_col=0)
+elif inp.name == 'runs.yaml':
+    runs = Runs.parse_file(inp)
+    df = pd.DataFrame([run.data_out.dict() for run in runs])
+    df.index = [str(run.dirname) for run in runs]
+else:
+    raise ValueError(f'Cannot open file: {inp}')
 
 with st.expander('IDS data'):
-    st.dataframe(runs_df)
+    st.table(df)
 
 prefix = 'profiles_1d/$i'
 
@@ -43,15 +48,15 @@ def ffmt(s):
 
 
 def get_options(a_run):
-    a_profile = runs[0].data_out.get_ids_tree(exclude_empty=True)
+    a_profile = get_ids_tree(ImasLocation(**a_run), exclude_empty=True)
     return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
-options = get_options(a_run=runs[0])
+options = get_options(a_run=df.iloc[0])
 
 with st.sidebar:
 
-    default_x_val = options.index(f'{prefix}/grid/rho_tor')
+    default_x_val = options.index(f'{prefix}/grid/rho_tor_norm')
     default_y_val = f'{prefix}/t_i_average'
 
     x_val = st.selectbox('Select IDS (x)',
@@ -71,17 +76,20 @@ with st.sidebar:
             'y-values are interpolated to put them on a common basis for x.'))
 
 
-@st.cache
-def get_run_data(run, *, x, y):
+@st.experimental_memo
+def get_run_data(row, *, x, y):
     """Get data for single run."""
-    profile = run.data_out.get_ids_tree(exclude_empty=True)
+    profile = get_ids_tree(ImasLocation(**row), exclude_empty=True)
     return profile.to_dataframe(x, y)
 
 
-@st.cache
-def get_data(runs, **kwargs):
+@st.experimental_memo
+def get_data(df, **kwargs):
     """Get and concatanate data for all runs."""
-    runs_data = {str(run.dirname): get_run_data(run, **kwargs) for run in runs}
+    runs_data = {
+        str(name): get_run_data(row, **kwargs)
+        for name, row in df.iterrows()
+    }
 
     return pd.concat(runs_data,
                      names=('run',
@@ -115,7 +123,7 @@ for y_val in y_vals:
 
     st.header(f'{x} vs. {y}')
 
-    source = get_data(runs, x=x, y=y)
+    source = get_data(df, x=x, y=y)
 
     slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
     select_step = alt.selection_single(name='tstep',
