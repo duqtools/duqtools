@@ -6,6 +6,8 @@ from getpass import getuser
 from pathlib import Path
 
 from ..schema.imas import ImasBaseModel
+from ..utils import dry_run_toggle
+from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 
 logger = logging.getLogger(__name__)
@@ -62,18 +64,20 @@ class ImasHandle(ImasBaseModel):
         destination : ImasHandle
             Copy data to a new location.
         """
-        from ..ids import copy_ids_entry
         copy_ids_entry(self, destination)
 
     def delete(self):
         """Remove data from entry."""
+        from ..config import cfg
+
         # ERASE_PULSE operation is yet supported by IMAS as of June 2022
         path = self.path()
         for suffix in SUFFIXES:
             to_delete = path.with_suffix(suffix)
             logger.debug('Removing %s', to_delete)
             try:
-                to_delete.unlink()
+                if not cfg.dry_run:
+                    to_delete.unlink()
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
@@ -98,6 +102,7 @@ class ImasHandle(ImasBaseModel):
         self.copy_ids_entry_to(destination)
         return destination
 
+    @dry_run_toggle
     def get(self, key: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 

@@ -10,6 +10,7 @@ from typing_extensions import Literal
 from duqtools.config.basemodel import BaseModel
 
 from ..config._description_helpers import formatter as f
+from ..utils import dry_run_toggle
 from .operation import IDSPathMixin
 
 if TYPE_CHECKING:
@@ -41,6 +42,7 @@ class IDSSamplerMixin(BaseModel):
 class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
     """Sample from IDS between error bounds."""
 
+    @dry_run_toggle
     def apply(self, ids_mapping: IDSMapping) -> None:
         """Apply operation to IDS. Data are modified in-place.
 

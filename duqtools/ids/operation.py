@@ -10,6 +10,7 @@ from typing_extensions import Literal
 from duqtools.config.basemodel import BaseModel
 
 from ..config._description_helpers import formatter as f
+from ..utils import dry_run_toggle
 
 if TYPE_CHECKING:
     from .ids import IDSMapping
@@ -44,6 +45,7 @@ class IDSOperation(IDSPathMixin, IDSOperatorMixin, BaseModel):
         Values to use with operator on field to create sampling
         space."""))
 
+    @dry_run_toggle
     def apply(self, ids_mapping: IDSMapping) -> None:
         """Apply operation to IDS. Data are modified in-place.
 

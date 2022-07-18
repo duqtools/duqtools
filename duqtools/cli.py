@@ -44,7 +44,7 @@ def dry_run_option(f):
     def callback(ctx, param, dry_run):
         if dry_run:
             logger.info('--dry-run enabled')
-            cfg.system = 'dummy'
+            cfg.dry_run = True
 
         return dry_run
 
@@ -123,6 +123,9 @@ def cli_plot(**kwargs):
 @cli.command('clean')
 @common_options
 @click.option('--out', is_flag=True, help='Remove output data.')
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite backup file if necessary.')
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup

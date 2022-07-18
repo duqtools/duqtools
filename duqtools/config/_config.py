@@ -29,6 +29,7 @@ class Config(BaseModel):
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
+    dry_run: bool = Field(False, description='run without side effects')
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
