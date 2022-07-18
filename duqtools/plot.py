@@ -2,6 +2,7 @@ import logging
 
 from .config import cfg
 from .ids import get_ids_tree
+from .system import get_system
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -18,7 +19,7 @@ def plot(*, dry_run, **kwargs):
     runs = cfg.workspace.runs
 
     for run in runs:
-        imas_loc = cfg.system.get_imas_location(run)
+        imas_loc = get_system().get_imas_location(run)
         info('Reading %s', imas_loc)
 
         profile = get_ids_tree(imas_loc, 'core_profiles')

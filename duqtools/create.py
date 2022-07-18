@@ -6,6 +6,7 @@ from duqtools.config import cfg
 from .config import Runs
 from .ids import IDSMapping
 from .ids.handler import ImasHandle
+from .system import get_system
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,9 @@ def create(*, force, dry_run, **kwargs):
     matrix = options.matrix
     sampler = options.sampler
 
-    source = cfg.system.imas_from_path(template_drc)
+    system = get_system()
+
+    source = system.imas_from_path(template_drc)
     logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
@@ -92,12 +95,12 @@ def create(*, force, dry_run, **kwargs):
             with target_in.open() as data_entry_target:
                 core_profiles.put(db_entry=data_entry_target)
 
-        cfg.system.copy_from_template(template_drc, run_drc)
-        cfg.system.write_batchfile(cfg.workspace, run_name)
+        system.copy_from_template(template_drc, run_drc)
+        system.write_batchfile(cfg.workspace, run_name)
 
-        cfg.system.update_imas_locations(run=run_drc,
-                                         inp=target_in,
-                                         out=target_out)
+        system.update_imas_locations(run=run_drc,
+                                     inp=target_in,
+                                     out=target_out)
 
         runs.append({
             'dirname': run_name,
