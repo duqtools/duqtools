@@ -108,3 +108,28 @@ def halton(*iterables, n_samples: int, **kwargs):
         List of sampled input arguments.
     """
     return _sampler(qmc.Halton, *iterables, n_samples=n_samples, **kwargs)
+
+
+_SAMPLERS = {
+    'latin-hypercube': latin_hypercube,
+    'halton': halton,
+    'sobol': sobol,
+    'low-discrepancy-sequence': sobol,
+    'cartesian-product': cartesian_product,
+}
+
+
+def get_matrix_sampler(name: str):
+    """Get sampler.
+
+    Parameters
+    ----------
+    name : str
+        Name of the sampler.
+
+    Returns
+    -------
+    Callable
+        Sampling function.
+    """
+    return _SAMPLERS[name]
