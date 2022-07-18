@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from .config import AbstractSystem, Run, WorkDirectory, cfg
+from .ids.handler import ImasHandle
 from .jetto import JettoSystem
 
 
@@ -25,8 +26,7 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def imas_from_path(template_drc: Path):
-        raise NotImplementedError('')
-        # return ImasLocation(db='', shot='-1', run='-1')
+        return ImasHandle(db='', shot='-1', run='-1')
 
     @staticmethod
     def update_imas_locations(run: Path, inp, out):

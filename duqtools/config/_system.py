@@ -4,8 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from ..schema.imas import ImasBaseModel
 from .basemodel import BaseModel
-from .imaslocation import ImasLocation
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -40,5 +40,6 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
-    def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
+    def update_imas_locations(run: Path, inp: ImasBaseModel,
+                              out: ImasBaseModel):
         pass

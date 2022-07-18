@@ -4,8 +4,8 @@ from typing import Iterable
 from duqtools.config import cfg
 
 from .config import Runs
-from .config.imaslocation import ImasLocation
 from .ids import IDSMapping
+from .ids.handler import ImasHandle
 from .system import get_system
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 RUN_PREFIX = 'run_'
 
 
-def fail_if_locations_exist(locations: Iterable[ImasLocation]):
+def fail_if_locations_exist(locations: Iterable[ImasHandle]):
     """Check IDS coordinates and raise if any exist."""
     any_exists = False
     for location in locations:
@@ -45,7 +45,9 @@ def create(*, force, dry_run, **kwargs):
     matrix = options.matrix
     sampler = options.sampler
 
-    source = get_system().imas_from_path(template_drc)
+    system = get_system()
+
+    source = system.imas_from_path(template_drc)
     logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
@@ -57,9 +59,9 @@ def create(*, force, dry_run, **kwargs):
                 'Directory is not empty, use `duqtools clean` to clear or '
                 '`--force` to override.')
 
-        locations = (ImasLocation(db=options.data.db,
-                                  shot=source.shot,
-                                  run=options.data.run_in_start_at + i)
+        locations = (ImasHandle(db=options.data.db,
+                                shot=source.shot,
+                                run=options.data.run_in_start_at + i)
                      for i in range(len(combinations)))
 
         fail_if_locations_exist(locations)
@@ -72,12 +74,12 @@ def create(*, force, dry_run, **kwargs):
         if not dry_run:
             run_drc.mkdir(parents=True, exist_ok=force)
 
-        target_in = ImasLocation(db=options.data.db,
-                                 shot=source.shot,
-                                 run=options.data.run_in_start_at + i)
-        target_out = ImasLocation(db=options.data.db,
-                                  shot=source.shot,
-                                  run=options.data.run_out_start_at + i)
+        target_in = ImasHandle(db=options.data.db,
+                               shot=source.shot,
+                               run=options.data.run_in_start_at + i)
+        target_out = ImasHandle(db=options.data.db,
+                                shot=source.shot,
+                                run=options.data.run_out_start_at + i)
 
         if not dry_run:
             source.copy_ids_entry_to(target_in)
@@ -93,12 +95,12 @@ def create(*, force, dry_run, **kwargs):
             with target_in.open() as data_entry_target:
                 core_profiles.put(db_entry=data_entry_target)
 
-        get_system().copy_from_template(template_drc, run_drc)
-        get_system().write_batchfile(cfg.workspace, run_name)
+        system.copy_from_template(template_drc, run_drc)
+        system.write_batchfile(cfg.workspace, run_name)
 
-        get_system().update_imas_locations(run=run_drc,
-                                           inp=target_in,
-                                           out=target_out)
+        system.update_imas_locations(run=run_drc,
+                                     inp=target_in,
+                                     out=target_out)
 
         runs.append({
             'dirname': run_name,

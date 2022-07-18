@@ -12,7 +12,7 @@ from ._jset import JettoSettings
 
 if TYPE_CHECKING:
     from ..config import Run, WorkDirectory
-    from ..config.imaslocation import ImasLocation
+    from ..ids.handler import ImasHandle
 
 
 class JettoSystem(AbstractSystem):
@@ -50,7 +50,7 @@ class JettoSystem(AbstractSystem):
         return source
 
     @staticmethod
-    def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
+    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
         jset = JettoSettings.from_directory(run)
         jset_copy = jset.set_imas_locations(inp=inp, out=out)
         jset_copy.to_directory(run)
