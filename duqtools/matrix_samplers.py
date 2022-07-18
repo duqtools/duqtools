@@ -38,7 +38,7 @@ def _sampler(func, *iterables, n_samples: int, **kwargs):
     return samples
 
 
-def latin_hypercube(*iterables, n_samples: int, **kwargs):
+def latin_hypercube(*iterables, n_samples: int, seed: int = None, **kwargs):
     """Sample input iterables using Latin hypercube sampling (LHS).
 
     Uses `scipy.stats.qmc.LatinHyperCube`.
@@ -49,16 +49,21 @@ def latin_hypercube(*iterables, n_samples: int, **kwargs):
         Iterables to sample from.
     n_samples : int
         Number of samples to return.
+    seed : int, optional
+        Seed to use for the randomizer
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.LatinHypercube, *iterables, n_samples=n_samples)
+    return _sampler(qmc.LatinHypercube,
+                    *iterables,
+                    n_samples=n_samples,
+                    seed=seed)
 
 
-def sobol(*iterables, n_samples: int, **kwargs):
+def sobol(*iterables, n_samples: int, seed: int = None, **kwargs):
     """Sample input iterables using the Sobol sampling method for generating
     low discrepancy sequences.
 
@@ -72,16 +77,18 @@ def sobol(*iterables, n_samples: int, **kwargs):
         Number of samples to return. Note that Sobol sequences lose their
         balance  properties if one uses a sample size that is not a power
         of two.
+    seed : int, optional
+        Seed to use for the randomizer
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.Sobol, *iterables, n_samples=n_samples)
+    return _sampler(qmc.Sobol, *iterables, n_samples=n_samples, seed=seed)
 
 
-def halton(*iterables, n_samples: int, **kwargs):
+def halton(*iterables, n_samples: int, seed: int = None, **kwargs):
     """Sample input iterables using the Halton sampling method.
 
     Uses `scipy.stats.qmc.Halton`.
@@ -92,13 +99,15 @@ def halton(*iterables, n_samples: int, **kwargs):
         Iterables to sample from.
     n_samples : int
         Number of samples to return.
+    seed : int, optional
+        Seed to use for the randomizer
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.Halton, *iterables, n_samples=n_samples)
+    return _sampler(qmc.Halton, *iterables, n_samples=n_samples, seed=seed)
 
 
 _SAMPLERS = {
