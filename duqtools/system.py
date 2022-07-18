@@ -1,8 +1,11 @@
 from pathlib import Path
 
-from .config import AbstractSystem, Run, WorkDirectory, cfg
+from .config import cfg
 from .ids.handler import ImasHandle
 from .jetto import JettoSystem
+from .models.system import AbstractSystem
+from .models.workdir import WorkDirectory
+from .schema.runs import Run
 
 
 class DummySystem(AbstractSystem):

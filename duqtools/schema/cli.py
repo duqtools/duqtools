@@ -4,7 +4,6 @@ from typing import List, Union
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from ..config._workdir import WorkDirectory
 from ..ids.operation import IDSOperationSet
 from ..ids.sampler import IDSSamplerSet
 from ._description_helpers import formatter as f
@@ -12,6 +11,7 @@ from .basemodel import BaseModel
 from .data_location import DataLocation
 from .plot import PlotModel
 from .samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
+from .work_dir import WorkDirectoryModel
 
 
 class CreateConfigModel(BaseModel):
@@ -148,7 +148,7 @@ class ConfigModel(BaseModel):
     status: StatusConfigModel = Field(
         StatusConfigModel(),
         description='Configuration for the status subcommand')
-    workspace: WorkDirectory = WorkDirectory()
+    workspace: WorkDirectoryModel = WorkDirectoryModel()
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
                                      description='backend system to use')

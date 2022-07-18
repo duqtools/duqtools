@@ -3,10 +3,11 @@ from typing import Iterable
 
 from duqtools.config import cfg
 
-from .config import Runs
 from .ids import IDSMapping
 from .ids.handler import ImasHandle
 from .matrix_samplers import get_matrix_sampler
+from .models.workdir import WorkDirectory
+from .schema.runs import Runs
 from .system import get_system
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,8 @@ def create(*, force, dry_run, **kwargs):
         logger.warning('No create options specified.')
         return
 
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+
     template_drc = options.template
     matrix = options.matrix
     matrix_sampler = get_matrix_sampler(options.sampler.method)
@@ -55,7 +58,7 @@ def create(*, force, dry_run, **kwargs):
     combinations = matrix_sampler(*variables, **dict(options.sampler))
 
     if not force:
-        if cfg.workspace.runs_yaml.exists():
+        if workspace.runs_yaml.exists():
             raise IOError(
                 'Directory is not empty, use `duqtools clean` to clear or '
                 '`--force` to override.')
@@ -71,7 +74,7 @@ def create(*, force, dry_run, **kwargs):
 
     for i, combination in enumerate(combinations):
         run_name = f'{RUN_PREFIX}{i:04d}'
-        run_drc = cfg.workspace.cwd / run_name
+        run_drc = workspace.cwd / run_name
         if not dry_run:
             run_drc.mkdir(parents=True, exist_ok=force)
 
@@ -97,7 +100,7 @@ def create(*, force, dry_run, **kwargs):
                 core_profiles.put(db_entry=data_entry_target)
 
         system.copy_from_template(template_drc, run_drc)
-        system.write_batchfile(cfg.workspace, run_name)
+        system.write_batchfile(workspace, run_name)
 
         system.update_imas_locations(run=run_drc,
                                      inp=target_in,
@@ -113,5 +116,5 @@ def create(*, force, dry_run, **kwargs):
     if not dry_run:
         runs = Runs.parse_obj(runs)
 
-        with open(cfg.workspace.runs_yaml, 'w') as f:
+        with open(workspace.runs_yaml, 'w') as f:
             runs.yaml(stream=f, descriptions=True)

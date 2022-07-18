@@ -3,7 +3,7 @@ from pathlib import Path
 
 from duqtools.config import Config
 
-from .config.basemodel import BaseModel
+from .schema.basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 

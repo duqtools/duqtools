@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 from pydantic import Field
 from typing_extensions import Literal
 
-from ..config import AbstractSystem
+from ..models.system import AbstractSystem
 from ._imas_functions import imas_from_jset_input
 from ._jset import JettoSettings
 
 if TYPE_CHECKING:
-    from ..config import Run, WorkDirectory
     from ..ids.handler import ImasHandle
+    from ..models.workdir import WorkDirectory
+    from ..schema.runs import Run
 
 
 class JettoSystem(AbstractSystem):
