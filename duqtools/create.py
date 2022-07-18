@@ -52,7 +52,7 @@ def create(*, force, dry_run, **kwargs):
     logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
-    combinations = matrix_sampler(*variables)
+    combinations = matrix_sampler(*variables, **dict(options.sampler))
 
     if not force:
         if cfg.workspace.runs_yaml.exists():
