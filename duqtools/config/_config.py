@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import Field
 from typing_extensions import Literal
 
-from ._create import CreateConfig
+from ..schema.cli import CreateConfig
 from ._plot import PlotConfig
 from ._status import StatusConfig
 from ._submit import SubmitConfig

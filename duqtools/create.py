@@ -6,6 +6,7 @@ from duqtools.config import cfg
 from .config import Runs
 from .ids import IDSMapping
 from .ids.handler import ImasHandle
+from .matrix_samplers import get_matrix_sampler
 from .system import get_system
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def create(*, force, dry_run, **kwargs):
 
     template_drc = options.template
     matrix = options.matrix
-    sampler = options.sampler
+    matrix_sampler = get_matrix_sampler(options.sampler.method)
 
     system = get_system()
 
@@ -51,7 +52,7 @@ def create(*, force, dry_run, **kwargs):
     logger.info('Source data: %s', source)
 
     variables = tuple(var.expand() for var in matrix)
-    combinations = sampler(*variables)
+    combinations = matrix_sampler(*variables, **dict(options.sampler))
 
     if not force:
         if cfg.workspace.runs_yaml.exists():

@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import qmc
 
 
-def cartesian_product(*iterables):
+def cartesian_product(*iterables, **kwargs):
     """Return cartesian product of input iterables.
 
     Uses `itertools.product`
@@ -49,18 +49,13 @@ def latin_hypercube(*iterables, n_samples: int, **kwargs):
         Iterables to sample from.
     n_samples : int
         Number of samples to return.
-    **kwargs
-        These keyword arguments are passed to `scipy.stats.qmc.LatinHypercube`
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.LatinHypercube,
-                    *iterables,
-                    n_samples=n_samples,
-                    **kwargs)
+    return _sampler(qmc.LatinHypercube, *iterables, n_samples=n_samples)
 
 
 def sobol(*iterables, n_samples: int, **kwargs):
@@ -77,15 +72,13 @@ def sobol(*iterables, n_samples: int, **kwargs):
         Number of samples to return. Note that Sobol sequences lose their
         balance  properties if one uses a sample size that is not a power
         of two.
-    **kwargs
-        These keyword arguments are passed to `scipy.stats.qmc.Sobol`
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.Sobol, *iterables, n_samples=n_samples, **kwargs)
+    return _sampler(qmc.Sobol, *iterables, n_samples=n_samples)
 
 
 def halton(*iterables, n_samples: int, **kwargs):
@@ -99,12 +92,35 @@ def halton(*iterables, n_samples: int, **kwargs):
         Iterables to sample from.
     n_samples : int
         Number of samples to return.
-    **kwargs
-        These keyword arguments are passed to `scipy.stats.qmc.Halton`
 
     Returns
     -------
     samples : list[Any]
         List of sampled input arguments.
     """
-    return _sampler(qmc.Halton, *iterables, n_samples=n_samples, **kwargs)
+    return _sampler(qmc.Halton, *iterables, n_samples=n_samples)
+
+
+_SAMPLERS = {
+    'latin-hypercube': latin_hypercube,
+    'halton': halton,
+    'sobol': sobol,
+    'low-discrepancy-sequence': sobol,
+    'cartesian-product': cartesian_product,
+}
+
+
+def get_matrix_sampler(name: str):
+    """Get sampler.
+
+    Parameters
+    ----------
+    name : str
+        Name of the sampler.
+
+    Returns
+    -------
+    Callable
+        Sampling function.
+    """
+    return _SAMPLERS[name]
