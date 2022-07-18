@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-from typing import Union
-
 from pydantic import Field
+from typing_extensions import Literal
 
-from ..jetto.system import JettoSystem
 from ._create import CreateConfig
 from ._plot import PlotConfig
 from ._status import StatusConfig
 from ._submit import SubmitConfig
 from ._workdir import WorkDirectory
 from .basemodel import BaseModel
-from .system import DummySystem
 
 
 class Config(BaseModel):
@@ -29,8 +26,9 @@ class Config(BaseModel):
     status: StatusConfig = Field(
         StatusConfig(), description='Configuration for the status subcommand')
     workspace: WorkDirectory = WorkDirectory()
-    system: Union[JettoSystem, DummySystem] = Field(default=JettoSystem(),
-                                                    discriminator='name')
+    system: Literal['jetto',
+                    'dummy'] = Field('jetto',
+                                     description='backend system to use')
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton

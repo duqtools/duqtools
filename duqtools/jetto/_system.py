@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from pydantic import Field
 from typing_extensions import Literal
 
-from ..config.system import AbstractSystem
+from ..config import AbstractSystem
 from ._imas_functions import imas_from_jset_input
 from ._jset import JettoSettings
 

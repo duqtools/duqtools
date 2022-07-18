@@ -43,9 +43,8 @@ def dry_run_option(f):
 
     def callback(ctx, param, dry_run):
         if dry_run:
-            from .config.system import DummySystem
             logger.info('--dry-run enabled')
-            cfg.system = DummySystem()
+            cfg.system = 'dummy'
 
         return dry_run
 
