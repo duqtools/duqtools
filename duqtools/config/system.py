@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from pydantic import Field
 from typing_extensions import Literal
 
+from ..schema.imas import ImasBaseModel
 from .basemodel import BaseModel
-from .imaslocation import ImasLocation
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -43,7 +43,8 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
-    def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
+    def update_imas_locations(run: Path, inp: ImasBaseModel,
+                              out: ImasBaseModel):
         pass
 
 
@@ -70,8 +71,9 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def imas_from_path(template_drc: Path):
-        return ImasLocation(db='', shot='-1', run='-1')
+        return ImasBaseModel(db='', shot='-1', run='-1')
 
     @staticmethod
-    def update_imas_locations(run: Path, inp: ImasLocation, out: ImasLocation):
+    def update_imas_locations(run: Path, inp: ImasBaseModel,
+                              out: ImasBaseModel):
         pass

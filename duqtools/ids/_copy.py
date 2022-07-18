@@ -12,7 +12,7 @@ from .._logging_utils import LoggingContext
 from ._imas import imas
 
 if TYPE_CHECKING:
-    from ..config.imaslocation import ImasLocation
+    from .ids.handler import ImasHandle
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
 
@@ -50,14 +50,14 @@ def get_imas_ual_version():
     return imas_version, ual_version
 
 
-def copy_ids_entry(source: ImasLocation, target: ImasLocation):
+def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """Copies the ids entry to a new location.
 
     Parameters
     ----------
-    source : ImasLocation
+    source : ImasHandle
         Source ids entry
-    target : ImasLocation
+    target : ImasHandle
         Target ids entry
 
     Raises

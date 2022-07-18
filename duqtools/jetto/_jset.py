@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
 if TYPE_CHECKING:
     from .._types import PathLike
-    from ..config.imaslocation import ImasLocation
+    from ..ids.imas import ImasHandle
 
 DEFAULT_FILENAME = 'jetto.jset'
 
@@ -319,15 +319,15 @@ class JettoSettings:
 
         return jset_copy
 
-    def set_imas_locations(self, inp: ImasLocation,
-                           out: ImasLocation) -> JettoSettings:
+    def set_imas_locations(self, inp: ImasHandle,
+                           out: ImasHandle) -> JettoSettings:
         """Make a copy with updated IDS locations for input / output.
 
         Parameters
         ----------
-        inp : ImasLocation
+        inp : ImasHandle
             IMAS description of where the input data is stored.
-        out : ImasLocation
+        out : ImasHandle
             IMAS description of where the output data should be stored.
 
         Returns

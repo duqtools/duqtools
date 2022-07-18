@@ -4,16 +4,16 @@ from typing import List, Union
 
 from pydantic import DirectoryPath, Field
 
+from ..ids.handler import ImasHandle
 from ..ids.operation import IDSOperation
 from ..ids.sampler import IDSSampler
 from .basemodel import BaseModel
-from .imaslocation import ImasLocation
 
 
 class Run(BaseModel):
     dirname: DirectoryPath = Field(None, description='Directory of run')
-    data_in: ImasLocation
-    data_out: ImasLocation
+    data_in: ImasHandle
+    data_out: ImasHandle
     operations: List[Union[IDSOperation, IDSSampler]]
 
 

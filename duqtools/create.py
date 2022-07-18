@@ -4,15 +4,15 @@ from typing import Iterable
 from duqtools.config import cfg
 
 from .config import Runs
-from .config.imaslocation import ImasLocation
 from .ids import IDSMapping
+from .ids.handler import ImasHandle
 
 logger = logging.getLogger(__name__)
 
 RUN_PREFIX = 'run_'
 
 
-def fail_if_locations_exist(locations: Iterable[ImasLocation]):
+def fail_if_locations_exist(locations: Iterable[ImasHandle]):
     """Check IDS coordinates and raise if any exist."""
     any_exists = False
     for location in locations:
@@ -56,9 +56,9 @@ def create(*, force, dry_run, **kwargs):
                 'Directory is not empty, use `duqtools clean` to clear or '
                 '`--force` to override.')
 
-        locations = (ImasLocation(db=options.data.db,
-                                  shot=source.shot,
-                                  run=options.data.run_in_start_at + i)
+        locations = (ImasHandle(db=options.data.db,
+                                shot=source.shot,
+                                run=options.data.run_in_start_at + i)
                      for i in range(len(combinations)))
 
         fail_if_locations_exist(locations)
@@ -71,12 +71,12 @@ def create(*, force, dry_run, **kwargs):
         if not dry_run:
             run_drc.mkdir(parents=True, exist_ok=force)
 
-        target_in = ImasLocation(db=options.data.db,
-                                 shot=source.shot,
-                                 run=options.data.run_in_start_at + i)
-        target_out = ImasLocation(db=options.data.db,
-                                  shot=source.shot,
-                                  run=options.data.run_out_start_at + i)
+        target_in = ImasHandle(db=options.data.db,
+                               shot=source.shot,
+                               run=options.data.run_in_start_at + i)
+        target_out = ImasHandle(db=options.data.db,
+                                shot=source.shot,
+                                run=options.data.run_out_start_at + i)
 
         if not dry_run:
             source.copy_ids_entry_to(target_in)
