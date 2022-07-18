@@ -34,6 +34,11 @@ class DummySystem(AbstractSystem):
 
 
 def get_system():
+    """get_system.
+
+    Get the system to do operations with TODO make it a variable, not a
+    function
+    """
     if (cfg.system == 'jetto'):
         return JettoSystem
     elif (cfg.system == 'dummy'):
