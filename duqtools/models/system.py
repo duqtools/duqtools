@@ -5,18 +5,17 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from ..schema.imas import ImasBaseModel
-from .basemodel import BaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ._runs import Run
-    from ._workdir import WorkDirectory
+    from ..schema.runs import Run
+    from .workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
 
 
-class AbstractSystem(ABC, BaseModel):
+class AbstractSystem(ABC):
 
     @staticmethod
     @abstractmethod

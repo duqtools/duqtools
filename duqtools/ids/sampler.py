@@ -7,9 +7,8 @@ import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
 
-from duqtools.config.basemodel import BaseModel
-
-from ..config._description_helpers import formatter as f
+from ..schema._description_helpers import formatter as f
+from ..schema.basemodel import BaseModel
 from .operation import IDSPathMixin
 
 if TYPE_CHECKING:
