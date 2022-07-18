@@ -4,6 +4,7 @@ import logging
 import shutil
 
 from .config import cfg
+from .models.workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ def cleanup(out: bool = False, **kwargs):
         Remove output IDS.
     """
 
-    for run in cfg.workspace.runs:
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+
+    for run in workspace.runs:
         logger.info('Removing %s', run.data_in)
         run.data_in.delete()
 
@@ -28,5 +31,5 @@ def cleanup(out: bool = False, **kwargs):
         logger.info('Removing run dir %s', run.dirname.resolve())
         shutil.rmtree(run.dirname)
 
-    logger.info('Removing %s', cfg.workspace.runs_yaml)
-    cfg.workspace.runs_yaml.unlink()
+    logger.info('Removing %s', workspace.runs_yaml)
+    workspace.runs_yaml.unlink()
