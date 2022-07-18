@@ -5,8 +5,8 @@ from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
-from ..ids._imas import imas, imasdef
-from .basemodel import BaseModel
+from ..schema.imas import ImasBaseModel
+from ._imas import imas, imasdef
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +33,7 @@ def _patch_str_repr(obj: object):
     obj.__repr__ = types.MethodType(true_repr, obj)  # type: ignore
 
 
-class ImasLocation(BaseModel):
-    user: str = getuser()
-    db: str
-    shot: int
-    run: int
+class ImasHandle(ImasBaseModel):
 
     def path(self) -> Path:
         """Return location as Path."""
@@ -58,12 +54,12 @@ class ImasLocation(BaseModel):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_ids_entry_to(self, destination: ImasLocation):
+    def copy_ids_entry_to(self, destination: ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters
         ----------
-        destination : ImasLocation
+        destination : ImasHandle
             Copy data to a new location.
         """
         from ..ids import copy_ids_entry
@@ -81,7 +77,7 @@ class ImasLocation(BaseModel):
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
-    def copy_ids_entry_to_run(self, *, run: int) -> ImasLocation:
+    def copy_ids_entry_to_run(self, *, run: int) -> ImasHandle:
         """Copy ids entry to destination with given run number.
 
         The user is set to the current user, because we don't
@@ -94,7 +90,7 @@ class ImasLocation(BaseModel):
 
         Returns
         -------
-        destination : ImasLocation
+        destination : ImasHandle
             Returns the destination.
         """
         user = getuser()
@@ -110,7 +106,7 @@ class ImasLocation(BaseModel):
         key : str, optional
             Name of profiles to open.
         **kwargs
-            These keyword parametes are passed to `ImasLocation.open()`.
+            These keyword parametes are passed to `ImasHandle.open()`.
 
         Returns
         -------
