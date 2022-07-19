@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Dict, Union
 
 import numpy as np
 
@@ -80,5 +80,29 @@ def ids_sampler(model: IDSSampler, ids_mapping: IDSMapping) -> None:
     profile[:] = new_profile
 
 
-def apply_model(model: IDSSampler, ids_mapping: IDSMapping):
-    breakpoint()
+# TODO: Use single dispatch
+def apply_model(model: Union[IDSSampler, IDSOperation],
+                ids_mapping: IDSMapping):
+    """Apply model to IDS data.
+
+    Parameters
+    ----------
+    model : IDSSampler
+        Description
+    ids_mapping : IDSMapping
+        Description
+
+    Returns
+    -------
+    TYPE
+        Description
+    """
+
+    model_name = model.__class__.__name__
+    dispatch_table: Dict[str, Callable] = {
+        'IDSSampler': ids_sampler,
+        'IDSOperation': ids_operation,
+    }
+    func = dispatch_table[model_name]
+
+    return func(model=model, ids_mapping=ids_mapping)
