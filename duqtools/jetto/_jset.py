@@ -260,6 +260,7 @@ class JettoSettings:
         directory : PathLike
             Name of output directory
         """
+        self.run_dir = str(directory)
         filename = Path(directory) / DEFAULT_FILENAME
         write_jset(filename, self.raw_mapping)
         debug('write %s', filename)
