@@ -4,6 +4,7 @@ from typing import Iterable
 from duqtools.config import cfg
 
 from .ids import IDSMapping
+from .ids.dimensions import apply_model
 from .ids.handler import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models.workdir import WorkDirectory
@@ -46,7 +47,7 @@ def create(*, force, dry_run, **kwargs):
     workspace = WorkDirectory.parse_obj(cfg.workspace)
 
     template_drc = options.template
-    matrix = options.matrix
+    dimensions = options.dimensions
     matrix_sampler = get_matrix_sampler(options.sampler.method)
 
     system = get_system()
@@ -54,8 +55,8 @@ def create(*, force, dry_run, **kwargs):
     source = system.imas_from_path(template_drc)
     logger.info('Source data: %s', source)
 
-    variables = tuple(var.expand() for var in matrix)
-    combinations = matrix_sampler(*variables, **dict(options.sampler))
+    matrix = tuple(dim.expand() for dim in dimensions)
+    combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
     if not force:
         if workspace.runs_yaml.exists():
@@ -91,8 +92,8 @@ def create(*, force, dry_run, **kwargs):
             core_profiles = target_in.get('core_profiles')
             ids_mapping = IDSMapping(core_profiles)
 
-            for operation in combination:
-                operation.apply(ids_mapping)
+            for model in combination:
+                apply_model(model, ids_mapping)
 
         logger.info('Writing data entry: %s', target_in)
         if not dry_run:

@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING, List, Tuple
+from typing import List, Tuple
 
-import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
 
 from ._description_helpers import formatter as f
 from .basemodel import BaseModel
-
-logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from ..ids import IDSMapping
 
 
 class IDSPathMixin(BaseModel):
@@ -42,29 +35,6 @@ class IDSOperation(IDSPathMixin, IDSOperatorMixin, BaseModel):
     value: float = Field(description=f("""
         Values to use with operator on field to create sampling
         space."""))
-
-    def apply(self, ids_mapping: IDSMapping) -> None:
-        """Apply operation to IDS. Data are modified in-place.
-
-        Parameters
-        ----------
-        ids_mapping : IDSMapping
-            Core profiles IDSMapping, data to apply operation to.
-            Must contain the IDS path.
-        """
-        logger.info('Apply `%s(%s, %s)`', self.ids, self.operator, self.value)
-
-        profile = ids_mapping.flat_fields[self.ids]
-
-        logger.debug('data range before: %s - %s', profile.min(),
-                     profile.max())
-        self._npfunc(profile, self.value, out=profile)
-        logger.debug('data range after: %s - %s', profile.min(), profile.max())
-
-    @property
-    def _npfunc(self):
-        """Grab numpy function."""
-        return getattr(np, self.operator)
 
 
 class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
@@ -108,54 +78,6 @@ class IDSSamplerMixin(BaseModel):
 
 class IDSSampler(IDSPathMixin, IDSSamplerMixin, BaseModel):
     """Sample from IDS between error bounds."""
-
-    def apply(self, ids_mapping: IDSMapping) -> None:
-        """Apply operation to IDS. Data are modified in-place.
-
-        Parameters
-        ----------
-        ids_mapping : IDSMapping
-            Core profiles IDSMapping, data to apply operation to.
-            Must contain the IDS path.
-        """
-        upper_key = self.ids + self._upper_suffix
-        lower_key = self.ids + self._lower_suffix
-
-        logger.info('Apply %s', self)
-
-        profile = ids_mapping.flat_fields[self.ids]
-
-        upper = ids_mapping.flat_fields[upper_key]
-        sigma_upper = abs(upper - profile)
-
-        has_lower = lower_key in ids_mapping.flat_fields
-
-        if self.bounds == 'auto':
-            bounds = 'asymmetric' if has_lower else 'symmetric'
-        else:
-            bounds = self.bounds
-
-        # this is only ever necessary if upper/lower are different
-        if bounds == 'symmetric':
-
-            if has_lower:
-                lower = ids_mapping.flat_fields[lower_key]
-                sigma_lower = abs(profile - lower)
-                mean_sigma = (sigma_upper + sigma_lower) / 2
-            else:
-                mean_sigma = sigma_upper
-
-            rng = np.random.default_rng()
-            new_profile = rng.normal(loc=profile, scale=mean_sigma)
-
-        elif bounds == 'asymmetric':
-            raise NotImplementedError
-        else:
-            raise ValueError(
-                f'Unknown value for argument: bounds={self.bounds}')
-
-        # update in-place
-        profile[:] = new_profile
 
 
 class IDSSamplerDim(IDSPathMixin, IDSSamplerMixin, BaseModel):

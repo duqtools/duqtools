@@ -17,16 +17,17 @@ from .work_dir import WorkDirectoryModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    matrix: List[Union[IDSOperationDim, IDSSamplerDim]] = Field(
+    dimensions: List[Union[IDSOperationDim, IDSSamplerDim]] = Field(
         [IDSOperationDim(), IDSSamplerDim()],
         description=f("""
-        The `matrix` specifies the operations to apply. These are compound
-        operations which are expanded to fill a matrix of all possible
-        combinations. This generates the
+        The `dimensions` specifies the dimensions of the matrix to sample
+        from. Each dimension is a compound set of operations to apply.
+        From this, a matrix all possible combinations is generated.
+        Essentially, it generates the
         [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
         of all operations. By specifying a different `sampler`, a subset of
         this hypercube can be efficiently sampled.
-"""))
+        """))
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),
@@ -40,7 +41,7 @@ class CreateConfigModel(BaseModel):
         [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
         [`halton`](en.wikipedia.org/wiki/Halton_sequence).
         Where `n_samples` gives the number of samples to extract.
-                                                """))
+        """))
 
     template: DirectoryPath = Field(
         f'/pfs/work/{getuser()}/jetto/runs/duqtools_template',

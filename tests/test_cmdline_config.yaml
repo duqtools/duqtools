@@ -9,7 +9,7 @@ create:
   sampler:
     method: latin-hypercube
     n_samples: 3
-  matrix:
+  dimensions:
     - ids: profiles_1d/0/zeff
       operator: add
       values: [1, 2, 3]
