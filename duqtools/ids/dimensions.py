@@ -1,26 +1,41 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Union
+from functools import singledispatch
 
 import numpy as np
 
-if TYPE_CHECKING:
-    from ..schema.dimensions import IDSOperation, IDSSampler
-    from ._mapping import IDSMapping
+from ..schema.basemodel import BaseModel
+from ..schema.dimensions import IDSOperation, IDSSampler
+from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
 
-def ids_operation(model: IDSOperation, ids_mapping: IDSMapping) -> None:
-    """Apply operation to IDS. Data are modified in-place.
+@singledispatch
+def apply_model(model: BaseModel, ids_mapping: IDSMapping) -> None:
+    """Apply operation in model to IDS. Data are modified in-place.
 
     Parameters
     ----------
+    model
+        The model describes the operation to apply to the data.
     ids_mapping : IDSMapping
         Core profiles IDSMapping, data to apply operation to.
         Must contain the IDS path.
+
+    Raises
+    ------
+    NotImplementedError
+        When the model is unknown
     """
+
+    raise NotImplementedError(f'Unknown model: {model}')
+
+
+@apply_model.register
+def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
+
     npfunc = getattr(np, model.operator)
 
     logger.info('Apply `%s(%s, %s)`', model.ids, model.operator, model.value)
@@ -32,7 +47,8 @@ def ids_operation(model: IDSOperation, ids_mapping: IDSMapping) -> None:
     logger.debug('data range after: %s - %s', profile.min(), profile.max())
 
 
-def ids_sampler(model: IDSSampler, ids_mapping: IDSMapping) -> None:
+@apply_model.register
+def _(model: IDSSampler, ids_mapping: IDSMapping) -> None:
     """Apply operation to IDS. Data are modified in-place.
 
     Parameters
@@ -78,31 +94,3 @@ def ids_sampler(model: IDSSampler, ids_mapping: IDSMapping) -> None:
 
     # update in-place
     profile[:] = new_profile
-
-
-# TODO: Use single dispatch
-def apply_model(model: Union[IDSSampler, IDSOperation],
-                ids_mapping: IDSMapping):
-    """Apply model to IDS data.
-
-    Parameters
-    ----------
-    model : IDSSampler
-        Description
-    ids_mapping : IDSMapping
-        Description
-
-    Returns
-    -------
-    TYPE
-        Description
-    """
-
-    model_name = model.__class__.__name__
-    dispatch_table: Dict[str, Callable] = {
-        'IDSSampler': ids_sampler,
-        'IDSOperation': ids_operation,
-    }
-    func = dispatch_table[model_name]
-
-    return func(model=model, ids_mapping=ids_mapping)
