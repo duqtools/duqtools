@@ -46,7 +46,7 @@ def create(*, force, dry_run, **kwargs):
     workspace = WorkDirectory.parse_obj(cfg.workspace)
 
     template_drc = options.template
-    dimensions = options._dimensions
+    dimensions = options.dimensions
     matrix_sampler = get_matrix_sampler(options.sampler.method)
 
     system = get_system()
