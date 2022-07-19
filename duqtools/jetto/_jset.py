@@ -83,6 +83,12 @@ JINTRAC_CONFIG_VARS = (
         'key': 'AppPanel.openPrvSetDir',
         'doc': 'Location of the run directory'
     },
+    {
+        'name': 'run_dir_name',
+        'type': str,
+        'key': 'JobProcessingPanel.runDirNumber',
+        'doc': 'Name of the run directory'
+    },
 )
 
 
@@ -260,8 +266,12 @@ class JettoSettings:
         directory : PathLike
             Name of output directory
         """
+        directory = Path(directory)
+
         self.run_dir = str(directory)
-        filename = Path(directory) / DEFAULT_FILENAME
+        self.run_dir_name = directory.name
+
+        filename = directory / DEFAULT_FILENAME
         write_jset(filename, self.raw_mapping)
         debug('write %s', filename)
 
