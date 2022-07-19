@@ -9,6 +9,7 @@ Creation Time                                               : 14:52:26
 Version                                                     : v210921_gateway_imas
 *
 *Settings
+AppPanel.openPrvSetDir                                      : /path/to/data
 JobProcessingPanel.driver                                   : IMAS(Python), native + IDS I/O
 JobProcessingPanel.emailNotify                              :
 JobProcessingPanel.idsRunid                                 : 251
