@@ -166,3 +166,4 @@ class ConfigModel(BaseModel):
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
+    dry_run: bool = Field(False, description='run without side effects')

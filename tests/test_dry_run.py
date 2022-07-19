@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from duqtools.cli import cli_create, cli_init, cli_plot, cli_submit
+from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
 
@@ -33,13 +33,26 @@ def cmdline_workdir(tmp_path_factory):
     return workdir
 
 
+@pytest.mark.dependency()
+def test_clean_database(cmdline_workdir):
+    with work_directory(cmdline_workdir):
+        cli_create(['-c', 'config.yaml', '--force'], standalone_mode=False)
+        cli_clean(['-c', 'config.yaml', '--force', '--out'],
+                  standalone_mode=False)
+        assert (not Path('./run_0000').exists())
+        assert (not Path('./run_0001').exists())
+        assert (not Path('./run_0002').exists())
+        assert (not Path('./runs.yaml').exists())
+        assert (Path('./runs.yaml.old').exists())
+
+
 def test_init(cmdline_workdir):
     with work_directory(cmdline_workdir):
         cli_init(['--full', '--dry-run'], standalone_mode=False)
         assert (not Path('./duqtools.yaml').exists())
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(depends=['test_clean_database'])
 def test_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
         cli_create(['-c', 'config.yaml', '--dry-run', '--force'],

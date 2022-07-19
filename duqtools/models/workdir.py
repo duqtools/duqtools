@@ -32,6 +32,11 @@ class WorkDirectory(WorkDirectoryModel):
         return self.cwd / 'runs.yaml'
 
     @property
+    def runs_yaml_old(self):
+        """Location of runs.yaml.old."""
+        return self.cwd / 'runs.yaml.old'
+
+    @property
     def runs(self) -> List[Run]:
         """Get a list of the runs currently created from this config."""
         runs_yaml = self.runs_yaml

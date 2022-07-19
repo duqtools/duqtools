@@ -86,17 +86,16 @@ def create(*, force, dry_run, **kwargs):
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
+        source.copy_ids_entry_to(target_in)
+
+        core_profiles = target_in.get('core_profiles')
+        ids_mapping = IDSMapping(core_profiles)
+
         if not dry_run:
-            source.copy_ids_entry_to(target_in)
-
-            core_profiles = target_in.get('core_profiles')
-            ids_mapping = IDSMapping(core_profiles)
-
             for model in combination:
                 apply_model(model, ids_mapping)
 
-        logger.info('Writing data entry: %s', target_in)
-        if not dry_run:
+            logger.info('Writing data entry: %s', target_in)
             with target_in.open() as data_entry_target:
                 core_profiles.put(db_entry=data_entry_target)
 
