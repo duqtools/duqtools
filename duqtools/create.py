@@ -117,4 +117,4 @@ def create(*, force, dry_run, **kwargs):
         runs = Runs.parse_obj(runs)
 
         with open(workspace.runs_yaml, 'w') as f:
-            runs.yaml(stream=f, descriptions=True)
+            runs.yaml(stream=f)
