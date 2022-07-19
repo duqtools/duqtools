@@ -5,8 +5,8 @@ from typing import List, Tuple
 from pydantic import Field
 from typing_extensions import Literal
 
+from . import BaseModel
 from ._description_helpers import formatter as f
-from .basemodel import BaseModel
 
 
 class IDSPathMixin(BaseModel):

@@ -12,7 +12,7 @@ from .._logging_utils import LoggingContext
 from ._imas import imas
 
 if TYPE_CHECKING:
-    from .ids.handler import ImasHandle
+    from .ids import ImasHandle
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
 

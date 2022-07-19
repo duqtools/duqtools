@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import Field
 
+from . import BaseModel
 from ._description_helpers import formatter as f
-from .basemodel import BaseModel
 
 
 class PlotModel(BaseModel):

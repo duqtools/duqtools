@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
-    from .ids.handler import ImasHandle
+    from .ids import ImasHandle
 
 logger = logging.getLogger(__name__)
 

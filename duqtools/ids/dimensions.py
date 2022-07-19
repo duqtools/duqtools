@@ -5,7 +5,7 @@ from functools import singledispatch
 
 import numpy as np
 
-from ..schema.basemodel import BaseModel
+from ..schema import BaseModel
 from ..schema.dimensions import IDSOperation, IDSSampler
 from ._mapping import IDSMapping
 

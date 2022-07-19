@@ -6,15 +6,14 @@ from typing import TYPE_CHECKING
 from pydantic import Field
 from typing_extensions import Literal
 
-from ..models.system import AbstractSystem
+from ..models import AbstractSystem
 from ..utils import dry_run_toggle
 from ._imas_functions import imas_from_jset_input
 from ._jset import JettoSettings
 
 if TYPE_CHECKING:
-    from ..ids.handler import ImasHandle
-    from ..models.workdir import WorkDirectory
-    from ..schema.runs import Run
+    from ..ids import ImasHandle
+    from ..models import WorkDirectory
 
 
 class JettoSystem(AbstractSystem):
@@ -34,10 +33,6 @@ class JettoSystem(AbstractSystem):
     def write_batchfile(workspace: WorkDirectory, run_name: str):
         from duqtools.jetto import write_batchfile as jetto_write_batchfile
         return jetto_write_batchfile(workspace, run_name)
-
-    @staticmethod
-    def get_imas_location(run: Run):
-        return run.data_out
 
     @staticmethod
     @dry_run_toggle

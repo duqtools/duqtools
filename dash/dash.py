@@ -7,8 +7,7 @@ import pandas as pd
 import streamlit as st
 from scipy.interpolate import interp1d
 
-from duqtools.ids import get_ids_tree
-from duqtools.ids.handler import ImasHandle
+from duqtools.ids import ImasHandle, get_ids_tree
 from duqtools.schema.runs import Runs
 
 try:

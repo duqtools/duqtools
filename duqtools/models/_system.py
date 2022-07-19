@@ -9,7 +9,6 @@ from ..schema.imas import ImasBaseModel
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ..schema.runs import Run
     from .workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
@@ -20,11 +19,6 @@ class AbstractSystem(ABC):
     @staticmethod
     @abstractmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def get_imas_location(run: Run):
         pass
 
     @staticmethod

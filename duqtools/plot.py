@@ -1,9 +1,8 @@
 import logging
 
 from .config import cfg
-from .ids import get_ids_tree
-from .models.workdir import WorkDirectory
-from .system import get_system
+from .ids import ImasHandle, get_ids_tree
+from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -22,7 +21,7 @@ def plot(*, dry_run, **kwargs):
     runs = workspace.runs
 
     for run in runs:
-        imas_loc = get_system().get_imas_location(run)
+        imas_loc = ImasHandle.parse_obj(run.data_out)
         info('Reading %s', imas_loc)
 
         profile = get_ids_tree(imas_loc, 'core_profiles')

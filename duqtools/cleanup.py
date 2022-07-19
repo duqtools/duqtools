@@ -4,7 +4,8 @@ import logging
 import shutil
 
 from .config import cfg
-from .models.workdir import WorkDirectory
+from .ids import ImasHandle
+from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +26,15 @@ def cleanup(out, force, **kwargs):
                 '`runs.yaml.old` exists, use --force to overwrite anyway')
 
     for run in workspace.runs:
-        logger.info('Removing %s', run.data_in)
-        run.data_in.delete()
+        data_in = ImasHandle.parse_obj(run.data_in)
+        data_out = ImasHandle.parse_obj(run.data_out)
+
+        logger.info('Removing %s', data_in)
+        data_in.delete()
 
         if out:
-            logger.info('Removing %s', run.data_out)
-            run.data_out.delete()
+            logger.info('Removing %s', data_out)
+            data_out.delete()
 
         logger.info('Removing run dir %s', run.dirname.resolve())
         shutil.rmtree(run.dirname)
