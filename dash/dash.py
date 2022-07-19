@@ -143,7 +143,7 @@ for y_val in y_vals:
 
         # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
         band = alt.Chart(source).mark_errorband(
-            extent='ci', interpolate='linear').encode(
+            extent='stdev', interpolate='linear').encode(
                 x=f'{x}:Q',
                 y=f'{y}:Q',
                 color=alt.Color('tstep:N'),
