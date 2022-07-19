@@ -77,6 +77,12 @@ JINTRAC_CONFIG_VARS = (
         'key': 'SetUpPanel.endTime',
         'doc': 'End time'
     },
+    {
+        'name': 'run_dir',
+        'type': str,
+        'key': 'AppPanel.openPrvSetDir',
+        'doc': 'Location of the run directory'
+    },
 )
 
 
