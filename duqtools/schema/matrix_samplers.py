@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import Field
 from typing_extensions import Literal
 
-from . import BaseModel
+from ._basemodel import BaseModel
 
 
 class LHSSampler(BaseModel):

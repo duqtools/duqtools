@@ -2,7 +2,7 @@ from getpass import getuser
 
 from pydantic import DirectoryPath, Field
 
-from . import BaseModel
+from ._basemodel import BaseModel
 
 
 class WorkDirectoryModel(BaseModel):

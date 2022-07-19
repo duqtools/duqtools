@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from ..schema.imas import ImasBaseModel
+from ..schema import BaseModel, ImasBaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AbstractSystem(ABC):
+class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod

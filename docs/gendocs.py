@@ -44,16 +44,15 @@ extra_schemas = {}
 extra_yamls = {}
 
 if 'plot' in models:
-    from duqtools.config._plot import Plot
+    from duqtools.schema import PlotModel
 
-    extra_schemas['plot_schema'] = Plot.schema()
+    extra_schemas['plot_schema'] = PlotModel.schema()
 
 if 'create' in models:
-    from duqtools.ids.operation import IDSOperationSet
-    from duqtools.ids.sampler import IDSSamplerSet
+    from duqtools.schema import IDSOperationDim, IDSSamplerDim
 
-    extra_schemas['ops_schema'] = IDSOperationSet.schema()
-    extra_schemas['sampler_schema'] = IDSSamplerSet.schema()
+    extra_schemas['ops_schema'] = IDSOperationDim.schema()
+    extra_schemas['sampler_schema'] = IDSSamplerDim.schema()
     extra_schemas['data_loc_schema'] = cfg.create.data.schema()
 
     extra_yamls['data_loc_yaml'] = model2config('data', cfg.create.data)
@@ -62,13 +61,11 @@ if 'introduction' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()
     extra_yamls['wd_yaml'] = model2config('workspace', cfg.workspace)
 
-    from duqtools.config.system import DummySystem
-    from duqtools.jetto.system import JettoSystem
+    from duqtools.jetto import JettoSystem
+    from duqtools.system import DummySystem
 
-    extra_schemas['system_schema'] = cfg.system.schema()
     extra_schemas['jetto_schema'] = JettoSystem.schema()
     extra_schemas['dummy_schema'] = DummySystem.schema()
-    extra_yamls['system_yaml'] = model2config('system', cfg.system)
 
 for name, model in models.items():
     template = get_template(f'template_{name}.md')

@@ -4,13 +4,13 @@ from typing import List, Union
 from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
-from . import BaseModel
+from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
+from ._dimensions import IDSOperationDim, IDSSamplerDim
+from ._plot import PlotModel
 from .data_location import DataLocation
-from .dimensions import IDSOperationDim, IDSSamplerDim
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
-from .plot import PlotModel
 from .workdir import WorkDirectoryModel
 
 

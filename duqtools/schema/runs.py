@@ -4,9 +4,9 @@ from typing import List, Union
 
 from pydantic import DirectoryPath, Field
 
-from . import BaseModel
-from .dimensions import IDSOperation, IDSSampler
-from .imas import ImasBaseModel
+from ._basemodel import BaseModel
+from ._dimensions import IDSOperation, IDSSampler
+from ._imas import ImasBaseModel
 
 
 class Run(BaseModel):

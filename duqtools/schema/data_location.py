@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from . import BaseModel
+from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 
 

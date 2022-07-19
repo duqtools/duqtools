@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
-from ..schema.imas import ImasBaseModel
+from ..schema import ImasBaseModel
 from ..utils import dry_run_toggle
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
