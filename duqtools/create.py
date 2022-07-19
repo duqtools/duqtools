@@ -91,10 +91,10 @@ def create(*, force, dry_run, **kwargs):
         core_profiles = target_in.get('core_profiles')
         ids_mapping = IDSMapping(core_profiles)
 
-        for model in combination:
-            apply_model(model, ids_mapping)
-
         if not dry_run:
+            for model in combination:
+                apply_model(model, ids_mapping)
+
             logger.info('Writing data entry: %s', target_in)
             with target_in.open() as data_entry_target:
                 core_profiles.put(db_entry=data_entry_target)
