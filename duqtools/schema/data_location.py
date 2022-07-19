@@ -1,7 +1,7 @@
 from pydantic import Field
 
+from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from .basemodel import BaseModel
 
 
 class DataLocation(BaseModel):

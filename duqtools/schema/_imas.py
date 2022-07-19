@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from getpass import getuser
 
-from .basemodel import BaseModel
+from ._basemodel import BaseModel
 
 
 class ImasBaseModel(BaseModel):

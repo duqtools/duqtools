@@ -5,7 +5,7 @@ from typing import Any, List
 
 from duqtools.config import cfg
 
-from .models.workdir import WorkDirectory
+from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

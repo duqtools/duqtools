@@ -4,14 +4,14 @@ from typing import List, Union
 from pydantic import DirectoryPath, Field, validator
 from typing_extensions import Literal
 
+from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from .basemodel import BaseModel
+from ._dimensions import IDSOperationDim, IDSSamplerDim
+from ._plot import PlotModel
 from .data_location import DataLocation
-from .dimensions import IDSOperationDim, IDSSamplerDim
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
-from .plot import PlotModel
-from .work_dir import WorkDirectoryModel
+from .workdir import WorkDirectoryModel
 
 
 class DeprecatedValueError(ValueError):

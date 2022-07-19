@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
 if TYPE_CHECKING:
     from .._types import PathLike
-    from ..ids.imas import ImasHandle
+    from ..ids import ImasHandle
 
 DEFAULT_FILENAME = 'jetto.jset'
 

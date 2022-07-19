@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from ..ids.handler import ImasHandle
+from ..ids import ImasHandle
 
 if TYPE_CHECKING:
     from ._jset import JettoSettings

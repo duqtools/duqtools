@@ -5,8 +5,7 @@ from functools import singledispatch
 
 import numpy as np
 
-from ..schema.basemodel import BaseModel
-from ..schema.dimensions import IDSOperation, IDSSampler
+from ..schema import BaseModel, IDSOperation, IDSSampler
 from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)

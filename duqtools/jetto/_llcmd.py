@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from duqtools.models.workdir import WorkDirectory
+    from duqtools.models import WorkDirectory
 
 
 def write_batchfile(workspace: WorkDirectory, run_name: str):

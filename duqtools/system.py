@@ -1,11 +1,9 @@
 from pathlib import Path
 
 from .config import cfg
-from .ids.handler import ImasHandle
+from .ids import ImasHandle
 from .jetto import JettoSystem
-from .models.system import AbstractSystem
-from .models.workdir import WorkDirectory
-from .schema.runs import Run
+from .models import AbstractSystem, WorkDirectory
 
 
 class DummySystem(AbstractSystem):
@@ -18,10 +16,6 @@ class DummySystem(AbstractSystem):
     @staticmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str):
         pass
-
-    @staticmethod
-    def get_imas_location(run: Run):
-        return run.data_out
 
     @staticmethod
     def copy_from_template(source_drc: Path, target_drc: Path):

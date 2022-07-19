@@ -4,7 +4,7 @@ from typing import List
 from pydantic import validator
 
 from ..schema.runs import Run, Runs
-from ..schema.work_dir import WorkDirectoryModel
+from ..schema.workdir import WorkDirectoryModel
 
 
 class WorkDirectory(WorkDirectoryModel):
