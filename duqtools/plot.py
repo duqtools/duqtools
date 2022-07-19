@@ -2,6 +2,7 @@ import logging
 
 from .config import cfg
 from .ids import get_ids_tree
+from .models.workdir import WorkDirectory
 from .system import get_system
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,9 @@ def plot(*, dry_run, **kwargs):
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
     profiles = []
-    runs = cfg.workspace.runs
+
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+    runs = workspace.runs
 
     for run in runs:
         imas_loc = get_system().get_imas_location(run)

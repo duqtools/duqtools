@@ -5,6 +5,8 @@ from typing import Any, List
 
 from duqtools.config import cfg
 
+from .models.workdir import WorkDirectory
+
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
@@ -24,7 +26,8 @@ def submit(*, force: bool, **kwargs):
 
     debug('Submit config: %s', cfg.submit)
 
-    runs = cfg.workspace.runs
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+    runs = workspace.runs
 
     run_dirs = [Path(run.dirname) for run in runs]
     debug('Case directories: %s', run_dirs)

@@ -1,4 +1,5 @@
-from duqtools.samplers import cartesian_product, halton, latin_hypercube, sobol
+from duqtools.matrix_samplers import (cartesian_product, halton,
+                                      latin_hypercube, sobol)
 
 
 def test_cartesian_product():

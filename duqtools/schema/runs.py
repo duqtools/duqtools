@@ -5,9 +5,8 @@ from typing import List, Union
 from pydantic import DirectoryPath, Field
 
 from ..ids.handler import ImasHandle
-from ..ids.operation import IDSOperation
-from ..ids.sampler import IDSSampler
 from .basemodel import BaseModel
+from .dimensions import IDSOperation, IDSSampler
 
 
 class Run(BaseModel):

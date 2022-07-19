@@ -4,6 +4,7 @@ import logging
 import shutil
 
 from .config import cfg
+from .models.workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +17,14 @@ def cleanup(out, force, **kwargs):
     out : bool
         Remove output IDS.
     """
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
 
-    if cfg.workspace.runs_yaml.exists and not force:
-        if (cfg.workspace.root / 'runs.yaml.old').exists():
+    if workspace.runs_yaml.exists and not force:
+        if workspace.runs_yaml_old.exists():
             raise IOError(
-                'runs.yaml.old exists, use --force to overwrite anyway')
+                '`runs.yaml.old` exists, use --force to overwrite anyway')
 
-    for run in cfg.workspace.runs:
+    for run in workspace.runs:
         logger.info('Removing %s', run.data_in)
         run.data_in.delete()
 
@@ -33,5 +35,5 @@ def cleanup(out, force, **kwargs):
         logger.info('Removing run dir %s', run.dirname.resolve())
         shutil.rmtree(run.dirname)
 
-    logger.info('Moving %s', cfg.workspace.runs_yaml)
-    shutil.move(cfg.workspace.runs_yaml, cfg.workspace.root / 'runs.yaml.old')
+    logger.info('Moving %s', workspace.runs_yaml)
+    shutil.move(workspace.runs_yaml, workspace.runs_yaml_old)

@@ -9,7 +9,7 @@ plot:  # Configuration for the plotting subcommand
     xlabel: Rho tor. # Custom label for x-axis
     ylabel: Ion temperature # Custom label for y-axis
 create: # Configuration for the create subcommand
-  matrix:  # The `matrix` specifies the operations to apply. These are compound operations which are expanded to fill a matrix of all possible combinations. This generates the [Cartesian product](en.wikipedia.org/wiki/Cartesian_product) of all operations. By specifying a different `sampler`, a subset of this hypercube can be efficiently sampled.
+  dimensions:  # The `matrix` specifies the operations to apply. These are compound operations which are expanded to fill a matrix of all possible combinations. This generates the [Cartesian product](en.wikipedia.org/wiki/Cartesian_product) of all operations. By specifying a different `sampler`, a subset of this hypercube can be efficiently sampled.
   - operator: multiply  # Which operator to apply to the data in combination with any of the given values below. This can be any of the basic numpy arithmetic operations. Available choices: `add`, `multiply`, `divide`, `power`, `subtract`, `floor_divide`, `mod`, and `remainder`. These directly map to the equivalent numpy functions, i.e. `add` -> `np.add`.
     ids: profiles_1d/0/t_i_average # IDS Path of the data to modify. `core_profiles` is implied.
     values: # Values to use with operator on field to create sampling space.
