@@ -4,21 +4,21 @@ from typing import List, Union
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
-from ..ids.operation import IDSOperationSet
-from ..ids.sampler import IDSSamplerSet
 from ._description_helpers import formatter as f
 from .basemodel import BaseModel
 from .data_location import DataLocation
+from .dimensions import IDSOperationDim, IDSSamplerDim
+from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
+                              SobolSampler)
 from .plot import PlotModel
-from .samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .work_dir import WorkDirectoryModel
 
 
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    matrix: List[Union[IDSOperationSet, IDSSamplerSet]] = Field(
-        [IDSOperationSet(), IDSSamplerSet()],
+    matrix: List[Union[IDSOperationDim, IDSSamplerDim]] = Field(
+        [IDSOperationDim(), IDSSamplerDim()],
         description=f("""
         The `matrix` specifies the operations to apply. These are compound
         operations which are expanded to fill a matrix of all possible
