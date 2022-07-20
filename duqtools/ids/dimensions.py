@@ -37,12 +37,27 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
 
     npfunc = getattr(np, model.operator)
 
-    logger.info('Apply `%s(%s, %s)`', model.ids, model.operator, model.value)
-
     profile = ids_mapping.flat_fields[model.ids]
 
+    if model.scale_to_error:
+        sigma_key = model.ids + model._upper_suffix
+
+        if model.value < 0:
+            lower_key = model.ids + model._lower_suffix
+            if lower_key in ids_mapping.flat_fields:
+                sigma_key = lower_key
+
+        sigma_bound = ids_mapping.flat_fields[sigma_key]
+        sigma = abs(sigma_bound - profile)
+
+        value = sigma * model.value
+    else:
+        value = model.value
+
+    logger.info('Apply %s', model)
+
     logger.debug('data range before: %s - %s', profile.min(), profile.max())
-    npfunc(profile, model.value, out=profile)
+    npfunc(profile, value, out=profile)
     logger.debug('data range after: %s - %s', profile.min(), profile.max())
 
 

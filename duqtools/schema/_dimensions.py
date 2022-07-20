@@ -28,6 +28,17 @@ class IDSOperatorMixin(BaseModel):
         `subtract`, `floor_divide`, `mod`, and `remainder`. These directly map
         to the equivalent numpy functions, i.e. `add` -> `np.add`.
         """))
+    scale_to_error: bool = Field(False,
+                                 description=f("""
+        If True, multiply value(s) by the error (sigma).
+
+        With asymmetric errors (i.e. both lower/upper error are available),
+        scale negative values to the lower error, and positive values to upper
+        error.
+        """))
+
+    _upper_suffix: str = '_error_upper'
+    _lower_suffix: str = '_error_lower'
 
 
 class IDSOperation(IDSPathMixin, IDSOperatorMixin, BaseModel):
@@ -85,7 +96,10 @@ class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
     def expand(self, *args, **kwargs) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
-            IDSOperation(ids=self.ids, operator=self.operator, value=value)
+            IDSOperation(ids=self.ids,
+                         operator=self.operator,
+                         value=value,
+                         scale_to_error=self.scale_to_error)
             for value in self.values)
 
     @validator('values')
@@ -106,7 +120,7 @@ class IDSSamplerMixin(BaseModel):
                                     description=f("""
         Specify `symmetric` or `asymmetric` sampling. Use
         `auto` to choose `asymmetric` if the lower bounds are defined,
-        else `symmetric`. The bounds are defiend by `$IDS_error_upper`
+        else `symmetric`. The bounds are defined by `$IDS_error_upper`
         and `$IDS_error_lower` in the data specification. Symmetric
         sampling sampling when both the lower and upper error bounds
         are present, takes the average of the two."""))
