@@ -1,10 +1,12 @@
-# Command-line interface
+# Usage
 
-This page documents the command line interface for `duqtools`.
+The main form of interaction with *duqtools* is via the command-line interface. This page documents the different subcommands available .
 
 To get started:
 
     duqtools --help
+
+For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](/config/introduction).
 
 ::: mkdocs-click
     :module: duqtools.cli

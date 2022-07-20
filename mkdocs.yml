@@ -2,6 +2,7 @@ site_name: dUQtools
 
 nav:
   - Home: index.md
+  - Usage: command-line-interface.md
   - Configuration:
     - Getting Started: config/introduction.md
     - config/create.md
@@ -9,7 +10,6 @@ nav:
     - config/status.md
     - config/plot.md
   - Dashboard: dash.md
-  - CLI: command-line-interface.md
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
