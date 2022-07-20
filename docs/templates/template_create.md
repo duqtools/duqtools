@@ -78,6 +78,63 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
     The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
 
+#### Specifying ranges
+
+There are two ways to specify ranges in *duqtools*
+
+{{ linspace_schema['description'] }}
+
+This example generates a range from 0.7 to 1.3 with 10 steps:
+
+```yaml title="duqtools.yaml"
+ids: profiles_1d/0/t_i_average
+operator: multiply
+values:
+  start: 0.7
+  stop: 1.3
+  num: 10
+```
+
+{{ arange_schema['description'] }}
+
+This example generates a range from 0.7 to 1.3 with steps of 0.1:
+
+```yaml title="duqtools.yaml"
+ids: profiles_1d/0/t_i_average
+operator: multiply
+values:
+  start: 0.7
+  stop: 1.3
+  step: 0.1
+```
+
+#### Error bounds
+
+The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
+
+```yaml title="duqtools.yaml"
+ids: profiles_1d/0/electrons/temperature
+operator: add
+values: [-2, -1, 0, 1, 2]
+scale_to_error: True
+```
+
+The following example takes `t_i_average`, and generates a range from $-3\sigma$ to $+3\sigma$ with 10 equivalent steps:
+
+```yaml title="duqtools.yaml"
+ids: profiles_1d/0/t_i_average
+operator: add
+values:
+  start: -3
+  stop: 3
+  num: 10
+scale_to_error: True
+```
+
+!!! note
+
+    When specifying a sigma range, make sure you use `add` as the operator. While the other operators are also supported, they do not make much sense in this context.
+
 ### Error bound sampling
 
 {{ sampler_schema['description'] }}
