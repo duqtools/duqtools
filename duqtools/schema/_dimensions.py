@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
-from pydantic import Field
+import numpy as np
+from pydantic import Field, validator
 from typing_extensions import Literal
 
 from ._basemodel import BaseModel
@@ -37,6 +38,38 @@ class IDSOperation(IDSPathMixin, IDSOperatorMixin, BaseModel):
         space."""))
 
 
+class LinSpace(BaseModel):
+    """Generated evenly spaced numbers over specified interval using
+    `np.linspace`."""
+    start: float
+    stop: float
+    num: int
+
+    @property
+    def values(self):
+        """Convert to list."""
+        # `val.item()` converts to native python types
+        return [
+            val.item() for val in np.linspace(self.start, self.stop, self.num)
+        ]
+
+
+class ARange(BaseModel):
+    """Generate evenly spaced numbers within a given interval using
+    `np.arange`."""
+    start: float
+    stop: float
+    step: float
+
+    @property
+    def values(self):
+        """Convert to list."""
+        # `val.item()` converts to native python types
+        return [
+            val.item() for val in np.arange(self.start, self.stop, self.step)
+        ]
+
+
 class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
     """Apply set of arithmetic operations to IDS.
 
@@ -44,8 +77,8 @@ class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
     the given values.
     """
 
-    values: List[float] = Field([1.1, 1.2, 1.3],
-                                description=f("""
+    values: Union[List[float], ARange, LinSpace, ] = Field([1.1, 1.2, 1.3],
+                                                           description=f("""
             Values to use with operator on field to create sampling
             space."""))
 
@@ -54,6 +87,12 @@ class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
         return tuple(
             IDSOperation(ids=self.ids, operator=self.operator, value=value)
             for value in self.values)
+
+    @validator('values')
+    def convert_to_list(cls, v):
+        if not isinstance(v, list):
+            v = v.values
+        return v
 
 
 class IDSSamplerMixin(BaseModel):
