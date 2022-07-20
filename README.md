@@ -26,29 +26,41 @@ Suggestions, improvements, and edits are most welcome.
 
 *Duqtools* targets Python 3.7, which is the version available on [eufus](https://wiki.eufus.eu/doku.php).
 
-Install using Conda:
+Clone the repository into the `duqtools` directory:
 
 ```console
-conda create -n duqtools python=3.7
-conda activate duqtools
-pip install -e .[develop]
+git clone https://github.com/CarbonCollective/fusion-dUQtools.git duqtools
 ```
 
 Install using `virtualenv`:
 
 ```console
+cd duqtools
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -e .[develop]
 ```
 
-Run tests:
+Alternatively, install using Conda:
+
+```console
+cd duqtools
+conda create -n duqtools python=3.7
+conda activate duqtools
+pip install -e .[develop]
+```
+
+### Tests
+
+Duqtools uses [pytest](https://docs.pytest.org/en/7.1.x/) to run the tests. You can run the tests for yourself using:
 
 ```console
 pytest
 ```
 
-Make docs:
+### Documentation
+
+The documentation uses the [mkdocs](https://www.mkdocs.org/). To build the docs for yourself:
 
 ```console
 mkdocs serve
