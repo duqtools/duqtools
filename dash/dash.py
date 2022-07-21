@@ -121,6 +121,42 @@ def put_on_common_basis(source, *, x_val, y_vals, common_basis=None):
         ('run', 'tstep')).reset_index(drop=True)
 
 
+def put_on_common_time(source, *, common_time=None):
+    if common_time is None:
+        first_run = source.iloc[0].run
+        common_time = source[source['run'] == first_run].tstep.unique()
+
+    cols = ['grid/rho_tor_norm', 't_i_average']
+
+    def refit(gb):
+        x = gb.tstep.unique()
+        y = np.array(gb[cols])
+
+        n_xvals = 100
+        n_cols = 2
+        n_tstep_old = 2
+        n_tstep_new = 5
+
+        # column order = column, xstep, tstep
+        y = y.reshape(n_tstep_old, n_xvals, n_cols).T
+
+        f = interp1d(x, y, fill_value='extrapolate', bounds_error=False)
+
+        new_values = f(common_time)
+        new_values = new_values.T.reshape(n_tstep_new * n_xvals, n_cols)
+
+        new_time = np.repeat(common_time,
+                             n_xvals).reshape(n_tstep_new * n_xvals, 1)
+
+        out = np.hstack((new_time, new_values))
+
+        return pd.DataFrame(out, columns=['tstep', *cols])
+
+    grouped = source.groupby(['run'])
+
+    return grouped.apply(refit).reset_index('run').reset_index(drop=True)
+
+
 y_vals = tuple(ffmt(y_key) for y_key in y_keys)
 x_val = ffmt(x_key)
 
@@ -216,16 +252,17 @@ with st.form('Save to new IMAS DB entry'):
         common_basis = template_data.to_dataframe(x_val,
                                                   time_steps=(0, ))[x_val]
 
-        # TODO:
-        # Extract x_val, because we need it to set the basis
-        # Expand `put_on_common_basis` to work with multiple y cols
+        data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
+
+        data = put_on_common_basis(data,
+                                   x_val=x_val,
+                                   y_vals=y_vals,
+                                   common_basis=common_basis)
+
+        common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
+
         # Set to common time basis
-
-        data = get_data(df, keys=y_vals, prefix='profiles_1d')
-
-        data = put_on_common_basis(data, *y_val, common_basis=common_basis)
-
-        # data = put_on_common_time(data)
+        data = put_on_common_time(data, common_time=common_time)
 
         # template.copy_ids_entry_to(target)
 
