@@ -109,17 +109,16 @@ def create(*, force, dry_run, **kwargs):
                                 run=options.data.run_out_start_at + i)
 
         op_queue.add(action=lambda: source.copy_ids_entry_to(target_in),
-                     description=f'Create {target_in} from {source}')
+                     description=f'Create {target_in} from template')
 
         op_queue.add(
             action=lambda combination=combination, target_in=target_in,
             target_out=target_out: apply_combination(target_in, combination),
-            description=f'Applying combination {combination} to {target_in}')
+            description=f'Applying combination to {target_in}')
 
-        op_queue.add(
-            action=lambda run_drc=run_drc: system.copy_from_template(
-                template_drc, run_drc),
-            description=f'Copying template from {template_drc} to {run_drc}')
+        op_queue.add(action=lambda run_drc=run_drc: system.copy_from_template(
+            template_drc, run_drc),
+                     description=f'Copying template to {run_drc}')
 
         op_queue.add(action=lambda run_name=run_name: system.write_batchfile(
             workspace, run_name),
@@ -128,8 +127,7 @@ def create(*, force, dry_run, **kwargs):
         op_queue.add(action=lambda run_drc=run_drc, target_in=target_in,
                      target_out=target_out: system.update_imas_locations(
                          run=run_drc, inp=target_in, out=target_out),
-                     description=f'Updating imas locations of {run_drc} to \n'
-                     'in: {target_in}\nout: {target_out}')
+                     description=f'Updating imas locations of {run_drc}')
 
         runs.append({
             'dirname': run_name,

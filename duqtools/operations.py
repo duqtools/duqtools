@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
-from queue import SimpleQueue
+from collections import deque
 from typing import Callable
 
+import click
 from pydantic import Field
 
 from .schema import BaseModel
@@ -26,7 +27,7 @@ class Operation(BaseModel):
         return self
 
 
-class Operations(SimpleQueue):
+class Operations(deque):
     """Operations Queue which keeps track of all the operations that need to be
     done."""
 
@@ -41,22 +42,43 @@ class Operations(SimpleQueue):
     def add(self, action: Callable, description: str) -> None:
         """convenience wrapper around put."""
 
-        self.put(Operation(action=action, description=description))
+        self.append(Operation(action=action, description=description))
 
-    def put(self, item: Operation) -> None:  # type: ignore
+    def append(self, item: Operation) -> None:  # type: ignore
         """Restrict our diet to Operation objects only."""
 
-        super().put(item)
+        super().append(item)
 
     def apply(self) -> Operation:
         """Apply the next operation in the queue and remove it."""
 
-        return self.get()()
+        return self.popleft()()
 
     def apply_all(self) -> None:
         """Apply all queued operations and empty the queue."""
-        while not self.empty():
+        while len(self) != 0:
             self.apply()
+
+    def confirm_apply_all(self) -> bool:
+        """First asks the user if he wants to apply everything.
+
+        Returns
+        -------
+        bool: did we apply everything or not
+        """
+
+        # To print the descriptions we need to get them
+        logger.info('')
+        logger.info('Operations in the Queue:')
+        logger.info('========================')
+        for op in self:
+            logging.info(op.description)
+
+        ans = click.confirm('Do you want to apply all these operations?',
+                            default=False)
+        if ans:
+            self.apply_all()
+        return ans
 
 
 op_queue = Operations()
@@ -68,7 +90,7 @@ def confirm_operations(func):
 
     def wrapper(*args, **kwargs):
         ret = func(*args, **kwargs)
-        op_queue.apply_all()
+        op_queue.confirm_apply_all()
         return ret
 
     return wrapper
