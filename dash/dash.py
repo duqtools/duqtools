@@ -121,34 +121,36 @@ def put_on_common_basis(source, *, x_val, y_vals, common_basis=None):
         ('run', 'tstep')).reset_index(drop=True)
 
 
-def put_on_common_time(source, *, common_time=None):
+def put_on_common_time(source, *, cols, common_time=None):
     if common_time is None:
         first_run = source.iloc[0].run
         common_time = source[source['run'] == first_run].tstep.unique()
 
-    cols = ['grid/rho_tor_norm', 't_i_average']
+    n_cols = len(cols)
+    n_tsteps_new = len(common_time)
 
     def refit(gb):
-        x = gb.tstep.unique()
-        y = np.array(gb[cols])
+        time = gb.tstep.unique()
+        values = np.array(gb[cols])
 
-        n_xvals = 100
-        n_cols = 2
-        n_tstep_old = 2
-        n_tstep_new = 5
+        n_tsteps = len(time)
+        n_vals = int(len(values) / n_tsteps)
 
-        # column order = column, xstep, tstep
-        y = y.reshape(n_tstep_old, n_xvals, n_cols).T
+        values = values.reshape(n_tsteps, n_vals, n_cols).T
+        # column order of values is now column, xstep, tstep
 
-        f = interp1d(x, y, fill_value='extrapolate', bounds_error=False)
+        f = interp1d(time,
+                     values,
+                     fill_value='extrapolate',
+                     bounds_error=False)
 
-        new_values = f(common_time)
-        new_values = new_values.T.reshape(n_tstep_new * n_xvals, n_cols)
+        values_new = f(common_time)
+        values_new = values_new.T.reshape(n_tsteps_new * n_vals, n_cols)
 
-        new_time = np.repeat(common_time,
-                             n_xvals).reshape(n_tstep_new * n_xvals, 1)
+        tstep_new = np.repeat(common_time,
+                              n_vals).reshape(n_tsteps_new * n_vals, 1)
 
-        out = np.hstack((new_time, new_values))
+        out = np.hstack((tstep_new, values_new))
 
         return pd.DataFrame(out, columns=['tstep', *cols])
 
@@ -262,7 +264,9 @@ with st.form('Save to new IMAS DB entry'):
         common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
 
         # Set to common time basis
-        data = put_on_common_time(data, common_time=common_time)
+        data = put_on_common_time(data,
+                                  cols=[x_val, *y_vals],
+                                  common_time=common_time)
 
         # template.copy_ids_entry_to(target)
 
