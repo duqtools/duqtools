@@ -96,23 +96,25 @@ def get_data(df, **kwargs):
 
 
 @st.experimental_memo
-def put_on_common_basis(source, *, x, y, common_basis=None):
+def put_on_common_basis(source, *, x_val, y_vals, common_basis=None):
     if common_basis is None:
         first_run = source.iloc[0].run
         n = sum((source['run'] == first_run) & (source['tstep'] == 0))
 
-        mn = source[x].min()
-        mx = source[x].max()
+        mn = source[x_val].min()
+        mx = source[x_val].max()
         common_basis = np.linspace(mn, mx, n)
 
     def refit(gb):
-        f = interp1d(gb[x],
-                     gb[y],
-                     fill_value='extrapolate',
-                     bounds_error=False)
         new_x = common_basis
-        new_y = f(common_basis)
-        return pd.DataFrame((new_x, new_y), index=[x, y]).T
+        new_ys = []
+        for y_val in y_vals:
+            f = interp1d(gb[x_val],
+                         gb[y_val],
+                         fill_value='extrapolate',
+                         bounds_error=False)
+            new_ys.append(f(common_basis))
+        return pd.DataFrame((new_x, *new_ys), index=[x_val, *y_vals]).T
 
     grouped = source.groupby(['run', 'tstep'])
     return grouped.apply(refit).reset_index(
@@ -134,7 +136,7 @@ for y_val in y_vals:
                                        init={'tstep': 0})
 
     if show_error_bar:
-        source = put_on_common_basis(source, x=x_val, y=y_val)
+        source = put_on_common_basis(source, x_val=x_val, y_vals=[y_val])
 
         line = alt.Chart(source).mark_line().encode(
             x=f'{x_val}:Q',
