@@ -44,6 +44,10 @@ class Operations(deque):
 
         self.append(Operation(action=action, description=description))
 
+    def put(self, item: Operation) -> None:
+        """synonym for append."""
+        self.append(item)
+
     def append(self, item: Operation) -> None:  # type: ignore
         """Restrict our diet to Operation objects only."""
 
