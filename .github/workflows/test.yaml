@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -e .[develop]
+          python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
         run: python -m pytest
