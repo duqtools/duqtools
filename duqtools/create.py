@@ -50,7 +50,7 @@ def create(*, force, dry_run, **kwargs):
 
     system = get_system()
 
-    if not options.templat_data:
+    if not options.template_data:
         source = system.imas_from_path(template_drc)
     else:
         source = ImasHandle.parse_obj(options.template_data)
