@@ -50,11 +50,13 @@ class IDSOperation(IDSPathMixin, IDSOperatorMixin, BaseModel):
 
 
 class LinSpace(BaseModel):
-    """Generated evenly spaced numbers over specified interval using
-    `np.linspace`."""
-    start: float
-    stop: float
-    num: int
+    """Generated evenly spaced numbers over a specified interval.
+
+    See the implementation of [numpy.linspace][] for more details.
+    """
+    start: float = Field(None, description='Start value of the sequence.')
+    stop: float = Field(None, description='End value of the sequence.')
+    num: int = Field(None, description='Number of samples to generate.')
 
     @property
     def values(self):
@@ -66,11 +68,16 @@ class LinSpace(BaseModel):
 
 
 class ARange(BaseModel):
-    """Generate evenly spaced numbers within a given interval using
-    `np.arange`."""
-    start: float
-    stop: float
-    step: float
+    """Generate evenly spaced numbers within a given interval.
+
+    See the implementation of [numpy.arange][] for more details.
+    """
+
+    start: float = Field(
+        None, description='Start of the interval. Includes this value.')
+    stop: float = Field(
+        None, description='End of the interval. Excludes this interval.')
+    step: float = Field(None, description='Spacing between values.')
 
     @property
     def values(self):

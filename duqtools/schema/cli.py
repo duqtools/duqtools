@@ -35,7 +35,8 @@ class CreateConfigModel(BaseModel):
 
     matrix: List = Field([],
                          deprecated=True,
-                         description='Use `dimensions` instead.')
+                         description='Use `dimensions` instead.',
+                         exclude=True)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),

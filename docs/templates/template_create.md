@@ -18,7 +18,7 @@ Check out [the command-line interface](/command-line-interface/#create) for more
 : {{ prop['description'] }}
 {% endfor %}
 
-### Example
+For example:
 
 ```yaml title="duqtools.yaml"
 {{ yaml_example }}
@@ -39,7 +39,7 @@ For example:
 {{ data_loc_yaml }}
 ```
 
-## IDS operations
+## Dimensions
 
 These instructions operate on the template model. Note that these are compound operations, so they are expanded to fill the matrix with possible entries for data modifications (depending on the sampling method).
 
@@ -78,11 +78,20 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
     The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
 
-#### Specifying ranges
+### Specifying value ranges
 
-There are two ways to specify ranges in *duqtools*
+Although it is possible to specify value ranges explicitly in an operator, sometimes it may be easier to specify a range.
+
+There are two ways to specify ranges in *duqtools*.
+
+#### By number of samples
 
 {{ linspace_schema['description'] }}
+
+{% for name, prop in linspace_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
 
 This example generates a range from 0.7 to 1.3 with 10 steps:
 
@@ -95,7 +104,14 @@ values:
   num: 10
 ```
 
+#### By stepsize
+
 {{ arange_schema['description'] }}
+
+{% for name, prop in linspace_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
 
 This example generates a range from 0.7 to 1.3 with steps of 0.1:
 
@@ -108,7 +124,7 @@ values:
   step: 0.1
 ```
 
-#### Error bounds
+### Sampling between error bounds
 
 The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
 
@@ -134,25 +150,3 @@ scale_to_error: True
 !!! note
 
     When specifying a sigma range, make sure you use `add` as the operator. While the other operators are also supported, they do not make much sense in this context.
-
-### Error bound sampling
-
-{{ sampler_schema['description'] }}
-
-{% for name, prop in sampler_schema['properties'].items() %}
-`{{ name }}`
-: {{ prop['description'] }}
-{% endfor %}
-
-Example:
-
-```yaml title="duqtools.yaml"
-ids: profiles_1d/0/q
-sampling: normal
-bounds: symmetric
-n_samples: 5
-```
-
-!!! note
-
-     Note that the example above adds 5 (`n_samples`) entries to the matrix. This is independent from the hypercube sampling above.
