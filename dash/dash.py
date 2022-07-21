@@ -98,7 +98,9 @@ def get_data(df, **kwargs):
 @st.experimental_memo
 def put_on_common_basis(source, *, x, y, common_basis=None):
     if common_basis is None:
-        n = sum((source['run'] == 'run_0000') & (source['tstep'] == 0))
+        first_run = source.iloc[0].run
+        n = sum((source['run'] == first_run) & (source['tstep'] == 0))
+
         mn = source[x].min()
         mx = source[x].max()
         common_basis = np.linspace(mn, mx, n)
@@ -182,7 +184,7 @@ with st.form('Save to new IMAS DB entry'):
                                     key='run_template'),
     }
 
-    template = ImasLocation(**template)
+    template = ImasHandle(**template)
 
     st.subheader('Target IMAS entry:')
 
@@ -202,7 +204,7 @@ with st.form('Save to new IMAS DB entry'):
         cols[3].number_input('Run', step=1, key='run_target'),
     }
 
-    target = ImasLocation(**target)
+    target = ImasHandle(**target)
 
     submitted = st.form_submit_button('Save')
     if submitted:
@@ -213,7 +215,7 @@ with st.form('Save to new IMAS DB entry'):
                                                   time_steps=(0, ))[x_val]
 
         # TODO:
-        # Extract x_val, because we need it to se the basis
+        # Extract x_val, because we need it to set the basis
         # Expand `put_on_common_basis` to work with multiple y cols
         # Set to common time basis
 
@@ -234,5 +236,5 @@ with st.form('Save to new IMAS DB entry'):
         # with target.open() as data_entry_target:
         #     core_profiles.put(db_entry=data_entry_target)
 
-        st.success('Success!')
-        st.balloons()
+        # st.success('Success!')
+        # st.balloons()
