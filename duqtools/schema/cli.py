@@ -6,7 +6,7 @@ from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import IDSOperationDim, IDSSamplerDim
+from ._dimensions import IDSOperationDim
 from ._plot import PlotModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
@@ -21,9 +21,11 @@ class DeprecatedValueError(ValueError):
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[Union[IDSOperationDim, IDSSamplerDim]] = Field(
-        [IDSOperationDim(), IDSSamplerDim()],
-        description=f("""
+    dimensions: List[Union[IDSOperationDim]] = Field([
+        IDSOperationDim(ids='profiles_1d/0/t_i_average', ),
+        IDSOperationDim(ids='profiles_1d/0/electrons/temperature')
+    ],
+                                                     description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
@@ -35,7 +37,8 @@ class CreateConfigModel(BaseModel):
 
     matrix: List = Field([],
                          deprecated=True,
-                         description='Use `dimensions` instead.')
+                         description='Use `dimensions` instead.',
+                         exclude=True)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=LHSSampler(),

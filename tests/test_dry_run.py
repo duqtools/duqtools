@@ -7,6 +7,8 @@ import pytest
 from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
+pytest.importorskip('imas')  # These tests require imas to be installed
+
 
 @pytest.fixture(scope='session', autouse=True)
 def extra_env():
