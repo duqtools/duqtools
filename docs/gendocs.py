@@ -49,11 +49,9 @@ if 'plot' in models:
     extra_schemas['plot_schema'] = PlotModel.schema()
 
 if 'create' in models:
-    from duqtools.schema import (ARange, IDSOperationDim, IDSSamplerDim,
-                                 LinSpace)
+    from duqtools.schema import ARange, IDSOperationDim, LinSpace
 
     extra_schemas['ops_schema'] = IDSOperationDim.schema()
-    extra_schemas['sampler_schema'] = IDSSamplerDim.schema()
     extra_schemas['data_loc_schema'] = cfg.create.data.schema()
 
     extra_schemas['linspace_schema'] = LinSpace.schema()
