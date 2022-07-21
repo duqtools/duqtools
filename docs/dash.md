@@ -33,8 +33,7 @@ Duqtools stores all run metdata in a file named `runs.yaml`. By default, the das
 
 Alternatively, you can import data by the IMAS handle from a CSV file.
 
-The CSV file must contain the columns: `user`, `db`, `shot`, and `run`.
-The index is an arbitrary name for each row.
+The CSV file must have contain at least 5 columns, including: `user`, `db`, `shot`, and `run`. The first column is used as the index. The index can be any string or number, as long as it uniquely identifies the row.
 
 For example:
 
