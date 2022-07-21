@@ -50,7 +50,11 @@ def create(*, force, dry_run, **kwargs):
 
     system = get_system()
 
-    source = system.imas_from_path(template_drc)
+    if not options.template_data:
+        source = system.imas_from_path(template_drc)
+    else:
+        source = ImasHandle.parse_obj(options.template_data)
+
     logger.info('Source data: %s', source)
 
     matrix = tuple(dim.expand() for dim in dimensions)

@@ -24,6 +24,34 @@ For example:
 {{ yaml_example }}
 ```
 
+
+## Specify the template data
+
+By default the template IMAS data to modify is extracted from the path specified in the `template` field.
+
+```yaml title="duqtools.yaml"
+template: /pfs/work/stef/jetto/runs/duqtools_template
+```
+
+In some cases, it may be useful to re-use the same set of model settings, but with different input data. If the `template_data` field is specified, these data will be used instead. To do so, specify `template_data` with the fields below:
+
+{% for name, prop in imas_basemodel_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+For example:
+
+```yaml title="duqtools.yaml"
+template: /pfs/work/g2ssmee/jetto/runs/duqtools_template
+template_data:
+  user: g2ssmee
+  db: jet
+  shot: 91234
+  run: 5
+```
+
+
 ## Data location
 
 {{ data_loc_schema['description'] }}
@@ -78,7 +106,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
     The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
 
-### Specifying value ranges
+### Specify value ranges
 
 Although it is possible to specify value ranges explicitly in an operator, sometimes it may be easier to specify a range.
 
@@ -149,4 +177,4 @@ scale_to_error: True
 
 !!! note
 
-    When specifying a sigma range, make sure you use `add` as the operator. While the other operators are also supported, they do not make much sense in this context.
+    When you specify a sigma range, make sure you use `add` as the operator. While the other operators are also supported, they do not make much sense in this context.
