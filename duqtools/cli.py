@@ -39,8 +39,24 @@ def debug_option(f):
                         callback=callback)(f)
 
 
+def dry_run_option(f):
+
+    def callback(ctx, param, dry_run):
+        if dry_run:
+            logger.info('--dry-run enabled')
+            cfg.dry_run = True
+
+        return dry_run
+
+    return click.option('--dry-run',
+                        is_flag=True,
+                        help='Execute without any side-effects.',
+                        callback=callback)(f)
+
+
 def common_options(func):
-    for wrapper in (debug_option, config_option):
+    for wrapper in (debug_option, config_option, dry_run_option):
+        # config_option MUST BE BEFORE dry_run_option
         func = wrapper(func)
     return func
 
@@ -59,6 +75,9 @@ def cli(**kwargs):
 @click.option('--full',
               is_flag=True,
               help='Create a config file with all possible config values.')
+@click.option('--comments',
+              is_flag=True,
+              help='Add descriptions to the config.')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
 def cli_init(**kwargs):
     """Create a default config file."""
@@ -107,6 +126,9 @@ def cli_plot(**kwargs):
 @cli.command('clean')
 @common_options
 @click.option('--out', is_flag=True, help='Remove output data.')
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite backup file if necessary.')
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup

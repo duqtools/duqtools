@@ -2,6 +2,7 @@ site_name: dUQtools
 
 nav:
   - Home: index.md
+  - Usage: command-line-interface.md
   - Configuration:
     - Getting Started: config/introduction.md
     - config/create.md
@@ -9,7 +10,6 @@ nav:
     - config/status.md
     - config/plot.md
   - Dashboard: dash.md
-  - CLI: command-line-interface.md
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
@@ -38,6 +38,12 @@ markdown_extensions:
   - mkdocs-click
   - attr_list
   - pymdownx.extra
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
 - search
@@ -47,6 +53,7 @@ plugins:
       python:
         import:
         - https://docs.python.org/3/objects.inv
+        - https://numpy.org/doc/stable/objects.inv
         selection:
           docstring_style: numpy
           docstring_options:

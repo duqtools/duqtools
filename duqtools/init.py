@@ -3,28 +3,42 @@ from pathlib import Path
 
 from duqtools.config import Config
 
-from .config.basemodel import BaseModel
+from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
-def init(config: str = 'config.yaml',
-         full: bool = False,
-         force: bool = False,
-         **kwargs):
+def init(*, dry_run: bool, config: str, full: bool, force: bool,
+         comments: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
     ----------
+    dry_run : bool
+        Do not make any changes to the file system.
     config : str
         Filename of the config.
-    force : bool
-        Overwrite config if it already exists.
     full : bool
         Make a config with all the default values
         (otherwise just selected important ones)
-    kwargs :
+    force : bool
+        Overwrite config if it already exists.
+    comments : bool
+        Description
+    **kwargs
+        Description
+
+    Deleted Parameters
+    ------------------
+    comment : bool
+        Add comments to the config
+    kwargs
         kwargs, optional stuff.
+
+    Raises
+    ------
+    RuntimeError
+        Description
     """
     cfg = Config()
     BaseModel.__init__(cfg)
@@ -41,14 +55,16 @@ def init(config: str = 'config.yaml',
     logger.info('Writing default config to %s', config_filepath)
 
     if full:
-        cfg_yaml = cfg.yaml(descriptions=True)
+        cfg_yaml = cfg.yaml(descriptions=comments)
     else:
-        cfg_yaml = cfg.yaml(descriptions=True,
+        cfg_yaml = cfg.yaml(descriptions=comments,
                             include={
                                 'workspace': True,
-                                'create': {'matrix', 'sampler', 'template'},
+                                'create':
+                                {'dimensions', 'sampler', 'template'},
                                 'plot': {'plots'}
                             })
 
-    with open(config_filepath, 'w') as f:
-        f.write(cfg_yaml)
+    if not dry_run:
+        with open(config_filepath, 'w') as f:
+            f.write(cfg_yaml)

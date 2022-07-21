@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
-    from ..config.imaslocation import ImasLocation
+    from .ids import ImasHandle
 
 logger = logging.getLogger(__name__)
 
 
-def get_ids_tree(imas_loc: ImasLocation,
+def get_ids_tree(imas_loc: ImasHandle,
                  key: str = 'core_profiles',
                  **kwargs) -> IDSMapping:
     """get the data as a simple ids (all values in memory, in a dict).

@@ -7,9 +7,8 @@ import pandas as pd
 import streamlit as st
 from scipy.interpolate import interp1d
 
-from duqtools.config import Runs
-from duqtools.config.imaslocation import ImasLocation
-from duqtools.ids import get_ids_tree
+from duqtools.ids import ImasHandle, get_ids_tree
+from duqtools.schema.runs import Runs
 
 try:
     default_workdir = sys.argv[1]
@@ -48,7 +47,7 @@ def ffmt(s):
 
 
 def get_options(a_run):
-    a_profile = get_ids_tree(ImasLocation(**a_run), exclude_empty=True)
+    a_profile = get_ids_tree(ImasHandle(**a_run), exclude_empty=True)
     return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
@@ -79,7 +78,7 @@ with st.sidebar:
 @st.experimental_memo
 def get_run_data(row, *, keys, **kwargs):
     """Get data for single run."""
-    profile = get_ids_tree(ImasLocation(**row), exclude_empty=True)
+    profile = get_ids_tree(ImasHandle(**row), exclude_empty=True)
     return profile.to_dataframe(*keys, **kwargs)
 
 
@@ -144,7 +143,7 @@ for y_val in y_vals:
 
         # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
         band = alt.Chart(source).mark_errorband(
-            extent='ci', interpolate='linear').encode(
+            extent='stdev', interpolate='linear').encode(
                 x=f'{x_val}:Q',
                 y=f'{y_val}:Q',
                 color=alt.Color('tstep:N'),

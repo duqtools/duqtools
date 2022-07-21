@@ -5,7 +5,7 @@ create:
     db: jet
     run_in_start_at: 7000
     run_out_start_at: 8000
-  matrix:
+  dimensions:
     - ids: profiles_1d/0/zeff
       operator: add
       values: [1,]

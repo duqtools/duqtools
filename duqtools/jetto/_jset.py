@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
 if TYPE_CHECKING:
     from .._types import PathLike
-    from ..config.imaslocation import ImasLocation
+    from ..ids import ImasHandle
 
 DEFAULT_FILENAME = 'jetto.jset'
 
@@ -76,6 +76,18 @@ JINTRAC_CONFIG_VARS = (
         'type': float,
         'key': 'SetUpPanel.endTime',
         'doc': 'End time'
+    },
+    {
+        'name': 'run_dir',
+        'type': str,
+        'key': 'AppPanel.openPrvSetDir',
+        'doc': 'Location of the run directory'
+    },
+    {
+        'name': 'run_dir_name',
+        'type': str,
+        'key': 'JobProcessingPanel.runDirNumber',
+        'doc': 'Name of the run directory'
     },
 )
 
@@ -254,7 +266,12 @@ class JettoSettings:
         directory : PathLike
             Name of output directory
         """
-        filename = Path(directory) / DEFAULT_FILENAME
+        directory = Path(directory)
+
+        self.run_dir = str(directory)
+        self.run_dir_name = directory.name
+
+        filename = directory / DEFAULT_FILENAME
         write_jset(filename, self.raw_mapping)
         debug('write %s', filename)
 
@@ -319,15 +336,15 @@ class JettoSettings:
 
         return jset_copy
 
-    def set_imas_locations(self, inp: ImasLocation,
-                           out: ImasLocation) -> JettoSettings:
+    def set_imas_locations(self, inp: ImasHandle,
+                           out: ImasHandle) -> JettoSettings:
         """Make a copy with updated IDS locations for input / output.
 
         Parameters
         ----------
-        inp : ImasLocation
+        inp : ImasHandle
             IMAS description of where the input data is stored.
-        out : ImasLocation
+        out : ImasHandle
             IMAS description of where the output data should be stored.
 
         Returns

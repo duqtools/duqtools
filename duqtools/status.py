@@ -4,6 +4,7 @@ from time import sleep
 
 from .config import cfg
 from .jetto import read_namelist
+from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -78,7 +79,8 @@ class Status():
     def __init__(self):
         debug('Submit config: %s', cfg.submit)
 
-        runs = cfg.workspace.runs
+        workspace = WorkDirectory.parse_obj(cfg.workspace)
+        runs = workspace.runs
 
         self.dirs = [Path(run.dirname) for run in runs]
         debug('Case directories: %s', self.dirs)
@@ -179,7 +181,7 @@ class Status():
             self.update_status()
 
 
-def status(progress: bool, detailed: bool, **kwargs):
+def status(*, progress: bool, detailed: bool, **kwargs):
     """Show status of runs.
 
     Parameters

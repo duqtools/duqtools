@@ -1,13 +1,14 @@
 import logging
 
 from .config import cfg
-from .ids import get_ids_tree
+from .ids import ImasHandle, get_ids_tree
+from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(**kwargs):
+def plot(*, dry_run, **kwargs):
     """Plot subroutine to create plots from datas."""
     import matplotlib.pyplot as plt
     import numpy as np
@@ -15,10 +16,12 @@ def plot(**kwargs):
     # Gather all results and put them in a in-memory format
     # (they should be small enough)
     profiles = []
-    runs = cfg.workspace.runs
+
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+    runs = workspace.runs
 
     for run in runs:
-        imas_loc = cfg.system.get_imas_location(run)
+        imas_loc = ImasHandle.parse_obj(run.data_out)
         info('Reading %s', imas_loc)
 
         profile = get_ids_tree(imas_loc, 'core_profiles')
@@ -48,4 +51,5 @@ def plot(**kwargs):
             ax.plot(x, y, label=j)
 
         ax.legend()
-        fig.savefig(f'plot_{i:04d}.png')
+        if not dry_run:
+            fig.savefig(f'plot_{i:04d}.png')

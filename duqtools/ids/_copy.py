@@ -12,7 +12,7 @@ from .._logging_utils import LoggingContext
 from ._imas import imas
 
 if TYPE_CHECKING:
-    from ..config.imaslocation import ImasLocation
+    from .ids import ImasHandle
 
 PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
 
@@ -50,14 +50,14 @@ def get_imas_ual_version():
     return imas_version, ual_version
 
 
-def copy_ids_entry(source: ImasLocation, target: ImasLocation):
+def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """Copies the ids entry to a new location.
 
     Parameters
     ----------
-    source : ImasLocation
+    source : ImasHandle
         Source ids entry
-    target : ImasLocation
+    target : ImasHandle
         Target ids entry
 
     Raises
@@ -77,26 +77,30 @@ def copy_ids_entry(source: ImasLocation, target: ImasLocation):
         raise KeyError('The entry you are trying to copy does not exist')
 
     idss_out = imas.ids(target.shot, target.run)
-    idss_out.create_env(target.user, source.db, str(imas_version.major))
-    idx = idss_out.expIdx
 
-    parser = Parser.load_idsdef()
+    from ..config import cfg
+    if not cfg.dry_run:
+        idss_out.create_env(target.user, target.db, str(imas_version.major))
+        idx = idss_out.expIdx
 
-    # Temporarily hide warnings, because this loop is very spammy
-    with LoggingContext(level=logging.CRITICAL):
+        parser = Parser.load_idsdef()
 
-        for ids_info in parser.idss:
-            name = ids_info['name']
-            maxoccur = int(ids_info['maxoccur'])
+        # Temporarily hide warnings, because this loop is very spammy
+        with LoggingContext(level=logging.CRITICAL):
 
-            if name in ('ec_launchers', 'numerics', 'sdn'):
-                continue
+            for ids_info in parser.idss:
+                name = ids_info['name']
+                maxoccur = int(ids_info['maxoccur'])
 
-            for i in range(maxoccur + 1):
-                ids = idss_in.__dict__[name]
-                ids.get(i)
-                ids.setExpIdx(idx)  # this line sets the index to the output
-                ids.put(i)
+                if name in ('ec_launchers', 'numerics', 'sdn'):
+                    continue
 
-    idss_in.close()
+                for i in range(maxoccur + 1):
+                    ids = idss_in.__dict__[name]
+                    ids.get(i)
+                    ids.setExpIdx(
+                        idx)  # this line sets the index to the output
+                    ids.put(i)
+
+        idss_in.close()
     idss_out.close()

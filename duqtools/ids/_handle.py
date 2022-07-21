@@ -5,8 +5,10 @@ from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
-from ..ids._imas import imas, imasdef
-from .basemodel import BaseModel
+from ..schema import ImasBaseModel
+from ..utils import dry_run_toggle
+from ._copy import copy_ids_entry
+from ._imas import imas, imasdef
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +35,7 @@ def _patch_str_repr(obj: object):
     obj.__repr__ = types.MethodType(true_repr, obj)  # type: ignore
 
 
-class ImasLocation(BaseModel):
-    user: str = getuser()
-    db: str
-    shot: int
-    run: int
+class ImasHandle(ImasBaseModel):
 
     def path(self) -> Path:
         """Return location as Path."""
@@ -58,30 +56,32 @@ class ImasLocation(BaseModel):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_ids_entry_to(self, destination: ImasLocation):
+    def copy_ids_entry_to(self, destination: ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters
         ----------
-        destination : ImasLocation
+        destination : ImasHandle
             Copy data to a new location.
         """
-        from ..ids import copy_ids_entry
         copy_ids_entry(self, destination)
 
     def delete(self):
         """Remove data from entry."""
+        from ..config import cfg
+
         # ERASE_PULSE operation is yet supported by IMAS as of June 2022
         path = self.path()
         for suffix in SUFFIXES:
             to_delete = path.with_suffix(suffix)
             logger.debug('Removing %s', to_delete)
             try:
-                to_delete.unlink()
+                if not cfg.dry_run:
+                    to_delete.unlink()
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
-    def copy_ids_entry_to_run(self, *, run: int) -> ImasLocation:
+    def copy_ids_entry_to_run(self, *, run: int) -> ImasHandle:
         """Copy ids entry to destination with given run number.
 
         The user is set to the current user, because we don't
@@ -94,7 +94,7 @@ class ImasLocation(BaseModel):
 
         Returns
         -------
-        destination : ImasLocation
+        destination : ImasHandle
             Returns the destination.
         """
         user = getuser()
@@ -102,6 +102,7 @@ class ImasLocation(BaseModel):
         self.copy_ids_entry_to(destination)
         return destination
 
+    @dry_run_toggle
     def get(self, key: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 
@@ -110,7 +111,7 @@ class ImasLocation(BaseModel):
         key : str, optional
             Name of profiles to open.
         **kwargs
-            These keyword parametes are passed to `ImasLocation.open()`.
+            These keyword parametes are passed to `ImasHandle.open()`.
 
         Returns
         -------
