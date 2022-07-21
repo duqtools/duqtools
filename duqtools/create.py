@@ -3,8 +3,7 @@ from typing import Iterable
 
 from duqtools.config import cfg
 
-from .ids import IDSMapping, ImasHandle
-from .ids.dimensions import apply_model
+from .ids import IDSMapping, ImasHandle, apply_model
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
 from .schema.runs import Runs
