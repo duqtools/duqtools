@@ -7,6 +7,7 @@ from typing_extensions import Literal
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import IDSOperationDim
+from ._imas import ImasBaseModel
 from ._plot import PlotModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
@@ -57,11 +58,19 @@ class CreateConfigModel(BaseModel):
     template: DirectoryPath = Field(
         f'/pfs/work/{getuser()}/jetto/runs/duqtools_template',
         description=f("""
-        The create subroutine takes as a template directory. This can be a
+        Template directory to modify. Duqtools copies and updates the settings
+        required for the specified system from this directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
-        started). Duqtools uses the input IDS machine (db) name, user, shot,
-        run number from e.g. `jetto.in` to find the data to modify for the
-        UQ runs.
+        started). By default, duqtools extracts the input IMAS database entry
+        from the settings file (e.g. jetto.in) to find the data to modify for
+        the UQ runs.
+        """))
+
+    template_data: ImasBaseModel = Field(None,
+                                         description=f("""
+        Specify the location of the template data to modify. This overrides the
+        location of the data specified in settings file in the template
+        directory.
         """))
 
     data: DataLocation = Field(DataLocation(),
