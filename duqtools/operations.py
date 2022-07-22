@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
+from inspect import signature
 from typing import Callable
 
 import click
@@ -20,10 +21,16 @@ class Operation(BaseModel):
     action: Callable = Field(
         description='a function which can be executed when we '
         'decide to apply this operation')
+    args: tuple = Field((),
+                        description='positional arguments that have to be '
+                        'passed to the action')
+    kwargs: dict = Field({},
+                         description='keyword arguments that will be '
+                         'passed to the action')
 
     def __call__(self) -> Operation:
         logger.info(f'-: {self.description}')
-        self.action()
+        self.action(*self.args, **self.kwargs)
         return self
 
 
@@ -39,10 +46,10 @@ class Operations(deque):
             Operations._instance = super().__new__(cls)
         return Operations._instance
 
-    def add(self, action: Callable, description: str) -> None:
-        """convenience wrapper around put."""
+    def add(self, *args, **kwargs) -> None:
+        """convenience Operation wrapper around put."""
 
-        self.append(Operation(action=action, description=description))
+        self.append(Operation(*args, **kwargs))
 
     def put(self, item: Operation) -> None:
         """synonym for append."""
@@ -98,3 +105,29 @@ def confirm_operations(func):
         return ret
 
     return wrapper
+
+
+def add_to_op_queue(description: str):
+    """Decorator which adds the function call to the op_queue, instead of
+    executing it directly, the string can be a format string and use the
+    function arguments."""
+
+    def op_queue_real(func):
+
+        def wrapper(*args, **kwargs) -> None:
+            # For the description format we must convert args to kwargs
+            sig = signature(func)
+            args_to_kw = dict(zip(sig.parameters, args))
+            fkwargs = kwargs.copy()
+            fkwargs.update(args_to_kw)
+            formatted_description = description.format(**fkwargs)
+
+            # add the function to the queue
+            op_queue.add(action=func,
+                         args=args,
+                         kwargs=kwargs,
+                         description=formatted_description)
+
+        return wrapper
+
+    return op_queue_real

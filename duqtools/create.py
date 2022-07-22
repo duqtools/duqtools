@@ -7,7 +7,7 @@ from .ids import IDSMapping, ImasHandle
 from .ids.dimensions import apply_model
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
-from .operations import confirm_operations, op_queue
+from .operations import add_to_op_queue, confirm_operations, op_queue
 from .schema.runs import Runs
 from .system import get_system
 
@@ -29,6 +29,7 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
             'remove or `--force` to override.')
 
 
+@add_to_op_queue('Applying combination to {target_in}')
 def apply_combination(target_in: ImasHandle, combination) -> None:
     core_profiles = target_in.get('core_profiles')
     ids_mapping = IDSMapping(core_profiles)
@@ -41,6 +42,7 @@ def apply_combination(target_in: ImasHandle, combination) -> None:
             core_profiles.put(db_entry=data_entry_target)
 
 
+@add_to_op_queue('Writing out {workspace.runs_yaml}')
 def write_runs_file(runs: list, workspace) -> None:
 
     runs = Runs.parse_obj(runs)
@@ -97,8 +99,11 @@ def create(*, force, dry_run, **kwargs):
         run_name = f'{RUN_PREFIX}{i:04d}'
         run_drc = workspace.cwd / run_name
 
-        op_queue.add(action=lambda run_drc=run_drc: run_drc.mkdir(
-            parents=True, exist_ok=force),
+        op_queue.add(action=run_drc.mkdir,
+                     kwargs={
+                         'parents': True,
+                         'exist_ok': force
+                     },
                      description=f'Create folder {run_drc}')
 
         target_in = ImasHandle(db=options.data.db,
@@ -108,26 +113,17 @@ def create(*, force, dry_run, **kwargs):
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
-        op_queue.add(action=lambda: source.copy_ids_entry_to(target_in),
-                     description=f'Create {target_in} from template')
+        source.copy_ids_entry_to(target_in)
 
-        op_queue.add(
-            action=lambda combination=combination, target_in=target_in,
-            target_out=target_out: apply_combination(target_in, combination),
-            description=f'Applying combination to {target_in}')
+        apply_combination(target_in, combination)
 
-        op_queue.add(action=lambda run_drc=run_drc: system.copy_from_template(
-            template_drc, run_drc),
-                     description=f'Copying template to {run_drc}')
+        system.copy_from_template(template_drc, run_drc)
 
-        op_queue.add(action=lambda run_name=run_name: system.write_batchfile(
-            workspace, run_name),
-                     description=f'Writing new batchfile for {run_name}')
+        system.write_batchfile(workspace, run_name)
 
-        op_queue.add(action=lambda run_drc=run_drc, target_in=target_in,
-                     target_out=target_out: system.update_imas_locations(
-                         run=run_drc, inp=target_in, out=target_out),
-                     description=f'Updating imas locations of {run_drc}')
+        system.update_imas_locations(run=run_drc,
+                                     inp=target_in,
+                                     out=target_out),
 
         runs.append({
             'dirname': run_name,
@@ -136,5 +132,4 @@ def create(*, force, dry_run, **kwargs):
             'operations': combination
         })
 
-    op_queue.add(action=lambda: write_runs_file(runs, workspace),
-                 description=f'Writing out {workspace.runs_yaml}')
+    write_runs_file(runs, workspace)
