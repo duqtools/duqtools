@@ -118,12 +118,11 @@ def create(*, force, dry_run, **kwargs):
         apply_combination(target_in, combination)
 
         system.copy_from_template(template_drc, run_drc)
-
         system.write_batchfile(workspace, run_name)
 
         system.update_imas_locations(run=run_drc,
                                      inp=target_in,
-                                     out=target_out),
+                                     out=target_out)
 
         runs.append({
             'dirname': run_name,

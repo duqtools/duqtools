@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
+from ..operations import add_to_op_queue
 from ..schema import ImasBaseModel
 from ..utils import dry_run_toggle
 from ._copy import copy_ids_entry
@@ -66,6 +67,7 @@ class ImasHandle(ImasBaseModel):
         """
         copy_ids_entry(self, destination)
 
+    @add_to_op_queue('Removing {self}')
     def delete(self):
         """Remove data from entry."""
         from ..config import cfg
