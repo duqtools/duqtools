@@ -16,6 +16,37 @@ def rebase_on_ids(source: pd.DataFrame,
                   base_col: str,
                   value_cols: Sequence[str],
                   new_base: np.ndarray = None) -> pd.DataFrame:
+    """Rebase data on new ids basis using interpolation.
+
+    This operation makes sure that all data on the x-axis are the same for
+    each run and time step.
+
+    Uses [scipy.interpolate.interp1d][].
+
+    Parameters
+    ----------
+    source : pd.DataFrame
+        Input data, contains the columns 'run', 'tstep' and any number of
+        ids columns.
+    base_col : str
+        This defines the base ids column that the new base belongs to.
+        In other words, this is the `x` column in the interpolation.
+    value_cols : Sequence[str]
+        The data in these ids columns will be interpolated.
+        In other words, these are the `y` columns in the interpolation.
+        IDS columns not defined by base_col and value_cols will be omitted
+        from the output.
+    new_base : np.ndarray, optional
+        Numpy array with the new base values for the given base column.
+        If not defined, use the data in the base column of the first time
+        step of the first run as the basis.
+
+    Returns
+    -------
+    pd.DataFrame
+        For the returned dataframe, for each run and time step,
+        the values in the base column will be the same.
+    """
     if new_base is None:
         first_run = source.iloc[0].run
         idx = (source[RUN_COL] == first_run) & (source[TIME_COL] == 0)
@@ -44,6 +75,31 @@ def rebase_on_time(source: pd.DataFrame,
                    *,
                    cols: Sequence[str],
                    new_base: np.ndarray = None) -> pd.DataFrame:
+    """Rebase data on new time basis using interpolation.
+
+    This operation makes sure that each run has the same time steps.
+
+    Uses [scipy.interpolate.interp1d][].
+
+    Parameters
+    ----------
+    source : pd.DataFrame
+        Input data, contains the columns 'run', 'tstep' and any number of
+        ids columns.
+    cols : Sequence[str]
+        This defines the columns that should be rebased.
+        IDS columns not defined will be omitted from the output.
+    new_base : np.ndarray, optional
+        Numpy array with the new base values for the time steps.
+        If not defined, use the time steps in the first run of the
+        source data.
+
+    Returns
+    -------
+    pd.DataFrame
+        For the returned dataframe, for each run the time steps will
+        be the same.
+    """
     if new_base is None:
         first_run = source.iloc[0].run
         new_base = source[source[RUN_COL] == first_run].tstep.unique()
