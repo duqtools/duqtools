@@ -51,7 +51,7 @@ def write_runs_file(runs: list, workspace) -> None:
 
 
 @confirm_operations
-def create(*, force, dry_run, **kwargs):
+def create(*, force, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters

@@ -9,14 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 @confirm_operations
-def init(*, dry_run: bool, config: str, full: bool, force: bool,
-         comments: bool, **kwargs):
+def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
     ----------
-    dry_run : bool
-        Do not make any changes to the file system.
     config : str
         Filename of the config.
     full : bool

@@ -8,6 +8,7 @@ from typing import Callable
 import click
 from pydantic import Field
 
+from .config import cfg
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,11 @@ class Operation(BaseModel):
 
     def __call__(self) -> Operation:
         logger.info(f'-: {self.description}')
-        self.action(*self.args, **self.kwargs)
+        if not cfg.dry_run:
+            self.action(*self.args, **self.kwargs)
+        else:
+            logger.info('Dry run enabled, refusing to apply operation: '
+                        f'{self.description}')
         return self
 
 
@@ -85,8 +90,13 @@ class Operations(deque):
         for op in self:
             logging.info(op.description)
 
-        ans = click.confirm('Do you want to apply all these operations?',
-                            default=False)
+        if not cfg.dry_run:
+            ans = click.confirm('Do you want to apply all these operations?',
+                                default=False)
+        else:
+            logger.info('Dry run enabled, not applying operations')
+            ans = False
+
         if ans:
             self.apply_all()
         return ans
