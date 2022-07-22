@@ -5,7 +5,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from duqtools.ids import (ImasHandle, get_ids_tree, rebase_on_ids,
+from duqtools.ids import (IDSMapping, ImasHandle, get_ids_tree, rebase_on_ids,
                           rebase_on_time)
 from duqtools.schema.runs import Runs
 
@@ -113,6 +113,7 @@ for y_val in y_vals:
 
     if show_error_bar:
         source = rebase_on_ids(source, base_col=x_val, value_cols=[y_val])
+        source = rebase_on_time(source, cols=(x_val, y_val))
 
         line = alt.Chart(source).mark_line().encode(
             x=f'{x_val}:Q',
@@ -189,8 +190,7 @@ with st.form('Save to new IMAS DB entry'):
         template_data = get_ids_tree(template)
 
         # pick first time step as basis
-        common_basis = template_data.to_dataframe(x_val,
-                                                  time_steps=(0, ))[x_val]
+        common_basis = template_data[f'profiles_1d/0/{x_val}']
 
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
 
@@ -199,23 +199,40 @@ with st.form('Save to new IMAS DB entry'):
                              value_cols=y_vals,
                              new_base=common_basis)
 
-        common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
+        # common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
+        common_time = template_data['time']
 
         # Set to common time basis
         data = rebase_on_time(data,
                               cols=[x_val, *y_vals],
                               new_base=common_time)
 
-        # template.copy_ids_entry_to(target)
+        gb = data.groupby(['tstep', x_val])
 
-        # core_profiles = target_in.get('core_profiles')
-        # ids_mapping = IDSMapping(core_profiles)
+        agg_funcs = ['mean', 'std']
+        agg_dict = {y_val: agg_funcs for y_val in y_vals}
 
-        # for y_val in y_keys:
-        #     pass
+        merged = gb.agg(agg_dict)
 
-        # with target.open() as data_entry_target:
-        #     core_profiles.put(db_entry=data_entry_target)
+        template.copy_ids_entry_to(target)
 
-        # st.success('Success!')
-        # st.balloons()
+        core_profiles = target.get('core_profiles')
+        ids_mapping = IDSMapping(core_profiles, exclude_empty=False)
+
+        for tstep, group in merged.groupby('tstep'):
+
+            mean = group['t_i_average', 'mean']
+            stdev = group['t_i_average', 'std']
+
+            profile = ids_mapping[f'profiles_1d/{tstep}/{y_val}']
+            profile[:] = mean
+
+            # This does not work yet, because `*_error_upper` *may* be empty
+            # profile_error_upper = ids_mapping[f'profiles_1d/{tstep}/{y_val}_error_upper']
+            # profile_error_upper[:] = mean + stdev
+
+        with target.open() as data_entry_target:
+            core_profiles.put(db_entry=data_entry_target)
+
+        st.success('Success!')
+        st.balloons()

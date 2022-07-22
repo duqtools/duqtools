@@ -5,11 +5,9 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-logger = logging.getLogger(__name__)
+from ._constants import RUN_COL, TIME_COL, TSTEP_COL
 
-RUN_COL = 'run'
-TSTEP_COL = 'tstep'
-TIME_COL = 'time'
+logger = logging.getLogger(__name__)
 
 
 def rebase_on_ids(source: pd.DataFrame,
@@ -50,7 +48,7 @@ def rebase_on_ids(source: pd.DataFrame,
     """
     if new_base is None:
         first_run = source.iloc[0].run
-        idx = (source[RUN_COL] == first_run) & (source[TIME_COL] == 0)
+        idx = (source[RUN_COL] == first_run) & (source[TSTEP_COL] == 0)
         new_base = source[idx][base_col]
         logger.debug('Rebase ids on %s, using %s from %d to %d with %d steps',
                      first_run, base_col, new_base.min(), new_base.max(),
@@ -68,10 +66,12 @@ def rebase_on_ids(source: pd.DataFrame,
 
         df = pd.DataFrame((new_base, *new_values),
                           index=[base_col, *value_cols]).T
+
         df[TIME_COL] = gb[TIME_COL].iloc[0]
         return df
 
     grouped = source.groupby([RUN_COL, TSTEP_COL])
+
     out = grouped.apply(refit).reset_index(
         (RUN_COL, TSTEP_COL)).reset_index(drop=True)
 
@@ -110,12 +110,14 @@ def rebase_on_time(source: pd.DataFrame,
     """
     if new_base is None:
         first_run = source.iloc[0].run
-        new_base = source[source[RUN_COL] == first_run].tstep.unique()
+        new_base = source[source[RUN_COL] == first_run][TIME_COL].unique()
         logger.debug('Rebase time on %s, from %d to %d with %d steps',
                      first_run, new_base.min(), new_base.max(), len(new_base))
 
+    cols = list(cols)
+
     n_cols = len(cols)
-    n_tsteps_new = len(new_base)
+    n_time_new = len(new_base)
 
     def refit(gb: pd.DataFrame) -> pd.DataFrame:
         time = gb[TIME_COL].unique()
@@ -132,11 +134,11 @@ def rebase_on_time(source: pd.DataFrame,
                      bounds_error=False)
 
         values_new = f(new_base)
-        values_new = values_new.T.reshape(n_tsteps_new * n_vals, n_cols)
+        values_new = values_new.T.reshape(n_time_new * n_vals, n_cols)
 
         time_new = np.repeat(new_base, n_vals).reshape(-1, 1)
 
-        tstep_new = np.repeat(np.arange(n_tsteps_new), n_vals).reshape(-1, 1)
+        tstep_new = np.repeat(np.arange(n_time_new), n_vals).reshape(-1, 1)
 
         arr = np.hstack((tstep_new, time_new, values_new))
 
