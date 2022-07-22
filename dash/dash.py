@@ -70,7 +70,7 @@ with st.sidebar:
     show_error_bar = st.checkbox(
         'Show errorbar',
         help=(
-            'Show 95\\% confidence interval band around mean y-value. All '
+            'Show standard deviation band around mean y-value. All '
             'y-values are interpolated to put them on a common basis for x.'))
 
 
