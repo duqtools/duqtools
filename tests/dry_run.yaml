@@ -26,7 +26,7 @@ create: # Configuration for the create subcommand
   data:
     db: 'test'
     run_in_start_at: 7010
-    run_out_start_at: 8010
+    run_out_start_at: 7010
   template: ./template_model # The create subroutine takes as a template directory. This can be a directory with a finished run, or one just stored by JAMS (but not yet started). Duqtools uses the input IDS machine (db) name, user, shot, run number from e.g. `jetto.in` to find the data to modify for the UQ runs.
 workspace:
   root: .  # The folder from which experiments have to be run, rjettov runs relative to this folder

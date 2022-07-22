@@ -7,7 +7,6 @@ def test_touch_operation(tmp_path):
     action = test_file.touch
     operation = Operation(action=action, description='touching test file')
     op_queue.put(operation)
-
     assert (not test_file.exists())
 
     op_queue.apply()

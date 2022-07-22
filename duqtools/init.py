@@ -63,6 +63,5 @@ def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
                                 'plot': {'plots'}
                             })
 
-    op_queue.add(action=open(config_filepath, 'w').write,
-                 args=(cfg_yaml, ),
+    op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
                  description=f'Writing out {config_filepath} config file')
