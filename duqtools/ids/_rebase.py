@@ -8,7 +8,8 @@ from scipy.interpolate import interp1d
 logger = logging.getLogger(__name__)
 
 RUN_COL = 'run'
-TIME_COL = 'tstep'
+TSTEP_COL = 'tstep'
+TIME_COL = 'time'
 
 
 def rebase_on_ids(source: pd.DataFrame,
@@ -57,18 +58,25 @@ def rebase_on_ids(source: pd.DataFrame,
 
     def refit(gb: pd.DataFrame) -> pd.DataFrame:
         new_values = []
+
         for value_col in value_cols:
             f = interp1d(gb[base_col],
                          gb[value_col],
                          fill_value='extrapolate',
                          bounds_error=False)
             new_values.append(f(new_base))
-        return pd.DataFrame((new_base, *new_values),
-                            index=[base_col, *value_cols]).T
 
-    grouped = source.groupby([RUN_COL, TIME_COL])
-    return grouped.apply(refit).reset_index(
-        (RUN_COL, TIME_COL)).reset_index(drop=True)
+        df = pd.DataFrame((new_base, *new_values),
+                          index=[base_col, *value_cols]).T
+        df[TIME_COL] = gb[TIME_COL].iloc[0]
+        return df
+
+    grouped = source.groupby([RUN_COL, TSTEP_COL])
+    out = grouped.apply(refit).reset_index(
+        (RUN_COL, TSTEP_COL)).reset_index(drop=True)
+
+    out = out[[RUN_COL, TSTEP_COL, TIME_COL, base_col, *value_cols]]
+    return out
 
 
 def rebase_on_time(source: pd.DataFrame,
@@ -110,13 +118,13 @@ def rebase_on_time(source: pd.DataFrame,
     n_tsteps_new = len(new_base)
 
     def refit(gb: pd.DataFrame) -> pd.DataFrame:
-        time = gb.tstep.unique()
+        time = gb[TIME_COL].unique()
         values = np.array(gb[cols])
 
-        n_tsteps = len(time)
-        n_vals = int(len(values) / n_tsteps)
+        n_times = len(time)
+        n_vals = int(len(values) / n_times)
 
-        values = values.reshape(n_tsteps, n_vals, n_cols).T
+        values = values.reshape(n_times, n_vals, n_cols).T
 
         f = interp1d(time,
                      values,
@@ -126,13 +134,17 @@ def rebase_on_time(source: pd.DataFrame,
         values_new = f(new_base)
         values_new = values_new.T.reshape(n_tsteps_new * n_vals, n_cols)
 
-        tstep_new = np.repeat(new_base,
-                              n_vals).reshape(n_tsteps_new * n_vals, 1)
+        time_new = np.repeat(new_base, n_vals).reshape(-1, 1)
 
-        out = np.hstack((tstep_new, values_new))
+        tstep_new = np.repeat(np.arange(n_tsteps_new), n_vals).reshape(-1, 1)
 
-        return pd.DataFrame(out, columns=[TIME_COL, *cols])
+        arr = np.hstack((tstep_new, time_new, values_new))
+
+        out = pd.DataFrame(arr, columns=[TSTEP_COL, TIME_COL, *cols])
+        out[TSTEP_COL] = out[TSTEP_COL].astype(np.int64)
+        return out
 
     grouped = source.groupby([RUN_COL])
 
-    return grouped.apply(refit).reset_index(RUN_COL).reset_index(drop=True)
+    out = grouped.apply(refit).reset_index(RUN_COL).reset_index(drop=True)
+    return out
