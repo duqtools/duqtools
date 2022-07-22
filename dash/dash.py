@@ -2,12 +2,11 @@ import sys
 from pathlib import Path
 
 import altair as alt
-import numpy as np
 import pandas as pd
 import streamlit as st
-from scipy.interpolate import interp1d
 
-from duqtools.ids import ImasHandle, get_ids_tree
+from duqtools.ids import (ImasHandle, get_ids_tree, rebase_on_ids,
+                          rebase_on_time)
 from duqtools.schema.runs import Runs
 
 try:
@@ -95,69 +94,8 @@ def get_data(df, **kwargs):
                             'index')).reset_index('run').reset_index(drop=True)
 
 
-@st.experimental_memo
-def put_on_common_basis(source, *, x_val, y_vals, common_basis=None):
-    if common_basis is None:
-        first_run = source.iloc[0].run
-        n = sum((source['run'] == first_run) & (source['tstep'] == 0))
-
-        mn = source[x_val].min()
-        mx = source[x_val].max()
-        common_basis = np.linspace(mn, mx, n)
-
-    def refit(gb):
-        new_x = common_basis
-        new_ys = []
-        for y_val in y_vals:
-            f = interp1d(gb[x_val],
-                         gb[y_val],
-                         fill_value='extrapolate',
-                         bounds_error=False)
-            new_ys.append(f(common_basis))
-        return pd.DataFrame((new_x, *new_ys), index=[x_val, *y_vals]).T
-
-    grouped = source.groupby(['run', 'tstep'])
-    return grouped.apply(refit).reset_index(
-        ('run', 'tstep')).reset_index(drop=True)
-
-
-def put_on_common_time(source, *, cols, common_time=None):
-    if common_time is None:
-        first_run = source.iloc[0].run
-        common_time = source[source['run'] == first_run].tstep.unique()
-
-    n_cols = len(cols)
-    n_tsteps_new = len(common_time)
-
-    def refit(gb):
-        time = gb.tstep.unique()
-        values = np.array(gb[cols])
-
-        n_tsteps = len(time)
-        n_vals = int(len(values) / n_tsteps)
-
-        values = values.reshape(n_tsteps, n_vals, n_cols).T
-        # column order of values is now column, xstep, tstep
-
-        f = interp1d(time,
-                     values,
-                     fill_value='extrapolate',
-                     bounds_error=False)
-
-        values_new = f(common_time)
-        values_new = values_new.T.reshape(n_tsteps_new * n_vals, n_cols)
-
-        tstep_new = np.repeat(common_time,
-                              n_vals).reshape(n_tsteps_new * n_vals, 1)
-
-        out = np.hstack((tstep_new, values_new))
-
-        return pd.DataFrame(out, columns=['tstep', *cols])
-
-    grouped = source.groupby(['run'])
-
-    return grouped.apply(refit).reset_index('run').reset_index(drop=True)
-
+rebase_on_ids = st.experimental_memo(rebase_on_ids)
+rebase_on_time = st.experimental_memo(rebase_on_time)
 
 y_vals = tuple(ffmt(y_key) for y_key in y_keys)
 x_val = ffmt(x_key)
@@ -174,7 +112,7 @@ for y_val in y_vals:
                                        init={'tstep': 0})
 
     if show_error_bar:
-        source = put_on_common_basis(source, x_val=x_val, y_vals=[y_val])
+        source = rebase_on_ids(source, base_col=x_val, value_cols=[y_val])
 
         line = alt.Chart(source).mark_line().encode(
             x=f'{x_val}:Q',
@@ -256,17 +194,17 @@ with st.form('Save to new IMAS DB entry'):
 
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
 
-        data = put_on_common_basis(data,
-                                   x_val=x_val,
-                                   y_vals=y_vals,
-                                   common_basis=common_basis)
+        data = rebase_on_ids(data,
+                             base_col=x_val,
+                             value_cols=y_vals,
+                             new_base=common_basis)
 
         common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
 
         # Set to common time basis
-        data = put_on_common_time(data,
-                                  cols=[x_val, *y_vals],
-                                  common_time=common_time)
+        data = rebase_on_time(data,
+                              cols=[x_val, *y_vals],
+                              new_base=common_time)
 
         # template.copy_ids_entry_to(target)
 
