@@ -1,4 +1,5 @@
 import logging
+from getpass import getuser
 
 import click
 import coverage
@@ -121,6 +122,32 @@ def cli_plot(**kwargs):
     """Analyze the results and generate a report."""
     from .plot import plot
     plot(**kwargs)
+
+
+@cli.command('show')
+@click.option('-x', type=str, help='IDS of the x value')
+@click.option('-y', type=str, help='IDS of the y value')
+@click.option('-u',
+              '--user',
+              default=getuser(),
+              type=str,
+              help='User name, defaults to current user')
+@click.option('-d',
+              '--db',
+              default='jet',
+              type=str,
+              help='Database or machine name')
+@click.option('-r', '--run', type=int, help='Run number')
+@click.option('-s', '--shot', type=int, help='Shot number')
+@click.option('-i',
+              '--inp',
+              type=str,
+              help='Input file, i.e. `data.csv` or `runs.yaml`')
+@common_options
+def cli_show(**kwargs):
+    """Analyze the results and generate a report."""
+    from .show import show
+    show(**kwargs)
 
 
 @cli.command('clean')
