@@ -3,7 +3,8 @@ import logging
 import click
 import coverage
 
-from duqtools.config import cfg
+from .config import cfg
+from .operations import op_queue
 
 logger = logging.getLogger(__name__)
 coverage.process_startup()
@@ -44,7 +45,9 @@ def dry_run_option(f):
     def callback(ctx, param, dry_run):
         if dry_run:
             logger.info('--dry-run enabled')
-            cfg.dry_run = True
+            op_queue.dry_run = True
+        else:
+            op_queue.dry_run = False
 
         return dry_run
 
@@ -54,8 +57,25 @@ def dry_run_option(f):
                         callback=callback)(f)
 
 
+def yes_option(f):
+
+    def callback(ctx, param, yes):
+        if yes:
+            logger.info('--yes enabled')
+            op_queue.yes = True
+        else:
+            op_queue.yes = False
+        return yes
+
+    return click.option('--yes',
+                        '-y',
+                        is_flag=True,
+                        help='Answer yes to questions automatically.',
+                        callback=callback)(f)
+
+
 def common_options(func):
-    for wrapper in (debug_option, config_option, dry_run_option):
+    for wrapper in (debug_option, config_option, dry_run_option, yes_option):
         # config_option MUST BE BEFORE dry_run_option
         func = wrapper(func)
     return func
