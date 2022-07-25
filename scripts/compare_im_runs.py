@@ -32,9 +32,24 @@ keys_list['profiles_1d'] = [
     'core_profiles.profiles_1d[].q', 
     'core_profiles.profiles_1d[].electrons.density_thermal',
     'core_profiles.profiles_1d[].electrons.density',
+    'core_profiles.profiles_1d[].electrons.density_fit.measured',
+    'core_profiles.profiles_1d[].electrons.density_fit.measured_error_upper',
     'core_profiles.profiles_1d[].electrons.temperature',
-    'core_profiles.profiles_1d[].ion[].temperature',
-    'core_profiles.profiles_1d[].ion[].density',
+    'core_profiles.profiles_1d[].electrons.temperature_fit.measured',
+    'core_profiles.profiles_1d[].electrons.temperature_fit.measured_error_upper',
+    'core_profiles.profiles_1d[].t_i_average',
+    'core_profiles.profiles_1d[].t_i_average_fit.measured',
+    'core_profiles.profiles_1d[].t_i_average_fit.measured_error_upper',
+    'core_profiles.profiles_1d[].ion[0].temperature',
+    'core_profiles.profiles_1d[].ion[0].temperature_fit.measured',
+    'core_profiles.profiles_1d[].ion[0].temperature_fit.measured_error_upper',
+    'core_profiles.profiles_1d[].ion[0].density',
+    'core_profiles.profiles_1d[].ion[1].temperature',
+    'core_profiles.profiles_1d[].ion[1].temperature_fit.measured',
+    'core_profiles.profiles_1d[].ion[1].temperature_fit.measured_error_upper',
+    'core_profiles.profiles_1d[].ion[1].density',
+    'core_profiles.profiles_1d[].ion[1].density_fit.measured',
+    'core_profiles.profiles_1d[].ion[1].density_fit.measured_error_upper',
     'core_profiles.profiles_1d[].t_i_average', 
     'core_profiles.profiles_1d[].zeff',
     'core_profiles.profiles_1d[].grid.rho_tor_norm',
@@ -133,8 +148,8 @@ python compare_im_runs.py -u g2aho -d jet -s 94875 -r 1 102 --time_begin 48 --ti
     parser.add_argument("--plot_uniform_basis",                      default=False, action='store_true',             help="Toggle plotting of interpolated data to form uniform time and radial basis, uses first run as basis")
     parser.add_argument("--analyze_traces",   nargs='*', type=str,   default=None, choices=["absolute_error"],       help="Define which analyses to perform after time trace comparison plots")
     parser.add_argument("--analyze_profiles", nargs='*', type=str,   default=None, choices=["average_absolute_error"], help="Define which analyses to perform after profile comparison plots")
-    parser.add_argument("--change_sign",                             default=None, action='store_true',               help="Allows to change the sign of the output if it is not the same in the HFPS and in the IDS")
-
+    parser.add_argument("--change_sign",                             default=None, action='store_true',              help="Allows to change the sign of the output if it is not the same in the HFPS and in the IDS")
+    parser.add_argument("--multi_var_function", "-func", type=str,   default=None,                                   help="Function of multiple variables")
 
     args=parser.parse_args()
 
@@ -277,6 +292,27 @@ def get_onesig(ids,signame,time_begin,time_end=None,sid=None,tid=None):
         if idsname == 'core_transport':
             if datatype == 'profiles_1d':
                 xstring='ids.model[tid_ind].profiles_1d[tt].grid_d.rho_tor_norm'
+        # Defining a different x vector for the experimental data
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].electrons.temperature_fit.measured':
+            xstring = 'ids.profiles_1d[tt].electrons.temperature_fit.rho_tor_norm'
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].electrons.temperature_fit.measured_error_upper':
+            xstring = 'ids.profiles_1d[tt].electrons.temperature_fit.rho_tor_norm'
+
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].electrons.density_fit.measured':
+            xstring = 'ids.profiles_1d[tt].electrons.density_fit.rho_tor_norm'
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].electrons.density_fit.measured_error_upper':
+            xstring = 'ids.profiles_1d[tt].electrons.density_fit.rho_tor_norm'
+
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].t_i_average_fit.measured':
+            xstring = 'ids.profiles_1d[tt].t_i_average_fit.rho_tor_norm'
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].t_i_average_fit.measured_error_upper':
+            xstring = 'ids.profiles_1d[tt].t_i_average_fit.rho_tor_norm'
+
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].ion[1].density_fit.measured':
+            xstring = 'ids.profiles_1d[tt].ion[1].density_fit.rho_tor_norm'
+        if idsname == 'core_profiles' and signame == 'core_profiles.profiles_1d[].ion[1].density_fit.measured_error_upper':
+            xstring = 'ids.profiles_1d[tt].ion[1].density_fit.rho_tor_norm'
+
         # Define x vector (could be time or radius)
         if xstring == 'ids.time[tt]':
             xvec = np.array([tvec[tt]]).flatten()
@@ -288,6 +324,7 @@ def get_onesig(ids,signame,time_begin,time_end=None,sid=None,tid=None):
             except:
                 raise IOError('Radial vector not present in IDS.')
         # Define y vector(value of signal)
+
         try:
             yvec=eval(ystring)
             if not isinstance(yvec, np.ndarray):
@@ -363,6 +400,7 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
             first_tag = tag
 
         temp_run_dict[tag] = get_onedict(sigvec,user,db,shot,runid,time_begin,time_end,interpolate=True)
+
         if reference_tag is None:
             reference_tag = tag
     # If another run is required to be the reference, then set that to be the reference if it is present
@@ -438,7 +476,8 @@ def standardize_manydict(runvec,sigvec,time_begin,time_end=None,time_vector=None
                         else:
                             for ii in range(ytable_temp.shape[1]):
                                 y_new = fit_and_substitute(run_dict[key+".t"], t_new, ytable_temp[:, ii])
-                            ytable_new = np.vstack((ytable_new, y_new)) if ytable_new is not None else np.atleast_2d(y_new)
+                                ytable_new = np.vstack((ytable_new, y_new)) if ytable_new is not None else np.atleast_2d(y_new)
+
                         if ytable_new is not None:
                             ytable_new = ytable_new.T
                     else:
@@ -528,7 +567,6 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
                         tidx = np.abs(tvec[tidx_orig] - tvec_new).argmin(0)
                         pdata[run].append({"time": plot_data[run][signame+".t"][tidx], "rho": plot_data[run][signame][tidx]["x"], "data": plot_data[run][signame][tidx]["y"]})
                         tvec_final = np.hstack((tvec_final, plot_data[run][signame+".t"][tidx]))
-                    #print(tvec, tvec_final)
         if pdata and single_time_reference:
             if tvec is None:
                 for tidx in range(len(plot_data[first_run][signame])):
@@ -540,8 +578,8 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
             print("Plotting %s" % (signame))
             Figure = plt.figure()
 
-# creating a plot
-#    lines_plotted = plt.plot([])
+            # creating a plot
+            # lines_plotted = plt.plot([])
 
             ax = Figure.add_subplot(1, 1, 1)
             ax.set_xlabel('rho_tor_norm')
@@ -565,28 +603,28 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
 
             ax.legend(loc='best')
 
-# putting limits on x axis since it is a trigonometry function (0,2)
+            # putting limits on x axis since it is a trigonometry function (0,2)
 
             ax.set_xlim([0,1])
 
-# putting limits on y since it is a cosine function
+            # putting limits on y since it is a cosine function
             ax.set_ylim([ymin,ymax])
 
-# function takes frame as an input
+            # function takes frame as an input
             def AnimationFunction(frame):
 
                 # line is set with new values of x and y
                 for run in pdata:
                     plot_list[run].set_data((pdata[run][frame]["rho"], pdata[run][frame]["data"]))
 
-# creating the animation and saving it with a name that does not include spaces
+            # creating the animation and saving it with a name that does not include spaces
 
             anim_created = FuncAnimation(Figure, AnimationFunction, frames=len(tvec), interval=200)
             #ylabel = ylabel.replace(' ', '_')
             #f = r'/afs/eufus.eu/user/g/g2mmarin/imas_scripts/animation' + ylabel + '.gif'
             #anim_created.save(f, writer='writergif')
 
-# displaying the video
+            # displaying the video
 
             video = anim_created.to_html5_video()
             html = display.HTML(video)
@@ -594,7 +632,7 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
 
             plt.show()
 
-# good practice to close the plt object.
+            # good practice to close the plt object.
             plt.close()
 
 def plot_gif_interpolated_profiles(interpolated_data):
@@ -607,8 +645,8 @@ def plot_gif_interpolated_profiles(interpolated_data):
             print("Plotting %s" % (signame))
             Figure = plt.figure()
 
-# creating a plot
-#    lines_plotted = plt.plot([])
+            # creating a plot
+            #    lines_plotted = plt.plot([])
 
             ax = Figure.add_subplot(1, 1, 1)
             ax.set_xlabel('rho_tor_norm')
@@ -628,28 +666,28 @@ def plot_gif_interpolated_profiles(interpolated_data):
 
             ax.legend(loc='best')
 
-# putting limits on x axis since it is a trigonometry function (0,2)
+            # putting limits on x axis since it is a trigonometry function (0,2)
 
             ax.set_xlim([0,1])
 
-# putting limits on y since it is a cosine function
+            # putting limits on y since it is a cosine function
             ax.set_ylim([ymin,ymax])
 
-# function takes frame as an input
+            # function takes frame as an input
             def AnimationFunction(frame):
 
                 # line is set with new values of x and y
                 for run in interpolated_data[signame]:
                     plot_list[run].set_data((interpolated_data[signame+".x"], interpolated_data[signame][run][frame]))
 
-# creating the animation and saving it with a name that does not include spaces
+            # creating the animation and saving it with a name that does not include spaces
 
             anim_created = FuncAnimation(Figure, AnimationFunction, frames=len(interpolated_data[signame+".t"]), interval=200)
             #ylabel = ylabel.replace(' ', '_')
             #f = r'/afs/eufus.eu/user/g/g2mmarin/imas_scripts/animation' + ylabel + '.gif'
             #anim_created.save(f, writer='writergif')
 
-# displaying the video
+            # displaying the video
 
             video = anim_created.to_html5_video()
             html = display.HTML(video)
@@ -657,7 +695,7 @@ def plot_gif_interpolated_profiles(interpolated_data):
 
             plt.show()
 
-# good practice to close the plt object.
+            # good practice to close the plt object.
             plt.close()
 
 def plot_profiles(plot_data):
@@ -753,6 +791,7 @@ def main():
     sid_tmp = args.source
     tid_tmp = args.transport
     change_sign = args.change_sign
+    multi_var_function = args.multi_var_function
 
 #    nsig=len(signame)
     nmas=len(mas_tmp)
@@ -779,7 +818,23 @@ def main():
 
 #    keyvec='user','database','shot','run','time','x','y','sid','tid'
 
-#    idsname=args.idsname
+    # Adding the variables for comparison of functions when they are not available
+
+    if multi_var_function:
+        operations_signs = ['*2', '/2', '+', '-', '*', '/'] # Add more here as they are needed.
+        multi_var_function_tmp = copy.copy(multi_var_function)
+        for operation_sign in operations_signs:
+            multi_var_function_tmp = multi_var_function_tmp.replace(operation_sign, ' ')
+
+        variables_multi_var_function = multi_var_function_tmp.split(' ')
+        if variables_multi_var_function[-1] == '':
+            variables_multi_var_function = variables_multi_var_function[:-1]
+
+        for variable_multi_var_function in variables_multi_var_function:
+            if sigvec == None:
+                sigvec = [variable_multi_var_function]
+            else:
+                sigvec.append(variable_multi_var_function)
 
 #    print('ids to be used',idsname)
 
@@ -803,18 +858,109 @@ def main():
         if args.steady_state and i == 0:
             ref_tag = None
 
+        if multi_var_function:
+        # Changing time vector if it is different between different IDSs. Already needed at this stage since operations need to be done
+            for key in variables_multi_var_function:
+                time_ref = None
+                if time_ref is None:
+                    time_ref = plot_dict[tag][key+'.t']
+
+                plot_dict[tag][key] = fit_and_substitute(plot_dict[tag][key+".t"], time_ref, plot_dict[tag][key])
+
+        # Substituting the key since otherwise it will think that the dots define attributes
+            multi_var_function = multi_var_function.replace('.', '_')
+            for key in variables_multi_var_function:
+                new_key = key.replace('.', '_')
+                globals()[new_key] = plot_dict[tag][key]
+
+            new_variable = eval(multi_var_function)
+
+            plot_dict[tag][multi_var_function] = new_variable
+            plot_dict[tag][multi_var_function+'.t'] = time_ref
+
+            for key in variables_multi_var_function:
+                new_key = key.replace('.', '_')
+                del globals()[new_key]
+
         # adding the option of changing the sign of the variable. Useful for q profile in some instances
         if i > 0 and change_sign:
             for key in plot_dict[tag]:
                 if not key.endswith(".x") and not key.endswith(".t"):
-                    for i, data in enumerate(plot_dict[tag][key]):
-                        plot_dict[tag][key][i]['y'] = -data['y']
+                    if type(plot_dict[tag][key][0]) == dict:
+                        for ii, data in enumerate(plot_dict[tag][key]):
+                            plot_dict[tag][key][ii]["y"] = -data["y"]
+                    else:
+                        plot_dict[tag][key] = -plot_dict[tag][key]
+
+    # Only variables in the keys_list will be plotted
+    if multi_var_function:
+        keys_list['time_trace'].append(multi_var_function)
 
     if not args.plot_uniform_basis:
         plot_traces(plot_dict, single_time_reference=args.steady_state)
         plot_gif_profiles(plot_dict, single_time_reference=args.steady_state)
 
     analysis_dict = standardize_manydict(runvec,sigvec,tb_tmp,time_end=te_tmp,time_vector=time_tmp,set_reference=ref_tag)
+
+    # Changing the sign of the variable also in the analysis_dict when needed (should not be needed in the future)
+    if change_sign:
+        for key in analysis_dict:
+            if not key.endswith(".x") and not key.endswith(".t"):
+                first_index = 0
+                for tag in analysis_dict[key]:
+                    if first_index:
+                        analysis_dict[key][tag] = -analysis_dict[key][tag]
+                    first_index += 1
+
+
+    # ------------- Adding comparison of functions ------------
+    # Adding the possibility of comparing functions of variables.
+    # Need to interpolate in space and time when the signals are coming from different IDSs...
+    # Only traces are supported for now, so no space interpolation
+
+    if multi_var_function:
+        # Changing time vector if it is different between different IDSs
+        for key in variables_multi_var_function:
+            time_ref = None
+            for tag in analysis_dict[key]:
+                if time_ref is None:
+                    time_ref = analysis_dict[key+'.t']
+
+                analysis_dict[key][tag] = fit_and_substitute(analysis_dict[key+".t"], time_ref, analysis_dict[key][tag])
+
+        # Building an array in place of the dictionary to simplify the operation later
+        analysis_array = {}
+        for key in variables_multi_var_function:
+            analysis_array[key] = None
+            for tag in analysis_dict[key]:
+                if analysis_array[key] is not None:
+                    analysis_array[key] = np.hstack((analysis_array[key], analysis_dict[key][tag]))
+                else:
+                    analysis_array[key] = analysis_dict[key][tag]
+
+        # Substituting the key since otherwise it will think that the dots define attributes
+        multi_var_function = multi_var_function.replace('.', '_')
+        for key in variables_multi_var_function:
+            new_key = key.replace('.', '_')
+            globals()[new_key] = analysis_array[key]
+
+        new_variable = eval(multi_var_function)
+        new_variable = new_variable.reshape(len(analysis_dict[key]),len(time_ref))
+
+        for key in variables_multi_var_function:
+            new_key = key.replace('.', '_')
+            del globals()[new_key]
+
+        analysis_dict[multi_var_function] = {}
+        for new_slice, tag in zip(new_variable, analysis_dict[variables_multi_var_function[0]]):
+            
+            analysis_dict[multi_var_function][tag] = new_slice
+            analysis_dict[multi_var_function+'.t'] = time_ref
+
+        # Already done above
+        #keys_list['time_trace'].append(multi_var_function)
+
+    # -------------------------------------------------------------------------
 
     if args.plot_uniform_basis:
         plot_interpolated_traces(analysis_dict)

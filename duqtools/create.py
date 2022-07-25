@@ -3,8 +3,7 @@ from typing import Iterable
 
 from duqtools.config import cfg
 
-from .ids import IDSMapping, ImasHandle
-from .ids.dimensions import apply_model
+from .ids import IDSMapping, ImasHandle, apply_model
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
 from .operations import add_to_op_queue, confirm_operations, op_queue
@@ -74,7 +73,11 @@ def create(*, force, **kwargs):
 
     system = get_system()
 
-    source = system.imas_from_path(template_drc)
+    if not options.template_data:
+        source = system.imas_from_path(template_drc)
+    else:
+        source = ImasHandle.parse_obj(options.template_data)
+
     logger.info('Source data: %s', source)
 
     matrix = tuple(dim.expand() for dim in dimensions)
