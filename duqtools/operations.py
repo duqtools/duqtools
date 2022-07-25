@@ -88,11 +88,14 @@ class Operations(deque):
         return Operations._instance
 
     def add(self, *args, **kwargs) -> None:
-        """convenience Operation wrapper around put. ```python from
-        duqtools.operations import add_to_op_queue.
+        """convenience Operation wrapper around put.
 
-        op_queue.add(print, args=('Hello World,), description="Function
-        that prints hello world") ```
+        ```python
+        from duqtools.operations import add_to_op_queue.
+
+        op_queue.add(print, args=('Hello World,),
+                description="Function that prints hello world")
+        ```
         """
 
         self.append(Operation(*args, **kwargs))
