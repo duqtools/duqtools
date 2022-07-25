@@ -117,14 +117,6 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@common_options
-def cli_plot(**kwargs):
-    """Analyze the results and generate a report."""
-    from .plot import plot
-    plot(**kwargs)
-
-
-@cli.command('show')
 @click.option('-x', type=str, help='IDS of the x value')
 @click.option('-y', type=str, help='IDS of the y value')
 @click.option('-u',
@@ -144,10 +136,10 @@ def cli_plot(**kwargs):
               type=str,
               help='Input file, i.e. `data.csv` or `runs.yaml`')
 @common_options
-def cli_show(**kwargs):
+def cli_plot(**kwargs):
     """Analyze the results and generate a report."""
-    from .show import show
-    show(**kwargs)
+    from .plot import plot
+    plot(**kwargs)
 
 
 @cli.command('clean')

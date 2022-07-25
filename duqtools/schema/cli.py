@@ -8,7 +8,6 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import IDSOperationDim
 from ._imas import ImasBaseModel
-from ._plot import PlotModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
@@ -141,30 +140,8 @@ class StatusConfigModel(BaseModel):
             """))
 
 
-class PlotConfigModel(BaseModel):
-    """The options of the plot subcommand are stored under the `plot` key in
-    the config.
-
-    Plots are specified as a list under the `plots` key. Multiple plots
-    can be defined, and they will be written sequentially as .png files
-    to the current working directory.
-    """
-    plots: List[PlotModel] = [
-        PlotModel(),
-        PlotModel(
-            x='profiles_1d/0/grid/rho_tor_norm',
-            y='profiles_1d/0/t_i_average',
-            xlabel='Rho tor.',
-            ylabel='Ion temperature',
-        )
-    ]
-
-
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
-    plot: PlotConfigModel = Field(
-        PlotConfigModel(),
-        description='Configuration for the plotting subcommand')
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
         description='Configuration for the submit subcommand')
