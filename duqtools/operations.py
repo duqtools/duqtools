@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class Operation(BaseModel):
-    """Operation, simple class which has a callable action."""
+    """Operation, simple class which has a callable action.
+
+    Usually not called directly but used through Operations. has the
+    following members:
+    """
 
     description: str = Field(
         description='description of the operation to be done')
@@ -28,12 +32,35 @@ class Operation(BaseModel):
                          description='keyword arguments that will be '
                          'passed to the action')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, action, description, *args, **kwargs):
+        """__init__.
+
+        Parameters
+        ----------
+        description: str
+            description of the operation to be done
+        action: Callable
+            function to be eventually evaluated
+        *args: tuple
+            positional arguments to action
+        **kwargs: dict
+            keyword arguments to action
+        """
+        super().__init__(action=action,
+                         description=description,
+                         *args,
+                         **kwargs)
         if not self.kwargs:
             self.kwargs = {}
 
     def __call__(self) -> Operation:
+        """Execute the action with the args and kwargs.
+
+        Returns
+        -------
+        Operation
+            The operation that was executed
+        """
         logger.info(self.description)
         self.action(*self.args, **self.kwargs)
         return self
@@ -41,7 +68,14 @@ class Operation(BaseModel):
 
 class Operations(deque):
     """Operations Queue which keeps track of all the operations that need to be
-    done."""
+    done.
+
+    It's basically dask_delayed, but custom made and a few drawbacks:
+    The return value from an action is eventually discarded,
+    communication between queue items is possible through references, or
+    global values, but not really recommended, and no guidance for this
+    is provided
+    """
 
     _instance = None
     yes = False  # Apply operations without prompt
@@ -54,7 +88,12 @@ class Operations(deque):
         return Operations._instance
 
     def add(self, *args, **kwargs) -> None:
-        """convenience Operation wrapper around put."""
+        """convenience Operation wrapper around put. ```python from
+        duqtools.operations import add_to_op_queue.
+
+        op_queue.add(print, args=('Hello World,), description="Function
+        that prints hello world") ```
+        """
 
         self.append(Operation(*args, **kwargs))
 
@@ -111,7 +150,19 @@ op_queue = Operations()
 
 def confirm_operations(func):
     """Decorator which confirms and applies queued operations after the
-    function."""
+    function.
+
+    ```python
+    from duqtools.operations import confirm_operations, op_queue
+
+    @confirm_operations
+    def complicated_stuff()
+        op_queue.add(print, args=('Hello World,),
+                description="Function that prints hello world")
+        op_queue.add(print, args=('Hello World again,),
+                description="Function that prints hello world, again")
+    ```
+    """
 
     def wrapper(*args, **kwargs):
         ret = func(*args, **kwargs)
@@ -125,7 +176,21 @@ def confirm_operations(func):
 def add_to_op_queue(description: str):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
-    function arguments."""
+    function arguments.
+
+    ```python
+    from duqtools.operations import add_to_op_queue, op_queue
+
+    @add_to_op_queue("Printing hello world {name}")
+    def print_hello_world(name):
+        print(f"Hello World {name}")
+
+
+    print_hello_world("Snoozy")
+
+    op_queue.confirm_apply_all()
+    ```
+    """
 
     def op_queue_real(func):
 
