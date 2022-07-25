@@ -24,12 +24,17 @@ class Operation(BaseModel):
     args: tuple = Field((),
                         description='positional arguments that have to be '
                         'passed to the action')
-    kwargs: dict = Field({},
+    kwargs: dict = Field(None,
                          description='keyword arguments that will be '
                          'passed to the action')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.kwargs:
+            self.kwargs = {}
+
     def __call__(self) -> Operation:
-        logger.info(f'-: {self.description}')
+        logger.info(self.description)
         self.action(*self.args, **self.kwargs)
         return self
 
@@ -65,7 +70,9 @@ class Operations(deque):
     def apply(self) -> Operation:
         """Apply the next operation in the queue and remove it."""
 
-        return self.popleft()()
+        operation = self.popleft()
+        operation()
+        return operation
 
     def apply_all(self) -> None:
         """Apply all queued operations and empty the queue."""
@@ -91,15 +98,11 @@ class Operations(deque):
             logger.info('Dry run enabled, not applying op_queue')
             return False
 
-        if not self.yes:
-            ans = click.confirm('Do you want to apply all these operations?',
-                                default=False)
-        else:
-            ans = self.yes
+        ans = self.yes or click.confirm(
+            'Do you want to apply all these operations?', default=False)
 
         if ans:
             self.apply_all()
-
         return ans
 
 
