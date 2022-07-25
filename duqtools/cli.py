@@ -137,7 +137,7 @@ def cli_status(**kwargs):
               help='Input file, i.e. `data.csv` or `runs.yaml`')
 @common_options
 def cli_plot(**kwargs):
-    """Analyze the results and generate a report."""
+    """Plot some IDS data."""
     from .plot import plot
     plot(**kwargs)
 
