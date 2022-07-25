@@ -12,6 +12,10 @@ from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
 
+stream = logging.StreamHandler()
+stream.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
+logger.addHandler(stream)
+
 
 class Operation(BaseModel):
     """Operation, simple class which has a callable action.
@@ -61,7 +65,7 @@ class Operation(BaseModel):
         Operation
             The operation that was executed
         """
-        logger.info(self.description)
+        logger.debug(self.description)
         self.action(*self.args, **self.kwargs)
         return self
 
@@ -117,9 +121,16 @@ class Operations(deque):
         return operation
 
     def apply_all(self) -> None:
-        """Apply all queued operations and empty the queue."""
-        while len(self) != 0:
-            self.apply()
+        """Apply all queued operations and empty the queue.
+
+        and show a fancy progress bar while applying
+        """
+        from tqdm import tqdm
+        with tqdm(total=len(self)) as pbar:
+            pbar.set_description('Applying operations')
+            while len(self) != 0:
+                self.apply()
+                pbar.update()
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -134,7 +145,7 @@ class Operations(deque):
         logger.info('Operations in the Queue:')
         logger.info('========================')
         for op in self:
-            logging.info(op.description)
+            logger.info(op.description)
 
         if self.dry_run:
             logger.info('Dry run enabled, not applying op_queue')
