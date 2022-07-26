@@ -13,16 +13,6 @@ if TYPE_CHECKING:
     from .ids import ImasHandle
 
 
-def dry_run_toggle(func):
-
-    def wrapper(*args, **kwargs):
-        from .config import cfg
-        if not cfg.dry_run:
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
 @contextmanager
 def work_directory(path: PathLike):
     """Changes working directory and returns to previous on exit.
@@ -32,10 +22,12 @@ def work_directory(path: PathLike):
     path : PathLike
         Temporarily change to this directory.
     """
-    prev_cwd = Path.cwd()
-    os.chdir(path)
-    yield
-    os.chdir(prev_cwd)
+    prev_cwd = Path.cwd().resolve()
+    try:
+        os.chdir(path)
+        yield
+    finally:  # In any case, no matter what happens, go back eventually
+        os.chdir(prev_cwd)
 
 
 def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:

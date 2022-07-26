@@ -3,13 +3,17 @@ from __future__ import annotations
 import logging
 import shutil
 
+import click
+
 from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
+from .operations import confirm_operations, op_queue
 
 logger = logging.getLogger(__name__)
 
 
+@confirm_operations
 def cleanup(out, force, **kwargs):
     """Read runs.yaml and clean the current directory.
 
@@ -29,15 +33,23 @@ def cleanup(out, force, **kwargs):
         data_in = ImasHandle.parse_obj(run.data_in)
         data_out = ImasHandle.parse_obj(run.data_out)
 
-        logger.info('Removing %s', data_in)
         data_in.delete()
 
         if out:
-            logger.info('Removing %s', data_out)
             data_out.delete()
+        else:
+            op_queue.add(action=lambda: None,
+                         description=click.style('NOT Removing',
+                                                 fg='red',
+                                                 bold=True),
+                         extra_description=f'{data_out}')
 
-        logger.info('Removing run dir %s', run.dirname.resolve())
-        shutil.rmtree(run.dirname)
+        op_queue.add(action=shutil.rmtree,
+                     args=(run.dirname, ),
+                     description='Removing run dir',
+                     extra_description=f'{run.dirname}')
 
-    logger.info('Moving %s', workspace.runs_yaml)
-    shutil.move(workspace.runs_yaml, workspace.runs_yaml_old)
+    op_queue.add(action=shutil.move,
+                 args=(workspace.runs_yaml, workspace.runs_yaml_old),
+                 description='Moving runs.yaml',
+                 extra_description=f'{workspace.runs_yaml_old}')

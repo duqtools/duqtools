@@ -12,7 +12,7 @@ create:
   data:
     db: 'test'
     run_in_start_at: 7010
-    run_out_start_at: 8010
+    run_out_start_at: 7010
   template: ./template_model
 workspace:
   root: .

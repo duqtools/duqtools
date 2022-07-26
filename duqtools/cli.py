@@ -1,9 +1,12 @@
 import logging
+from datetime import datetime
+from sys import stderr, stdout
 
 import click
 import coverage
 
-from duqtools.config import cfg
+from .config import cfg
+from .operations import op_queue
 
 logger = logging.getLogger(__name__)
 coverage.process_startup()
@@ -12,7 +15,6 @@ coverage.process_startup()
 def config_option(f):
 
     def callback(ctx, param, config):
-        logger.debug('Subcommand: %s', ctx.invoked_subcommand)
         if ctx.command.name != 'init':
             cfg.parse_file(config)
 
@@ -44,7 +46,9 @@ def dry_run_option(f):
     def callback(ctx, param, dry_run):
         if dry_run:
             logger.info('--dry-run enabled')
-            cfg.dry_run = True
+            op_queue.dry_run = True
+        else:
+            op_queue.dry_run = False
 
         return dry_run
 
@@ -54,9 +58,60 @@ def dry_run_option(f):
                         callback=callback)(f)
 
 
+def yes_option(f):
+
+    def callback(ctx, param, yes):
+        if yes:
+            logger.info('--yes enabled')
+            op_queue.yes = True
+        else:
+            op_queue.yes = False
+        return yes
+
+    return click.option('--yes',
+                        '-y',
+                        is_flag=True,
+                        help='Answer yes to questions automatically.',
+                        callback=callback)(f)
+
+
+def logfile_option(f):
+
+    def callback(ctx, param, logfile):
+        streams = {'stdout': stdout, 'stderr': stderr}
+
+        logger.info(f'logging to {logfile}')
+        logging.getLogger().handlers = []
+
+        if logfile in streams.keys():
+            logging.basicConfig(stream=streams[logfile], level=logging.INFO)
+        else:
+            logging.basicConfig(filename=logfile, level=logging.INFO)
+
+        logger.info('')
+        logger.info(
+            'Duqtools starting at '
+            f'{datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")}')
+        logger.info('------------------------------------------------')
+        logger.info('')
+
+        return logfile
+
+    return click.option('--logfile',
+                        '-l',
+                        is_flag=False,
+                        default='duqtools.log',
+                        help='where to send the logfile,'
+                        ' the special values stderr/stdout'
+                        ' will send it there respectively.',
+                        callback=callback)(f)
+
+
 def common_options(func):
-    for wrapper in (debug_option, config_option, dry_run_option):
+    for wrapper in (logfile_option, debug_option, config_option,
+                    dry_run_option, yes_option):
         # config_option MUST BE BEFORE dry_run_option
+        # logfile_option must be before debug_option
         func = wrapper(func)
     return func
 
