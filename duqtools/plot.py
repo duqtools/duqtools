@@ -13,30 +13,32 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, x, y, imas_path, input_file, dry_run, **kwargs):
+def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, **kwargs):
     """Show subroutine to create plots from IDS data."""
     handles = {}
 
-    if imas_path:
+    for n, imas_path in enumerate(imas_paths):
         handle = ImasHandle.from_string(imas_path)
-        handles[0] = handle
+        handles[n] = handle
 
-    if input_file:
+    for input_file in input_files:
         handles.update(read_imas_handles_from_file(input_file))
 
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    source = get_ids_dataframe(handles, keys=(x, y))
-
-    chart = alt_line_chart(source, x=x, y=y)
-
-    outfile = Path('chart.html')
-
-    if not dry_run:
-        chart.save(outfile, scale_factor=2.0)
+    source = get_ids_dataframe(handles, keys=(x_val, *y_vals))
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')
-    click.secho(f'    file:///{outfile.absolute()}', bold=True)
-    click.echo('')
+
+    for n, y_val in enumerate(y_vals):
+        chart = alt_line_chart(source, x=x_val, y=y_val)
+
+        outfile = Path(f'chart_{n}.html')
+        click.echo(f'  {x_val} vs. {y_val}:')
+        click.secho(f'    file:///{outfile.absolute()}', bold=True)
+        click.echo('')
+
+        if not dry_run:
+            chart.save(outfile, scale_factor=2.0)
