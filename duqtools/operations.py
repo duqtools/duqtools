@@ -140,13 +140,15 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
+        logger.info(click.style('Applying Operations', fg='red', bold=True))
         with tqdm(total=len(self), position=1) as pbar:
+            pbar.set_description('Applying operations')
             with tqdm(iterable=False, bar_format='{desc}', position=0) as dbar:
-                pbar.set_description('Applying operations')
                 while len(self) != 0:
                     op = self.popleft()
                     op()
                     dbar.set_description(op.description)
+                    logger.info(op.description)
                     pbar.update()
 
     def confirm_apply_all(self) -> bool:
