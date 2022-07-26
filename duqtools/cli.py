@@ -129,9 +129,6 @@ def cli(**kwargs):
 @click.option('--full',
               is_flag=True,
               help='Create a config file with all possible config values.')
-@click.option('--comments',
-              is_flag=True,
-              help='Add descriptions to the config.')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
 def cli_init(**kwargs):
     """Create a default config file."""
