@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import shutil
 
+import click
+
 from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
@@ -35,11 +37,19 @@ def cleanup(out, force, **kwargs):
 
         if out:
             data_out.delete()
+        else:
+            op_queue.add(action=lambda: None,
+                         description=click.style('NOT Removing',
+                                                 fg='red',
+                                                 bold=True),
+                         extra_description=f'{data_out}')
 
         op_queue.add(action=shutil.rmtree,
                      args=(run.dirname, ),
-                     description=f'Removing run dir {run.dirname}')
+                     description='Removing run dir',
+                     extra_description=f'{run.dirname}')
 
     op_queue.add(action=shutil.move,
                  args=(workspace.runs_yaml, workspace.runs_yaml_old),
-                 description=f'Moving {workspace.runs_yaml}')
+                 description='Moving runs.yaml',
+                 extra_description=f'{workspace.runs_yaml_old}')

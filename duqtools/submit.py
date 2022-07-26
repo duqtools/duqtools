@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-@add_to_op_queue('Submitting {run_dir}')
+@add_to_op_queue('Submitting', '{run_dir}')
 def submit_job(lockfile, cmd, run_dir):
     debug(f'Put lockfile in place for {lockfile}')
     lockfile.touch()

@@ -66,7 +66,7 @@ class ImasHandle(ImasBaseModel):
         """
         copy_ids_entry(self, destination)
 
-    @add_to_op_queue('Removing {self}')
+    @add_to_op_queue('Removing ids', '{self}')
     def delete(self):
         """Remove data from entry."""
 
