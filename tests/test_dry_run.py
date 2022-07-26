@@ -38,8 +38,9 @@ def cmdline_workdir(tmp_path_factory):
 @pytest.mark.dependency()
 def test_clean_database(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        cli_create(['-c', 'config.yaml', '--force'], standalone_mode=False)
-        cli_clean(['-c', 'config.yaml', '--force', '--out'],
+        cli_create(['-c', 'config.yaml', '--force', '--yes'],
+                   standalone_mode=False)
+        cli_clean(['-c', 'config.yaml', '--force', '--out', '--yes'],
                   standalone_mode=False)
         assert (not Path('./run_0000').exists())
         assert (not Path('./run_0001').exists())
@@ -69,7 +70,8 @@ def test_create(cmdline_workdir):
 @pytest.mark.dependency()
 def test_real_create(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        cli_create(['-c', 'config.yaml', '--force'], standalone_mode=False)
+        cli_create(['-c', 'config.yaml', '--force', '--yes'],
+                   standalone_mode=False)
         assert (Path('./run_0000').exists())
         assert (Path('./run_0001').exists())
         assert (Path('./run_0002').exists())
@@ -88,5 +90,16 @@ def test_submit(cmdline_workdir):
 @pytest.mark.dependency(depends=['test_real_create'])
 def test_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        cli_plot(['-c', 'config.yaml', '--dry-run'], standalone_mode=False)
-        assert (not Path('./plot_0000.png').exists())
+        cli_plot([
+            '-c',
+            'config.yaml',
+            '--dry-run',
+            '-x',
+            'grid//rho_tor_norm',
+            '-y',
+            't_i_average',
+            '--imas',
+            'g2aho/jet/94875/1',
+        ],
+                 standalone_mode=False)
+        assert (not Path('./chart.html').exists())

@@ -26,7 +26,6 @@ models = {
     'introduction': cfg,
     'status': cfg.status,
     'submit': cfg.submit,
-    'plot': cfg.plot,
     'create': cfg.create,
 }
 
@@ -42,11 +41,6 @@ def model2config(key: str, model) -> str:
 
 extra_schemas = {}
 extra_yamls = {}
-
-if 'plot' in models:
-    from duqtools.schema import PlotModel
-
-    extra_schemas['plot_schema'] = PlotModel.schema()
 
 if 'create' in models:
     from duqtools.schema import (ARange, IDSOperationDim, ImasBaseModel,

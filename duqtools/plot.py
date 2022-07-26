@@ -1,55 +1,44 @@
-import logging
+from __future__ import annotations
 
-from .config import cfg
-from .ids import ImasHandle, get_ids_tree
-from .models import WorkDirectory
+import logging
+from pathlib import Path
+
+import click
+
+from ._plot_utils import alt_line_chart
+from .ids import ImasHandle, get_ids_dataframe
+from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, dry_run, **kwargs):
-    """Plot subroutine to create plots from datas."""
-    import matplotlib.pyplot as plt
-    import numpy as np
-    info('Extracting imas data')
-    # Gather all results and put them in a in-memory format
-    # (they should be small enough)
-    profiles = []
+def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, **kwargs):
+    """Show subroutine to create plots from IDS data."""
+    handles = {}
 
-    workspace = WorkDirectory.parse_obj(cfg.workspace)
-    runs = workspace.runs
+    for n, imas_path in enumerate(imas_paths):
+        handle = ImasHandle.from_string(imas_path)
+        handles[n] = handle
 
-    for run in runs:
-        imas_loc = ImasHandle.parse_obj(run.data_out)
-        info('Reading %s', imas_loc)
+    for input_file in input_files:
+        handles.update(read_imas_handles_from_file(input_file))
 
-        profile = get_ids_tree(imas_loc, 'core_profiles')
-        if 'profiles_1d' not in profile:
-            logger.warning('No data in entry, skipping...')
-            continue
+    if len(handles) == 0:
+        raise SystemExit('No data to show.')
 
-        profiles.append(profile)
+    source = get_ids_dataframe(handles, keys=(x_val, *y_vals))
 
-    for i, plot in enumerate(cfg.plot.plots):
-        info('Creating plot number %04i', i)
+    click.echo('You can now view your plot in your browser:')
+    click.echo('')
 
-        fig, ax = plt.subplots()
+    for n, y_val in enumerate(y_vals):
+        chart = alt_line_chart(source, x=x_val, y=y_val)
 
-        ax.set_title(plot.y)
-        ax.set_xlabel(plot.get_xlabel())
-        ax.set_ylabel(plot.get_ylabel())
+        outfile = Path(f'chart_{n}.html')
+        click.echo(f'  {x_val} vs. {y_val}:')
+        click.secho(f'    file:///{outfile.absolute()}', bold=True)
+        click.echo('')
 
-        for j, profile in enumerate(profiles):
-            y = profile.flat_fields[plot.y]
-
-            if plot.x:
-                x = profile.flat_fields[plot.x]
-            else:
-                x = np.linspace(0, 1, len(y))
-
-            ax.plot(x, y, label=j)
-
-        ax.legend()
         if not dry_run:
-            fig.savefig(f'plot_{i:04d}.png')
+            chart.save(outfile, scale_factor=2.0)

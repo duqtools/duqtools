@@ -6,16 +6,13 @@ import numpy as np
 import pickle
 import math
 import functools
+import re
 from scipy import integrate
 from scipy.interpolate import interp1d, UnivariateSpline
 import idstools
 #from idstools import *
 from packaging import version
 from os import path
-
-#from extra_tools_im import *
-#from keys_lists import *
-#from integrated_modelling_tools import *
 
 import inspect
 import types
@@ -57,9 +54,7 @@ if imas is not None:
 #    print(imas_version)
 #    print(ual_version)
 
-#afrom classes import IntegratedModellingFields
-
-from tools_input_im import *
+#from tools_input_im import *
 import jetto_tools
 
 import copy
@@ -105,7 +100,6 @@ class IntegratedModellingRuns:
     def __init__(
 	self, 
 	shot, 
-	sensitivity_list, 
 	instructions_list, 
 	generator_name, 
 	baserun_name, 
@@ -115,9 +109,14 @@ class IntegratedModellingRuns:
 	run_output = 100,
 	time_start = 0,
 	time_end = 100,
+        esco_timesteps = None,
+        output_timesteps = None,
 	force_run = False,
 	density_feedback = False,
+        pulse_scheduler = False,
 	zeff_option = None,
+        zeff_mult = 1,
+        sensitivity_list = [],
         input_instructions = [],
         boundary_instructions = {}
     ):
@@ -136,13 +135,18 @@ class IntegratedModellingRuns:
         self.run_output = run_output
         self.time_start = time_start
         self.time_end = time_end
+        self.esco_timesteps = esco_timesteps
+        self.output_timesteps = output_timesteps
         self.force_run = force_run
         self.density_feedback = density_feedback
+        self.pulse_scheduler = pulse_scheduler
         self.core_profiles = None
         self.equilibrium = None
         self.line_ave_density = None
         self.input_instructions = input_instructions
+        self.sensitivity_list = sensitivity_list
         self.zeff_option = zeff_option
+        self.zeff_mult = zeff_mult
         self.boundary_instructions = boundary_instructions
 
         # Trying to be a little flexible with the generator name. It is not used if I am only setting the input.
@@ -182,8 +186,9 @@ class IntegratedModellingRuns:
 
         # Default sensitivity list. The sensitivity list can be omitted and will not be used when only dealing with the baserun
 
-        if not sensitivity_list:
-            self.sensitivity_list = ['te 0.8', 'te 1.2', 'ne 0.8', 'ne 1.2', 'zeff 0.8', 'zeff 1.2', 'q95 0.8', 'q95 1.2']
+        # Example of sensitivity list. Not default.
+        #if not sensitivity_list:
+        #    self.sensitivity_list = ['te 0.8', 'te 1.2', 'ne 0.8', 'ne 1.2', 'zeff 0.8', 'zeff 1.2', 'q95 0.8', 'q95 1.2']
 
         # Default baserun name is 'run000'. It is not used if I am only setting the input. Baserun name should always start with 'run###'
 
@@ -200,10 +205,6 @@ class IntegratedModellingRuns:
             self.tag_list.append(tag)
 
         # New instructions are just an array with six True/False (or 0/1). They correspond orderly to what to do in the instruction list
-
-        # Might leave the choice to the user in the future
-        self.esco_timesteps = 50
-        self.output_timesteps = 100
 
     def update_instructions(self, new_instructions):
 
@@ -248,7 +249,7 @@ class IntegratedModellingRuns:
             print('prepare_input.py not found and needed for this option. Aborting')
             exit()
 
-        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium)
+        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, zeff_mult = self.zeff_mult, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium)
 
 
     def setup_input_sensitivities(self):
@@ -259,6 +260,12 @@ class IntegratedModellingRuns:
     
         '''
     
+        try:
+            import prepare_im_input
+        except ImportError:
+            print('prepare_input.py not found and needed for this option. Aborting')
+            exit()
+
     # Maybe here I am already creating all the entries, which might be a problem if I change 'shift profiles', but should be allright for now
 
         for index in range(1,len(self.tag_list),1):
@@ -286,17 +293,17 @@ class IntegratedModellingRuns:
     
             if name == 'te':
                 print(self.db, self.shot, self.run_start)
-                shift_profiles('TE', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.shift_profiles('TE', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'ti':
-                shift_profiles('TI', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.shift_profiles('TI', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'ne':
-                shift_profiles('NE', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.shift_profiles('NE', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'zeff':
-                shift_profiles('ZEFF', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.shift_profiles('ZEFF', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'tepeak':
-                peak_temperature(self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.peak_temperature(self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'q95':
-                alter_q_profile_same_q95(self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
+                prepare_im_input.alter_q_profile_same_q95(self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
     
             index += 1
     
@@ -354,17 +361,50 @@ class IntegratedModellingRuns:
         else:
             ibtsign = -1
 
-        self.modify_jetto_in(self.baserun_name, r0, abs(b0), start_time, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, ibtsign = ibtsign)
-        #self.modify_jetto_in(self.baserun_name, r0, b0, start_time, end_time, imp_datas_ids = imp_data)
+        if 'interpretive' not in self.path_generator:
+            interpretive_flag = False
+        else:
+            interpretive_flag = True
 
-        if 'interpretive' not in self.generator_name:
-            self.setup_jetto_simulation()
+        # Still cannot run with positive current...
+        self.modify_jetto_in(self.baserun_name, r0, abs(b0), start_time, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, num_times_eq = self.esco_timesteps, ibtsign = ibtsign, interpretive_flag = interpretive_flag)
+        #self.modify_jetto_in(self.baserun_name, r0, b0, start_time, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, ibtsign = ibtsign)
+
+        self.setup_jetto_simulation()
     
         if self.density_feedback == True:
             self.setup_feedback_on_density(self.run_input)
 
         self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, abs(b0), r0)
         #self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, b0, r0)
+
+        # Selecting the impurity correctly in the jset
+
+        impurity_jset_linestarts = ['ImpOptionPanel.impuritySelect[]',
+                                    'ImpOptionPanel.impurityMass[]',
+                                    'ImpOptionPanel.impurityCharge[]',
+                                    'ImpOptionPanel.impuritySuperStates[]'
+                                   ]
+        for index in range(6):
+            if index < len(imp_data):
+                for jset_linestart in impurity_jset_linestarts:
+                    line_start = jset_linestart[:-2] + str(index) + jset_linestart[-1]
+                    if jset_linestart == 'ImpOptionPanel.impuritySelect[]':
+                        new_content = '1'
+                    elif jset_linestart == 'ImpOptionPanel.impurityMass[]':
+                        new_content = str(imp_data[index][1])
+                    elif jset_linestart == 'ImpOptionPanel.impurityCharge[]':
+                        new_content = str(imp_data[index][2])
+                    elif jset_linestart == 'ImpOptionPanel.impuritySuperStates[]':
+                        new_content = str(imp_data[index][3])
+
+                    modify_jset_line(self.baserun_name, line_start, new_content)
+
+            else:
+                line_start = 'ImpOptionPanel.impuritySelect[' + str(index) + ']'
+                new_content = 'false'
+                modify_jset_line(self.baserun_name, line_start, new_content)
+
         modify_llcmd(self.baserun_name, self.generator_name, self.generator_username)
     
     def create_sensitivities(self):
@@ -510,13 +550,12 @@ class IntegratedModellingRuns:
     
         '''
     
-    # In the future an option to operate with the correct ip sign could be added here. Not currently working
-    # Also, IBTSIGN seems not to be in the list as it should. not sure what is happening...
+        # In the future an option to operate with the correct ip sign could be added here. Not currently working
+        # Also, IBTSIGN seems not to be in the list as it should. not sure what is happening...
     
-#        lookup = jetto_tools.lookup.from_file(self.path + '/lookup_json/lookup.json')
-#        jset = jetto_tools.jset.read(self.path_generator + '/jetto.jset')
-#        namelist = jetto_tools.namelist.read(self.path_generator + '/jetto.in')
-
+        #lookup = jetto_tools.lookup.from_file(self.path + '/lookup_json/lookup.json')
+        #jset = jetto_tools.jset.read(self.path_generator + '/jetto.jset')
+        #namelist = jetto_tools.namelist.read(self.path_generator + '/jetto.in')
 
         b0, r0, start_time, end_time = self.get_r0_b0()
 
@@ -534,45 +573,51 @@ class IntegratedModellingRuns:
         # Changing the orientation when necessary
         # Add IBTSING if ip sign and b0 sign are opposite. There is still a bug.
 
-        if (b0 > 0 and self.equilibrium.time_slice[0].global_quantities.ip < 0) or (b0 < 0 and self.equilibrium.time_slice[0].global_quantities.ip > 0):
-            extranamelist = get_extraname_fields(self.path_baserun)
-            extranamelist = add_extraname_fields(extranamelist, 'IBTSIGN', ['1'])
-            put_extraname_fields(self.path_baserun, extranamelist)
-
+        extranamelist = get_extraname_fields(self.path_baserun)
+        if 'interpretive' not in self.path_generator:
+            add_item_lookup('btin', 'EquilEscoRefPanel.BField.ConstValue', 'NLIST1', 'real', 'scalar', self.path_baserun)
+            add_item_lookup('rmj', 'EquilEscoRefPanel.refMajorRadius', 'NLIST1', 'real', 'scalar', self.path_baserun)
             add_item_lookup('ibtsign', 'null', 'NLIST1', 'int', 'scalar', self.path_baserun)
 
-        #extranamelist = get_extraname_fields(self.path_baserun)
-        #extranamelist = add_extraname_fields(extranamelist, 'IBTSIGN', ['1'])
-        #put_extraname_fields(self.path_baserun, extranamelist)
+            if (b0 > 0 and self.equilibrium.time_slice[0].global_quantities.ip < 0) or (b0 < 0 and self.equilibrium.time_slice[0].global_quantities.ip > 0):
+                extranamelist = add_extraname_fields(extranamelist, 'IBTSIGN', ['1'])
+            else:
+                extranamelist = add_extraname_fields(extranamelist, 'IBTSIGN', ['-1'])
 
-        #add_item_lookup('ibtsign', 'null', 'NLIST1', 'int', 'scalar', self.path_baserun)
-
+        put_extraname_fields(self.path_baserun, extranamelist)
 
         template = jetto_tools.template.from_directory(self.path_baserun)
         config = jetto_tools.config.RunConfig(template)
-    
-        if (b0 > 0 and self.equilibrium.time_slice[0].global_quantities.ip < 0) or (b0 < 0 and self.equilibrium.time_slice[0].global_quantities.ip > 0):
-            config['ibtsign'] = 1
 
-        #config['ibtsign'] = 1
+        if 'interpretive' not in self.path_generator:
+            if (b0 > 0 and self.equilibrium.time_slice[0].global_quantities.ip < 0) or (b0 < 0 and self.equilibrium.time_slice[0].global_quantities.ip > 0):
+                config['ibtsign'] = 1
+            else:
+                config['ibtsign'] = -1
 
-        config.esco_timesteps = self.esco_timesteps
-        config.profile_timesteps = self.output_timesteps
-        config['ntint'] = self.output_timesteps
+        if 'interpretive' not in self.path_generator:
+            config['btin'] = abs(b0)
+            # Absolute value should not be needed anymore since the fix on the ip sign
+            #config['btin'] = b0
+            config['rmj'] = r0
+
+        if self.esco_timesteps:
+            config.esco_timesteps = self.esco_timesteps
+        if self.output_timesteps:
+            config.profile_timesteps = self.output_timesteps
+            config['ntint'] = self.output_timesteps
+
+
         config.start_time = start_time
         config.end_time = end_time
 
-        #config['btin'] = b0
-        # Absolute value should not be needed anymore since the fix on the ip sign
-        config['btin'] = abs(b0)
-        config['rmj'] = r0
-
-        # I could introduce a way not to do this if there are no impurities. Need to add impurities if not there, modifying the various files. Maybe in the future
+        # I could introduce a way not to do this if there are no impurities. Need to add impurities if not there, modifying the various files. Maybe in the future. For now I modify the jset anyway so this part does nothing...
    
         config['atmi'] = 6.0
         config['nzeq'] = 12.0
         config['zipi'] = 6
 
+        # Should automatically run the simulation. Not working for the gateway currently...
         #manager = jetto_tools.job.JobManager()
         #manager.submit_job_to_batch(config, path + baserun_name, run=False)
 
@@ -597,9 +642,14 @@ class IntegratedModellingRuns:
 
         # Could add a check if run_exp exists. Should become the runinput though...
 
-        summary = open_and_get_summary(self.db, self.shot, self.run_exp)
-        self.summary_time = summary.time
-        self.line_ave_density = summary.line_average.n_e.value
+        #summary = open_and_get_summary(self.db, self.shot, self.run_exp)
+        #self.summary_time = summary.time
+        #self.line_ave_density = summary.line_average.n_e.value
+
+        summary = open_and_get_pulse_schedule(self.db, self.shot, self.run_exp)
+        self.dens_feedback_time = pulse_schedule.time
+        self.line_ave_density = pulse_schedule.density_control.n_e_line.reference.data
+
 
     def setup_feedback_on_density(self, run_interpretive):
         '''
@@ -623,7 +673,7 @@ class IntegratedModellingRuns:
             dneflfb_strs.append(str(density))
 
         dtneflfb_strs = []
-        for time in self.summary_time:
+        for time in self.dens_feedback_time:
             dtneflfb_strs.append(str(time))
 
         extranamelist = get_extraname_fields(self.path_baserun)
@@ -635,7 +685,7 @@ class IntegratedModellingRuns:
         config = jetto_tools.config.RunConfig(template)
 
         config['dneflfb'] = self.line_ave_density*1e-6
-        config['dtneflfb'] = self.summary_time
+        config['dtneflfb'] = self.dens_feedback_time
     
         # ------- Can use to create the baseruns when I understand how to create a template from a run without the lookup file (probably just creating the lookup file there)
     
@@ -726,8 +776,8 @@ class IntegratedModellingRuns:
         for line_start, new_content in zip(line_start_list, new_content_list):
             modify_jset_line(sensitivity_name, line_start, new_content)
     
-    def modify_jetto_in(self, sensitivity_name, r0, b0, time_start, time_end, num_times_print = 100, num_times_eq = 50, imp_datas_ids = [[1.0, 12.0, 6, 6.0]], ibtsign = 1):
-    
+    def modify_jetto_in(self, sensitivity_name, r0, b0, time_start, time_end, num_times_print = None, num_times_eq = None, imp_datas_ids = [[1.0, 12.0, 6, 6.0]], ibtsign = 1, interpretive_flag = False):
+
         '''
     
         modifies the jset file to accomodate a new run name. Default impurity is carbon
@@ -757,7 +807,13 @@ class IntegratedModellingRuns:
                 read_data.append(line)
     
         # Could also use a list here as well, but just trying now
-        index_btin, index_nlist4 = 0, 0
+        index_btin, index_nlist1, index_nlist4 = 0, 0, 0
+
+        original_num_tprint = 1
+
+        for index, line in enumerate(read_data):
+            if line.startswith('  NTINT'):
+                original_num_tprint = int(re.search(r'\d+', line).group())
 
         jetto_in_nameslist = {
             '  RMJ': str(r0),
@@ -766,26 +822,69 @@ class IntegratedModellingRuns:
             '  TMAX': str(time_end),
             '  MACHID': '\'' + self.db + '\'',
             '  NPULSE': str(self.shot),
-            '  NIMP': '1',  # Needs to be changed
-            '  NTINT': str(num_times_print),
-            '  NTPR': str(num_times_print)
+            '  NIMP': str(len(imp_datas_ids))
+            #'  NIMP': '1'  # Needs to be changed
         }
+
+        if num_times_print != None:
+           jetto_in_nameslist['  NTINT'] = str(num_times_print)
+           jetto_in_nameslist['  NTPR'] = str(num_times_print - 2)
+
+        if interpretive_flag:
+           del jetto_in_nameslist['  RMJ']
+           del jetto_in_nameslist['  BTIN']
+
+        for index, line in enumerate(read_data):
+            if line[:6] == '  BTIN':
+                index_btin = index
+            elif line[:18] == ' Namelist : NLIST4':
+                index_nlist4 = index
+            elif line[:8] == ' &NLIST1':
+                index_nlist1 = index
 
         for index, line in enumerate(read_data):
             for jetto_name in jetto_in_nameslist:
                 if line.startswith(jetto_name):
                     read_data[index] = read_data[index][:14] + jetto_in_nameslist[jetto_name] + '    ,'  + '\n'
-                    if line[:6] == '  BTIN':
-                        index_btin = index
-                    if line[:18] == ' Namelist : NLIST4':
-                        index_nlist4 = index
 
+            # needs to be modified
             if line[:8] == '  TIMEQU':
-                read_data[index] = read_data[index][:14] + str(time_start) + ' , ' + str(time_end) + ' , '
-                read_data[index] += str((time_end - time_start)/num_times_eq) + ' , ' + '\n'
+                if num_times_eq:
+                    read_data[index] = read_data[index][:14] + str(time_start) + ' , ' + str(time_end) + ' , '
+                    # Testing, do not leave like this
+                    #read_data[index] += str(num_times_eq) + ' , ' + '\n'
+                    read_data[index] += str((time_end - time_start)/num_times_eq) + ' , ' + '\n'
+                else:
+                    original_time_eq = re.findall("\d+\.\d+", line)
+                    if len(original_time_eq) == 1:
+                        num_times_eq = 1
+                    else:
+                        num_times_eq = int(round((float(original_time_eq[1]) - float(original_time_eq[0]))/float(original_time_eq[-1])))
+                        # The meaning of the numbers is different when interpretive equilibrium. Trying to handle that here.
+                        if num_times_eq == 0:
+                            num_times_eq = int(round(float(original_time_eq[-1])))
+                    read_data[index] = read_data[index][:14] + str(time_start) + ' , ' + str(time_end) + ' , '
+                    # Testing, do not leave like this
+                    read_data[index] += str((time_end - time_start)/num_times_eq) + ' , ' + '\n'
+                    #read_data[index] += str(num_times_eq) + ' , ' + '\n'
 
+        # Nexessary for interpretive runs when there is no btin
+        if index_btin == 0:
+            index_btin = index_nlist1 + 2
+            read_data.insert(index_btin, '  RMJ   =  ' + str(r0) + '     ,'  + '\n')
+            read_data.insert(index_btin, '  BTIN  =  ' + str(b0) + '     ,'  + '\n')
+
+        #if not interpretive_flag:
+        #    if ibtsign == 1:
+        #        read_data.insert(index_btin, '  IBTSIGN  =  1        ,'  + '\n')
+        #    elif ibtsign == -1 :
+        #        read_data.insert(index_btin, '  IBTSIGN  =  -1       ,'  + '\n')
+         
         if ibtsign == 1:
             read_data.insert(index_btin, '  IBTSIGN  =  1        ,'  + '\n')
+        elif ibtsign == -1 :
+            read_data.insert(index_btin, '  IBTSIGN  =  -1       ,'  + '\n')
+
 
         if self.line_ave_density is not None:
             # -------------- Feedback density density -----------------
@@ -805,6 +904,10 @@ class IntegratedModellingRuns:
 
             read_data.insert(index_nlist4+12, dtneflfb_lines)
 
+        # Need to extract the previous TPRINT and adapt the array to the new start time-end time
+        if not num_times_print:
+            num_times_print = original_num_tprint
+
         tprint_start = 0
         for index, line in enumerate(read_data):
             if line[:8] == '  TPRINT':
@@ -816,7 +919,8 @@ class IntegratedModellingRuns:
                 read_data[index] = read_data[index][:14] + tprint + '\n'
             if line[:6] == '      ' and tprint_start != 0 and index > tprint_start and index < tprint_start +10:
                 read_data[index] = '             ' + '\n'
-    
+
+
         # Could simplify   
         # ALFP, ALFINW might need to be modified as well
 
@@ -1061,7 +1165,7 @@ def add_item_lookup(name, name_jset, namelist, name_type, name_dim, path):
     if name_jset == 'null':
         new_item.append('  \"jset_id\": ' + name_jset + ',\n')
     else:
-        new_item.append('  \"jset_id\": \'' + name_jset + '\",\n')
+        new_item.append('  \"jset_id\": \"' + name_jset + '\",\n')
     new_item.append('  \"nml_id\": { \n')
     new_item.append('   \"namelist\": \"' + namelist + '\",\n')
     new_item.append('   \"field\":  \"' + name.upper() + '\" \n')
@@ -1076,9 +1180,74 @@ def add_item_lookup(name, name_jset, namelist, name_type, name_dim, path):
         for line in read_data:
             f.writelines(line)
 
+# Redefined for when prepare_im_input is not imported
+def open_and_get_core_profiles(db, shot, run, username = ''):
+
+    if username == '':
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+    else:
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+
+    op = data_entry.open()
+
+    if op[0]<0:
+        cp=data_entry.create()
+        print(cp[0])
+        if cp[0]==0:
+            print("data entry created")
+    elif op[0]==0:
+        print("data entry opened")
+
+    core_profiles = data_entry.get('core_profiles')
+    data_entry.close()
+
+    return(core_profiles)
+
+def open_and_get_equilibrium(db, shot, run, username = ''):
+
+    if username == '':
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+    else:
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+
+    op = data_entry.open()
+
+    if op[0]<0:
+        cp=data_entry.create()
+        print(cp[0])
+        if cp[0]==0:
+            print("data entry created")
+    elif op[0]==0:
+        print("data entry opened")
+
+    equilibrium = data_entry.get('equilibrium')
+    data_entry.close()
+
+    return(equilibrium)
+
+def open_and_get_pulse_schedule(db, shot, run, username = ''):
+
+    if username == '':
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+    else:
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+
+    op = data_entry.open()
+
+    if op[0]<0:
+        cp=data_entry.create()
+        print(cp[0])
+        if cp[0]==0:
+            print("data entry created")
+    elif op[0]==0:
+        print("data entry opened")
+
+    pulse_schedule = data_entry.get('pulse_schedule')
+    data_entry.close()
+
+    return(pulse_schedule)
 
 
 if __name__ == "__main__":
 
-    print('tests')
-
+    print('main, not supported, use commands')

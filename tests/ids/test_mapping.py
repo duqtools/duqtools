@@ -89,8 +89,8 @@ def test_to_numpy():
     s = IDSMapping(Sample)
     cols, ret = s.to_numpy('x', 'y', prefix='data')
 
-    assert cols == ('tstep', 'x', 'y')
-    assert ret.shape == (6, 3)
+    assert cols == ('tstep', 'time', 'x', 'y')
+    assert ret.shape == (6, 4)
     assert_equal(ret[:, 0], [0, 0, 1, 1, 2, 2])
 
 
@@ -98,6 +98,6 @@ def test_to_dataframe():
     s = IDSMapping(Sample)
     df = s.to_dataframe('x', 'y', prefix='data')
 
-    assert tuple(df.columns) == ('tstep', 'x', 'y')
-    assert df.shape == (6, 3)
+    assert tuple(df.columns) == ('tstep', 'time', 'x', 'y')
+    assert df.shape == (6, 4)
     assert_equal(df['tstep'], [0, 0, 1, 1, 2, 2])

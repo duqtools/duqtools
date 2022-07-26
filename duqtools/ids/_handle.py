@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
+import re
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 
+from ..operations import add_to_op_queue
 from ..schema import ImasBaseModel
-from ..utils import dry_run_toggle
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 
@@ -19,6 +20,9 @@ SUFFIXES = (
     '.characteristics',
     '.tree',
 )
+
+IMAS_PATTERN = re.compile(
+    r'^((?P<user>\w+)/)?(?P<db>\w+)/(?P<shot>\d+)/(?P<run>\d+)$')
 
 
 def _patch_str_repr(obj: object):
@@ -36,6 +40,37 @@ def _patch_str_repr(obj: object):
 
 
 class ImasHandle(ImasBaseModel):
+
+    @classmethod
+    def from_string(cls, string: str) -> ImasHandle:
+        """Return location from formatted string.
+
+        Format:
+
+            <user>/<db>/<shot>/<run>
+            <db>/<shot>/<run>
+
+        Default to the current user if the user is not specified.
+
+        For example:
+
+            g2user/jet/91234/555
+
+        Parameters
+        ----------
+        string : str
+            Input string containing imas db path
+
+        Returns
+        -------
+        ImasHandle
+        """
+        match = IMAS_PATTERN.match(string)
+
+        if match:
+            return cls(**match.groupdict())
+
+        raise ValueError(f'Could not match {string!r}')
 
     def path(self) -> Path:
         """Return location as Path."""
@@ -66,9 +101,9 @@ class ImasHandle(ImasBaseModel):
         """
         copy_ids_entry(self, destination)
 
+    @add_to_op_queue('Removing ids', '{self}')
     def delete(self):
         """Remove data from entry."""
-        from ..config import cfg
 
         # ERASE_PULSE operation is yet supported by IMAS as of June 2022
         path = self.path()
@@ -76,8 +111,7 @@ class ImasHandle(ImasBaseModel):
             to_delete = path.with_suffix(suffix)
             logger.debug('Removing %s', to_delete)
             try:
-                if not cfg.dry_run:
-                    to_delete.unlink()
+                to_delete.unlink()
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
@@ -102,7 +136,6 @@ class ImasHandle(ImasBaseModel):
         self.copy_ids_entry_to(destination)
         return destination
 
-    @dry_run_toggle
     def get(self, key: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 

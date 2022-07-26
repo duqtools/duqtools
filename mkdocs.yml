@@ -8,8 +8,9 @@ nav:
     - config/create.md
     - config/submit.md
     - config/status.md
-    - config/plot.md
   - Dashboard: dash.md
+  - Visualization: visualization.md
+  - Operations: operations.md
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
@@ -68,3 +69,7 @@ plugins:
 - gen-files:
     scripts:
       - docs/gendocs.py
+
+watch:
+  - duqtools/
+  - docs/

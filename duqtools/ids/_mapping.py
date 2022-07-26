@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple, Union
 
 import numpy as np
 
+from ._constants import TIME_COL, TSTEP_COL
+
 if TYPE_CHECKING:
     import pandas as pd
 
@@ -231,7 +233,7 @@ class IDSMapping(Mapping):
             Keys to extract, i.e. `zeff`, `grid/rho_tor`
         prefix : str, optional
             First part of the data path
-        time : Sequence[int], optional
+        time_steps : Sequence[int], optional
             List or array of integer time steps to extract.
             Defaults to all time steps.
 
@@ -245,7 +247,8 @@ class IDSMapping(Mapping):
                                      prefix=prefix,
                                      time_steps=time_steps)
 
-        df = pd.DataFrame(arr, columns=['tstep'] + list(variables))
+        df = pd.DataFrame(arr, columns=columns)
+        df[TSTEP_COL] = df[TSTEP_COL].astype(int)
 
         return df
 
@@ -276,16 +279,20 @@ class IDSMapping(Mapping):
             Numpy array with a column for the time step and each of the
             variables.
         """
-        n_time_steps = len(self['time'])
         points_per_var = len(self.flat_fields[f'{prefix}/0/{variables[0]}'])
 
         if not time_steps:
+            n_time_steps = len(self[TIME_COL])
             time_steps = range(n_time_steps)
+        else:
+            n_time_steps = len(time_steps)
 
-        columns = ('tstep', *variables)
+        columns = (TSTEP_COL, TIME_COL, *variables)
         n_vars = len(columns)
 
         arr = np.empty((n_time_steps * points_per_var, n_vars))
+
+        timestamps = self[TIME_COL]
 
         for t in time_steps:
             for j, variable in enumerate(variables):
@@ -294,7 +301,8 @@ class IDSMapping(Mapping):
                 i_begin = t * points_per_var
                 i_end = i_begin + points_per_var
 
-                arr[i_begin:i_end, j + 1] = self.flat_fields[flat_variable]
                 arr[i_begin:i_end, 0] = t
+                arr[i_begin:i_end, 1] = timestamps[t]
+                arr[i_begin:i_end, j + 2] = self.flat_fields[flat_variable]
 
         return columns, arr
