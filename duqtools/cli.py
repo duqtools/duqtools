@@ -170,18 +170,24 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@click.option('-x', type=str, help='IDS of the x value')
-@click.option('-y', type=str, help='IDS of the y value')
+@click.option('-x', 'x_val', type=str, help='IDS of the x value')
+@click.option('-y',
+              'y_vals',
+              type=str,
+              help='IDS of the y value',
+              multiple=True)
 @click.option('-m',
               '--imas',
-              'imas_path',
+              'imas_paths',
               type=str,
-              help='IMAS path formatted as <user>/<db>/<shot>/<number>.')
+              help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
+              multiple=True)
 @click.option('-i',
               '--input',
-              'input_file',
+              'input_files',
               type=str,
-              help='Input file, i.e. `data.csv` or `runs.yaml`')
+              help='Input file, i.e. `data.csv` or `runs.yaml`',
+              multiple=True)
 @common_options
 def cli_plot(**kwargs):
     """Plot some IDS data."""
