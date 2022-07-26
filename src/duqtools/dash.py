@@ -2,13 +2,17 @@ import logging
 import sys
 from pathlib import Path
 
+from importlib_resources import files
+
 logger = logging.getLogger(__name__)
 
 
 def dash(**kwargs):
     """Start streamlit dashboard."""
     from streamlit import cli as stcli
-    dashboard_path = Path(__file__).parents[1] / 'dash' / 'dash.py'
+
+    dashboard_path = files('duqtools.data') / 'dash' / 'dash.py'
+
     workdir = Path('.').resolve()
 
     sys.argv = ['streamlit', 'run', str(dashboard_path), '--', str(workdir)]
