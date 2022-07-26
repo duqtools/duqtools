@@ -23,10 +23,3 @@ status:
   status_file: jetto.status
 submit:
   submit_script_name: .llcmd
-plot:
-  plots:
-  - add_time_slider: false
-    x: null
-    xlabel: null
-    y: profiles_1d/0/electrons/density_thermal
-    ylabel: null

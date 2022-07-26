@@ -35,7 +35,7 @@ class CreateConfigModel(BaseModel):
         this hypercube can be efficiently sampled.
         """))
 
-    matrix: List = Field([],
+    matrix: List = Field(None,
                          deprecated=True,
                          description='Use `dimensions` instead.',
                          exclude=True)
@@ -82,10 +82,11 @@ class CreateConfigModel(BaseModel):
         starting by the run number given by `run_out_start_at`.
         """))
 
-    @validator('matrix')
+    @validator('matrix', always=True, pre=True)
     def deprecate_matrix(v):
-        raise DeprecatedValueError(
-            "'matrix' has been deprecated, use 'dimensions' instead.")
+        if v:
+            raise DeprecatedValueError(
+                "'matrix' has been deprecated, use 'dimensions' instead.")
 
 
 class SubmitConfigModel(BaseModel):
@@ -142,6 +143,11 @@ class StatusConfigModel(BaseModel):
 
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
+    plot: dict = Field(None,
+                       deprecated=True,
+                       description='Options are specified via CLI.',
+                       exclude=True)
+
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
         description='Configuration for the submit subcommand')
@@ -156,3 +162,10 @@ class ConfigModel(BaseModel):
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
     dry_run: bool = Field(False, description='run without side effects')
+
+    @validator('plot', always=True, pre=True)
+    def deprecate_matrix(v):
+        if v:
+            raise DeprecatedValueError(
+                "'plot' config has been deprecated, you can remove this "
+                'section from your config file.')

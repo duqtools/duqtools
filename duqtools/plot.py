@@ -14,15 +14,15 @@ info, debug = logger.info, logger.debug
 
 
 def plot(*, x, y, imas_path, input_file, **kwargs):
-    """Show subroutine to create plots from datas."""
-    handles = []
+    """Show subroutine to create plots from IDS data."""
+    handles = {}
 
     if imas_path:
         handle = ImasHandle.from_string(imas_path)
-        handles.append(handle)
+        handles[0] = handle
 
     if input_file:
-        handles = read_imas_handles_from_file(input_file)
+        handles.update(read_imas_handles_from_file(input_file))
 
     if len(handles) == 0:
         raise SystemExit('No data to show.')

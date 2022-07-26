@@ -1,11 +1,4 @@
 create: null
-plot:
-  plots:
-  - add_time_slider: false
-    x: null
-    xlabel: null
-    y: profiles_1d/0/electrons/density_thermal
-    ylabel: null
 status:
   msg_completed: 'Status : Completed successfully'
   msg_failed: 'Status : Failed'
