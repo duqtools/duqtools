@@ -49,8 +49,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
         cfg_yaml = cfg.yaml(
             include={
                 'workspace': True,
-                'create': {'dimensions', 'sampler', 'template'},
-                'plot': {'plots'}
+                'create': {'dimensions', 'sampler', 'template', 'data'},
             })
 
     op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
