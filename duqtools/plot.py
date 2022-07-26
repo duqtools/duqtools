@@ -13,21 +13,16 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, x, y, user, db, shot, run, inp, **kwargs):
+def plot(*, x, y, imas_path, input_file, **kwargs):
     """Show subroutine to create plots from datas."""
     handles = []
 
-    if user and db and shot and run:
-        handle = ImasHandle(
-            user=user,
-            db=db,
-            shot=shot,
-            run=run,
-        )
+    if imas_path:
+        handle = ImasHandle.from_string(imas_path)
         handles.append(handle)
 
-    if inp:
-        handles = read_imas_handles_from_file(inp)
+    if input_file:
+        handles = read_imas_handles_from_file(input_file)
 
     if len(handles) == 0:
         raise SystemExit('No data to show.')

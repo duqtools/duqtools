@@ -1,5 +1,4 @@
 import logging
-from getpass import getuser
 
 import click
 import coverage
@@ -119,20 +118,14 @@ def cli_status(**kwargs):
 @cli.command('plot')
 @click.option('-x', type=str, help='IDS of the x value')
 @click.option('-y', type=str, help='IDS of the y value')
-@click.option('-u',
-              '--user',
-              default=getuser(),
+@click.option('-m',
+              '--imas',
+              'imas_path',
               type=str,
-              help='User name, defaults to current user')
-@click.option('-d',
-              '--db',
-              default='jet',
-              type=str,
-              help='Database or machine name')
-@click.option('-r', '--run', type=int, help='Run number')
-@click.option('-s', '--shot', type=int, help='Shot number')
+              help='IMAS path formatted as <user>/<db>/<shot>/<number>.')
 @click.option('-i',
-              '--inp',
+              '--input',
+              'input_file',
               type=str,
               help='Input file, i.e. `data.csv` or `runs.yaml`')
 @common_options

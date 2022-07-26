@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
@@ -20,6 +21,9 @@ SUFFIXES = (
     '.tree',
 )
 
+IMAS_PATTERN = re.compile(
+    r'^((?P<user>\w+)/)?(?P<db>\w+)/(?P<shot>\d+)/(?P<run>\d+)$')
+
 
 def _patch_str_repr(obj: object):
     """Reset str/repr methods to default."""
@@ -36,6 +40,37 @@ def _patch_str_repr(obj: object):
 
 
 class ImasHandle(ImasBaseModel):
+
+    @classmethod
+    def from_string(cls, string: str) -> ImasHandle:
+        """Return location from formatted string.
+
+        Format:
+
+            <user>/<db>/<shot>/<run>
+            <db>/<shot>/<run>
+
+        Default to the current user if the user is not specified.
+
+        For example:
+
+            g2user/jet/91234/555
+
+        Parameters
+        ----------
+        string : str
+            Input string containing imas db path
+
+        Returns
+        -------
+        ImasHandle
+        """
+        match = IMAS_PATTERN.match(string)
+
+        if match:
+            return cls(**match.groupdict())
+
+        raise ValueError(f'Could not match {string!r}')
 
     def path(self) -> Path:
         """Return location as Path."""
