@@ -1,0 +1,3 @@
+recursive-include src *.txt *.md
+include LICENSE
+include README.md
