@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @confirm_operations
-def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
+def init(*, config: str, full: bool, force: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
@@ -21,22 +21,13 @@ def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
         (otherwise just selected important ones)
     force : bool
         Overwrite config if it already exists.
-    comments : bool
-        Description
     **kwargs
-        Description
-
-    Deleted Parameters
-    ------------------
-    comment : bool
-        Add comments to the config
-    kwargs
-        kwargs, optional stuff.
+        Unused.
 
     Raises
     ------
     RuntimeError
-        Description
+        When the config already exists.
     """
     cfg = Config()
     BaseModel.__init__(cfg)
@@ -53,15 +44,14 @@ def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
     logger.debug('Creating default cfg.yaml')
 
     if full:
-        cfg_yaml = cfg.yaml(descriptions=comments)
+        cfg_yaml = cfg.yaml()
     else:
-        cfg_yaml = cfg.yaml(descriptions=comments,
-                            include={
-                                'workspace': True,
-                                'create':
-                                {'dimensions', 'sampler', 'template'},
-                                'plot': {'plots'}
-                            })
+        cfg_yaml = cfg.yaml(
+            include={
+                'workspace': True,
+                'create': {'dimensions', 'sampler', 'template'},
+                'plot': {'plots'}
+            })
 
     op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
                  description='Writing out',
