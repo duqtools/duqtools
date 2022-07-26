@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, x, y, imas_path, input_file, **kwargs):
+def plot(*, x, y, imas_path, input_file, dry_run, **kwargs):
     """Show subroutine to create plots from IDS data."""
     handles = {}
 
@@ -33,7 +33,8 @@ def plot(*, x, y, imas_path, input_file, **kwargs):
 
     outfile = Path('chart.html')
 
-    chart.save(outfile, scale_factor=2.0)
+    if not dry_run:
+        chart.save(outfile, scale_factor=2.0)
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')

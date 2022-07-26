@@ -69,7 +69,6 @@ def yes_option(f):
         return yes
 
     return click.option('--yes',
-                        '-y',
                         is_flag=True,
                         help='Answer yes to questions automatically.',
                         callback=callback)(f)
