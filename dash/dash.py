@@ -1,13 +1,14 @@
 import sys
 from pathlib import Path
 
-import altair as alt
 import pandas as pd
 import streamlit as st
 
+from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
 from duqtools.ids import (IDSMapping, ImasHandle, get_ids_tree, rebase_on_ids,
                           rebase_on_time)
-from duqtools.schema.runs import Runs
+from duqtools.ids._io import _get_ids_run_dataframe
+from duqtools.utils import read_imas_handles_from_file
 
 try:
     default_workdir = sys.argv[1]
@@ -26,14 +27,10 @@ inp = Path(work_dir) / data_file
 if not inp.exists():
     raise ValueError(f'{inp} does not exist!')
 
-if inp.suffix == '.csv':
-    df = pd.read_csv(inp, index_col=0)
-elif inp.name == 'runs.yaml':
-    runs = Runs.parse_file(inp)
-    df = pd.DataFrame([run.data_out.dict() for run in runs])
-    df.index = [str(run.dirname) for run in runs]
-else:
-    raise ValueError(f'Cannot open file: {inp}')
+handles = read_imas_handles_from_file(inp)
+df = pd.DataFrame.from_dict(
+    {index: model.dict()
+     for index, model in handles.items()}, orient='index')
 
 with st.expander('IDS data'):
     st.table(df)
@@ -74,18 +71,11 @@ with st.sidebar:
             'y-values are interpolated to put them on a common basis for x.'))
 
 
-@st.experimental_memo
-def get_run_data(row, *, keys, **kwargs):
-    """Get data for single run."""
-    profile = get_ids_tree(ImasHandle(**row), exclude_empty=True)
-    return profile.to_dataframe(*keys, **kwargs)
-
-
-@st.experimental_memo
+@st.experimental_memo()
 def get_data(df, **kwargs):
     """Get and concatanate data for all runs."""
     runs_data = {
-        str(name): get_run_data(row, **kwargs)
+        str(name): _get_ids_run_dataframe(ImasHandle(**row), **kwargs)
         for name, row in df.iterrows()
     }
 
@@ -105,42 +95,14 @@ for y_val in y_vals:
 
     source = get_data(df, keys=(x_val, y_val), prefix='profiles_1d')
 
-    slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
-    select_step = alt.selection_single(name='tstep',
-                                       fields=['tstep'],
-                                       bind=slider,
-                                       init={'tstep': 0})
-
     if show_error_bar:
         source = rebase_on_ids(source, base_col=x_val, value_cols=[y_val])
         source = rebase_on_time(source, cols=(x_val, y_val))
 
-        line = alt.Chart(source).mark_line().encode(
-            x=f'{x_val}:Q',
-            y=f'mean({y_val}):Q',
-            color=alt.Color('tstep:N'),
-        ).add_selection(select_step).transform_filter(
-            select_step).interactive()
-
-        # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
-        band = alt.Chart(source).mark_errorband(
-            extent='stdev', interpolate='linear').encode(
-                x=f'{x_val}:Q',
-                y=f'{y_val}:Q',
-                color=alt.Color('tstep:N'),
-            ).add_selection(select_step).transform_filter(
-                select_step).interactive()
-
-        chart = line + band
+        chart = alt_errorband_chart(source, x=x_val, y=y_val)
 
     else:
-        chart = alt.Chart(source).mark_line().encode(
-            x=f'{x_val}:Q',
-            y=f'{y_val}:Q',
-            color=alt.Color('run:N'),
-            tooltip='run',
-        ).add_selection(select_step).transform_filter(
-            select_step).interactive()
+        chart = alt_line_chart(source, x=x_val, y=y_val)
 
     st.altair_chart(chart, use_container_width=True)
 

@@ -8,7 +8,6 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import IDSOperationDim
 from ._imas import ImasBaseModel
-from ._plot import PlotModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
@@ -36,7 +35,7 @@ class CreateConfigModel(BaseModel):
         this hypercube can be efficiently sampled.
         """))
 
-    matrix: List = Field([],
+    matrix: List = Field(None,
                          deprecated=True,
                          description='Use `dimensions` instead.',
                          exclude=True)
@@ -83,10 +82,11 @@ class CreateConfigModel(BaseModel):
         starting by the run number given by `run_out_start_at`.
         """))
 
-    @validator('matrix')
+    @validator('matrix', always=True, pre=True)
     def deprecate_matrix(v):
-        raise DeprecatedValueError(
-            "'matrix' has been deprecated, use 'dimensions' instead.")
+        if v:
+            raise DeprecatedValueError(
+                "'matrix' has been deprecated, use 'dimensions' instead.")
 
 
 class SubmitConfigModel(BaseModel):
@@ -141,30 +141,13 @@ class StatusConfigModel(BaseModel):
             """))
 
 
-class PlotConfigModel(BaseModel):
-    """The options of the plot subcommand are stored under the `plot` key in
-    the config.
-
-    Plots are specified as a list under the `plots` key. Multiple plots
-    can be defined, and they will be written sequentially as .png files
-    to the current working directory.
-    """
-    plots: List[PlotModel] = [
-        PlotModel(),
-        PlotModel(
-            x='profiles_1d/0/grid/rho_tor_norm',
-            y='profiles_1d/0/t_i_average',
-            xlabel='Rho tor.',
-            ylabel='Ion temperature',
-        )
-    ]
-
-
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
-    plot: PlotConfigModel = Field(
-        PlotConfigModel(),
-        description='Configuration for the plotting subcommand')
+    plot: dict = Field(None,
+                       deprecated=True,
+                       description='Options are specified via CLI.',
+                       exclude=True)
+
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
         description='Configuration for the submit subcommand')
@@ -178,3 +161,10 @@ class ConfigModel(BaseModel):
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
+
+    @validator('plot', always=True, pre=True)
+    def deprecate_matrix(v):
+        if v:
+            raise DeprecatedValueError(
+                "'plot' config has been deprecated, you can remove this "
+                'section from your config file.')

@@ -14,7 +14,6 @@ Check out the different subpages of this section that explain the different part
 - [create](/config/create)
 - [submit](/config/submit)
 - [status](/config/status)
-- [plot](/config/plot)
 - [workspace](/config/introduction/#workspace)
 - [system](/config/introduction/#system)
 

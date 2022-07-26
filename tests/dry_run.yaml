@@ -1,13 +1,3 @@
-plot:
-  plots:
-  - x: profiles_1d/0/grid/rho_tor_norm
-    y: profiles_1d/0/electrons/density_thermal
-    xlabel:
-    ylabel:
-  - x: profiles_1d/0/grid/rho_tor_norm
-    y: profiles_1d/0/t_i_average
-    xlabel: Rho tor.
-    ylabel: Ion temperature
 create:
   dimensions:
   - operator: multiply

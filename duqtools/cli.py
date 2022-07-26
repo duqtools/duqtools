@@ -69,7 +69,6 @@ def yes_option(f):
         return yes
 
     return click.option('--yes',
-                        '-y',
                         is_flag=True,
                         help='Answer yes to questions automatically.',
                         callback=callback)(f)
@@ -171,9 +170,27 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
+@click.option('-x', 'x_val', type=str, help='IDS of the x value')
+@click.option('-y',
+              'y_vals',
+              type=str,
+              help='IDS of the y value',
+              multiple=True)
+@click.option('-m',
+              '--imas',
+              'imas_paths',
+              type=str,
+              help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
+              multiple=True)
+@click.option('-i',
+              '--input',
+              'input_files',
+              type=str,
+              help='Input file, i.e. `data.csv` or `runs.yaml`',
+              multiple=True)
 @common_options
 def cli_plot(**kwargs):
-    """Analyze the results and generate a report."""
+    """Plot some IDS data."""
     from .plot import plot
     plot(**kwargs)
 
