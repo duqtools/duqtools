@@ -28,7 +28,7 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
             'remove or `--force` to override.')
 
 
-@add_to_op_queue('Applying combination to {target_in}')
+@add_to_op_queue('Setting inital condition of', '{target_in}')
 def apply_combination(target_in: ImasHandle, combination) -> None:
     core_profiles = target_in.get('core_profiles')
     ids_mapping = IDSMapping(core_profiles)
@@ -41,7 +41,7 @@ def apply_combination(target_in: ImasHandle, combination) -> None:
             core_profiles.put(db_entry=data_entry_target)
 
 
-@add_to_op_queue('Writing out {workspace.runs_yaml}')
+@add_to_op_queue('Writing out', '{workspace.runs_yaml}')
 def write_runs_file(runs: list, workspace) -> None:
 
     runs = Runs.parse_obj(runs)
@@ -107,7 +107,8 @@ def create(*, force, **kwargs):
                          'parents': True,
                          'exist_ok': force
                      },
-                     description=f'Create folder {run_drc}')
+                     description='Create folder',
+                     extra_description=f'{run_drc}')
 
         target_in = ImasHandle(db=options.data.db,
                                shot=source.shot,

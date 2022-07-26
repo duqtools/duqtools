@@ -51,7 +51,7 @@ def get_imas_ual_version():
     return imas_version, ual_version
 
 
-@add_to_op_queue('Create {target} from template')
+@add_to_op_queue('Copy ids from template to', '{target}')
 def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """Copies the ids entry to a new location.
 

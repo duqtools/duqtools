@@ -50,7 +50,7 @@ def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
             f'Refusing to overwrite existing CONFIG, {config_filepath}, '
             'use --force if you really want to')
 
-    logger.info('Writing default config to %s', config_filepath)
+    logger.debug('Creating default cfg.yaml')
 
     if full:
         cfg_yaml = cfg.yaml(descriptions=comments)
@@ -64,4 +64,5 @@ def init(*, config: str, full: bool, force: bool, comments: bool, **kwargs):
                             })
 
     op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
-                 description=f'Writing out {config_filepath} config file')
+                 description='Writing out',
+                 extra_description=f'{config_filepath} config file')

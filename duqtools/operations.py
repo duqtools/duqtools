@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections import deque
 from inspect import signature
-from typing import Callable
+from typing import Callable, Optional
 
 import click
 from pydantic import Field
@@ -11,10 +11,6 @@ from pydantic import Field
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
-
-stream = logging.StreamHandler()
-stream.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
-logger.addHandler(stream)
 
 
 class Operation(BaseModel):
@@ -36,13 +32,20 @@ class Operation(BaseModel):
                          description='keyword arguments that will be '
                          'passed to the action')
 
-    def __init__(self, action, description, *args, **kwargs):
+    def __init__(self,
+                 action,
+                 description,
+                 extra_description: Optional[str] = None,
+                 *args,
+                 **kwargs):
         """__init__.
 
         Parameters
         ----------
         description: str
             description of the operation to be done
+        extra_description: Optional[str]
+            extra description, (not colorized)
         action: Callable
             function to be eventually evaluated
         *args: tuple
@@ -50,6 +53,10 @@ class Operation(BaseModel):
         **kwargs: dict
             keyword arguments to action
         """
+
+        if extra_description:
+            description = click.style(description,
+                                      fg='green') + ' : ' + extra_description
         super().__init__(action=action,
                          description=description,
                          *args,
@@ -84,6 +91,13 @@ class Operations(deque):
     _instance = None
     yes = False  # Apply operations without prompt
     dry_run = False  # Never apply any operations (do not even ask)
+    logger = logging.getLogger('operations')
+
+    def __init__(self):
+        super().__init__()
+        stream = logging.StreamHandler()
+        stream.setFormatter(logging.Formatter('%(message)s'))
+        self.logger.addHandler(stream)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
@@ -126,11 +140,14 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        with tqdm(total=len(self)) as pbar:
-            pbar.set_description('Applying operations')
-            while len(self) != 0:
-                self.apply()
-                pbar.update()
+        with tqdm(total=len(self), position=1) as pbar:
+            with tqdm(iterable=False, bar_format='{desc}', position=0) as dbar:
+                pbar.set_description('Applying operations')
+                while len(self) != 0:
+                    op = self.popleft()
+                    op()
+                    dbar.set_description(op.description)
+                    pbar.update()
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -141,14 +158,15 @@ class Operations(deque):
         """
 
         # To print the descriptions we need to get them
-        logger.info('')
-        logger.info('Operations in the Queue:')
-        logger.info('========================')
+        self.logger.info('')
+        self.logger.info(
+            click.style('Operations in the Queue:', fg='red', bold=True))
+        self.logger.info(click.style('========================', fg='red'))
         for op in self:
-            logger.info(op.description)
+            self.logger.info('- ' + op.description)
 
         if self.dry_run:
-            logger.info('Dry run enabled, not applying op_queue')
+            self.logger.info('Dry run enabled, not applying op_queue')
             return False
 
         ans = self.yes or click.confirm(
@@ -187,7 +205,7 @@ def confirm_operations(func):
     return wrapper
 
 
-def add_to_op_queue(description: str):
+def add_to_op_queue(op_desc: str, extra_desc: Optional[str] = None):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
     function arguments.
@@ -195,7 +213,7 @@ def add_to_op_queue(description: str):
     ```python
     from duqtools.operations import add_to_op_queue, op_queue
 
-    @add_to_op_queue("Printing hello world {name}")
+    @add_to_op_queue("Printing hello world", "{name}")
     def print_hello_world(name):
         print(f"Hello World {name}")
 
@@ -214,13 +232,17 @@ def add_to_op_queue(description: str):
             args_to_kw = dict(zip(sig.parameters, args))
             fkwargs = kwargs.copy()
             fkwargs.update(args_to_kw)
-            formatted_description = description.format(**fkwargs)
+            extra_formatted = None
+            if extra_desc:
+                extra_formatted = extra_desc.format(**fkwargs)
+            op_formatted = op_desc.format(**fkwargs)
 
             # add the function to the queue
             op_queue.add(action=func,
                          args=args,
                          kwargs=kwargs,
-                         description=formatted_description)
+                         description=op_formatted,
+                         extra_description=extra_formatted)
 
         return wrapper
 
