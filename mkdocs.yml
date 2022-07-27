@@ -71,5 +71,5 @@ plugins:
       - docs/gendocs.py
 
 watch:
-  - duqtools/
+  - src/
   - docs/
