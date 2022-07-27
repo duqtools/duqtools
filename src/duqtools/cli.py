@@ -3,13 +3,17 @@ from datetime import datetime
 from sys import stderr, stdout
 
 import click
-import coverage
 
 from .config import cfg
 from .operations import op_queue
 
 logger = logging.getLogger(__name__)
-coverage.process_startup()
+
+try:
+    import coverage
+    coverage.process_startup()
+except ImportError:
+    pass
 
 
 def config_option(f):
