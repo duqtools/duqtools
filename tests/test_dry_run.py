@@ -95,7 +95,7 @@ def test_plot(cmdline_workdir):
             'config.yaml',
             '--dry-run',
             '-x',
-            'grid//rho_tor_norm',
+            'grid/rho_tor_norm',
             '-y',
             't_i_average',
             '--imas',
