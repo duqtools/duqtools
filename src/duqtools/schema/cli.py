@@ -141,6 +141,22 @@ class StatusConfigModel(BaseModel):
             """))
 
 
+class MergeConfigModel(BaseModel):
+    """The options of the `merge` subcommand are stored under the `merge` key
+    in the config.
+
+    These keys define which data to merge, and where to store the
+    output.
+    """
+    template: ImasBaseModel = Field(None,
+                                    description='Template IMAS DB entry.')
+    output: ImasBaseModel = Field(None, description='Output IMAS DB entry')
+    ids: List[str] = Field(None, description='IDS keys to merge')
+    base_ids: str = Field('grid/rho_tor_norm',
+                          description='IDS key to use as common basis')
+    prefix: str = Field('profiles_1d', description='IDS path prefix')
+
+
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
     plot: dict = Field(None,
@@ -157,6 +173,10 @@ class ConfigModel(BaseModel):
     status: StatusConfigModel = Field(
         StatusConfigModel(),
         description='Configuration for the status subcommand')
+    merge: MergeConfigModel = Field(
+        MergeConfigModel(),
+        description='Configuration for the merge subcommand')
+
     workspace: WorkDirectoryModel = WorkDirectoryModel()
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
