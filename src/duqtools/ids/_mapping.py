@@ -30,7 +30,7 @@ class IDSMapping(Mapping):
         self._ids = ids
         self.exclude_empty = exclude_empty
 
-        # All fields in the core profile in a single dict
+        # All available data fields are stored in this set.
         self._keys: Set[str] = set()
 
         self.dive(ids, [])
@@ -89,12 +89,17 @@ class IDSMapping(Mapping):
         """Synchronize updated data back to IMAS db entry.
 
         Shortcut for 'put' command.
+
+        Parameters
+        ----------
+        handle : ImasHandle
+            Points to an IMAS db entry of where the data should be written.
         """
         with handle.open() as f:
             self._ids.put(db_entry=f)
 
     def dive(self, val, path: list):
-        """Recursively store the important bits of the imas structure in dicts.
+        """Recursively find the data fields.
 
         Parameters
         ----------
