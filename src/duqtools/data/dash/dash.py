@@ -1,13 +1,12 @@
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import (IDSMapping, ImasHandle, get_ids_tree, rebase_on_ids,
-                          rebase_on_time)
+from duqtools.ids import (ImasHandle, get_ids_tree, merge,
+                          rebase_on_ids, rebase_on_time)
 from duqtools.ids._io import _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
 
@@ -166,50 +165,14 @@ with st.form('merge_form'):
     target = ImasHandle(**target)
 
     submitted = st.form_submit_button('Save')
+
     if submitted:
-        template_data = get_ids_tree(template)
-
-        # pick first time step as basis
-        common_basis = template_data[f'profiles_1d/0/{x_val}']
-
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-
-        data = rebase_on_ids(data,
-                             base_col=x_val,
-                             value_cols=y_vals,
-                             new_base=common_basis)
-
-        # common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
-        common_time = template_data['time']
-
-        # Set to common time basis
-        data = rebase_on_time(data,
-                              cols=[x_val, *y_vals],
-                              new_base=common_time)
-
-        gb = data.groupby(['tstep', x_val])
-
-        agg_funcs = ['mean', 'std']
-        agg_dict = {y_val: agg_funcs for y_val in y_vals}
-
-        merged = gb.agg(agg_dict)
-
-        template.copy_ids_entry_to(target)
-
-        core_profiles = target.get('core_profiles')
-        ids_mapping = IDSMapping(core_profiles, exclude_empty=False)
-
-        for tstep, group in merged.groupby('tstep'):
-
-            mean = np.array(group['t_i_average', 'mean'])
-            stdev = np.array(group['t_i_average', 'std'])
-
-            key = f'profiles_1d/{tstep}/{y_val}'
-
-            ids_mapping[key] = mean
-            ids_mapping[key + '_error_upper'] = mean + stdev
-
-        ids_mapping.sync(target)
+        merge(data=data,
+              template=template,
+              target=target,
+              x_val=x_val,
+              y_vals=y_vals)
 
         st.success('Success!')
         st.balloons()
