@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -183,18 +184,15 @@ with st.form('Save to new IMAS DB entry'):
 
         for tstep, group in merged.groupby('tstep'):
 
-            mean = group['t_i_average', 'mean']
-            stdev = group['t_i_average', 'std']
+            mean = np.array(group['t_i_average', 'mean'])
+            stdev = np.array(group['t_i_average', 'std'])
 
-            profile = ids_mapping[f'profiles_1d/{tstep}/{y_val}']
-            profile[:] = mean
+            key = f'profiles_1d/{tstep}/{y_val}'
 
-            # This does not work yet, because `*_error_upper` *may* be empty
-            # profile_error_upper = ids_mapping[f'profiles_1d/{tstep}/{y_val}_error_upper']
-            # profile_error_upper[:] = mean + stdev
+            ids_mapping[key] = mean
+            ids_mapping[key + '_error_upper'] = mean + stdev
 
-        with target.open() as data_entry_target:
-            core_profiles.put(db_entry=data_entry_target)
+        ids_mapping.sync(target)
 
         st.success('Success!')
         st.balloons()
