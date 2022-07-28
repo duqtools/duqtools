@@ -33,7 +33,7 @@ df = pd.DataFrame.from_dict(
     {index: model.dict()
      for index, model in handles.items()}, orient='index')
 
-with st.expander('IDS data'):
+with st.expander('Click to view runs'):
     st.table(df)
 
 prefix = 'profiles_1d/$i'
@@ -107,12 +107,28 @@ for y_val in y_vals:
 
     st.altair_chart(chart, use_container_width=True)
 
-with st.form('Save to new IMAS DB entry'):
+with st.form('merge_form'):
+
+    st.subheader('Merge data')
+
+    st.write("""
+        With this form you can merge all runs into a new IMAS DB entry.
+
+        The mean and standard deviation are calculated over all the
+        runs for the fields specified in the side bar.
+
+        Note that it does not do error propagation yet if the source data have
+        error bars already.
+        """)
+
     a_run = df.iloc[0]
 
-    st.subheader('Template IMAS entry:')
+    st.markdown('**Template IMAS entry**')
+    st.write(
+        """This IMAS entry will be used as the template. The template is copied,
+        and any existing data is overwritten for the given fields.""")
 
-    cols = st.columns(4)
+    cols = st.columns((20, 20, 30, 30))
 
     template = {
         'user': cols[0].text_input('User',
@@ -128,9 +144,10 @@ with st.form('Save to new IMAS DB entry'):
 
     template = ImasHandle(**template)
 
-    st.subheader('Target IMAS entry:')
+    st.markdown('**Target IMAS entry**')
+    st.write('The data will be stored in the DB entry given below.')
 
-    cols = st.columns(4)
+    cols = st.columns((20, 20, 30, 30))
 
     target = {
         'user':
