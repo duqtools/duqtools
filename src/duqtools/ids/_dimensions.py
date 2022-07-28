@@ -37,17 +37,17 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
 
     npfunc = getattr(np, model.operator)
 
-    profile = ids_mapping.flat_fields[model.ids]
+    profile = ids_mapping[model.ids]
 
     if model.scale_to_error:
         sigma_key = model.ids + model._upper_suffix
 
         if model.value < 0:
             lower_key = model.ids + model._lower_suffix
-            if lower_key in ids_mapping.flat_fields:
+            if lower_key in ids_mapping:
                 sigma_key = lower_key
 
-        sigma_bound = ids_mapping.flat_fields[sigma_key]
+        sigma_bound = ids_mapping[sigma_key]
         sigma = abs(sigma_bound - profile)
 
         value = sigma * model.value

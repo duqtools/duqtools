@@ -33,25 +33,23 @@ class Sample:
 def test_mapping():
     s = IDSMapping(Sample)
 
-    assert_equal(s.flat_fields['time'], np.array([1., 2., 3.]))
-    assert_equal(s.flat_fields['_h'], np.array([0, 0]))
-    assert_equal(s.flat_fields['data/0/x'], np.array([0, 1]))
-    assert_equal(s.flat_fields['data/0/y'], np.array([2, 3]))
-    assert_equal(s.flat_fields['data/1/x'], np.array([4, 5]))
-    assert_equal(s.flat_fields['data/1/y'], np.array([6, 7]))
-    assert_equal(s.flat_fields['data/2/x'], np.array([8, 9]))
-    assert_equal(s.flat_fields['data/2/y'], np.array([10, 11]))
+    assert_equal(s['time'], np.array([1., 2., 3.]))
+    assert_equal(s['_h'], np.array([0, 0]))
+    assert_equal(s['data/0/x'], np.array([0, 1]))
+    assert_equal(s['data/0/y'], np.array([2, 3]))
+    assert_equal(s['data/1/x'], np.array([4, 5]))
+    assert_equal(s['data/1/y'], np.array([6, 7]))
+    assert_equal(s['data/2/x'], np.array([8, 9]))
+    assert_equal(s['data/2/y'], np.array([10, 11]))
 
-    assert 'data/0/z' not in s.flat_fields
-    assert 'data/0/z' not in s.flat_fields
-
-    assert_equal(s.fields['data']['0']['x'], np.array([0, 1]))
+    assert 'data/0/z' not in s
+    assert 'data/0/z' not in s
 
 
 def test_mapping_unknown_key_fail():
     s = IDSMapping(Sample)
     with pytest.raises(KeyError):
-        s.fields['this key does not exist']
+        s['this key does not exist']
 
 
 def test_find_all():
