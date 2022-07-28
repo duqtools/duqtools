@@ -43,10 +43,8 @@ class IDSMapping(Mapping):
 
         return s
 
-    def __getitem__(self, key: str):
-        if key not in self._keys:
-            raise KeyError(key)
-
+    def _deconstruct_key(self, key: str):
+        """Break down key and return pointer + attr."""
         *parts, attr = key.split('/')
 
         pointer = self._ids
@@ -58,6 +56,14 @@ class IDSMapping(Mapping):
                 pointer = getattr(pointer, part)
             else:
                 pointer = pointer[i]
+
+        return pointer, attr
+
+    def __getitem__(self, key: str):
+        if key not in self._keys:
+            raise KeyError(key)
+
+        pointer, attr = self._deconstruct_key(key)
 
         return getattr(pointer, attr)
 
@@ -65,17 +71,7 @@ class IDSMapping(Mapping):
         if key not in self._keys:
             return f'Cannot set non-existant key: {key}'
 
-        *parts, attr = key.split('/')
-
-        pointer = self._ids
-
-        for part in parts:
-            try:
-                i = int(part)
-            except ValueError:
-                pointer = getattr(pointer, part)
-            else:
-                pointer = pointer[i]
+        pointer, attr = self._deconstruct_key(key)
 
         setattr(pointer, attr, value)
 
