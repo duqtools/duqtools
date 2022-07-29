@@ -151,7 +151,7 @@ class MergeConfigModel(BaseModel):
     template: ImasBaseModel = Field(None,
                                     description='Template IMAS DB entry.')
     output: ImasBaseModel = Field(None, description='Output IMAS DB entry')
-    ids: List[str] = Field(None, description='IDS keys to merge')
+    ids_to_merge: List[str] = Field(None, description='IDS keys to merge')
     base_ids: str = Field('grid/rho_tor_norm',
                           description='IDS key to use as common basis')
     prefix: str = Field('profiles_1d', description='IDS path prefix')

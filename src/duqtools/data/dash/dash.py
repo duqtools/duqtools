@@ -5,8 +5,8 @@ import pandas as pd
 import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import (ImasHandle, get_ids_tree, merge,
-                          rebase_on_ids, rebase_on_time)
+from duqtools.ids import (ImasHandle, get_ids_tree, merge_data, rebase_on_ids,
+                          rebase_on_time)
 from duqtools.ids._io import _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
 
@@ -168,11 +168,8 @@ with st.form('merge_form'):
 
     if submitted:
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-        merge(data=data,
-              template=template,
-              target=target,
-              x_val=x_val,
-              y_vals=y_vals)
+        template.copy_ids_entry_to(target)
+        merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
         st.success('Success!')
         st.balloons()
