@@ -3,9 +3,11 @@ import subprocess
 from pathlib import Path
 from typing import Any, List
 
+import click
+
 from .config import cfg
 from .models import WorkDirectory
-from .operations import add_to_op_queue, confirm_operations
+from .operations import add_to_op_queue, confirm_operations, op_queue
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -68,12 +70,14 @@ def submit(*, force: bool, **kwargs):
 
         lockfile = run_dir / 'duqtools.submit.lock'
         if lockfile.exists() and not force:
-            info(
-                'Skipping %s, lockfile exists, enable --force to submit again',
-                run_dir)
+            op_queue.add(
+                action=lambda: None,
+                description=click.style('Not Submitting', fg='red', bold=True),
+                extra_description=f'{run_dir}, {lockfile} already exists,'
+                ' enable --force to override')
             continue
 
         submit_cmd = cfg.submit.submit_command.split()
-        cmd: List[Any] = [*submit_cmd, submission_script]
+        cmd: List[Any] = [*submit_cmd, str(submission_script)]
 
         submit_job(lockfile, cmd, run_dir)
