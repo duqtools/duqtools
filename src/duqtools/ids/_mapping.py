@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Sequence, Set, Tuple, Union
 
 import numpy as np
 
@@ -11,6 +11,8 @@ from ._constants import TIME_COL, TSTEP_COL
 
 if TYPE_CHECKING:
     import pandas as pd
+
+    from ._handle import ImasHandle
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -22,69 +24,78 @@ def insert_re_caret_dollar(string: str) -> str:
     return string
 
 
-def recursive_defaultdict():
-    """Recursive defaultdict."""
-    return defaultdict(recursive_defaultdict)
-
-
-def defaultdict_to_dict(ddict: defaultdict):
-    """defaultdict_to_dict, turns a nested defaultdict into a nested dict.
-
-    Parameters
-    ----------
-    ddict : defaultdict
-        ddict
-    """
-
-    # Convert members to dict first
-    for k, v in ddict.items():
-        if isinstance(v, defaultdict):
-            ddict[k] = defaultdict_to_dict(v)
-    # Finally convert self to dict
-    return dict(ddict)
-
-
 class IDSMapping(Mapping):
 
     def __init__(self, ids, exclude_empty: bool = True):
         self._ids = ids
         self.exclude_empty = exclude_empty
 
-        # All fields in the core profile in a single dict
-        self.flat_fields: dict = {}
-
-        # All fields, in the core profile in a nested dict
-        self.fields: dict = defaultdict(recursive_defaultdict)
+        # All available data fields are stored in this set.
+        self._keys: Set[str] = set()
 
         self.dive(ids, [])
-        self.fields = defaultdict_to_dict(self.fields)
 
     def __repr__(self):
         s = f'{self.__class__.__name__}(\n'
-        for key in self.fields.keys():
+        for key in self._keys:
             s += f'  {key} = ...\n'
         s += ')\n'
 
         return s
 
+    def _deconstruct_key(self, key: str):
+        """Break down key and return pointer + attr."""
+        *parts, attr = key.split('/')
+
+        pointer = self._ids
+
+        for part in parts:
+            try:
+                i = int(part)
+            except ValueError:
+                pointer = getattr(pointer, part)
+            else:
+                pointer = pointer[i]
+
+        return pointer, attr
+
     def __getitem__(self, key: str):
-        try:
-            return self.flat_fields[key]
-        except KeyError:
-            pass
-        try:
-            return self.fields[key]
-        except KeyError:
-            raise
+        if key not in self._keys:
+            raise KeyError(key)
+
+        pointer, attr = self._deconstruct_key(key)
+
+        return getattr(pointer, attr)
+
+    def __setitem__(self, key: str, value: np.ndarray):
+        if key not in self._keys:
+            return f'Cannot set non-existant key: {key}'
+
+        pointer, attr = self._deconstruct_key(key)
+
+        setattr(pointer, attr, value)
 
     def __iter__(self):
-        yield from self.fields
+        yield from self._keys
 
     def __len__(self):
-        return len(self.fields)
+        return len(self._keys)
+
+    def sync(self, handle: ImasHandle):
+        """Synchronize updated data back to IMAS db entry.
+
+        Shortcut for 'put' command.
+
+        Parameters
+        ----------
+        handle : ImasHandle
+            Points to an IMAS db entry of where the data should be written.
+        """
+        with handle.open() as f:
+            self._ids.put(db_entry=f)
 
     def dive(self, val, path: list):
-        """Recursively store the important bits of the imas structure in dicts.
+        """Recursively find the data fields.
 
         Parameters
         ----------
@@ -117,11 +128,7 @@ class IDSMapping(Mapping):
             return
 
         # We made it here, the value can be stored
-        self.flat_fields['/'.join(path)] = val
-        cur = self.fields
-        for item in path[:-1]:
-            cur = cur[item]
-        cur[path[-1]] = val
+        self._keys.add('/'.join(path))
 
     def findall(self, pattern: str) -> Dict[str, Any]:
         """Find keys matching regex pattern.
@@ -140,10 +147,7 @@ class IDSMapping(Mapping):
 
         pat = re.compile(pattern)
 
-        return {
-            key: self.flat_fields[key]
-            for key in self.flat_fields if pat.match(key)
-        }
+        return {key: self[key] for key in self._keys if pat.match(key)}
 
     def find_by_group(self, pattern: str) -> Dict[Union[tuple, str], Any]:
         """Find keys matching regex pattern by group.
@@ -166,12 +170,12 @@ class IDSMapping(Mapping):
         pat = re.compile(pattern)
 
         new = {}
-        for key in self.flat_fields:
+        for key in self._keys:
             m = pat.match(key)
             if m:
                 groups = m.groups()
                 idx = groups[0] if len(groups) == 1 else groups
-                new[idx] = self.flat_fields[key]
+                new[idx] = self[key]
 
         return new
 
@@ -206,7 +210,7 @@ class IDSMapping(Mapping):
 
         new_dict: Dict[str, Dict[int, np.ndarray]] = defaultdict(dict)
 
-        for key in self.flat_fields:
+        for key in self._keys:
             m = pat.match(key)
 
             if m:
@@ -214,7 +218,7 @@ class IDSMapping(Mapping):
                 new_key = key[:si] + idx_str + key[sj:]
 
                 idx = int(m.group('idx'))
-                new_dict[new_key][idx] = self.flat_fields[key]
+                new_dict[new_key][idx] = self[key]
 
         return new_dict
 
@@ -279,7 +283,7 @@ class IDSMapping(Mapping):
             Numpy array with a column for the time step and each of the
             variables.
         """
-        points_per_var = len(self.flat_fields[f'{prefix}/0/{variables[0]}'])
+        points_per_var = len(self[f'{prefix}/0/{variables[0]}'])
 
         if not time_steps:
             n_time_steps = len(self[TIME_COL])
@@ -303,6 +307,6 @@ class IDSMapping(Mapping):
 
                 arr[i_begin:i_end, 0] = t
                 arr[i_begin:i_end, 1] = timestamps[t]
-                arr[i_begin:i_end, j + 2] = self.flat_fields[flat_variable]
+                arr[i_begin:i_end, j + 2] = self[flat_variable]
 
         return columns, arr
