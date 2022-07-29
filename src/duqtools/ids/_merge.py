@@ -3,12 +3,14 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
+from ..operations import add_to_op_queue
 from ._get_ids_tree import get_ids_tree
 from ._handle import ImasHandle
 from ._mapping import IDSMapping
 from ._rebase import rebase_on_ids, rebase_on_time
 
 
+@add_to_op_queue('Merge data to', '{target}')
 def merge_data(data: pd.DataFrame,
                target: ImasHandle,
                x_val: str,

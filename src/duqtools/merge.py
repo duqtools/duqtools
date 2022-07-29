@@ -5,12 +5,14 @@ import logging
 from .config import cfg
 from .ids import ImasHandle, get_ids_dataframe, merge_data
 from .models import WorkDirectory
+from .operations import confirm_operations
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
+@confirm_operations
 def merge(**kwargs):
     """Merge data."""
 
@@ -31,8 +33,6 @@ def merge(**kwargs):
     debug('Merge output: %s', target)
 
     template.copy_ids_entry_to(target)
-
-    assert target.exists()
 
     merge_data(data=data,
                target=target,
