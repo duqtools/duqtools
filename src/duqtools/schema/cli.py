@@ -146,15 +146,39 @@ class MergeConfigModel(BaseModel):
     in the config.
 
     These keys define which data to merge, and where to store the
-    output.
+    output. Before merging, all keys are rebased on (1) the same radial
+    coordinate specified via `base_ids` and (2) the timestamp.
     """
-    template: ImasBaseModel = Field(None,
-                                    description='Template IMAS DB entry.')
-    output: ImasBaseModel = Field(None, description='Output IMAS DB entry')
-    ids_to_merge: List[str] = Field(None, description='IDS keys to merge')
+    template: ImasBaseModel = Field(
+        {
+            'user': getuser(),
+            'db': 'jet',
+            'shot': 94785,
+            'run': 1
+        },
+        description='This IMAS DB entry will be used as the template.')
+    output: ImasBaseModel = Field(
+        {
+            'db': 'jet',
+            'shot': 94785,
+            'run': 9999
+        },
+        description='Merged data will be written to this IMAS DB entry.')
+    ids_to_merge: List[str] = Field(['t_i_average', 'zeff'],
+                                    description=f("""
+            This is a list of IDSs to merge over all runs together with the `prefix`.
+            The mean/error are written to the target IDS.
+        """))
     base_ids: str = Field('grid/rho_tor_norm',
-                          description='IDS key to use as common basis')
-    prefix: str = Field('profiles_1d', description='IDS path prefix')
+                          description=f("""
+            This IDS field is taken from the template. It is used to rebase all IDS fields
+            to same radial grid before merging using an interpolation.
+            """))
+    prefix: str = Field('profiles_1d',
+                        description=f("""
+            This field specifies the prefix to the IDS path, i.e.
+            `<prefix>/<time_step>/<ids_to_merge>'. The time step is implied by the template.
+            """))
 
 
 class ConfigModel(BaseModel):
