@@ -86,6 +86,7 @@ class Status():
     def simple_status(self):
         """stateless status."""
 
+        self.update_status()
         info('Total number of directories with submission script : %i',
              len(self.dirs_submit))
         info('      number of not submitted jobs                 : %i',
