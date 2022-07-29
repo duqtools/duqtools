@@ -90,6 +90,7 @@ class Operations(deque):
 
     _instance = None
     yes = False  # Apply operations without prompt
+    enabled = False  # Actually do something
     dry_run = False  # Never apply any operations (do not even ask)
     logger = logging.getLogger('operations')
 
@@ -124,8 +125,11 @@ class Operations(deque):
 
     def append(self, item: Operation) -> None:  # type: ignore
         """Restrict our diet to Operation objects only."""
-
-        super().append(item)
+        if self.enabled:
+            super().append(item)
+        else:
+            self.logger.info('- ' + item.description)
+            item()
 
     def apply(self) -> Operation:
         """Apply the next operation in the queue and remove it."""
@@ -199,9 +203,13 @@ def confirm_operations(func):
     """
 
     def wrapper(*args, **kwargs):
+        if op_queue.enabled:
+            raise RuntimeError('op_queue already enabled')
+        op_queue.enabled = True
         ret = func(*args, **kwargs)
         op_queue.confirm_apply_all()
         op_queue.clear()
+        op_queue.enabled = False
         return ret
 
     return wrapper
