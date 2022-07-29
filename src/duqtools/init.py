@@ -2,13 +2,12 @@ import logging
 from pathlib import Path
 
 from .config import Config
-from .operations import confirm_operations, op_queue
+from .operations import op_queue
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
-@confirm_operations
 def init(*, config: str, full: bool, force: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 

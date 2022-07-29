@@ -6,7 +6,7 @@ import click
 
 from ._logging_utils import TermEscapeCodeFormatter
 from .config import cfg
-from .operations import op_queue
+from .operations import op_queue, op_queue_context
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,8 @@ def cli_init(**kwargs):
 def cli_create(**kwargs):
     """Create the UQ run files."""
     from .create import create
-    create(**kwargs)
+    with op_queue_context():
+        create(**kwargs)
 
 
 @cli.command('submit')
@@ -164,7 +165,8 @@ def cli_create(**kwargs):
 def cli_submit(**kwargs):
     """Submit the UQ runs."""
     from .submit import submit
-    submit(**kwargs)
+    with op_queue_context():
+        submit(**kwargs)
 
 
 @cli.command('status')
@@ -212,7 +214,8 @@ def cli_plot(**kwargs):
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup
-    cleanup(**kwargs)
+    with op_queue_context():
+        cleanup(**kwargs)
 
 
 @cli.command('go')
@@ -226,8 +229,10 @@ def cli_go(**kwargs):
     from .dash import dash
     from .status import status
     from .submit import submit
-    create(**kwargs)
-    submit(**kwargs)
+    with op_queue_context():
+        create(**kwargs)
+    with op_queue_context():
+        submit(**kwargs)
 
     skwargs = kwargs.copy()
     skwargs['detailed'] = True
