@@ -144,7 +144,8 @@ def cli(**kwargs):
 def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
-    init(**kwargs)
+    with op_queue_context():
+        init(**kwargs)
 
 
 @cli.command('create')
