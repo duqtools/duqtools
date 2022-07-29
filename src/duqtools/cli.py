@@ -4,6 +4,7 @@ from sys import stderr, stdout
 
 import click
 
+from ._logging_utils import TermEscapeCodeFormatter
 from .config import cfg
 from .operations import op_queue
 
@@ -89,7 +90,13 @@ def logfile_option(f):
         if logfile in streams.keys():
             logging.basicConfig(stream=streams[logfile], level=logging.INFO)
         else:
-            logging.basicConfig(filename=logfile, level=logging.INFO)
+            fhandler = logging.FileHandler(logfile)
+            fhandler.setLevel(logging.INFO)
+
+            # Remove fancies from logfiles
+            escaped_format = TermEscapeCodeFormatter(logging.BASIC_FORMAT)
+            fhandler.setFormatter(escaped_format)
+            logging.getLogger().addHandler(fhandler)
 
         logger.info('')
         logger.info(
