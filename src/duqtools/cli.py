@@ -215,6 +215,28 @@ def cli_clean(**kwargs):
     cleanup(**kwargs)
 
 
+@cli.command('go')
+@common_options
+@click.option('--force', is_flag=True, help='Overwrite files when necessary.')
+def cli_go(**kwargs):
+    """Run create - submit - status - dash in succession, very useful for
+    existing tested and working pipelines
+    """
+    from .create import create
+    from .dash import dash
+    from .status import status
+    from .submit import submit
+    create(**kwargs)
+    submit(**kwargs)
+
+    skwargs = kwargs.copy()
+    skwargs['detailed'] = True
+    skwargs['progress'] = False
+    status(**skwargs)
+
+    dash(**kwargs)
+
+
 @cli.command('dash')
 @common_options
 def cli_dash(**kwargs):
