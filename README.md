@@ -21,7 +21,9 @@ Features:
 
 To install:
 
-    pip install duqtools
+```console
+pip install duqtools
+```
 
 The source code is available from [Github](https://github.com/CarbonCollective/fusion-dUQtools).
 
@@ -74,9 +76,11 @@ mkdocs serve
 
 ### Making a release
 
-1. Bump the version (major/minor/patch as needed)
+1. Bump the version (`major`/`minor`/`patch` as needed)
 
-    bumpversion minor
+```console
+bumpversion minor
+```
 
 2. Make a new [release](https://github.com/CarbonCollective/fusion-dUQtools/releases). The [upload to pypi](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/publish.yaml) is triggered when a release is published.
 
