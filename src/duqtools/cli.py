@@ -216,5 +216,13 @@ def cli_dash(**kwargs):
     dash(**kwargs)
 
 
+@cli.command('merge')
+@common_options
+def cli_merge(**kwargs):
+    """Merge data sets with error propagation."""
+    from .merge import merge
+    merge(**kwargs)
+
+
 if __name__ == '__main__':
     cli()

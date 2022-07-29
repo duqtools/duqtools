@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import (IDSMapping, ImasHandle, get_ids_tree, rebase_on_ids,
+from duqtools.ids import (ImasHandle, get_ids_tree, merge_data, rebase_on_ids,
                           rebase_on_time)
 from duqtools.ids._io import _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
@@ -32,7 +32,7 @@ df = pd.DataFrame.from_dict(
     {index: model.dict()
      for index, model in handles.items()}, orient='index')
 
-with st.expander('IDS data'):
+with st.expander('Click to view runs'):
     st.table(df)
 
 prefix = 'profiles_1d/$i'
@@ -106,12 +106,28 @@ for y_val in y_vals:
 
     st.altair_chart(chart, use_container_width=True)
 
-with st.form('Save to new IMAS DB entry'):
+with st.form('merge_form'):
+
+    st.subheader('Merge data')
+
+    st.write("""
+        With this form you can merge all runs into a new IMAS DB entry.
+
+        The mean and standard deviation are calculated over all the
+        runs for the fields specified in the side bar.
+
+        Note that it does not do error propagation yet if the source data have
+        error bars already.
+        """)
+
     a_run = df.iloc[0]
 
-    st.subheader('Template IMAS entry:')
+    st.markdown('**Template IMAS entry**')
+    st.write(
+        """This IMAS entry will be used as the template. The template is copied,
+        and any existing data is overwritten for the given fields.""")
 
-    cols = st.columns(4)
+    cols = st.columns((20, 20, 30, 30))
 
     template = {
         'user': cols[0].text_input('User',
@@ -127,9 +143,10 @@ with st.form('Save to new IMAS DB entry'):
 
     template = ImasHandle(**template)
 
-    st.subheader('Target IMAS entry:')
+    st.markdown('**Target IMAS entry**')
+    st.write('The data will be stored in the DB entry given below.')
 
-    cols = st.columns(4)
+    cols = st.columns((20, 20, 30, 30))
 
     target = {
         'user':
@@ -148,53 +165,11 @@ with st.form('Save to new IMAS DB entry'):
     target = ImasHandle(**target)
 
     submitted = st.form_submit_button('Save')
+
     if submitted:
-        template_data = get_ids_tree(template)
-
-        # pick first time step as basis
-        common_basis = template_data[f'profiles_1d/0/{x_val}']
-
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-
-        data = rebase_on_ids(data,
-                             base_col=x_val,
-                             value_cols=y_vals,
-                             new_base=common_basis)
-
-        # common_time = [0.0, 0.25, 0.50, 0.75, 1.0]
-        common_time = template_data['time']
-
-        # Set to common time basis
-        data = rebase_on_time(data,
-                              cols=[x_val, *y_vals],
-                              new_base=common_time)
-
-        gb = data.groupby(['tstep', x_val])
-
-        agg_funcs = ['mean', 'std']
-        agg_dict = {y_val: agg_funcs for y_val in y_vals}
-
-        merged = gb.agg(agg_dict)
-
         template.copy_ids_entry_to(target)
-
-        core_profiles = target.get('core_profiles')
-        ids_mapping = IDSMapping(core_profiles, exclude_empty=False)
-
-        for tstep, group in merged.groupby('tstep'):
-
-            mean = group['t_i_average', 'mean']
-            stdev = group['t_i_average', 'std']
-
-            profile = ids_mapping[f'profiles_1d/{tstep}/{y_val}']
-            profile[:] = mean
-
-            # This does not work yet, because `*_error_upper` *may* be empty
-            # profile_error_upper = ids_mapping[f'profiles_1d/{tstep}/{y_val}_error_upper']
-            # profile_error_upper[:] = mean + stdev
-
-        with target.open() as data_entry_target:
-            core_profiles.put(db_entry=data_entry_target)
+        merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
         st.success('Success!')
         st.balloons()

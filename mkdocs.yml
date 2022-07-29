@@ -8,6 +8,7 @@ nav:
     - config/create.md
     - config/submit.md
     - config/status.md
+    - config/merge.md
   - Dashboard: dash.md
   - Visualization: visualization.md
   - Operations: operations.md

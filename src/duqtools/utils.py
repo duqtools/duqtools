@@ -5,9 +5,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict
 
-from duqtools.schema.runs import Runs
-
 from ._types import PathLike
+from .schema.runs import Runs
 
 if TYPE_CHECKING:
     from .ids import ImasHandle
