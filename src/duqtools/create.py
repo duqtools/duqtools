@@ -117,7 +117,6 @@ def create(*, force, **kwargs):
                                 run=options.data.run_out_start_at + i)
 
         source.copy_ids_entry_to(target_in)
-
         apply_combination(target_in, combination)
 
         system.copy_from_template(template_drc, run_drc)

@@ -4,6 +4,7 @@ import logging
 import xml.sax
 import xml.sax.handler
 from getpass import getuser
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from packaging import version
@@ -49,6 +50,45 @@ def get_imas_ual_version():
     ual_version = version.parse('.'.join(vsplit[5:8]))
 
     return imas_version, ual_version
+
+
+def add_provenance_info(ids: ImasHandle):
+    """Add provenance information to ids.
+
+    Parameters
+    ----------
+    ids:
+        handle to add provenance information to
+    """
+
+    import git
+    import pkg_resources  # type: ignore
+
+    with ids.open() as data_entry_target:
+        core_profiles = data_entry_target.get('core_profiles')
+
+        # Set the name
+        core_profiles.code.name = 'dUQtools'
+
+        # Get the commit if we are in a repository
+        try:
+            core_profiles.code.commit = git.Repo(
+                Path(__file__).parent,
+                search_parent_directories=True).head.object.hexsha
+        except Exception:
+            core_profiles.code.commit = 'unknown'
+
+        # Set the version if available
+        try:
+            core_profiles.code.version = pkg_resources.get_distribution(
+                'duqtools').version
+        except Exception:
+            core_profiles.code.version = 'unknown'
+
+        # The repository, always set to duqtools
+        core_profiles.code.repository = 'https://github.com/CarbonCollective/fusion-dUQtools/'
+
+        core_profiles.put(db_entry=data_entry_target)
 
 
 @add_to_op_queue('Copy ids from template to', '{target}')
@@ -103,3 +143,5 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
 
     idss_in.close()
     idss_out.close()
+
+    add_provenance_info(target)
