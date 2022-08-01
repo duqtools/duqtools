@@ -4,8 +4,9 @@ from sys import stderr, stdout
 
 import click
 
+from ._logging_utils import TermEscapeCodeFormatter
 from .config import cfg
-from .operations import op_queue
+from .operations import op_queue, op_queue_context
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,13 @@ def logfile_option(f):
         if logfile in streams.keys():
             logging.basicConfig(stream=streams[logfile], level=logging.INFO)
         else:
-            logging.basicConfig(filename=logfile, level=logging.INFO)
+            fhandler = logging.FileHandler(logfile)
+            fhandler.setLevel(logging.INFO)
+
+            # Remove fancies from logfiles
+            escaped_format = TermEscapeCodeFormatter(logging.BASIC_FORMAT)
+            fhandler.setFormatter(escaped_format)
+            logging.getLogger().addHandler(fhandler)
 
         logger.info('')
         logger.info(
@@ -137,7 +144,8 @@ def cli(**kwargs):
 def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
-    init(**kwargs)
+    with op_queue_context():
+        init(**kwargs)
 
 
 @cli.command('create')
@@ -148,7 +156,8 @@ def cli_init(**kwargs):
 def cli_create(**kwargs):
     """Create the UQ run files."""
     from .create import create
-    create(**kwargs)
+    with op_queue_context():
+        create(**kwargs)
 
 
 @cli.command('submit')
@@ -157,7 +166,8 @@ def cli_create(**kwargs):
 def cli_submit(**kwargs):
     """Submit the UQ runs."""
     from .submit import submit
-    submit(**kwargs)
+    with op_queue_context():
+        submit(**kwargs)
 
 
 @cli.command('status')
@@ -205,7 +215,32 @@ def cli_plot(**kwargs):
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup
-    cleanup(**kwargs)
+    with op_queue_context():
+        cleanup(**kwargs)
+
+
+@cli.command('go')
+@common_options
+@click.option('--force', is_flag=True, help='Overwrite files when necessary.')
+def cli_go(**kwargs):
+    """Run create - submit - status - dash in succession, very useful for
+    existing tested and working pipelines
+    """
+    from .create import create
+    from .dash import dash
+    from .status import status
+    from .submit import submit
+    with op_queue_context():
+        create(**kwargs)
+    with op_queue_context():
+        submit(**kwargs)
+
+    skwargs = kwargs.copy()
+    skwargs['detailed'] = True
+    skwargs['progress'] = False
+    status(**skwargs)
+
+    dash(**kwargs)
 
 
 @cli.command('dash')

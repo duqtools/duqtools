@@ -1,4 +1,14 @@
 import logging
+import re
+
+
+class TermEscapeCodeFormatter(logging.Formatter):
+    """A class to strip the escape codes from the."""
+    escape_re = re.compile(r'\x1b\[[0-9;]*m')
+
+    def format(self, record):
+        record.msg = re.sub(self.escape_re, '', str(record.msg))
+        return super().format(record)
 
 
 class LoggingContext:

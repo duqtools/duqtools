@@ -43,30 +43,6 @@ def is_running(dir: Path) -> bool:
     return status_file_contains(dir, cfg.status.msg_running)
 
 
-def completion_percentage(dir: Path) -> int:
-    of = (dir / cfg.status.out_file)
-    infile = (dir / cfg.status.in_file)
-    if not of.exists():
-        debug('%s does not exists, but the job is running', of)
-        return 0
-    if not infile.exists():
-        debug('%s does not exists, but the job is running', infile)
-        return 0
-
-    with open(of, 'r') as f:
-        lines = f.readlines()
-        for i in range(len(lines) - 1, 0, -1):
-            if 'STEP' in lines[i]:
-                time = float(lines[i].split('=')[2].lstrip(' ').split(' ')[0])
-                break
-        else:
-            time = 0.
-    nml = read_namelist(infile)
-    start = nml['nlist1']['tbeg']
-    end = nml['nlist1']['tmax']
-    return int(100 * (time - start) / (end - start))
-
-
 class Status():
 
     dirs: list
@@ -86,7 +62,6 @@ class Status():
         debug('Case directories: %s', self.dirs)
 
         debug('Total number of directories: %i', len(self.dirs))
-        self.update_status()
 
     def update_status(self):
 
@@ -111,6 +86,7 @@ class Status():
     def simple_status(self):
         """stateless status."""
 
+        self.update_status()
         info('Total number of directories with submission script : %i',
              len(self.dirs_submit))
         info('      number of not submitted jobs                 : %i',
@@ -149,36 +125,89 @@ class Status():
             sleep(5)
             self.update_status()
 
-    def get_status(self, dir):
-        if dir not in self.dirs_submit:
-            return 'Unsubmitted '
-        if dir in self.dirs_running:
-            return 'Running     '
-        if dir in self.dirs_failed:
-            return 'FAILED      '
-        if dir in self.dirs_completed:
-            return 'COMPLETED   '
-        return 'UNKNOWN'
-
     def detailed_status(self):
         from tqdm import tqdm
         """detailed_status of all separate runs."""
-        pbars = []
+        monitors = []
         for i, dir in enumerate(self.dirs):
-            pbars.append(tqdm(total=100, position=i))
-            status = self.get_status(dir)
-            pbars[-1].set_description(f'{dir.name:8s}, status: {dir.name:12s}')
+            pbar = tqdm(total=100, position=i)
+            monitor = Monitor(pbar=pbar, dir=dir)
+            monitors.append(monitor)
 
-        while len(self.dirs_completed) < len(self.dirs_submit):
-            for i, dir in enumerate(self.dirs):
-                status = self.get_status(dir)
-                pbars[i].set_description(
-                    f'{dir.name:8s}, status: {status:12s}')
-                if dir in self.dirs_running:
-                    pbars[i].n = completion_percentage(dir)
-                pbars[i].refresh()
+        while not all([monitor.finished for monitor in monitors]):
+            for monitor in monitors:
+                monitor.update()
             sleep(5)
-            self.update_status()
+
+
+class Monitor():
+    """Convenience class to keep track of submissions and update progress
+    bars."""
+
+    def __init__(self, pbar, dir):
+        self.pbar = pbar
+        self.dir = dir
+        self.outfile = None
+
+        self.set_status()
+
+        infile = (dir / cfg.status.in_file)
+        if not infile.exists():
+            debug('%s does not exists, but the job is running', infile)
+            return 0
+
+        nml = read_namelist(infile)
+        self.start = nml['nlist1']['tbeg']
+        self.end = nml['nlist1']['tmax']
+        self.time = self.start
+
+        self.finished = False
+
+    def set_status(self):
+        if not is_submitted(self.dir):
+            status = 'Unsubmitted '
+        elif is_running(self.dir):
+            status = 'Running     '
+        elif is_failed(self.dir):
+            status = 'FAILED      '
+        elif is_completed(self.dir):
+            status = 'COMPLETED   '
+        else:
+            status = 'UNKNOWN'
+
+        self.pbar.set_description(f'{self.dir.name:8s}, status: {status:12s}')
+        self.pbar.refresh()
+
+    def get_lines(self):
+        if not self.outfile:
+            of = (self.dir / cfg.status.out_file)
+            if not of.exists():
+                debug('%s does not exists, but the job is running', of)
+                return []
+            self.output_file = open(of, 'r')
+        return self.output_file.readlines()
+
+    def update(self):
+        self.set_status()
+
+        if is_completed(self.dir) or is_failed(self.dir):
+            self.pbar.n = 100 if is_completed(self.dir) else 0
+            self.pbar.refresh()
+            self.finished = True
+            return
+        if not is_running(self.dir):
+            return
+
+        lines = self.get_lines()
+        for i in range(len(lines) - 1, 0, -1):
+            if lines[i].startswith(' STEP'):
+                self.time = float(
+                    lines[i].split('=')[2].lstrip(' ').split(' ')[0])
+                break
+
+        self.pbar.n = int(100 * (self.time - self.start) /
+                          (self.end - self.start))
+        self.pbar.refresh()
 
 
 def status(*, progress: bool, detailed: bool, **kwargs):

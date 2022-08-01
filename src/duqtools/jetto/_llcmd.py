@@ -26,8 +26,8 @@ def write_batchfile(workspace: WorkDirectory, run_name: str):
         f.write(f"""#!/bin/sh
 #SBATCH -J jetto.{run_name}
 #SBATCH -i /dev/null
-#SBATCH -o ll.out
-#SBATCH -e ll.err
+#SBATCH -o {full_path}/ll.out
+#SBATCH -e {full_path}/ll.err
 #SBATCH -p gw
 
 #SBATCH -N 1
