@@ -252,14 +252,14 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
 
 class IntegratedModellingDict:
 
-    def __init__(self, db, shot, run, username = ''):
+    def __init__(self, db, shot, run, username='', backend='mdsplus'):
 
         # It might be possible to generalize part of the following functions. Left for future work
         # The extraction might also be simplified using partial_get. I am not sure if the filling part can also be simplified...
 
         # ------------------------------ LITS WITH ALL THE KEYS -----------------------------------
         self.all_keys = copy.deepcopy(keys_list)
-        self.ids_struct = open_integrated_modelling(db, shot, run, username = username)
+        self.ids_struct = open_integrated_modelling(db, shot, run, username=username, backend=backend)
         self.extract_ids_dict()
 
     def extract_ids_dict(self):
@@ -1344,7 +1344,7 @@ def rgetattr(obj, attr, *args):
 # ------------------------- EXTRA TOOLS TO OPEN AND PUT IDSS ------------------------------
 
 
-def open_integrated_modelling(db, shot, run, username = ''):
+def open_integrated_modelling(db, shot, run, username='', backend='mdsplus'):
 
     '''
 
@@ -1353,10 +1353,14 @@ def open_integrated_modelling(db, shot, run, username = ''):
 
     '''
 
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
+
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1371,12 +1375,16 @@ def open_integrated_modelling(db, shot, run, username = ''):
 
     return(ids_struct)
 
-def open_and_get_core_profiles(db, shot, run, username = ''):
+def open_and_get_core_profiles(db, shot, run, username='', backend='mdsplus'):
+
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
 
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1394,12 +1402,16 @@ def open_and_get_core_profiles(db, shot, run, username = ''):
     return(core_profiles)
 
 
-def open_and_get_equilibrium(db, shot, run, username = ''):
+def open_and_get_equilibrium(db, shot, run, username='', backend='mdsplus'):
+
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
 
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1418,12 +1430,16 @@ def open_and_get_equilibrium(db, shot, run, username = ''):
 
 #Redundant since I can just use partial get
 
-def open_and_get_equilibrium_tag(db, shot, run, tag, username = '', prefix = 'global_quantities'):
+def open_and_get_equilibrium_tag(db, shot, run, tag, username='', backend='mdsplus', prefix='global_quantities'):
+
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
 
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1441,12 +1457,16 @@ def open_and_get_equilibrium_tag(db, shot, run, tag, username = '', prefix = 'gl
 
     return(time, variable)
 
-def open_and_get_summary(db, shot, run, username = ''):
+def open_and_get_summary(db, shot, run, username=None, backend='mdsplus'):
 
-    if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
+
+    if not isinstance(username, str):
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1463,12 +1483,16 @@ def open_and_get_summary(db, shot, run, username = ''):
 
     return(summary)
 
-def open_and_get_core_sources(db, shot, run, username = ''):
+def open_and_get_core_sources(db, shot, run, username='', backend='mdsplus'):
+
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
 
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1486,12 +1510,16 @@ def open_and_get_core_sources(db, shot, run, username = ''):
     return(core_sources)
 
 
-def open_and_get_nbi(db, shot, run, username = ''):
+def open_and_get_nbi(db, shot, run, username='', backend='mdsplus'):
+
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
 
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1508,7 +1536,7 @@ def open_and_get_nbi(db, shot, run, username = ''):
 
     return(nbi)
 
-def open_and_get_all(db, shot, run, username = ''):
+def open_and_get_all(db, shot, run, username='', backend='mdsplus'):
 
     '''
 
@@ -1516,10 +1544,14 @@ def open_and_get_all(db, shot, run, username = ''):
 
     '''
 
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
+
     if username == '':
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=getpass.getuser())
     else:
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+        data_entry = imas.DBEntry(imas_backend, db, shot, run, user_name=username)
 
     op = data_entry.open()
 
@@ -1533,7 +1565,7 @@ def open_and_get_all(db, shot, run, username = ''):
 
     return(ids_dict)
 
-def put_integrated_modelling(db, shot, run, run_target, ids_struct):
+def put_integrated_modelling(db, shot, run, run_target, ids_struct, backend='mdsplus'):
 
     '''
 
@@ -1541,12 +1573,15 @@ def put_integrated_modelling(db, shot, run, run_target, ids_struct):
 
     '''
 
+    imas_backend = imasdef.MDSPLUS_BACKEND
+    if backend == 'hdf5':
+        imas_backend = imasdef.HDF5_BACKEND
+
     username = getpass.getuser()
     copy_ids_entry(username, db, shot, run, shot, run_target)
 
-    data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run_target, user_name=getpass.getuser())
-    #ids_list = ['core_profiles', 'core_sources', 'ec_launchers', 'equilibrium', 'nbi', 'summary', 'thomson_scattering', 'pulse_schedule']
-    ids_list = ['core_profiles', 'core_sources', 'equilibrium', 'nbi', 'summary', 'thomson_scattering', 'pulse_schedule']
+    data_entry = imas.DBEntry(imas_backend, db, shot, run_target, user_name=getpass.getuser())
+    ids_list = ['core_profiles', 'core_sources', 'ec_launchers', 'equilibrium', 'nbi', 'summary', 'thomson_scattering', 'pulse_schedule']
 
     op = data_entry.open()
 
