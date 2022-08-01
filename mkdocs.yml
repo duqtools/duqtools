@@ -12,6 +12,7 @@ nav:
   - Dashboard: dash.md
   - Visualization: visualization.md
   - Operations: operations.md
+  - Example notebook: ../scripts/getting_started.ipynb
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
@@ -70,6 +71,8 @@ plugins:
 - gen-files:
     scripts:
       - docs/gendocs.py
+- mkdocs-jupyter:
+    include_source: True
 
 watch:
   - src/duqtools
