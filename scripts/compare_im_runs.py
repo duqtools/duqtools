@@ -90,6 +90,7 @@ keys_list['time_trace'] = [
     'summary.global_quantities.beta_pol.value', 
     'summary.global_quantities.beta_pol_mhd.value', 
     'summary.global_quantities.beta_tor_norm.value', 
+    'summary.global_quantities.beta_tor.value', 
     'summary.global_quantities.power_radiated.value', 
     'summary.fusion.neutron_fluxes.total.value',
     'equilibrium.time_slice[].global_quantities.ip', 
@@ -144,12 +145,13 @@ python compare_im_runs.py -u g2aho -d jet -s 94875 -r 1 102 --time_begin 48 --ti
     parser.add_argument("--source",           nargs='*', type=str,   default=['total'],                              help="sourceid to be plotted(nbi, ec,etc as given in dd description), make sence if core_source is given as target ids, default is total")
     parser.add_argument("--transport",        nargs='*', type=str,   default=['transport_solver'],                   help="transpid to be plotted(neoclassical, anomalous, ets, cherck dd for more entires), make sence if core_transport is given as target ids, default is transport_solver")
     parser.add_argument("--steady_state",                            default=False, action='store_true',             help="Flag to identify that the input is a single point")
-    parser.add_argument("--show_plot",                               default=True, action='store_false',             help="Toggle showing of plot or saving of plot into default file names")
+    parser.add_argument("--save_plot",                               default=False, action='store_true',             help="Toggle showing of plot or saving of plot into default file names")
     parser.add_argument("--plot_uniform_basis",                      default=False, action='store_true',             help="Toggle plotting of interpolated data to form uniform time and radial basis, uses first run as basis")
     parser.add_argument("--analyze_traces",   nargs='*', type=str,   default=None, choices=["absolute_error"],       help="Define which analyses to perform after time trace comparison plots")
     parser.add_argument("--analyze_profiles", nargs='*', type=str,   default=None, choices=["average_absolute_error"], help="Define which analyses to perform after profile comparison plots")
     parser.add_argument("--change_sign",                             default=None, action='store_true',              help="Allows to change the sign of the output if it is not the same in the HFPS and in the IDS")
     parser.add_argument("--multi_var_function", "-func", type=str,   default=None,                                   help="Function of multiple variables")
+    parser.add_argument("--analysis_only",                           default=False, action='store_true',             help="Toggle off IDS plotting, only plot analysis results if specified")
 
     args=parser.parse_args()
 
@@ -322,7 +324,7 @@ def get_onesig(ids,signame,time_begin,time_end=None,sid=None,tid=None):
                 if not isinstance(xvec, np.ndarray):
                     xvec = np.array([xvec]).flatten()
             except:
-                raise IOError('Radial vector not present in IDS.')
+                raise IOError('Radial vector %s not present in IDS.' % (xstring))
         # Define y vector(value of signal)
 
         try:
@@ -330,7 +332,7 @@ def get_onesig(ids,signame,time_begin,time_end=None,sid=None,tid=None):
             if not isinstance(yvec, np.ndarray):
                 yvec = np.array([yvec]).flatten()
         except:
-            raise IOError('Value vector not present in IDS.')
+            raise IOError('Value vector %s not present in IDS.' % (ystring))
 
         # Check dimension consistency
         if len(yvec) != len(xvec):
@@ -715,6 +717,12 @@ def plot_profiles(plot_data):
 #            fig.savefig(signame+".png", bbox_inches="tight")
             plt.show()
 
+def print_time_traces(data_dict):
+    for signame in keys_list['time_trace']:
+        for run in data_dict:
+            if signame in data_dict[run] and len(data_dict[run][signame]) > 0:
+                print("%s %s average: %10.6e" % (run, signame, float(np.mean(data_dict[run][signame]))))
+
 def absolute_error(data1, data2):
     return np.abs(data1 - data2)
 
@@ -793,8 +801,6 @@ def main(args = None):
     user_tmp = args.user
     sid_tmp = args.source
     tid_tmp = args.transport
-    show_plot = args.show_plot
-    change_sign = args.change_sign
     multi_var_function = args.multi_var_function
 
 #    nsig=len(signame)
@@ -887,7 +893,7 @@ def main(args = None):
                 del globals()[new_key]
 
         # adding the option of changing the sign of the variable. Useful for q profile in some instances
-        if i > 0 and change_sign:
+        if i > 0 and args.change_sign:
             for key in plot_dict[tag]:
                 if not key.endswith(".x") and not key.endswith(".t"):
                     if type(plot_dict[tag][key][0]) == dict:
@@ -900,18 +906,14 @@ def main(args = None):
     if multi_var_function:
         keys_list['time_trace'].append(multi_var_function)
 
-    # Only variables in the keys_list will be plotted
-    if multi_var_function:
-        keys_list['time_trace'].append(multi_var_function)
-
-    if not args.plot_uniform_basis and show_plot:
-        plot_traces(plot_dict, single_time_reference=args.steady_state)
-        plot_gif_profiles(plot_dict, single_time_reference=args.steady_state)
+#    if not args.plot_uniform_basis and not save_plot:
+#        plot_traces(plot_dict, single_time_reference=args.steady_state)
+#        plot_gif_profiles(plot_dict, single_time_reference=args.steady_state)
 
     analysis_dict = standardize_manydict(runvec,sigvec,tb_tmp,time_end=te_tmp,time_vector=time_tmp,set_reference=ref_tag)
 
     # Changing the sign of the variable also in the analysis_dict when needed (should not be needed in the future)
-    if change_sign:
+    if args.change_sign:
         for key in analysis_dict:
             if not key.endswith(".x") and not key.endswith(".t"):
                 first_index = 0
@@ -970,53 +972,55 @@ def main(args = None):
 
     # -------------------------------------------------------------------------
 
-    if args.plot_uniform_basis and show_plot:
+    if not args.save_plot and not args.analysis_only:
+        if args.plot_uniform_basis:
+            plot_interpolated_traces(analysis_dict)
+            plot_gif_interpolated_profiles(analysis_dict)
+        else:
+            plot_traces(plot_dict, single_time_reference=args.steady_state)
+            plot_gif_profiles(plot_dict, single_time_reference=args.steady_state)
 
-        plot_interpolated_traces(analysis_dict)
-        plot_gif_interpolated_profiles(analysis_dict)
+    print_time_traces(plot_dict)
 
-    options = {"absolute_error": True}
+    if args.analyze_traces:
 
-    time_error_dict = perform_time_trace_analysis(analysis_dict, **options)
-    time_error_signals = []
-    for signame in keys_list['time_trace']:
-        for error in keys_list['errors']['time_trace']:
-            time_error_signals.append(signame+'.'+error)
+        options = {"absolute_error": True}
 
-    if show_plot:
-        plot_interpolated_traces(time_error_dict, custom_signals=time_error_signals)
+        time_error_dict = perform_time_trace_analysis(analysis_dict, **options)
+        time_error_signals = []
+        for signame in keys_list['time_trace']:
+            for error in keys_list['errors']['time_trace']:
+                time_error_signals.append(signame+'.'+error)
 
-    options = {"average_absolute_error": True}
+        if not args.save_plot:
+            plot_interpolated_traces(time_error_dict, custom_signals=time_error_signals)
 
-    profile_error_dict = perform_profile_analysis(analysis_dict, **options)
-    profile_error_signals = []
-    for signame in keys_list['profiles_1d']:
-        for error in keys_list['errors']['profiles_1d']:
-            profile_error_signals.append(signame+'.'+error)
+        options = {"average_absolute_error": True}
 
-    if show_plot:
-        plot_interpolated_traces(profile_error_dict, custom_signals=profile_error_signals)
+        profile_error_dict = perform_profile_analysis(analysis_dict, **options)
+        profile_error_signals = []
+        for signame in keys_list['profiles_1d']:
+            for error in keys_list['errors']['profiles_1d']:
+                profile_error_signals.append(signame+'.'+error)
 
-    error_signal = []
-    for signal in time_error_signals:
-        if signal in time_error_dict:
-            for run_tag in time_error_dict[signal]:
-                average_error = time_error_dict[signal][run_tag][np.where(np.isnan(time_error_dict[signal][run_tag]), False, True)]
-                error_signal.append(np.average(average_error))
+        if not args.save_plot:
+            plot_interpolated_traces(profile_error_dict, custom_signals=profile_error_signals)
 
-    for signal in profile_error_signals:
-        if signal in profile_error_dict:
-            for run_tag in profile_error_dict[signal]:
-                average_error = profile_error_dict[signal][run_tag][np.where(np.isnan(profile_error_dict[signal][run_tag]), False, True)]
-                error_signal.append(np.average(average_error))
+        error_signal = []
+        for signal in time_error_signals:
+            if signal in time_error_dict:
+                for run_tag in time_error_dict[signal]:
+                    average_error = time_error_dict[signal][run_tag][np.where(np.isnan(time_error_dict[signal][run_tag]), False, True)]
+                    error_signal.append(np.average(average_error))
 
-    if __name__ != "__main__":
-        return(error_signal)
+        for signal in profile_error_signals:
+            if signal in profile_error_dict:
+                for run_tag in profile_error_dict[signal]:
+                    average_error = profile_error_dict[signal][run_tag][np.where(np.isnan(profile_error_dict[signal][run_tag]), False, True)]
+                    error_signal.append(np.average(average_error))
 
-    # Replace plot to an optional output, or save plot without showing
-#    plot_results(data_list,signame,idsname,args.psiplot,args.subp, args.nrow, args.ncol)
-#    if not args.ext:
-#        plt.show()
+        if __name__ != "__main__":
+            return(error_signal)
 
 if __name__ == "__main__":
     main()
