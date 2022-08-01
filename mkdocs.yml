@@ -11,7 +11,11 @@ nav:
     - config/merge.md
   - Dashboard: dash.md
   - Visualization: visualization.md
-  - Operations: operations.md
+  - Python API:
+    - Public API: api.md
+    - Operations: operations.md
+  - Examples:
+    - Getting started: examples/getting_started.ipynb
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
@@ -56,6 +60,8 @@ plugins:
         import:
         - https://docs.python.org/3/objects.inv
         - https://numpy.org/doc/stable/objects.inv
+        - https://docs.scipy.org/doc/scipy/objects.inv
+        - https://pandas.pydata.org/docs/objects.inv
         selection:
           docstring_style: numpy
           docstring_options:
@@ -70,6 +76,10 @@ plugins:
 - gen-files:
     scripts:
       - docs/gendocs.py
+- mkdocs-jupyter:
+    include_source: True
+    ignore:
+      - gendocs.py
 
 watch:
   - src/duqtools

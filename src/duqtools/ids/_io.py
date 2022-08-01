@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Sequence
+from typing import TYPE_CHECKING, Dict, Sequence, Union
 
-from ._get_ids_tree import get_ids_tree
 from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)
@@ -16,12 +15,13 @@ def _get_ids_run_dataframe(handle: ImasHandle, *, keys,
                            **kwargs) -> pd.DataFrame:
     """Get data for single run."""
     logger.info('Getting data for %s', handle)
-    profile = get_ids_tree(handle, exclude_empty=True)
+    profile = handle.get('core_profiles', exclude_empty=True)
     return profile.to_dataframe(*keys, **kwargs)
 
 
-def get_ids_dataframe(handles: Dict[str, ImasHandle], *, keys: Sequence[str],
-                      **kwargs) -> pd.DataFrame:
+def get_ids_dataframe(handles: Union[Sequence[ImasHandle],
+                                     Dict[str, ImasHandle]], *,
+                      keys: Sequence[str], **kwargs) -> pd.DataFrame:
     """Read a dict of IMAS handles into a structured pandas dataframe.
 
     The returned dataframe will have the columns:
@@ -33,9 +33,10 @@ def get_ids_dataframe(handles: Dict[str, ImasHandle], *, keys: Sequence[str],
 
     Parameters
     ----------
-    handles : Dict[str, ImasHandle]
+    handles : Union[Sequence[str], Dict[str, ImasHandle]]
         Dict with IMAS handles. The key is used as the 'run' name in
-        the dataframe.
+        the dataframe. If the handles are specified as a sequence,
+        The Imas string representation will be used as the key.
     keys : Sequence[str]
         IDS values to extract. These will be used as columns in the
         data frame.
@@ -46,9 +47,12 @@ def get_ids_dataframe(handles: Dict[str, ImasHandle], *, keys: Sequence[str],
     Returns
     -------
     pd.DataFrame
-        Description
+        Structured pandas dataframe.
     """
     import pandas as pd
+
+    if not isinstance(handles, dict):
+        handles = {handle.to_string(): handle for handle in handles}
 
     runs_data = {
         str(name): _get_ids_run_dataframe(handle, keys=keys, **kwargs)

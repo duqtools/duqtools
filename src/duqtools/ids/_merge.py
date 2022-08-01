@@ -4,10 +4,8 @@ import numpy as np
 import pandas as pd
 
 from ..operations import add_to_op_queue
-from ._get_ids_tree import get_ids_tree
 from ._handle import ImasHandle
-from ._mapping import IDSMapping
-from ._rebase import rebase_on_ids, rebase_on_time
+from ._rebase import rebase_on_grid, rebase_on_time
 
 
 @add_to_op_queue('Merge data to', '{target}')
@@ -16,20 +14,20 @@ def merge_data(data: pd.DataFrame,
                x_val: str,
                y_vals: Sequence[str],
                prefix: str = 'profiles_1d'):
-    input_data = get_ids_tree(target)
+    input_data = target.get('core_profiles')
 
     # pick first time step as basis
     common_basis = input_data[f'{prefix}/0/{x_val}']
 
-    data = rebase_on_ids(data,
-                         base_col=x_val,
-                         value_cols=y_vals,
-                         new_base=common_basis)
+    data = rebase_on_grid(data,
+                          grid=x_val,
+                          cols=y_vals,
+                          grid_base=common_basis)
 
     common_time = input_data['time']
 
     # Set to common time basis
-    data = rebase_on_time(data, cols=[x_val, *y_vals], new_base=common_time)
+    data = rebase_on_time(data, cols=[x_val, *y_vals], time_base=common_time)
 
     gb = data.groupby(['tstep', x_val])
 
@@ -38,8 +36,7 @@ def merge_data(data: pd.DataFrame,
 
     merged = gb.agg(agg_dict)
 
-    core_profiles = target.get('core_profiles')
-    ids_mapping = IDSMapping(core_profiles, exclude_empty=False)
+    ids_mapping = target.get('core_profiles', exclude_empty=False)
 
     for y_val in y_vals:
         for tstep, group in merged.groupby('tstep'):

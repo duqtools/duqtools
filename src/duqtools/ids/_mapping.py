@@ -49,12 +49,13 @@ class IDSMapping(Mapping):
 
         # All available data fields are stored in this set.
         self._keys: Set[str] = set()
+        self._paths: Dict[str, Any] = {}
 
         self.dive(ids, [])
 
     def __repr__(self):
         s = f'{self.__class__.__name__}(\n'
-        for key in self._keys:
+        for key in self._paths:
             s += f'  {key} = ...\n'
         s += ')\n'
 
@@ -152,7 +153,14 @@ class IDSMapping(Mapping):
             return
 
         # We made it here, the value can be stored
-        self._keys.add('/'.join(path))
+        str_path = '/'.join(path)
+        self._keys.add(str_path)
+
+        cur = self._paths
+        for part in path[:-1]:
+            cur.setdefault(part, {})
+            cur = cur[part]
+        cur[path[-1]] = str_path
 
     def findall(self, pattern: str) -> Dict[str, Any]:
         """Find keys matching regex pattern.
@@ -212,7 +220,7 @@ class IDSMapping(Mapping):
         i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
         returns a dict with `zeff` and error attributes.
 
-        Parameters`
+        Parameters
         ----------
         pattern : str
             Regex pattern, must include a group matching a digit.
