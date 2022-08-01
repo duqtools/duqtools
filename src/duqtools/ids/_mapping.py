@@ -196,7 +196,7 @@ class IDSMapping(Mapping):
         i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
         returns a dict with `zeff` and error attributes.
 
-        Parameters`
+        Parameters
         ----------
         pattern : str
             Regex pattern, must include a group matching a digit.

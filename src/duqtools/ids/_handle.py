@@ -169,7 +169,7 @@ class ImasHandle(ImasBaseModel):
 
         Returns
         ------
-        entry : imas.DBEntry
+        entry : `imas.DBEntry`
             IMAS database entry
         """
         return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
@@ -187,7 +187,7 @@ class ImasHandle(ImasBaseModel):
 
         Yields
         ------
-        entry : imas.DBEntry
+        entry : `imas.DBEntry`
             Opened IMAS database entry
         """
         entry = self.entry(backend=backend)
