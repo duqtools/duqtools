@@ -26,7 +26,7 @@ class DataLocation(BaseModel):
     will stop if it detects that data will be overwritten.
     """
 
-    db: str = Field('jet', description='IMAS database or machine name.')
+    db: str = Field('test', description='IMAS database or machine name.')
 
     run_in_start_at: int = Field(7000,
                                  description=f("""

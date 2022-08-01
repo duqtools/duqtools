@@ -6,7 +6,7 @@ from duqtools.config import cfg
 from .ids import IDSMapping, ImasHandle, apply_model
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
-from .operations import add_to_op_queue, confirm_operations, op_queue
+from .operations import add_to_op_queue, op_queue
 from .schema.runs import Runs
 from .system import get_system
 
@@ -49,7 +49,6 @@ def write_runs_file(runs: list, workspace) -> None:
         runs.yaml(stream=f)
 
 
-@confirm_operations
 def create(*, force, **kwargs):
     """Create input for jetto and IDS data structures.
 
@@ -118,7 +117,6 @@ def create(*, force, **kwargs):
                                 run=options.data.run_out_start_at + i)
 
         source.copy_ids_entry_to(target_in)
-
         apply_combination(target_in, combination)
 
         system.copy_from_template(template_drc, run_drc)

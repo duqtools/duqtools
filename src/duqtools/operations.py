@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import atexit
 import logging
 from collections import deque
+from contextlib import contextmanager
 from inspect import signature
 from typing import Callable, Optional
 
@@ -126,6 +128,8 @@ class Operations(deque):
     def append(self, item: Operation) -> None:  # type: ignore
         """Restrict our diet to Operation objects only."""
         if self.enabled:
+            logger.debug(
+                f'Appended {item.description} to the operations queue')
             super().append(item)
         else:
             self.logger.info('- ' + item.description)
@@ -181,6 +185,25 @@ class Operations(deque):
         if ans:
             self.apply_all()
         return ans
+
+    def check_unconfirmed_operations(self):
+        """Safety check, it should never happen that operations are not
+        executed.
+
+        , check it anyway at program exit
+        """
+        if len(self) != 0:
+            self.logger.warning(
+                click.style(
+                    'There are unconfirmed operations in the queue at program exit!',
+                    fg='yellow',
+                    bold=True))
+            for op in self:
+                self.logger.warning('- ' + op.description)
+            self.logger.warning(
+                click.style(
+                    'Did you forget to use the @confirm_operations decorator?',
+                    fg='yellow'))
 
 
 op_queue = Operations()
@@ -257,3 +280,23 @@ def add_to_op_queue(op_desc: str, extra_desc: Optional[str] = None):
         return wrapper
 
     return op_queue_real
+
+
+atexit.register(op_queue.check_unconfirmed_operations)
+
+
+@contextmanager
+def op_queue_context():
+    """Context manager to enable the op_queue, and confirm_operations on exit
+    Also disables the op_queue on exit.
+
+    Works more or less the same as the `@confirm_operations` decorator
+    """
+
+    if op_queue.enabled:
+        raise RuntimeError('op_queue already enabled')
+    op_queue.enabled = True
+    yield
+    op_queue.confirm_apply_all()
+    op_queue.clear()
+    op_queue.enabled = False

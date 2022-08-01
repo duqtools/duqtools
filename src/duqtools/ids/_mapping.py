@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Sequence, Set, Tuple, Union
 import numpy as np
 
 from ._constants import TIME_COL, TSTEP_COL
+from ._copy import add_provenance_info
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -26,9 +27,25 @@ def insert_re_caret_dollar(string: str) -> str:
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids, exclude_empty: bool = True):
+    def __init__(self,
+                 ids,
+                 exclude_empty: bool = True,
+                 allow_blind_keys: bool = False):
+        """__init__
+
+        Parameters
+        ----------
+        ids :
+            ids
+        exclude_empty : bool
+            exclude_empty
+        allow_blind_keys : bool
+            allows for the getting and inserting of keys which are not in the _keys,
+            but could still fit in the ids
+        """
         self._ids = ids
         self.exclude_empty = exclude_empty
+        self.allow_blind_keys = allow_blind_keys
 
         # All available data fields are stored in this set.
         self._keys: Set[str] = set()
@@ -60,16 +77,20 @@ class IDSMapping(Mapping):
         return pointer, attr
 
     def __getitem__(self, key: str):
-        if key not in self._keys:
+        if (key not in self._keys) and not self.allow_blind_keys:
             raise KeyError(key)
 
-        pointer, attr = self._deconstruct_key(key)
+        try:
+            pointer, attr = self._deconstruct_key(key)
+            ret = getattr(pointer, attr)
+        except AttributeError as ea:
+            raise KeyError(str(ea))
 
-        return getattr(pointer, attr)
+        return ret
 
     def __setitem__(self, key: str, value: np.ndarray):
-        if key not in self._keys:
-            return f'Cannot set non-existant key: {key}'
+        if (key not in self._keys) and not self.allow_blind_keys:
+            raise KeyError(f'Cannot set non-existant key: {key}')
 
         pointer, attr = self._deconstruct_key(key)
 
@@ -91,6 +112,9 @@ class IDSMapping(Mapping):
         target : ImasHandle
             Points to an IMAS db entry of where the data should be written.
         """
+
+        add_provenance_info(target)
+
         with target.open() as db_entry:
             self._ids.put(db_entry=db_entry)
 

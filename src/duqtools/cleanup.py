@@ -8,12 +8,11 @@ import click
 from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
-from .operations import confirm_operations, op_queue
+from .operations import op_queue
 
 logger = logging.getLogger(__name__)
 
 
-@confirm_operations
 def cleanup(out, force, **kwargs):
     """Read runs.yaml and clean the current directory.
 
