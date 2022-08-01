@@ -57,8 +57,8 @@ def add_provenance_info(ids: ImasHandle):
 
     Parameters
     ----------
-    ids:
-        handle to add provenance information to
+    ids: ImasHandle
+        Handle to add provenance information to.
     """
 
     import git
