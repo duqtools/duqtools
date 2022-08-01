@@ -3,7 +3,7 @@ from typing import Iterable
 
 from duqtools.config import cfg
 
-from .ids import IDSMapping, ImasHandle, apply_model
+from .ids import ImasHandle, apply_model
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
 from .operations import add_to_op_queue, confirm_operations, op_queue
@@ -30,15 +30,13 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 
 @add_to_op_queue('Setting inital condition of', '{target_in}')
 def apply_combination(target_in: ImasHandle, combination) -> None:
-    core_profiles = target_in.get('core_profiles')
-    ids_mapping = IDSMapping(core_profiles)
+    ids_mapping = target_in.get('core_profiles')
 
     for model in combination:
         apply_model(model, ids_mapping)
 
         logger.info('Writing data entry: %s', target_in)
-        with target_in.open() as data_entry_target:
-            core_profiles.put(db_entry=data_entry_target)
+        ids_mapping.sync(target_in)
 
 
 @add_to_op_queue('Writing out', '{workspace.runs_yaml}')
@@ -117,7 +115,7 @@ def create(*, force, **kwargs):
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
-        source.copy_ids_entry_to(target_in)
+        source.copy_to(target_in)
 
         apply_combination(target_in, combination)
 

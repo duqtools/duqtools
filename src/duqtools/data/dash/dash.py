@@ -5,8 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import (ImasHandle, get_ids_tree, merge_data, rebase_on_ids,
-                          rebase_on_time)
+from duqtools.ids import ImasHandle, merge_data, rebase_on_ids, rebase_on_time
 from duqtools.ids._io import _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
 
@@ -43,7 +42,7 @@ def ffmt(s):
 
 
 def get_options(a_run):
-    a_profile = get_ids_tree(ImasHandle(**a_run), exclude_empty=True)
+    a_profile = ImasHandle(**a_run).get('core_profiles', exclude_empty=True)
     return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
@@ -168,7 +167,7 @@ with st.form('merge_form'):
 
     if submitted:
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-        template.copy_ids_entry_to(target)
+        template.copy_to(target)
         merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
         st.success('Success!')

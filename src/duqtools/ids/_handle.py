@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 import re
 from contextlib import contextmanager
-from getpass import getuser
 from pathlib import Path
 
 from ..operations import add_to_op_queue
 from ..schema import ImasBaseModel
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
+from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class ImasHandle(ImasBaseModel):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_ids_entry_to(self, destination: ImasHandle):
+    def copy_to(self, destination: ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters
@@ -116,28 +116,7 @@ class ImasHandle(ImasBaseModel):
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
-    def copy_ids_entry_to_run(self, *, run: int) -> ImasHandle:
-        """Copy ids entry to destination with given run number.
-
-        The user is set to the current user, because we don't
-        have access to write elsewhere.
-
-        Parameters
-        ----------
-        run : int
-            Run number of the target location.
-
-        Returns
-        -------
-        destination : ImasHandle
-            Returns the destination.
-        """
-        user = getuser()
-        destination = self.copy(update={'run': run, 'user': user})
-        self.copy_ids_entry_to(destination)
-        return destination
-
-    def get(self, key: str = 'core_profiles', **kwargs):
+    def get_raw_data(self, key: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 
         Parameters
@@ -145,7 +124,7 @@ class ImasHandle(ImasBaseModel):
         key : str, optional
             Name of profiles to open.
         **kwargs
-            These keyword parametes are passed to `ImasHandle.open()`.
+            These keyword parameters are passed to `ImasHandle.open()`.
 
         Returns
         -------
@@ -158,6 +137,23 @@ class ImasHandle(ImasBaseModel):
         _patch_str_repr(data)
 
         return data
+
+    def get(self, key: str = 'core_profiles', **kwargs) -> IDSMapping:
+        """Map the data to a dict-like structure.
+
+        Parameters
+        ----------
+        key : str, optional
+            Name of profiles to open
+        **kwargs
+            These parameters are passed to initialize `IDSMapping`.
+
+        Returns
+        -------
+        IDSMapping
+        """
+        raw_data = self.get_raw_data(key)
+        return IDSMapping(raw_data, **kwargs)
 
     def entry(self, backend=imasdef.MDSPLUS_BACKEND):
         """Return reference to `imas.DBEntry.`
