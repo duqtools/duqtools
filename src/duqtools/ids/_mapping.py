@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Sequence, Set, Tuple, Union
 import numpy as np
 
 from ._constants import TIME_COL, TSTEP_COL
+from ._copy import add_provenance_info
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -111,6 +112,9 @@ class IDSMapping(Mapping):
         target : ImasHandle
             Points to an IMAS db entry of where the data should be written.
         """
+
+        add_provenance_info(target)
+
         with target.open() as db_entry:
             self._ids.put(db_entry=db_entry)
 
