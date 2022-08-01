@@ -99,6 +99,7 @@ class ImasHandle(ImasBaseModel):
         destination : ImasHandle
             Copy data to a new location.
         """
+        logger.debug('Copy %s to %s', self, destination)
         copy_ids_entry(self, destination)
 
     @add_to_op_queue('Removing ids', '{self}')

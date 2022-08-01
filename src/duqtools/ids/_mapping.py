@@ -101,18 +101,18 @@ class IDSMapping(Mapping):
     def __len__(self):
         return len(self._keys)
 
-    def sync(self, handle: ImasHandle):
+    def sync(self, target: ImasHandle):
         """Synchronize updated data back to IMAS db entry.
 
         Shortcut for 'put' command.
 
         Parameters
         ----------
-        handle : ImasHandle
+        target : ImasHandle
             Points to an IMAS db entry of where the data should be written.
         """
-        with handle.open() as f:
-            self._ids.put(db_entry=f)
+        with target.open() as db_entry:
+            self._ids.put(db_entry=db_entry)
 
     def dive(self, val, path: list):
         """Recursively find the data fields.
