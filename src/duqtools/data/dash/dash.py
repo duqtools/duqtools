@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import ImasHandle, merge_data, rebase_on_ids, rebase_on_time
+from duqtools.ids import ImasHandle, merge_data, rebase_on_grid, rebase_on_time
 from duqtools.ids._io import _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
 
@@ -83,7 +83,7 @@ def get_data(df, **kwargs):
                             'index')).reset_index('run').reset_index(drop=True)
 
 
-rebase_on_ids = st.experimental_memo(rebase_on_ids)
+rebase_on_grid = st.experimental_memo(rebase_on_grid)
 rebase_on_time = st.experimental_memo(rebase_on_time)
 
 y_vals = tuple(ffmt(y_key) for y_key in y_keys)
@@ -95,7 +95,7 @@ for y_val in y_vals:
     source = get_data(df, keys=(x_val, y_val), prefix='profiles_1d')
 
     if show_error_bar:
-        source = rebase_on_ids(source, base_col=x_val, value_cols=[y_val])
+        source = rebase_on_grid(source, grid=x_val, cols=(y_val, ))
         source = rebase_on_time(source, cols=(x_val, y_val))
 
         chart = alt_errorband_chart(source, x=x_val, y=y_val)
@@ -167,7 +167,7 @@ with st.form('merge_form'):
 
     if submitted:
         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-        template.copy_to(target)
+        template.copy_data_to(target)
         merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
         st.success('Success!')

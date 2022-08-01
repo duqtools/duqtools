@@ -115,7 +115,7 @@ def create(*, force, **kwargs):
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
-        source.copy_to(target_in)
+        source.copy_data_to(target_in)
 
         apply_combination(target_in, combination)
 

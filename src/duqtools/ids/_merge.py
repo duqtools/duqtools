@@ -5,7 +5,7 @@ import pandas as pd
 
 from ..operations import add_to_op_queue
 from ._handle import ImasHandle
-from ._rebase import rebase_on_ids, rebase_on_time
+from ._rebase import rebase_on_grid, rebase_on_time
 
 
 @add_to_op_queue('Merge data to', '{target}')
@@ -19,15 +19,15 @@ def merge_data(data: pd.DataFrame,
     # pick first time step as basis
     common_basis = input_data[f'{prefix}/0/{x_val}']
 
-    data = rebase_on_ids(data,
-                         base_col=x_val,
-                         value_cols=y_vals,
-                         new_base=common_basis)
+    data = rebase_on_grid(data,
+                          grid=x_val,
+                          cols=y_vals,
+                          grid_base=common_basis)
 
     common_time = input_data['time']
 
     # Set to common time basis
-    data = rebase_on_time(data, cols=[x_val, *y_vals], new_base=common_time)
+    data = rebase_on_time(data, cols=[x_val, *y_vals], time_base=common_time)
 
     gb = data.groupby(['tstep', x_val])
 

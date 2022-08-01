@@ -4,7 +4,7 @@ source = ImasHandle(db='jet', shot=92432, user='g2aho', run=1)
 
 target = ImasHandle(db=source.db, shot=source.shot, run=1001)
 
-source.copy_to(target)
+source.copy_data_to(target)
 
 core_profiles = target.get('core_profiles')
 

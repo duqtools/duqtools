@@ -72,6 +72,10 @@ class ImasHandle(ImasBaseModel):
 
         raise ValueError(f'Could not match {string!r}')
 
+    def to_string(self) -> str:
+        """Generate string representation of Imas location."""
+        return f'{self.user}/{self.db}/{self.shot}/{self.run}'
+
     def path(self) -> Path:
         """Return location as Path."""
         return Path(
@@ -91,7 +95,7 @@ class ImasHandle(ImasBaseModel):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_to(self, destination: ImasHandle):
+    def copy_data_to(self, destination: ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters

@@ -32,7 +32,7 @@ def merge(**kwargs):
     debug('Merge input: %s', template)
     debug('Merge output: %s', target)
 
-    template.copy_to(target)
+    template.copy_data_to(target)
 
     merge_data(data=data,
                target=target,
