@@ -88,38 +88,31 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         instructions.append('flipping ip')
         print('ip will be flipped. Still necessary because of bugs but should not happen')
 
-    if 'average' in instructions:
-        average = True
-    if 'rebase' in instructions:
-        rebase = True
-    if 'nbi heating' in instructions:
-        nbi_heating = True
-    if 'flat q profile' in instructions:
-        flat_q_profile = True
-    if 'add early profiles' in instructions:
-        adding_early_profiles = True
-    if 'correct zeff' in instructions:
-        correct_Zeff = True
-    if 'correct boundaries' in instructions:
-        correct_boundaries = True
-    if 'set boundaries' in instructions:
-        set_boundaries = True
-    if 'flipping ip' in instructions:
-        flipping_ip = True
-
     if average and rebase:
         print('rebase and average cannot be done at the same time. Aborting')
         exit()
 
-    for index in range(run_start - len(instructions), run_start, 1):
-        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, index, user_name=username)
-        op = data_entry.open()
+    if zeff_option:
+        for index in range(run_start - len(instructions), run_start, 1):
+            data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, index, user_name=username)
+            op = data_entry.open()
 
-        if op[0]==0:
-            print('One of the data entries needed to manipulate the input already exists, aborting. Try increasing run start.')
-            exit()
+            if op[0]==0:
+                print('One of the data entries needed to manipulate the input already exists, aborting. Try increasing run start.')
+                exit()
 
-        data_entry.close()
+            data_entry.close()
+
+    else:
+        for index in range(run_start - len(instructions) + 1, run_start, 1):
+            data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, index, user_name=username)
+            op = data_entry.open()
+
+            if op[0]==0:
+                print('One of the data entries needed to manipulate the input already exists, aborting. Try increasing run start.')
+                exit()
+
+            data_entry.close()
 
     run_start = run_start - len(instructions) + 1
     if zeff_option is not None:
@@ -128,7 +121,16 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
     time_eq = equilibrium.time
     time_cp = core_profiles.time
 
-    if average:
+    if time_start == None:
+        time_start = max(min(time_eq), min(time_cp))
+    elif time_start == 'core_profile':
+        time_start = min(time_cp)
+    elif time_start == 'equilibrium':
+        time_start = min(time_eq)
+    else:
+        time_start = time_start
+
+    if 'average' in instructions:
         average_integrated_modelling(db, shot, run_input, run_start, time_start, time_end)
         print('Averaging on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
@@ -136,13 +138,15 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
     # Rebase sets the times of the equilibrium equal to the times in core profiles. Usually the grid in core profiles is more coarse.
     # This should help with the speed and with the noisiness in vloop
 
-    elif rebase:
+    elif 'rebase' in instructions:
         rebase_integrated_modelling(db, shot, run_input, run_start, time_cp, ['equilibrium'])
         print('Rebasing on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
 
     # If necessary, flipping ip here. Runs for sensitivities should be possible from this index (unless Zeff is weird)
-    if flipping_ip:
+
+    if 'flipping ip' in instructions:
+
         # Currently flips both Ip and b0
         flip_ip(db, shot, run_input, shot, run_start)
         print('flipping ip on index ' + str(run_start))
@@ -155,24 +159,25 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
 
 
     # Temporarily like this. The function itself will need to be updated
-    if nbi_heating:
+    if 'nbi heating' in instructions:
         prepare_nbi(db, shot, run_input, shot, run_start)
         print('Preparing nbi on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
 
     ion_number = check_ion_number(db, shot, run_input)
 
-    if set_boundaries:
+    if 'set boundaries' in instructions:
         set_boundaries_te(db, shot, run_input, run_start, te_sep = boundary_sep_te, ti_sep = boundary_sep_ti, method = boundary_method)
         print('Setting boundaries te and ti on index ' + str(run_start))
         run_input, run_start = run_start, run_start + 1
 
-    if correct_boundaries:
+    if 'correct boundaries' in instructions:
         correct_boundaries_te(db, shot, run_input, db, shot, run_start)
         print('Correcting te at the boundaries on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
 
-    if adding_early_profiles:
+    if 'add early profiles' in instructions:
+
         add_early_profiles(db, shot, run_input, run_start)
         print('Adding early profiles on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
@@ -195,7 +200,7 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
             print('Setting parabolic zeff profile on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and not average and zeff_option == 'impurity from flattop':
-            set_impurity_composition_from_flattop(db, shot, run_input, shot, run_start, verbose)
+            set_impurity_composition_from_flattop(db, shot, run_input, run_start, verbose = verbose)
             print('Setting impurity composition from flattop on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and average and zeff_option == 'impurity from flattop':
@@ -217,12 +222,25 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
             print('Option for Zeff initialization not recognized. Aborting generation')
             exit()
 
-    if correct_Zeff:
+    if 'parabolic zeff' in instructions:
+        set_parabolic_zeff(db, shot, run_input, run_start, zeff_mult = zeff_mult)
+        print('Setting parabolic zeff profile on index ' + str(run_start))
+        run_input, run_start = run_start, run_start+1
+    elif 'peaked zeff' in instructions:
+        set_peaked_zeff_profile(db, shot, run_input, run_start, zeff_mult = zeff_mult)
+        print('Setting peaked zeff profile on index ' + str(run_start))
+        run_input, run_start = run_start, run_start+1
+    elif 'parabolic zeff' in instructions and 'peaked zeff' in instructions:
+        print('zeff profiles cannot be peaked and parabolic at the same time. Aborting')
+        exit()
+
+
+    if 'correct zeff' in instructions:
         correct_zeff(db, shot, run_input, db, shot, run_start)
         print('correcting zeff on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
 
-    if flat_q_profile:
+    if 'flat q profile' in instructions:
         use_flat_q_profile(db, shot, run_input, run_start)
         print('setting a flat q profile on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
@@ -1681,8 +1699,43 @@ def set_parabolic_zeff(db, shot, run, run_target, zeff_mult = 1, db_target = Non
 
     print('zeff turned parabolic')
 
+def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False, zeff_mult = 1):
 
-# ------------------- WORK IN PROGRESS ---------------------------
+    if not username:
+        username=getpass.getuser()
+    if not db_target:
+        db_target = db
+    if not shot_target:
+        shot_target = shot
+    if not username_target:
+        username_target = username
+
+    ids_data = IntegratedModellingDict(db, shot, run, username = username)
+    ids_dict = ids_data.ids_dict
+
+
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 5, ids_dict['profiles_1d']['zeff'], 5)
+
+    average_zeff = []
+
+    for profile in ids_dict['profiles_1d']['zeff']:
+        average_zeff.append(np.average(profile))
+
+    for index in range(np.shape(ids_dict['profiles_1d']['zeff'])[0]):
+        norm = zeff_mult * (average_zeff[index]-1)/2
+        ids_dict['profiles_1d']['zeff'][index] = average_zeff[index] - norm/2 + norm * np.sqrt(1-ids_dict['profiles_1d']['grid.rho_tor_norm'][index])
+
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 5, ids_dict['profiles_1d']['zeff'], 5)
+
+    # Put the data back in the ids structure
+
+    ids_data.ids_dict = ids_dict
+    ids_data.fill_ids_struct()
+
+    put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
+
 
 def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False):
 
@@ -1698,33 +1751,28 @@ def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target 
     ids_data = IntegratedModellingDict(db, shot, run, username = username)
     ids_dict = ids_data.ids_dict
 
-    time = ids_dict['time']['equilibrium']
+    time_eq = ids_dict['time']['equilibrium']
     ip = ids_dict['traces']['global_quantities.ip']
 
     # The steady state is identified
-    index_start_ft, index_end_ft = identify_flattop_ip(ip, time)
+    index_start_ft, index_end_ft = identify_flattop_ip(ip, time_eq)
 
     # Coef1 is calculated for Zeff to be continuous when the ramp up ends
-    zeff_target, time_target = ids_dict['profiles_1d']['zeff'][index_start_ft][0], time[index_start_ft]
+    zeff_target, time_target = ids_dict['profiles_1d']['zeff'][index_start_ft][0], time_eq[index_start_ft]
 
-    # c is the parameter controlling how fast zeff descents after the beginning
+    # c is the parameter controlling how fast zeff descents after the beginning. Z0 is zeff at t=0
+    z0 = 4
+    c = 10
+    #b = (zeff_target - z0)/(-1 + 1/((c*time_target)**2 +1))
+    b = (zeff_target-z0)/(-1+1/((c*time_target)**4+1))
+    a = -b + z0
 
-
-    #zeff - 4 = -b + b/((c*time[index])**2 +1)
-
-    #plt.subplot(1,1,1)
-    #plt.plot(ids_dict['time']['core_profiles'], ids_dict['profiles_1d']['zeff'][:,0], 'r-', label = 'zeff')
-
-
-    c = 15
-    b = (zeff_target - 4)/(-1 + 1/((c*time_target)**2 +1))
-    a = -b + 4
+    time = ids_dict['time']['core_profiles']
 
     # Only changed at the beginning. Not adequate for ramp down. For that I would need to identify the last flattop, currently not done.
     zeff_new, index = [], 0
     for z in ids_dict['profiles_1d']['zeff'][:index_start_ft]:
-        zeff_new.append(np.full((np.size(z)), a + b/((c*time[index])**2 +1)))
-        print(a + b/((c*time[index])**2 +1))
+        zeff_new.append(np.full((np.size(z)), a + b/((c*time[index])**4 +1)))
         index += 1
 
     for z in ids_dict['profiles_1d']['zeff'][index_start_ft:]:
@@ -1737,13 +1785,6 @@ def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target 
     # Especially when combined with add profiles early
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 4.0, ids_dict['profiles_1d']['zeff'], 4.0)
-
-    #plt.plot(ids_dict['time']['core_profiles'], ids_dict['profiles_1d']['zeff'][:,0], 'c-', label = 'zeff')
-    #plt.legend()
-    #plt.show()
-
-    #exit()
-
 
     ids_data.ids_dict = ids_dict
     ids_data.fill_ids_struct()
@@ -2194,10 +2235,15 @@ def identify_flattop_ip(ip, time):
         dip_dt = np.gradient(smooth_ip, time)  
 
         index, index_flattop_begin, index_flattop_end = 0, 0, 0
-        while dip_dt[index] < -limit_derivative and index < len(dip_dt-1):
+        while dip_dt[index] < -limit_derivative and index < (len(dip_dt)-1):
             index += 1
         index_flattop_begin = index
-        while dip_dt[index] > -limit_derivative and dip_dt[index] < limit_derivative and index < len(dip_dt-1):
+
+        if index == len(dip_dt-1):
+            limit_derivative -= 5000
+            continue
+
+        while dip_dt[index] > -limit_derivative and dip_dt[index] < limit_derivative and index < (len(dip_dt)-1):
             index += 1
         index_flattop_end = index
 
@@ -2601,35 +2647,47 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
     while new_times[0] > 0.01:
         new_times = np.insert(new_times, 0, new_times[0] - (new_times[1] - new_times[0]))
 
-    old_te_profiles = ids_dict['profiles_1d']['electrons.temperature']
-    new_te_profiles = copy.deepcopy(old_te_profiles)
+    old_times = np.insert(old_times, 0, 0.0)
+    new_profiles = {}
 
-    firs_te_profile = np.full(np.size(ids_dict['profiles_1d']['electrons.temperature'][0]), ids_dict['profiles_1d']['electrons.temperature'][0][-1])
+    for variable in ['electrons.density_thermal', 'electrons.density', 'electrons.temperature', 'q', 't_i_average']:
 
-    old_te_profiles = np.insert(old_te_profiles, 0, firs_te_profile, axis = 0)
-    old_times = np.insert(old_times, 0, 0.01)
+        old_profiles = ids_dict['profiles_1d'][variable]
+        first_profile = np.full(np.size(ids_dict['profiles_1d'][variable][0]), ids_dict['profiles_1d'][variable][0][-1])
+        old_profiles = np.insert(old_profiles, 0, first_profile, axis = 0)
 
-    x_dim = np.shape(old_te_profiles)[1]
-    time_dim = np.shape(old_te_profiles)[0]
-    te_new_profiles = np.asarray([])
+        x_dim = np.shape(old_profiles)[1]
+        time_dim = np.shape(old_profiles)[0]
+        new_profiles[variable] = np.asarray([])
 
-    for i in np.arange(x_dim):
-        if np.size(te_new_profiles) != 0:
-            te_new_profiles = np.hstack((te_new_profiles, fit_and_substitute(old_times, new_times, old_te_profiles[:,i])))
-        else:
-            te_new_profiles = fit_and_substitute(old_times, new_times, old_te_profiles[:,i])
+        for i in np.arange(x_dim):
+            if np.size(new_profiles[variable]) != 0:
+                new_profiles[variable] = np.hstack((new_profiles[variable], fit_and_substitute(old_times, new_times, old_profiles[:,i])))
+            else:
+                new_profiles[variable] = fit_and_substitute(old_times, new_times, old_profiles[:,i])
+
+        new_profiles[variable] = new_profiles[variable].reshape(x_dim, len(new_times))
 
     ids_data.update_times(new_times, ['core_profiles'])
+    
+    # The fit in time of rho tor norm might mix the grid, which needs to be sorted.
+    new_rho_tor_norm = np.asarray([])
 
-    te_new_profiles = te_new_profiles.reshape(x_dim, len(new_times))
+    for rho_tor_norm_profile in ids_data.ids_dict['profiles_1d']['grid.rho_tor_norm']:
+        if np.size(new_rho_tor_norm) != 0:
+            new_rho_tor_norm = np.hstack((new_rho_tor_norm, np.sort(rho_tor_norm_profile)/max(rho_tor_norm_profile)))
+        else:
+            new_rho_tor_norm = np.sort(rho_tor_norm_profile)/max(rho_tor_norm_profile)
 
-    ids_dict['profiles_1d']['electrons.temperature'] = np.transpose(np.asarray(te_new_profiles))
+    ids_dict['profiles_1d']['grid.rho_tor_norm'] = new_rho_tor_norm.reshape(len(new_times), x_dim)
+    
+    for variable in ['electrons.density_thermal', 'electrons.density', 'electrons.temperature', 'q', 't_i_average']:
+        ids_dict['profiles_1d'][variable] = np.transpose(np.asarray(new_profiles[variable]))
 
     ids_data.ids_dict = ids_dict
     ids_data.fill_ids_struct()
 
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
-
 
 
 # -------------------------------- EXTRA TOOLS TO MAKE THE REST WORK -------------------------------------
