@@ -144,7 +144,9 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         run_input, run_start = run_start, run_start+1
 
     # If necessary, flipping ip here. Runs for sensitivities should be possible from this index (unless Zeff is weird)
+
     if 'flipping ip' in instructions:
+
         # Currently flips both Ip and b0
         flip_ip(db, shot, run_input, shot, run_start)
         print('flipping ip on index ' + str(run_start))
@@ -175,6 +177,7 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         run_input, run_start = run_start, run_start+1
 
     if 'add early profiles' in instructions:
+
         add_early_profiles(db, shot, run_input, run_start)
         print('Adding early profiles on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
@@ -191,6 +194,10 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         elif zeff_option == 'flat median':
             set_flat_Zeff(db, shot, run_input, run_start, 'median')
             print('Setting flat Zeff with median value on index ' + str(run_start))
+            run_input, run_start = run_start, run_start+1
+        elif zeff_option == 'parabolic':
+            set_parabolic_zeff(db, shot, run_input, run_start, zeff_mult = zeff_mult)
+            print('Setting parabolic zeff profile on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and not average and zeff_option == 'impurity from flattop':
             set_impurity_composition_from_flattop(db, shot, run_input, run_start, verbose = verbose)
@@ -1692,9 +1699,6 @@ def set_parabolic_zeff(db, shot, run, run_target, zeff_mult = 1, db_target = Non
 
     print('zeff turned parabolic')
 
-
-# ------------------- WORK IN PROGRESS ---------------------------
-
 def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False, zeff_mult = 1):
 
     if not username:
@@ -1733,9 +1737,6 @@ def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_ta
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
 
 
-
-
-
 def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False):
 
     if not username:
@@ -1767,8 +1768,6 @@ def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target 
     a = -b + z0
 
     time = ids_dict['time']['core_profiles']
-
-    print(ids_dict['profiles_1d']['zeff'])
 
     # Only changed at the beginning. Not adequate for ramp down. For that I would need to identify the last flattop, currently not done.
     zeff_new, index = [], 0
@@ -2230,7 +2229,6 @@ def identify_flattop_ip(ip, time):
     if ip[0] > 0:
         ip = -ip
 
-
     while time_interval < 0.2:
 
         smooth_ip = smooth(ip, window_len=17)
@@ -2685,16 +2683,11 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
     
     for variable in ['electrons.density_thermal', 'electrons.density', 'electrons.temperature', 'q', 't_i_average']:
         ids_dict['profiles_1d'][variable] = np.transpose(np.asarray(new_profiles[variable]))
-        #print(np.shape(ids_dict['profiles_1d'][variable]))
-
-    #print(np.shape(ids_dict['profiles_1d']['grid.rho_tor_norm']))
-    #exit()
 
     ids_data.ids_dict = ids_dict
     ids_data.fill_ids_struct()
 
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
-
 
 
 # -------------------------------- EXTRA TOOLS TO MAKE THE REST WORK -------------------------------------

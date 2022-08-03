@@ -1,5 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/duqtools/badge/?version=latest)](https://duqtools.readthedocs.io/en/latest/?badge=latest)
 [![Tests](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml/badge.svg)](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/duqtools)](https://pypi.org/project/duqtools/)
+[![PyPI](https://img.shields.io/pypi/v/duqtools.svg?style=flat)](https://pypi.org/project/duqtools/)
 
 
 # Duqtools
@@ -16,6 +18,12 @@ Features:
 - Display simulation results as confidence ranges and distributions
 
 *Duqtools* is currently under active development. It runs on linux only and requires the [ITER](http://iter.org/) Integrated Modeling and Analysis Suite ([IMAS](https://confluence.iter.org/display/IMP)).
+
+To install:
+
+```console
+pip install duqtools
+```
 
 The source code is available from [Github](https://github.com/CarbonCollective/fusion-dUQtools).
 
@@ -65,3 +73,14 @@ The documentation uses the [mkdocs](https://www.mkdocs.org/). To build the docs 
 ```console
 mkdocs serve
 ```
+
+### Making a release
+
+1. Bump the version (`major`/`minor`/`patch` as needed)
+
+```console
+bumpversion minor
+```
+
+2. Make a new [release](https://github.com/CarbonCollective/fusion-dUQtools/releases). The [upload to pypi](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/publish.yaml) is triggered when a release is published.
+

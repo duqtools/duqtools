@@ -567,7 +567,6 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
                         tidx = np.abs(tvec[tidx_orig] - tvec_new).argmin(0)
                         pdata[run].append({"time": plot_data[run][signame+".t"][tidx], "rho": plot_data[run][signame][tidx]["x"], "data": plot_data[run][signame][tidx]["y"]})
                         tvec_final = np.hstack((tvec_final, plot_data[run][signame+".t"][tidx]))
-                    #print(tvec, tvec_final)
         if pdata and single_time_reference:
             if tvec is None:
                 for tidx in range(len(plot_data[first_run][signame])):
@@ -579,8 +578,8 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
             print("Plotting %s" % (signame))
             Figure = plt.figure()
 
-# creating a plot
-#    lines_plotted = plt.plot([])
+            # creating a plot
+            # lines_plotted = plt.plot([])
 
             ax = Figure.add_subplot(1, 1, 1)
             ax.set_xlabel('rho_tor_norm')
@@ -604,28 +603,28 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
 
             ax.legend(loc='best')
 
-# putting limits on x axis since it is a trigonometry function (0,2)
+            # putting limits on x axis since it is a trigonometry function (0,2)
 
             ax.set_xlim([0,1])
 
-# putting limits on y since it is a cosine function
+            # putting limits on y since it is a cosine function
             ax.set_ylim([ymin,ymax])
 
-# function takes frame as an input
+            # function takes frame as an input
             def AnimationFunction(frame):
 
                 # line is set with new values of x and y
                 for run in pdata:
                     plot_list[run].set_data((pdata[run][frame]["rho"], pdata[run][frame]["data"]))
 
-# creating the animation and saving it with a name that does not include spaces
+            # creating the animation and saving it with a name that does not include spaces
 
             anim_created = FuncAnimation(Figure, AnimationFunction, frames=len(tvec), interval=200)
             #ylabel = ylabel.replace(' ', '_')
             #f = r'/afs/eufus.eu/user/g/g2mmarin/imas_scripts/animation' + ylabel + '.gif'
             #anim_created.save(f, writer='writergif')
 
-# displaying the video
+            # displaying the video
 
             video = anim_created.to_html5_video()
             html = display.HTML(video)
@@ -633,7 +632,7 @@ def plot_gif_profiles(plot_data, single_time_reference=False):
 
             plt.show()
 
-# good practice to close the plt object.
+            # good practice to close the plt object.
             plt.close()
 
 def plot_gif_interpolated_profiles(interpolated_data):
@@ -646,8 +645,8 @@ def plot_gif_interpolated_profiles(interpolated_data):
             print("Plotting %s" % (signame))
             Figure = plt.figure()
 
-# creating a plot
-#    lines_plotted = plt.plot([])
+            # creating a plot
+            #    lines_plotted = plt.plot([])
 
             ax = Figure.add_subplot(1, 1, 1)
             ax.set_xlabel('rho_tor_norm')
@@ -667,28 +666,28 @@ def plot_gif_interpolated_profiles(interpolated_data):
 
             ax.legend(loc='best')
 
-# putting limits on x axis since it is a trigonometry function (0,2)
+            # putting limits on x axis since it is a trigonometry function (0,2)
 
             ax.set_xlim([0,1])
 
-# putting limits on y since it is a cosine function
+            # putting limits on y since it is a cosine function
             ax.set_ylim([ymin,ymax])
 
-# function takes frame as an input
+            # function takes frame as an input
             def AnimationFunction(frame):
 
                 # line is set with new values of x and y
                 for run in interpolated_data[signame]:
                     plot_list[run].set_data((interpolated_data[signame+".x"], interpolated_data[signame][run][frame]))
 
-# creating the animation and saving it with a name that does not include spaces
+            # creating the animation and saving it with a name that does not include spaces
 
             anim_created = FuncAnimation(Figure, AnimationFunction, frames=len(interpolated_data[signame+".t"]), interval=200)
             #ylabel = ylabel.replace(' ', '_')
             #f = r'/afs/eufus.eu/user/g/g2mmarin/imas_scripts/animation' + ylabel + '.gif'
             #anim_created.save(f, writer='writergif')
 
-# displaying the video
+            # displaying the video
 
             video = anim_created.to_html5_video()
             html = display.HTML(video)
@@ -696,7 +695,7 @@ def plot_gif_interpolated_profiles(interpolated_data):
 
             plt.show()
 
-# good practice to close the plt object.
+            # good practice to close the plt object.
             plt.close()
 
 def plot_profiles(plot_data):
@@ -823,10 +822,8 @@ def main(args = None):
 
 #    keyvec='user','database','shot','run','time','x','y','sid','tid'
 
-    # --------------- WORK IN PROGRESS ---------------
     # Adding the variables for comparison of functions when they are not available
 
-#    multi_var_function = 'summary.global_quantities.li.value+summary.global_quantities.beta_pol.value/2'
     if multi_var_function:
         operations_signs = ['*2', '/2', '+', '-', '*', '/'] # Add more here as they are needed.
         multi_var_function_tmp = copy.copy(multi_var_function)
@@ -903,6 +900,10 @@ def main(args = None):
     if multi_var_function:
         keys_list['time_trace'].append(multi_var_function)
 
+    # Only variables in the keys_list will be plotted
+    if multi_var_function:
+        keys_list['time_trace'].append(multi_var_function)
+
     if not args.plot_uniform_basis and show_plot:
         plot_traces(plot_dict, single_time_reference=args.steady_state)
         plot_gif_profiles(plot_dict, single_time_reference=args.steady_state)
@@ -970,6 +971,7 @@ def main(args = None):
     # -------------------------------------------------------------------------
 
     if args.plot_uniform_basis and show_plot:
+
         plot_interpolated_traces(analysis_dict)
         plot_gif_interpolated_profiles(analysis_dict)
 

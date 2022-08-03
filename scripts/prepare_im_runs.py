@@ -14,10 +14,6 @@ import idstools
 from packaging import version
 from os import path
 
-#from extra_tools_im import *
-#from keys_lists import *
-#from integrated_modelling_tools import *
-
 import inspect
 import types
 
@@ -55,12 +51,6 @@ if imas is not None:
     if ual_version < version.parse(min_imasal_version_str):
         raise ImportError("IMAS AL version must be >= %s! Aborting!" % (min_imasal_version_str))
 
-#    print(imas_version)
-#    print(ual_version)
-
-#from classes import IntegratedModellingFields
-
-#from tools_input_im import *
 import jetto_tools
 
 import copy
@@ -1289,8 +1279,25 @@ def open_and_get_pulse_schedule(db, shot, run, username = ''):
 
     return(pulse_schedule)
 
+    if username == '':
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=getpass.getuser())
+    else:
+        data_entry = imas.DBEntry(imasdef.MDSPLUS_BACKEND, db, shot, run, user_name=username)
+
+    op = data_entry.open()
+
+    if op[0]<0:
+        cp=data_entry.create()
+        print(cp[0])
+        if cp[0]==0:
+            print("data entry created")
+    elif op[0]==0:
+        print("data entry opened")
+
+    core_profiles = data_entry.get('core_profiles')
+    data_entry.close()
 
 if __name__ == "__main__":
-
     print('main')
 
+    print('main, not supported, use commands')

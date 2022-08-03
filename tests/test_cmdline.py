@@ -7,6 +7,8 @@ import pytest
 
 from duqtools.utils import work_directory
 
+pytest.importorskip('imas')  # These tests require imas to be installed
+
 
 @pytest.fixture(scope='session', autouse=True)
 def extra_env():
@@ -36,7 +38,7 @@ def cmdline_workdir(tmp_path_factory):
 
 @pytest.mark.dependency()
 def test_example_create(cmdline_workdir):
-    cmd = 'duqtools create -c config.yaml --force'.split()
+    cmd = 'duqtools create -c config.yaml --force --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
@@ -45,7 +47,7 @@ def test_example_create(cmdline_workdir):
 
 @pytest.mark.dependency(depends=['test_example_create'])
 def test_example_submit(cmdline_workdir):
-    cmd = 'duqtools submit -c config.yaml'.split()
+    cmd = 'duqtools submit -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
@@ -54,7 +56,7 @@ def test_example_submit(cmdline_workdir):
 
 @pytest.mark.dependency(depends=['test_example_create'])
 def test_example_status(cmdline_workdir):
-    cmd = 'duqtools status -c config.yaml'.split()
+    cmd = 'duqtools status -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
@@ -64,7 +66,7 @@ def test_example_status(cmdline_workdir):
 @pytest.mark.dependency(depends=['test_example_status'])
 @pytest.mark.skip(reason='Should be fixed')
 def test_example_plot(cmdline_workdir):
-    cmd = 'duqtools plot -c config.yaml'.split()
+    cmd = 'duqtools plot -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
