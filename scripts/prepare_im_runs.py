@@ -14,6 +14,10 @@ import idstools
 from packaging import version
 from os import path
 
+#from extra_tools_im import *
+#from keys_lists import *
+#from integrated_modelling_tools import *
+
 import inspect
 import types
 
@@ -53,6 +57,8 @@ if imas is not None:
 
 #    print(imas_version)
 #    print(ual_version)
+
+#from classes import IntegratedModellingFields
 
 #from tools_input_im import *
 import jetto_tools
@@ -107,7 +113,7 @@ class IntegratedModellingRuns:
 	run_input = 1,
         run_start = None,
 	run_output = 100,
-	time_start = 0,
+	time_start = None,
 	time_end = 100,
         esco_timesteps = None,
         output_timesteps = None,
@@ -292,7 +298,6 @@ class IntegratedModellingRuns:
             mult = float(mult)
     
             if name == 'te':
-                print(self.db, self.shot, self.run_start)
                 prepare_im_input.shift_profiles('TE', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
             if name == 'ti':
                 prepare_im_input.shift_profiles('TI', self.db, self.shot, self.run_start, self.db, self.shot, self.run_start+index, mult = mult)
@@ -324,17 +329,36 @@ class IntegratedModellingRuns:
             print('generator not recognized. Aborting')
             exit()
 
-        b0, r0, start_time, end_time = self.get_r0_b0()
-
-        if self.density_feedback == True:
-            self.get_feedback_on_density_quantities()        
-
         # To save time, equilibrium and core profiles are not extracted if they already exist
         if not self.core_profiles:
             self.core_profiles = open_and_get_core_profiles(self.db, self.shot, self.run_input)
 
         if not self.equilibrium:
             self.equilibrium = open_and_get_equilibrium(self.db, self.shot, self.run_input)
+
+        time_eq = self.equilibrium.time
+        time_cp = self.core_profiles.time
+
+        if self.time_start == None:
+            self.time_start = max(min(time_eq), min(time_cp))
+        elif self.time_start == 'core_profiles':
+            self.time_start = min(time_cp)
+        elif self.time_start == 'equilibrium':
+            self.time_start = min(time_eq)
+
+        if self.time_end == 100:
+            self.time_end = min(max(time_eq), max(time_cp))
+        if self.time_end == 'auto':
+            summary = open_and_get_summary(self.db, self.shot, self.run_input)
+            kfactor = 0.05
+            mu0 = 4 * np.pi * 1.0e-7
+            time_sim = kfactor * mu0 * np.abs(summary.global_quantities.ip.value[0] * summary.global_quantities.r0.value)
+            time_end = self.time_start + time_sim
+
+        b0, r0 = self.get_r0_b0()
+
+        if self.density_feedback == True:
+            self.get_feedback_on_density_quantities()        
 
         # This should not be needed and should be handled by the jetto_tools. It's not though...
         # This is untested and might break
@@ -367,8 +391,8 @@ class IntegratedModellingRuns:
             interpretive_flag = True
 
         # Still cannot run with positive current...
-        self.modify_jetto_in(self.baserun_name, r0, abs(b0), start_time, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, num_times_eq = self.esco_timesteps, ibtsign = ibtsign, interpretive_flag = interpretive_flag)
-        #self.modify_jetto_in(self.baserun_name, r0, b0, start_time, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, ibtsign = ibtsign)
+        self.modify_jetto_in(self.baserun_name, r0, abs(b0), self.time_start, self.time_end, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, num_times_eq = self.esco_timesteps, ibtsign = ibtsign, interpretive_flag = interpretive_flag)
+        #self.modify_jetto_in(self.baserun_name, r0, b0, self.time_start, end_time, imp_datas_ids = imp_data, num_times_print = self.output_timesteps, ibtsign = ibtsign)
 
         self.setup_jetto_simulation()
     
@@ -414,7 +438,27 @@ class IntegratedModellingRuns:
         Sets up and runs the simulations created by setup_input_sensitivities(). Runs are expected to be numbered as run###something
     
         '''
-    
+
+        # To save time, equilibrium and core profiles are not extracted if they already exist
+        if not self.core_profiles:
+            self.core_profiles = open_and_get_core_profiles(self.db, self.shot, self.run_input)
+
+        if not self.equilibrium:
+            self.equilibrium = open_and_get_equilibrium(self.db, self.shot, self.run_input)
+
+        time_eq = self.equilibrium.time
+        time_cp = self.core_profiles.time
+
+        if self.time_start == None:
+            self.time_start = max(min(time_eq), min(time_cp))
+        elif self.time_start == 'core_profile':
+            self.time_start = min(time_cp)
+        elif self.time_start == 'equilibrium':
+            self.time_start = min(time_eq)
+
+        if self.time_end == 100:
+            self.time_end = min(max(time_eq), max(time_cp))
+
         baserun_number = int(self.baserun_name[3:6])
     
         if not self.force_run:
@@ -448,7 +492,7 @@ class IntegratedModellingRuns:
         for sensitivity_name, ids_number, ids_output_number in zip(sensitivity_names_list, ids_list, ids_output_list):
             os.chdir(self.path)
     
-            b0, r0, start_time, end_time = self.get_r0_b0()
+            b0, r0 = self.get_r0_b0()
 
             self.modify_jset(self.path, sensitivity_name, ids_number, ids_output_number, b0, r0)
             modify_llcmd(sensitivity_name, self.baserun_name, self.generator_username)
@@ -514,18 +558,8 @@ class IntegratedModellingRuns:
         time_eq = self.equilibrium.time
         time_cp = self.core_profiles.time
 
-        if self.time_start == 0:
-            start_time = max(min(time_eq), min(time_cp))
-        else:
-            start_time = self.time_start
-
-        if self.time_end == 100:
-            end_time = min(max(time_eq), max(time_cp))
-        else:
-            end_time = self.time_end
-
-        index_start = np.abs(time_eq - start_time).argmin(0)
-        index_end = np.abs(time_eq - end_time).argmin(0)
+        index_start = np.abs(time_eq - self.time_start).argmin(0)
+        index_end = np.abs(time_eq - self.time_end).argmin(0)
 
         if index_start != index_end:
             b0 = np.average(self.equilibrium.vacuum_toroidal_field.b0[index_start:index_end])
@@ -536,7 +570,7 @@ class IntegratedModellingRuns:
 
 # -----------------------------------------------------
 
-        return b0, r0, start_time, end_time
+        return b0, r0
 
     
     def setup_jetto_simulation(self):
@@ -557,7 +591,7 @@ class IntegratedModellingRuns:
         #jset = jetto_tools.jset.read(self.path_generator + '/jetto.jset')
         #namelist = jetto_tools.namelist.read(self.path_generator + '/jetto.in')
 
-        b0, r0, start_time, end_time = self.get_r0_b0()
+        b0, r0 = self.get_r0_b0()
 
         if not self.core_profiles:
             self.core_profiles = open_and_get_core_profiles(self.db, self.shot, self.run_input)
@@ -608,8 +642,8 @@ class IntegratedModellingRuns:
             config['ntint'] = self.output_timesteps
 
 
-        config.start_time = start_time
-        config.end_time = end_time
+        config.start_time = self.time_start
+        config.end_time = self.time_end
 
         # I could introduce a way not to do this if there are no impurities. Need to add impurities if not there, modifying the various files. Maybe in the future. For now I modify the jset anyway so this part does nothing...
    
@@ -646,7 +680,7 @@ class IntegratedModellingRuns:
         #self.summary_time = summary.time
         #self.line_ave_density = summary.line_average.n_e.value
 
-        summary = open_and_get_pulse_schedule(self.db, self.shot, self.run_exp)
+        pulse_schedule = open_and_get_pulse_schedule(self.db, self.shot, self.run_start)
         self.dens_feedback_time = pulse_schedule.time
         self.line_ave_density = pulse_schedule.density_control.n_e_line.reference.data
 
@@ -677,6 +711,11 @@ class IntegratedModellingRuns:
             dtneflfb_strs.append(str(time))
 
         extranamelist = get_extraname_fields(self.path_baserun)
+
+        if not dneflfb_strs:
+            print('No quantity to set the density feedback. Aborting')
+            exit()
+
         extranamelist = add_extraname_fields(extranamelist, 'DNEFLFB', dneflfb_strs)
         extranamelist = add_extraname_fields(extranamelist, 'DTNEFLFB', dtneflfb_strs)
         put_extraname_fields(self.path_baserun, extranamelist)
@@ -898,7 +937,7 @@ class IntegratedModellingRuns:
             # -------------- Feedback density time --------------------
 
             dtneflfb_lines = []
-            for index_time, time_value in enumerate(self.summary_time):
+            for index_time, time_value in enumerate(self.dens_feedback_time):
                 dtneflfb_line = '  DTNEFLFB' + '(' + str(index_time+1) + ')' + ' =  ' + str(time_value) + '    , \n'
                 dtneflfb_lines.append(dtneflfb_line)
 
@@ -1077,6 +1116,9 @@ def put_extraname_fields(path, extranamelist):
 
             ilist += 1
 
+    #for line in extranamelist_lines:
+        #print(line)
+
     read_lines.insert(index_start, extranamelist_lines)
 
 
@@ -1250,4 +1292,5 @@ def open_and_get_pulse_schedule(db, shot, run, username = ''):
 
 if __name__ == "__main__":
 
-    print('main, not supported, use commands')
+    print('main')
+
