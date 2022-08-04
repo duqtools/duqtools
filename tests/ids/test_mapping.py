@@ -98,3 +98,11 @@ def test_to_dataframe():
     assert tuple(df.columns) == ('tstep', 'time', 'x', 'y')
     assert df.shape == (6, 4)
     assert_equal(df['tstep'], [0, 0, 1, 1, 2, 2])
+
+
+def test_length():
+    s = IDSMapping(Sample)
+
+    assert len(s) == 8
+    assert s.length_of_key('data') == 3
+    assert s.length_of_key('data/1/z') is None

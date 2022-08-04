@@ -96,6 +96,32 @@ class IDSMapping(Mapping):
     def __len__(self):
         return len(self._keys)
 
+    def length_of_key(self, key: str):
+        """length_of_key gives you the number of entries of a (partial) ids
+        path, or None if the length does not exist.
+
+        Note: this is different then the length of an IDSMapping, which is defined
+        as the number of keys
+
+        Note: calling `len(map[key])` works as well
+
+        ## Example:
+
+
+        ```python
+        map.length_of_key('1d_profiles')
+        ```
+
+        Parameters
+        ----------
+        key : str
+            key
+        """
+        try:
+            return len(self[key])
+        except Exception:
+            pass
+
     def sync(self, target: ImasHandle):
         """Synchronize updated data back to IMAS db entry.
 
