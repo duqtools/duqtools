@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from typing import Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,7 @@ def rebase_on_grid(source: pd.DataFrame,
                    *,
                    grid: str,
                    cols: Sequence[str],
-                   grid_base: np.ndarray = None) -> pd.DataFrame:
+                   grid_base: Union[str, np.ndarray] = None) -> pd.DataFrame:
     """Rebase data on new ids basis using interpolation.
 
     This operation makes sure that all data on the x-axis are the same for
@@ -28,17 +28,17 @@ def rebase_on_grid(source: pd.DataFrame,
         Input data, contains the columns 'run', 'tstep' and any number of
         ids columns.
     grid : str
-        This defines the base ids column that the new base belongs to.
+        This defines the base ids column that the new base grid belongs to.
         In other words, this is the `x` column in the interpolation.
     cols : Sequence[str]
         The data in these ids columns will be interpolated.
         In other words, these are the `y` columns in the interpolation.
         IDS columns not defined by grid and cols will be omitted
         from the output.
-    grid_base : np.ndarray, optional
-        Numpy array with the new base values for the given base column.
-        If not defined, use the data in the base column of the first time
-        step of the first run as the basis.
+    grid_base : Union[str, np.ndarray], optional
+        If given as a string, then use the grid from this run at the first time step.
+        If given as a numpy array, then use these values directly as the base grid.
+        If not defined, use the grid from the first run at the first time step.
 
     Returns
     -------
@@ -47,11 +47,13 @@ def rebase_on_grid(source: pd.DataFrame,
         the values in the base column will be the same.
     """
     if grid_base is None:
-        first_run = source.iloc[0].run
-        idx = (source[RUN_COL] == first_run) & (source[TSTEP_COL] == 0)
+        grid_base = source.iloc[0].run
+
+    if isinstance(grid_base, str):
+        idx = (source[RUN_COL] == grid_base) & (source[TSTEP_COL] == 0)
         grid_base = source[idx][grid]
         logger.debug('Rebase ids on %s, using %s from %d to %d with %d steps',
-                     first_run, grid, grid_base.min(), grid_base.max(),
+                     grid_base, grid, grid_base.min(), grid_base.max(),
                      len(grid_base))
 
     def refit(gb: pd.DataFrame) -> pd.DataFrame:
@@ -81,7 +83,7 @@ def rebase_on_grid(source: pd.DataFrame,
 def rebase_on_time(source: pd.DataFrame,
                    *,
                    cols: Sequence[str],
-                   time_base: np.ndarray = None) -> pd.DataFrame:
+                   time_base: Union[str, np.ndarray] = None) -> pd.DataFrame:
     """Rebase data on new time basis using interpolation.
 
     This operation makes sure that each run has the same time steps.
@@ -96,10 +98,10 @@ def rebase_on_time(source: pd.DataFrame,
     cols : Sequence[str]
         This defines the columns that should be rebased.
         IDS columns not defined will be omitted from the output.
-    time_base : np.ndarray, optional
-        Numpy array with the new base values for the time steps.
-        If not defined, use the time steps in the first run of the
-        source data.
+    time_base : Union[str, np.ndarray], optional
+        If given as a string, then use the time steps from this run.
+        If given as a numpy array, then use these time steps directly.
+        If not defined, use the time steps in the first run in the source data.
 
     Returns
     -------
@@ -108,10 +110,12 @@ def rebase_on_time(source: pd.DataFrame,
         be the same.
     """
     if time_base is None:
-        first_run = source.iloc[0].run
-        time_base = source[source[RUN_COL] == first_run][TIME_COL].unique()
+        time_base = source.iloc[0].run
+
+    if isinstance(time_base, str):
+        time_base = source[source[RUN_COL] == time_base][TIME_COL].unique()
         logger.debug('Rebase time on %s, from %d to %d with %d steps',
-                     first_run, time_base.min(), time_base.max(),
+                     time_base, time_base.min(), time_base.max(),
                      len(time_base))
 
     cols = list(cols)
