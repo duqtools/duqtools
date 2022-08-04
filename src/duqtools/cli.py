@@ -199,6 +199,13 @@ def cli_status(**kwargs):
               type=str,
               help='Input file, i.e. `data.csv` or `runs.yaml`',
               multiple=True)
+@click.option('-o',
+              '--format',
+              'extensions',
+              type=str,
+              help='Output format (json, html, png, svg, pdf), default: html.',
+              default=('html', ),
+              multiple=True)
 @common_options
 def cli_plot(**kwargs):
     """Plot some IDS data."""
