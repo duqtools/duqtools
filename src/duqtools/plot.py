@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, **kwargs):
+def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, extensions,
+         **kwargs):
     """Show subroutine to create plots from IDS data."""
     handles = {}
 
@@ -35,10 +36,14 @@ def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, **kwargs):
     for n, y_val in enumerate(y_vals):
         chart = alt_line_chart(source, x=x_val, y=y_val)
 
-        outfile = Path(f'chart_{n}.html')
         click.echo(f'  {x_val} vs. {y_val}:')
-        click.secho(f'    file:///{outfile.absolute()}', bold=True)
-        click.echo('')
 
-        if not dry_run:
-            chart.save(outfile, scale_factor=2.0)
+        for extension in extensions:
+
+            outfile = Path(f'chart_{n}.{extension}')
+            click.secho(f'    file:///{outfile.absolute()}', bold=True)
+
+            if not dry_run:
+                chart.save(outfile, scale_factor=2.0)
+
+        click.echo('')
