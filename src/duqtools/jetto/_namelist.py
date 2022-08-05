@@ -28,7 +28,7 @@ def read_namelist(
         Returns parameters in namelist as dict
     """
     with open(path) as f:
-        header = [next(f) for _ in range(HEADER_ROWS)]
+        header = [next(f) for _ in range(header_rows)]
         nml = f90nml.read(f)
 
     return header, nml.todict()

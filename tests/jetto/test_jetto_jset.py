@@ -26,7 +26,7 @@ def test_jset_io(tmp_path):
     assert isinstance(jset2, JettoJset)
 
 
-def test_JSet(tmp_path):
+def test_jetto_settings(tmp_path):
     fn = Path(__file__).parent / 'trimmed_jetto.jset'
     jset = JettoJset.from_file(fn)
 
