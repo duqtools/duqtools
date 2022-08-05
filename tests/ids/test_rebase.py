@@ -35,7 +35,6 @@ def test_rebase_on_time(data_set, expected_out_time):
     x_val = 'x'
     y_vals = ('y1', 'y2')
     out = rebase_on_time(source=data_set, cols=[x_val, *y_vals])
-
     pd.testing.assert_frame_equal(out, expected_out_time)
 
 
@@ -52,5 +51,4 @@ def test_commutativity(data_set):
                                                        grid=x_val,
                                                        cols=y_vals),
                                  cols=[x_val, *y_vals])
-
     pd.testing.assert_frame_equal(data_order1, data_order2)
