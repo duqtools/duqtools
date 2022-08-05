@@ -42,8 +42,7 @@ def test_mapping():
     assert_equal(s['data/2/x'], np.array([8, 9]))
     assert_equal(s['data/2/y'], np.array([10, 11]))
 
-    assert 'data/0/z' not in s
-    assert 'data/0/z' not in s
+    assert 'data/0/z' not in s._keys
 
 
 def test_mapping_unknown_key_fail():
@@ -99,3 +98,11 @@ def test_to_dataframe():
     assert tuple(df.columns) == ('tstep', 'time', 'x', 'y')
     assert df.shape == (6, 4)
     assert_equal(df['tstep'], [0, 0, 1, 1, 2, 2])
+
+
+def test_length():
+    s = IDSMapping(Sample)
+
+    assert len(s) == 8
+    assert s.length_of_key('data') == 3
+    assert s.length_of_key('data/1/z') is None
