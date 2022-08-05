@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-from ._constants import RUN_COL, TIME_COL, TSTEP_COL
+from ._constants import QUAL_COL, RUN_COL, TIME_COL, TSTEP_COL
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,8 @@ def rebase_on_grid(source: pd.DataFrame,
         df = pd.DataFrame((grid_base, *new_values), index=[grid, *cols]).T
 
         df[TIME_COL] = gb[TIME_COL].iloc[0]
+        if QUAL_COL in gb.columns:
+            df[QUAL_COL] = gb[QUAL_COL].iloc[0]
         return df
 
     grouped = source.groupby([RUN_COL, TSTEP_COL])
@@ -76,7 +78,10 @@ def rebase_on_grid(source: pd.DataFrame,
     out = grouped.apply(refit).reset_index(
         (RUN_COL, TSTEP_COL)).reset_index(drop=True)
 
-    out = out[[RUN_COL, TSTEP_COL, TIME_COL, grid, *cols]]
+    if QUAL_COL in out.columns:
+        out = out[[RUN_COL, TSTEP_COL, TIME_COL, grid, *cols, QUAL_COL]]
+    else:
+        out = out[[RUN_COL, TSTEP_COL, TIME_COL, grid, *cols]]
     return out
 
 
@@ -144,10 +149,21 @@ def rebase_on_time(source: pd.DataFrame,
 
         tstep_new = np.repeat(np.arange(n_time_new), n_vals).reshape(-1, 1)
 
+        quality = np.ones(time_new.shape, np.int8)
+        maxtime = max(time)
+        mintime = min(time)
+
+        quality[np.where(time_new < mintime)] = 0
+        quality[np.where(time_new > maxtime)] = 2
+        quality_s = np.array(
+            ['extrapolated_before', 'interpolated',
+             'extrapolated_after'])[quality]
+
         arr = np.hstack((tstep_new, time_new, values_new))
 
         out = pd.DataFrame(arr, columns=[TSTEP_COL, TIME_COL, *cols])
         out[TSTEP_COL] = out[TSTEP_COL].astype(np.int64)
+        out[QUAL_COL] = quality_s
         return out
 
     grouped = source.groupby([RUN_COL])
