@@ -1,5 +1,7 @@
 """Functions to interface with `jetto.in` namelists."""
 
+import io
+import textwrap
 from typing import Any, Dict, List, Tuple
 
 import f90nml
@@ -54,6 +56,7 @@ def write_namelist(path: PathLike,
         hline = '-' * 80 + '\n'
         title = ' Namelist : {}\n'
         blank = '\n'
+        indentation = ' '
 
         for name, fields in nml.items():
             f.writelines(
@@ -63,8 +66,10 @@ def write_namelist(path: PathLike,
 
             section.end_comma = True
             section.uppercase = True
-            section.indent = ' '
+            section.indent = indentation
 
-            section.write(f)
+            sect_out = io.StringIO()
+            section.write(sect_out)
 
-            f.write(blank)
+            # Indentation is necessary to avoid jetto to crash as of 2022-08-05
+            f.write(textwrap.indent(sect_out.getvalue(), indentation))

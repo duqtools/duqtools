@@ -52,5 +52,6 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Updating imas locations of', '{run}')
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
         jetto_settings = JettoSettingsManager.from_directory(run)
-        jset_copy = jetto_settings.set_imas_locations(inp=inp, out=out)
-        jset_copy.to_directory(run)
+        jetto_settings_copy = jetto_settings.set_imas_locations(inp=inp,
+                                                                out=out)
+        jetto_settings_copy.to_directory(run)
