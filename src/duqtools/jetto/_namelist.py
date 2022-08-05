@@ -55,11 +55,11 @@ def write_namelist(path: PathLike,
         title = ' Namelist : {}\n'
         blank = '\n'
 
-        for title, fields in nml.items():
+        for name, fields in nml.items():
             f.writelines(
-                (blank, hline, title.format(title.upper()), hline, blank))
+                (blank, hline, title.format(name.upper()), hline, blank))
 
-            section = f90nml.Namelist({title: fields})
+            section = f90nml.Namelist({name: fields})
 
             section.end_comma = True
             section.uppercase = True

@@ -10,7 +10,7 @@ from typing_extensions import Literal
 
 from duqtools.api import ImasHandle
 
-from ..types import PathLike
+from .._types import PathLike
 from ._jetto_in import JettoIn
 from ._jetto_jset import JettoJset
 
