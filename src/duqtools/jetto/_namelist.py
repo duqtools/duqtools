@@ -1,11 +1,18 @@
 """Functions to interface with `jetto.in` namelists."""
 
+from typing import Any, Dict, List, Tuple
+
 import f90nml
 
 from .._types import PathLike
 
+HEADER_ROWS = 17
 
-def read_namelist(path: PathLike) -> dict:
+
+def read_namelist(
+    path: PathLike,
+    header_rows: int = HEADER_ROWS
+) -> Tuple[List[str], Dict[str, Dict[str, Any]]]:
     """Read fortran namelist (i.e. `jetto.in`).
 
     Parameters
@@ -18,10 +25,17 @@ def read_namelist(path: PathLike) -> dict:
     namelist : dict
         Returns parameters in namelist as dict
     """
-    return f90nml.read(path).todict()
+    with open(path) as f:
+        header = [next(f) for _ in range(HEADER_ROWS)]
+        nml = f90nml.read(f)
+
+    return header, nml.todict()
 
 
-def write_namelist(path: PathLike, namelist: dict):
+def write_namelist(path: PathLike,
+                   namelist: dict,
+                   header: List[str] = None,
+                   **kwargs):
     """Write dictionary fortran namelist (i.e. `jetto.in`).
 
     Parameters
@@ -32,29 +46,25 @@ def write_namelist(path: PathLike, namelist: dict):
         Fortran namelist in dictionary format
     """
     nml = f90nml.Namelist(**namelist)
-    nml.write(path)
 
+    with open(path, 'w') as f:
+        if header:
+            f.writelines(header)
 
-def patch_namelist(path: PathLike, patch: dict, out: PathLike):
-    """Patch parameters in namelist.
+        hline = '-' * 80 + '\n'
+        title = ' Namelist : {}\n'
+        blank = '\n'
 
-    i.e. in the case of `jetto.in`, this preserves
-    the comments in the header, which are required for
-    `rjettov`.
+        for title, fields in nml.items():
+            f.writelines(
+                (blank, hline, title.format(title.upper()), hline, blank))
 
-    Parameters
-    ----------
-    path : str
-        Path to original namelist
-    patch : dict
-        Dictionary with variables to patch / add
-    out : PathLike
-        Path to write patched `jetto.in` file.
+            section = f90nml.Namelist({title: fields})
 
-    Returns
-    -------
-    patched_nml : dict
-        Return patched namelist as dictionary
-    """
-    patched_nml = f90nml.patch(path, patch, out)
-    return patched_nml.todict()
+            section.end_comma = True
+            section.uppercase = True
+            section.indent = ' '
+
+            section.write(f)
+
+            f.write(blank)

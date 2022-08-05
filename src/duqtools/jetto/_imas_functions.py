@@ -6,17 +6,17 @@ from typing import TYPE_CHECKING
 from ..ids import ImasHandle
 
 if TYPE_CHECKING:
-    from ._jset import JettoSettings
+    from ._jetto_settings import JettoSettings
 
 logger = logging.getLogger(__name__)
 
 
-def imas_from_jset_input(jset: JettoSettings) -> ImasHandle:
+def imas_from_jset_input(jetto_settings: JettoSettings) -> ImasHandle:
     """Get IMAS input location from jetto settings.
 
     Parameters
     ----------
-    jset : JettoSettings
+    jetto_settings : JettoSettings
         Jetto settings.
 
     Returns
@@ -25,18 +25,18 @@ def imas_from_jset_input(jset: JettoSettings) -> ImasHandle:
         Returns the destination.
     """
     return ImasHandle(
-        db=jset.machine_in,  # type: ignore
-        user=jset.user_in,  # type: ignore
-        run=jset.run_in,  # type: ignore
-        shot=jset.shot_in)  # type: ignore
+        db=jetto_settings.machine_in,  # type: ignore
+        user=jetto_settings.user_in,  # type: ignore
+        run=jetto_settings.run_in,  # type: ignore
+        shot=jetto_settings.shot_in)  # type: ignore
 
 
-def imas_from_jset_output(jset: JettoSettings) -> ImasHandle:
+def imas_from_jset_output(jetto_settings: JettoSettings) -> ImasHandle:
     """Get IMAS output location from jetto settings.
 
     Parameters
     ----------
-    jset : JettoSettings
+    jetto_settings : JettoSettings
         Jetto settings.
 
     Returns
@@ -45,6 +45,6 @@ def imas_from_jset_output(jset: JettoSettings) -> ImasHandle:
         Returns the destination.
     """
     return ImasHandle(
-        db=jset.machine_out,  # type: ignore
-        run=jset.run_out,  # type: ignore
-        shot=jset.shot_out)  # type: ignore
+        db=jetto_settings.machine_out,  # type: ignore
+        run=jetto_settings.run_out,  # type: ignore
+        shot=jetto_settings.shot_out)  # type: ignore

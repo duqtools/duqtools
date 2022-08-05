@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from duqtools.jetto._jset import JettoSettings, read_jset, write_jset
+from duqtools.jetto._jetto_jset import JettoJset, read_jset, write_jset
 
 JSET = {
     'section 1': {
@@ -23,31 +23,12 @@ def test_jset_io(tmp_path):
     jset2 = read_jset(path)
 
     assert JSET == jset2
+    assert isinstance(jset2, JettoJset)
 
 
-def test_JettoSettings(tmp_path):
+def test_JSet(tmp_path):
     fn = Path(__file__).parent / 'trimmed_jetto.jset'
-    jset = JettoSettings.from_file(fn)
-
-    from duqtools.jetto._jset import JINTRAC_CONFIG_VARS
+    jset = JettoJset.from_file(fn)
 
     assert isinstance(jset.metadata, dict)
     assert isinstance(jset.settings, dict)
-
-    test_values = {
-        int: 123,
-        float: 3.14,
-        str: 'quack',
-    }
-
-    for var in JINTRAC_CONFIG_VARS:
-        var_type = var['type']
-        var_name = var['name']
-        var_key = var['key']
-        value = getattr(jset, var_name)
-        assert isinstance(value, var_type)
-
-        test_value = test_values[var_type]
-        setattr(jset, var_name, test_value)
-
-        assert jset.settings[var_key] == str(test_value)

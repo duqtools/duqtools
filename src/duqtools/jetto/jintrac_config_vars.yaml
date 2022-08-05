@@ -1,0 +1,128 @@
+- doc: Input IDS shot
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.idsIMASDBShot
+    - file: jetto.jset
+      field: AdvancedPanel.catShotID
+    - file: jetto.jset
+      field: AdvancedPanel.catShotID_R
+    - file: jetto.in
+      field: NPULSE
+      section: INESCO
+  name: shot_in
+  type: int
+- doc: Output IDS shot
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.shotNum
+  name: shot_out
+  type: int
+- doc: Input IDS run
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.idsIMASDBRunid
+  name: run_in
+  type: int
+- doc: Output IDS run
+  keys:
+    - file: jetto.jset
+      field: JobProcessingPanel.idsRunid
+  name: run_out
+  type: int
+- doc: Input IDS user
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.idsIMASDBUser
+    - file: jetto.jset
+      field: AdvancedPanel.catOwner
+    - file: jetto.jset
+      field: AdvancedPanel.catOwner_R
+  name: user_in
+  type: str
+- doc: Input IDS machine
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.idsIMASDBMachine
+    - file: jetto.jset
+      field: AdvancedPanel.catMachID
+    - file: jetto.jset
+      field: AdvancedPanel.catMachID_R
+  name: machine_in
+  type: str
+- doc: Output IDS machine
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.machine
+    - file: jetto.in
+      field: MACHID
+      section: NLIST1
+  name: machine_out
+  type: str
+- doc: JobProcessingPanel.numProcessors
+  keys:
+    - file: jetto.jset
+      field: JobProcessingPanel.numProcessors
+  name: noprocessors
+  type: str
+- doc: Start time
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.startTime
+    - file: jetto.jset
+      field: EquilEscoRefPanel.tvalue.tinterval.startRange
+    - file: jetto.jset
+      field: EquilIdsRefPanel.rangeStart
+    - file: jetto.jset
+      field: OutputStdPanel.profileRangeStart
+    - file: jetto.in
+      field: TBEG
+      section: NLIST1
+  name: tstart
+  type: float
+- doc: End time
+  keys:
+    - file: jetto.jset
+      field: SetUpPanel.endTime
+    - file: jetto.jset
+      field: EquilEscoRefPanel.tvalue.tinterval.endRange
+    - file: jetto.jset
+      field: EquilIdsRefPanel.rangeEnd
+    - file: jetto.jset
+      field: OutputStdPanel.profileRangeEnd
+    - file: jetto.in
+      field: TMAX
+      section: NLIST1
+  name: tend
+  type: float
+- doc: Location of the run directory
+  keys:
+    - file: jetto.jset
+      field: AppPanel.openPrvSetDir
+  name: run_dir
+  type: str
+- doc: Name of the run directory
+  keys:
+    - file: jetto.jset
+      field: JobProcessingPanel.runDirNumber
+  name: run_dir_name
+  type: str
+- doc: Vacuum toroidal field at R0
+  keys:
+    - file: jetto.jset
+      field: EquilEscoRefPanel.BField.ConstValue
+    - file: jetto.jset
+      field: EquilEscoRefPanel.BField
+    - file: jetto.in
+      field: BTIN
+      section: NLIST1
+  name: b0
+  type: float
+- doc: Reference major radius (R0)
+  keys:
+    - file: jetto.jset
+      field: EquilEscoRefPanel.refMajorRadius
+    - file: jetto.in
+      field: RMJ
+      section: NLIST1
+  name: major_radius
+  type: float
