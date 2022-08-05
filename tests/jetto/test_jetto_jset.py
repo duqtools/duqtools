@@ -23,7 +23,7 @@ def test_jset_io(tmp_path):
     jset2 = read_jset(path)
 
     assert JSET == jset2
-    assert isinstance(jset2, JettoJset)
+    assert isinstance(jset2, dict)
 
 
 def test_jetto_settings(tmp_path):
