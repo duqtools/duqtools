@@ -13,7 +13,8 @@ from ._description_helpers import formatter as f
 class IDSPathMixin(BaseModel):
     ids: str = Field('profiles_1d/0/t_i_average',
                      description=f("""
-            IDS Path of the data to modify. `core_profiles` is implied.
+            IDS Path of the data to modify.
+            The IDS name, e.g. `core_profiles`, is implied.
             """))
 
 

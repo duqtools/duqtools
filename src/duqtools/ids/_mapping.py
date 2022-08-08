@@ -133,7 +133,7 @@ class IDSMapping(Mapping):
             Points to an IMAS db entry of where the data should be written.
         """
 
-        add_provenance_info(target)
+        add_provenance_info(handle=target)
 
         with target.open() as db_entry:
             self._ids.put(db_entry=db_entry)

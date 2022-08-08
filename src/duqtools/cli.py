@@ -181,7 +181,11 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@click.option('-x', 'x_val', type=str, help='IDS of the x value')
+@click.option('-x',
+              'x_path',
+              default='profiles_1d/*/grid/rho_tor_norm',
+              type=str,
+              help='IDS of the x value')
 @click.option('-y',
               'y_vals',
               type=str,
@@ -193,6 +197,11 @@ def cli_status(**kwargs):
               type=str,
               help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
               multiple=True)
+@click.option('-d',
+              '--ids',
+              type=str,
+              default='core_profiles',
+              help='Which IDS to grab data from')
 @click.option('-i',
               '--input',
               'input_files',

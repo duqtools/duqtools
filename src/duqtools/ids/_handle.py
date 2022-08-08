@@ -120,12 +120,12 @@ class ImasHandle(ImasBaseModel):
             except FileNotFoundError:
                 logger.warning('%s does not exist', to_delete)
 
-    def get_raw_data(self, key: str = 'core_profiles', **kwargs):
+    def get_raw_data(self, ids: str = 'core_profiles', **kwargs):
         """Get data from IDS entry.
 
         Parameters
         ----------
-        key : str, optional
+        ids : str, optional
             Name of profiles to open.
         **kwargs
             These keyword parameters are passed to `ImasHandle.open()`.
@@ -135,19 +135,19 @@ class ImasHandle(ImasBaseModel):
         data
         """
         with self.open(**kwargs) as data_entry:
-            data = data_entry.get(key)
+            data = data_entry.get(ids)
 
         # reset string representation because output is extremely lengthy
         _patch_str_repr(data)
 
         return data
 
-    def get(self, key: str = 'core_profiles', **kwargs) -> IDSMapping:
+    def get(self, ids: str = 'core_profiles', **kwargs) -> IDSMapping:
         """Map the data to a dict-like structure.
 
         Parameters
         ----------
-        key : str, optional
+        ids : str, optional
             Name of profiles to open
         **kwargs
             These parameters are passed to initialize `IDSMapping`.
@@ -156,7 +156,7 @@ class ImasHandle(ImasBaseModel):
         -------
         IDSMapping
         """
-        raw_data = self.get_raw_data(key)
+        raw_data = self.get_raw_data(ids)
         return IDSMapping(raw_data, **kwargs)
 
     def entry(self, backend=imasdef.MDSPLUS_BACKEND):

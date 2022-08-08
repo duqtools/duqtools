@@ -29,8 +29,10 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}')
-def apply_combination(target_in: ImasHandle, combination) -> None:
-    ids_mapping = target_in.get('core_profiles')
+def apply_combination(target_in: ImasHandle,
+                      combination,
+                      ids: str = 'core_profiles') -> None:
+    ids_mapping = target_in.get(ids)
 
     for model in combination:
         apply_model(model, ids_mapping)
