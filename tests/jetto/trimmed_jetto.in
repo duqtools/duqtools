@@ -1,0 +1,107 @@
+================================================================================
+                             CODE INPUT NAMELIST FILE
+================================================================================
+
+Application                    : JETTO
+JAMS Version                   : v210921_gateway_imas
+Date                           : 21/06/2022
+Time                           : 15:05:40
+
+JAMS GIT information:-
+
+Current GIT repository         : /pfs/work/g2fkoech/cmg/jams/v210921_gateway_imas/java
+Current GIT release tag        : Release-v210921
+Current GIT branch             : fkochl/v210921_addons_31
+Last commit SHA1-key           : 3a4347b10268c12acc42ea7ac6e32692b102b84c
+Repository status              : Clean
+
+
+--------------------------------------------------------------------------------
+ Namelist : NLIST1
+--------------------------------------------------------------------------------
+
+ &NLIST1
+  BCINTRHON = 0.9,
+  BCINTRHONSANCO = 0.9,
+  BTIN = 2.73, 2.73,
+  CNIONT = 1.0,
+  CTOTEBW = 1.0,
+  CTOTEC = 0.0,
+  CTOTLH = 1.0,
+  DNHB1 = 9.9999998e+16, 9.9999998e+16,
+  DTEC = 0.0,
+  DTMAX = 0.001,
+  DTMIN = 1e-12,
+  FTOENB = -1.0,
+  FTOERF = -1.0,
+  ICURB = 0,
+  IDEBUG = 100,
+  IDNHB1 = 0,
+  IEQUOP = 3,
+  IEXMOM = 2,
+  IEXNE = 1, 0,
+  IEXPRA = 2,
+  IEXPV = 0,
+  IEXQ = 1,
+  IEXTE = 1,
+  IEXTI = 1,
+  IEXZEF = -2,
+  IFSOLVE = 1,
+  IRESTR = 0,
+  IRESTW = 1,
+  ISPLITSANCOT = 300,
+  ISWCON = 2,
+  ISWEBW = 0,
+  ISWEC = 0,
+  ISWEQU = 6,
+  ISWFBC = 0,
+  ISWLH = 0,
+  ISWNI = 0,
+  ISWPI = 0,
+  ISWRF = 0,
+  ITEB = 0,
+  ITIB = 0,
+  ITORM = 1,
+  IUPDPSI = 1,
+  IVOLCORR = 0,
+  MACHID = 'jet',
+  NBTIN = 2,
+  NCRASH = 0,
+  NCUR = 0,
+  NDNHB1 = 2,
+  NDTMAX = 2,
+  NGRID = 101,
+  NPELIN = 0,
+  NSYNC = 0,
+  NTEB = 2,
+  NTEBW = 0,
+  NTEC = 0,
+  NTIB = 2,
+  NTLH = 0,
+  NTNI = 0,
+  NTPRAD = 0,
+  NTRF = 0,
+  PDTMAX = 1.0, 1.0,
+  PRAD = -1.0,
+  PTOTEBW = -1.0,
+  PTOTEC = 0.0,
+  PTOTLH = -1.0,
+  PTOTNI = -1.0,
+  RFINPO = -1.0,
+  RMJ = 296,
+  SNBTOT = -1.0, -1.0,
+  TBEG = 48.35,
+  TBTIN = 0.0, 1000.0,
+  TDNHB1 = 0.0, 1000.0,
+  TDTMAX = 0.0, 1000.0,
+  TEB = 150.0, 150.0,
+  TIB = 150.0, 150.0,
+  TMAX = 48.4,
+  TQNIONT = 1.0,
+  TTEB = 0.0, 1000.0,
+  TTIB = 0.0, 1000.0,
+ /
+
+ &INESCO
+  NPULSE = 94875
+ /

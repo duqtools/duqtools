@@ -8,88 +8,10 @@ from typing import TYPE_CHECKING, Dict, List, TextIO, Tuple
 
 if TYPE_CHECKING:
     from .._types import PathLike
-    from ..ids import ImasHandle
-
-DEFAULT_FILENAME = 'jetto.jset'
 
 HEADER = """!================================================================
 !                      JETTO SETTINGS FILE
 !================================================================"""
-
-JINTRAC_CONFIG_VARS = (
-    {
-        'name': 'shot_in',
-        'type': int,
-        'key': 'SetUpPanel.idsIMASDBShot',
-        'doc': 'Input IDS shot'
-    },
-    {
-        'name': 'shot_out',
-        'type': int,
-        'key': 'SetUpPanel.shotNum',
-        'doc': 'Output IDS shot'
-    },
-    {
-        'name': 'run_in',
-        'type': int,
-        'key': 'SetUpPanel.idsIMASDBRunid',
-        'doc': 'Input IDS run'
-    },
-    {
-        'name': 'run_out',
-        'type': int,
-        'key': 'JobProcessingPanel.idsRunid',
-        'doc': 'Output IDS run'
-    },
-    {
-        'name': 'user_in',
-        'type': str,
-        'key': 'SetUpPanel.idsIMASDBUser',
-        'doc': 'Input IDS user'
-    },
-    {
-        'name': 'machine_in',
-        'type': str,
-        'key': 'SetUpPanel.idsIMASDBMachine',
-        'doc': 'Input IDS machine'
-    },
-    {
-        'name': 'machine_out',
-        'type': str,
-        'key': 'SetUpPanel.machine',
-        'doc': 'Output IDS machine'
-    },
-    {
-        'name': 'noprocessors',
-        'type': str,
-        'key': 'JobProcessingPanel.numProcessors',
-        'doc': 'JobProcessingPanel.numProcessors'
-    },
-    {
-        'name': 'tstart',
-        'type': float,
-        'key': 'SetUpPanel.startTime',
-        'doc': 'Start time'
-    },
-    {
-        'name': 'tend',
-        'type': float,
-        'key': 'SetUpPanel.endTime',
-        'doc': 'End time'
-    },
-    {
-        'name': 'run_dir',
-        'type': str,
-        'key': 'AppPanel.openPrvSetDir',
-        'doc': 'Location of the run directory'
-    },
-    {
-        'name': 'run_dir_name',
-        'type': str,
-        'key': 'JobProcessingPanel.runDirNumber',
-        'doc': 'Name of the run directory'
-    },
-)
 
 
 def parse_section(section: List[str]) -> Tuple[str, Dict[str, str]]:
@@ -199,7 +121,8 @@ def write_jset(path: PathLike, settings: Dict[str, Dict[str, str]]):
         f.writelines(lines)
 
 
-class JettoSettings:
+class JettoJset:
+    DEFAULT_FILENAME = 'jetto.jset'
 
     def __init__(self, mapping: Dict[str, Dict[str, str]]):
         self.raw_mapping = mapping
@@ -212,35 +135,17 @@ class JettoSettings:
     def settings(self):
         return self.raw_mapping['Settings']
 
-    def __new__(cls, *args, **kwargs):
+    def get(self, field: str, section: str = None):
+        if section:
+            return self.settings[section][field]
+        else:
+            return self.settings[field]
 
-        def setter(jset_key: str, jset_type):
-
-            def f(self, value):
-                self.settings[jset_key] = str(value)
-
-            return f
-
-        def getter(jset_key: str, jset_type):
-
-            def f(self):
-                return jset_type(self.settings[jset_key])
-
-            return f
-
-        for variable in JINTRAC_CONFIG_VARS:
-            jset_key = variable['key']
-            jset_type = variable['type']
-            name = variable['name']
-            doc = variable['doc']
-            prop = property(
-                fget=getter(jset_key, jset_type),
-                fset=setter(jset_key, jset_type),
-                doc=doc,
-            )
-            setattr(cls, name, prop)
-
-        return super().__new__(cls)
+    def set(self, field: str, value: str, section: str = None):
+        if section:
+            self.settings[section][field] = value
+        else:
+            self.settings[field] = value
 
     def copy(self):
         """Return a copy of this instance."""
@@ -268,16 +173,16 @@ class JettoSettings:
         """
         directory = Path(directory)
 
-        self.run_dir = str(directory)
-        self.run_dir_name = directory.name
+        self.settings['AppPanel.openPrvSetDir'] = str(directory)
+        self.settings['JobProcessingPanel.runDirNumber'] = directory.name
 
-        filename = directory / DEFAULT_FILENAME
+        filename = directory / self.DEFAULT_FILENAME
         write_jset(filename, self.raw_mapping)
         debug('write %s', filename)
 
     @classmethod
-    def from_file(cls, path: PathLike) -> JettoSettings:
-        """Read JettoSettings from 'jetto.jset' file.
+    def from_file(cls, path: PathLike) -> JettoJset:
+        """Read jetto settings from 'jetto.jset' file.
 
         Parameters
         ----------
@@ -286,16 +191,16 @@ class JettoSettings:
 
         Returns
         -------
-        jset : JettoSettings
-            Instance of `JettoSettings`
+        jset : JettoJset
+            Instance of `JettoJset`
         """
         mapping = read_jset(path)
         jset = cls(mapping)
         return jset
 
     @classmethod
-    def from_directory(cls, path: PathLike) -> JettoSettings:
-        """Read JettoSettings from 'jetto.jset' file in given directory.
+    def from_directory(cls, path: PathLike) -> JettoJset:
+        """Read settings from 'jetto.jset' file in given directory.
 
         Parameters
         ----------
@@ -304,15 +209,15 @@ class JettoSettings:
 
         Returns
         -------
-        jset : JettoSettings
-            Instance of `JettoSettings`
+        jset : JettoJset
+            Instance of `JettoJset`
         """
-        filename = Path(path) / DEFAULT_FILENAME
+        filename = Path(path) / cls.DEFAULT_FILENAME
         return cls.from_file(filename)
 
     def copy_and_patch(self,
                        settings: dict = None,
-                       metadata: dict = None) -> JettoSettings:
+                       metadata: dict = None) -> JettoJset:
         """Patch a copy of the jetto settings.
 
         Parameters
@@ -324,7 +229,7 @@ class JettoSettings:
 
         Returns
         -------
-        jset_copy : JettoSettings
+        jset_copy : JSet
             Patched copy.
         """
         jset_copy = self.copy()
@@ -335,32 +240,3 @@ class JettoSettings:
             jset_copy.metadata.update(metadata)
 
         return jset_copy
-
-    def set_imas_locations(self, inp: ImasHandle,
-                           out: ImasHandle) -> JettoSettings:
-        """Make a copy with updated IDS locations for input / output.
-
-        Parameters
-        ----------
-        inp : ImasHandle
-            IMAS description of where the input data is stored.
-        out : ImasHandle
-            IMAS description of where the output data should be stored.
-
-        Returns
-        -------
-        jset_new : JettoSettings
-            Copy of the jetto settings with updated IDS locations.
-        """
-        jset_new = self.copy()
-
-        jset_new.user_in = inp.user
-        jset_new.machine_in = inp.db
-        jset_new.shot_in = inp.shot
-        jset_new.run_in = inp.run
-
-        jset_new.machine_out = out.db
-        jset_new.shot_out = out.shot
-        jset_new.run_out = out.run
-
-        return jset_new
