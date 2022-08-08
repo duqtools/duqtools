@@ -141,6 +141,24 @@ class StatusConfigModel(BaseModel):
             """))
 
 
+class MergeOp(BaseModel):
+    ids: str = Field('core_profiles',
+                     description='Merge fields from this IDS.')
+    paths: List[str] = Field(
+        ['profiles_1d/*/t_i_average', 'profiles_1d/*/zeff'],
+        description=f("""
+            This is a list of IDS paths to merge over all runs.
+            The mean/error are written to the target IDS.
+            The patsh must have `/*/` for the time component.
+        """))
+    base_grid: str = Field('profiles_1d/*/grid/rho_tor_norm',
+                           description=f("""
+            This IDS field is taken from the template. It is used to rebase all IDS fields
+            to same radial grid before merging using an interpolation. Must contain
+            '/*/' for the time component.
+            """))
+
+
 class MergeConfigModel(BaseModel):
     """The options of the `merge` subcommand are stored under the `merge` key
     in the config.
@@ -164,21 +182,8 @@ class MergeConfigModel(BaseModel):
             'run': 9999
         },
         description='Merged data will be written to this IMAS DB entry.')
-    ids_to_merge: List[str] = Field(['t_i_average', 'zeff'],
-                                    description=f("""
-            This is a list of IDSs to merge over all runs together with the `prefix`.
-            The mean/error are written to the target IDS.
-        """))
-    base_ids: str = Field('grid/rho_tor_norm',
-                          description=f("""
-            This IDS field is taken from the template. It is used to rebase all IDS fields
-            to same radial grid before merging using an interpolation.
-            """))
-    prefix: str = Field('profiles_1d',
-                        description=f("""
-            This field specifies the prefix to the IDS path, i.e.
-            `<prefix>/<time_step>/<ids_to_merge>'. The time step is implied by the template.
-            """))
+    plan: List[MergeOp] = Field(MergeOp(),
+                                description='List of merging operations.')
 
 
 class ConfigModel(BaseModel):

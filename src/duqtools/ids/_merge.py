@@ -8,13 +8,14 @@ from ._handle import ImasHandle
 from ._rebase import rebase_on_grid, rebase_on_time
 
 
-@add_to_op_queue('Merge data to', '{target}')
+@add_to_op_queue('Merge', '{ids} -> {target}')
 def merge_data(data: pd.DataFrame,
                target: ImasHandle,
                x_val: str,
                y_vals: Sequence[str],
+               ids: str = 'core_profiles',
                prefix: str = 'profiles_1d'):
-    input_data = target.get('core_profiles')
+    input_data = target.get(ids)
 
     # pick first time step as basis
     common_basis = input_data[f'{prefix}/0/{x_val}']
@@ -36,7 +37,7 @@ def merge_data(data: pd.DataFrame,
 
     merged = gb.agg(agg_dict)
 
-    ids_mapping = target.get('core_profiles', exclude_empty=False)
+    ids_mapping = target.get(ids, exclude_empty=False)
 
     for y_val in y_vals:
         for tstep, group in merged.groupby('tstep'):
