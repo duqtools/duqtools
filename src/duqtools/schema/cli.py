@@ -141,7 +141,21 @@ class StatusConfigModel(BaseModel):
             """))
 
 
-class MergeOp(BaseModel):
+class MergeStep(BaseModel):
+    """These parameters describe which paths should be merged.
+
+    The IDS parameter (`ids`) describes the where the data are retrieved from.
+    This IDS then contains the given `paths`, which belong to this IDS.
+
+    The base grid points to the data which should be used as the common basis. All
+    other data arrays are interpolated to this grid. Both the template and the
+    data must contain this data.
+
+    To denote the time step, use `/*/` in both the base grid and the data paths.
+
+    Note that multiple merge steps can be specified, for example for different
+    IDS.
+    """
     ids: str = Field('core_profiles',
                      description='Merge fields from this IDS.')
     paths: List[str] = Field(
@@ -149,13 +163,14 @@ class MergeOp(BaseModel):
         description=f("""
             This is a list of IDS paths to merge over all runs.
             The mean/error are written to the target IDS.
-            The patsh must have `/*/` for the time component.
+            The paths should contain `/*/` for the time component.
         """))
     base_grid: str = Field('profiles_1d/*/grid/rho_tor_norm',
                            description=f("""
-            This IDS field is taken from the template. It is used to rebase all IDS fields
-            to same radial grid before merging using an interpolation. Must contain
-            '/*/' for the time component.
+            The data for this field is taken from the template. The IMAS data to merge should
+            also contain this path, because it will be used to rebase all IDS fields
+            to same radial grid before merging using interpolation. The path should contain
+            '/*/' to denote the time component.
             """))
 
 
@@ -163,8 +178,10 @@ class MergeConfigModel(BaseModel):
     """The options of the `merge` subcommand are stored under the `merge` key
     in the config.
 
-    These keys define which data to merge, and where to store the
-    output. Before merging, all keys are rebased on (1) the same radial
+    These keys define the location of the IMAS data, which IDS entries
+    to merge, and where to store the output.
+
+    Before merging, all keys are rebased on (1) the same radial
     coordinate specified via `base_ids` and (2) the timestamp.
     """
     data: FilePath = Field('runs.yaml',
@@ -186,8 +203,8 @@ class MergeConfigModel(BaseModel):
             'run': 9999
         },
         description='Merged data will be written to this IMAS DB entry.')
-    plan: List[MergeOp] = Field(MergeOp(),
-                                description='List of merging operations.')
+    plan: List[MergeStep] = Field(MergeStep(),
+                                  description='List of merging operations.')
 
 
 class ConfigModel(BaseModel):
