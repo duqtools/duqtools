@@ -28,7 +28,9 @@ def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, extensions,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    source = get_ids_dataframe(handles, keys=(x_val, *y_vals))
+    source = get_ids_dataframe(handles,
+                               ids='core_profiles',
+                               keys=(x_val, *y_vals))
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')
