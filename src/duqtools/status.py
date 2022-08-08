@@ -8,6 +8,9 @@ from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
+stream = logging.StreamHandler()
+stream.setFormatter(logging.Formatter('%(message)s'))
+logger.addHandler(stream)
 
 
 def has_submit_script(dir: Path) -> bool:
@@ -164,7 +167,9 @@ class Monitor():
         self.finished = False
 
     def set_status(self):
-        if not is_submitted(self.dir):
+        if not (self.dir / cfg.status.status_file).exists():
+            status = 'No status'
+        elif not is_submitted(self.dir):
             status = 'Unsubmitted '
         elif is_running(self.dir):
             status = 'Running     '
@@ -189,14 +194,14 @@ class Monitor():
 
     def update(self):
         self.set_status()
-
-        if is_completed(self.dir) or is_failed(self.dir):
-            self.pbar.n = 100 if is_completed(self.dir) else 0
-            self.pbar.refresh()
-            self.finished = True
-            return
-        if not is_running(self.dir):
-            return
+        if (self.dir / cfg.status.status_file).exists():
+            if is_completed(self.dir) or is_failed(self.dir):
+                self.pbar.n = 100 if is_completed(self.dir) else 0
+                self.pbar.refresh()
+                self.finished = True
+                return
+            if not is_running(self.dir):
+                return
 
         lines = self.get_lines()
         for i in range(len(lines) - 1, 0, -1):
