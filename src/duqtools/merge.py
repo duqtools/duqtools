@@ -69,4 +69,5 @@ def merge(**kwargs):
                    target=target,
                    x_val=x_val,
                    y_vals=y_vals,
-                   prefix=prefix)
+                   prefix=prefix,
+                   ids=step.ids)
