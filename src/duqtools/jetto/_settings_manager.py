@@ -8,7 +8,8 @@ The settings manager consolidates fields that should have the same value
 to a single variable. For example, the attribute `shot_in` referring to the
 shot number, can map to 4 fields in `jetto.jset` and 1 in `jetto.in`.
 
-These fields are configured in the file `jintrac_config_vars.yaml`.
+These fields are configured in the file:
+`duqtools/data/jintrac_config_vars.yaml`.
 
 Each entry contains the `name` the field(s) are exposed as,
 some documentation (`doc`), the `type` of the variable,
@@ -23,6 +24,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import List
 
+from importlib_resources import files
+
 from duqtools.api import ImasHandle
 
 from .._types import PathLike
@@ -30,7 +33,7 @@ from ._jetto_in import JettoIn
 from ._jetto_jset import JettoJset
 from ._settings_manager_schema import JettoConfigModel, JettoField
 
-CFG_PATH = Path(__file__).parent / 'jintrac_config_vars.yaml'
+CFG_PATH = files('duqtools.data') / 'jintrac_config_vars.yaml'
 CONFIG = JettoConfigModel.parse_file(CFG_PATH)
 
 
