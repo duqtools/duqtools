@@ -101,3 +101,7 @@ Repository status              : Clean
   TTEB = 0.0, 1000.0,
   TTIB = 0.0, 1000.0,
  /
+
+ &INESCO
+  NPULSE = 94875
+ /

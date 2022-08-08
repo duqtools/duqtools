@@ -21,7 +21,7 @@ class JettoIn:
         self.header = header
 
     def get(self, field: str, section: str):
-        return self.raw_mapping[section][field]
+        return self.raw_mapping[section.lower()][field.lower()]
 
     def set(
         self,
@@ -29,7 +29,7 @@ class JettoIn:
         value: str,
         section: str,
     ):
-        self.raw_mapping[section][field] = value
+        self.raw_mapping[section.lower()][field.lower()] = value
 
     def copy(self):
         """Return a copy of this instance."""
