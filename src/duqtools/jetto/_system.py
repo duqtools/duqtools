@@ -30,9 +30,12 @@ class JettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_name}')
-    def write_batchfile(workspace: WorkDirectory, run_name: str):
+    def write_batchfile(workspace: WorkDirectory, run_name: str,
+                        template_drc: Path):
         from duqtools.jetto import write_batchfile as jetto_write_batchfile
-        return jetto_write_batchfile(workspace, run_name)
+        jset = JettoSettings.from_directory(template_drc)
+
+        return jetto_write_batchfile(workspace, run_name, jset)
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}')
