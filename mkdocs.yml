@@ -24,6 +24,7 @@ theme:
   name: material
   primary: blue
   accent: red
+  custom_dir: docs/overrides
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
