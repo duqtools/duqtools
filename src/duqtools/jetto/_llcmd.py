@@ -29,7 +29,7 @@ def write_batchfile(workspace: WorkDirectory, run_name: str,
 
     with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
-#SBATCH -J jetto.{run_name}
+#SBATCH -J duqtools.jetto.{run_name}
 #SBATCH -i /dev/null
 #SBATCH -o {full_path}/ll.out
 #SBATCH -e {full_path}/ll.err
