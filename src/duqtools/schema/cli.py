@@ -1,7 +1,7 @@
 from getpass import getuser
 from typing import List, Union
 
-from pydantic import DirectoryPath, Field, validator
+from pydantic import DirectoryPath, Field, FilePath, validator
 from typing_extensions import Literal
 
 from ._basemodel import BaseModel
@@ -167,6 +167,10 @@ class MergeConfigModel(BaseModel):
     output. Before merging, all keys are rebased on (1) the same radial
     coordinate specified via `base_ids` and (2) the timestamp.
     """
+    data: FilePath = Field('runs.yaml',
+                           description=f("""
+            Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
+        """))
     template: ImasBaseModel = Field(
         {
             'user': getuser(),

@@ -5,7 +5,6 @@ from typing import Sequence, Tuple
 
 from .config import cfg
 from .ids import ImasHandle, get_ids_dataframe, merge_data
-from .models import WorkDirectory
 from .operations import confirm_operations
 from .utils import read_imas_handles_from_file
 
@@ -43,17 +42,14 @@ def _split_paths(paths: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
 @confirm_operations
 def merge(**kwargs):
     """Merge data."""
-
-    workspace = WorkDirectory.parse_obj(cfg.workspace)
-
     template = ImasHandle.parse_obj(cfg.merge.template)
     target = ImasHandle.parse_obj(cfg.merge.output)
+
+    handles = read_imas_handles_from_file(cfg.merge.data)
 
     for step in cfg.merge.plan:
         prefix, (x_val, *y_vals) = _split_paths(paths=(step.base_grid,
                                                        *step.paths))
-
-        handles = read_imas_handles_from_file(workspace.runs_yaml)
 
         data = get_ids_dataframe(handles,
                                  ids=step.ids,
