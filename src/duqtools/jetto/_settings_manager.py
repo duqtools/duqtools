@@ -1,58 +1,37 @@
+"""The JettoSettingsManager is a single access point for multiple configs.
+
+In the Jetto system, there are two config files, `jetto.in` and `jetto.jset`
+that contain some settings that should be kept synchronized. Within
+jetto.jset there are several fields that should map to the same value.
+
+The settings manager consolidates fields that should have the same value
+to a single variable. For example, the attribute `shot_in` referring to the
+shot number, can map to 4 fields in `jetto.jset` and 1 in `jetto.in`.
+
+These fields are configured in the file `jintrac_config_vars.yaml`.
+
+Each entry contains the `name` the field(s) are exposed as,
+some documentation (`doc`), the `type` of the variable,
+and the `keys`. Each key has it's field name (`field`) and
+`file` in which the variable can be found associated with it.
+It can also have a `section` if the field is not at the root level.
+"""
+
 from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, List, Optional, Type
-
-from pydantic import BaseModel, validator
-from pydantic_yaml import YamlModelMixin
-from typing_extensions import Literal
+from typing import List
 
 from duqtools.api import ImasHandle
 
 from .._types import PathLike
 from ._jetto_in import JettoIn
 from ._jetto_jset import JettoJset
+from ._settings_manager_schema import JettoConfigModel, JettoField
 
-
-class JettoField(BaseModel):
-    file: Literal['jetto.jset', 'jetto.in']
-    field: str
-    section: Optional[str] = None
-
-    @validator('section')
-    def section_lower(cls, v):
-        return v.lower()
-
-
-class JettoVar(BaseModel):
-    doc: str
-    name: str
-    type: Type
-    keys: List[JettoField]
-
-    @validator('type', pre=True)
-    def validate_type(cls, v):
-        return {
-            'str': str,
-            'int': int,
-            'float': float,
-        }[v]
-
-
-class JettoConfigModel(YamlModelMixin, BaseModel):
-    __root__: List[JettoVar] = []
-
-    def __iter__(self):
-        yield from self.__root__
-
-    def __getitem__(self, index: int):
-        return self.__root__[index]
-
-
-cfg_path = Path(__file__).parent / 'jintrac_config_vars.yaml'
-
-CONFIG = JettoConfigModel.parse_file(cfg_path)
+CFG_PATH = Path(__file__).parent / 'jintrac_config_vars.yaml'
+CONFIG = JettoConfigModel.parse_file(CFG_PATH)
 
 
 class JettoSettingsManager:
@@ -66,42 +45,28 @@ class JettoSettingsManager:
 
             def f(self, value):
                 for key in keys:
-
-                    cfg_file = key.file
-                    field = key.field
-                    section = key.section
-
-                    self.handlers[cfg_file].set(field, value, section=section)
+                    entry = self.handlers[key.file]
+                    entry.set(key.field, value, section=key.section)
 
             return f
 
-        def getter(key: Any, setting_type):
+        def getter(key: JettoField, setting_type: type):
 
             def f(self):
-
-                cfg_file = key.file
-                field = key.field
-                section = key.section
-
-                value = self.handlers[cfg_file].get(field, section=section)
+                entry = self.handlers[key.file]
+                value = entry.get(key.field, section=key.section)
 
                 return setting_type(value)
 
             return f
 
         for variable in CONFIG:
-            name = variable.name
-            doc = variable.doc
-            keys = variable.keys
-
-            setting_type = variable.type
-
             prop = property(
-                fget=getter(keys[0], setting_type),
-                fset=setter(keys),
-                doc=doc,
+                fget=getter(variable.keys[0], variable.type),
+                fset=setter(variable.keys),
+                doc=variable.doc,
             )
-            setattr(cls, name, prop)
+            setattr(cls, variable.name, prop)
 
         return super().__new__(cls)
 

@@ -1,4 +1,6 @@
-- doc: Input IDS shot
+- name: shot_in
+  doc: Input IDS shot
+  type: int
   keys:
     - file: jetto.jset
       field: SetUpPanel.idsIMASDBShot
@@ -9,27 +11,27 @@
     - file: jetto.in
       field: NPULSE
       section: INESCO
-  name: shot_in
+- name: shot_out
+  doc: Output IDS shot
   type: int
-- doc: Output IDS shot
   keys:
     - file: jetto.jset
       field: SetUpPanel.shotNum
-  name: shot_out
+- name: run_in
+  doc: Input IDS run
   type: int
-- doc: Input IDS run
   keys:
     - file: jetto.jset
       field: SetUpPanel.idsIMASDBRunid
-  name: run_in
+- name: run_out
+  doc: Output IDS run
   type: int
-- doc: Output IDS run
   keys:
     - file: jetto.jset
       field: JobProcessingPanel.idsRunid
-  name: run_out
-  type: int
-- doc: Input IDS user
+- name: user_in
+  doc: Input IDS user
+  type: str
   keys:
     - file: jetto.jset
       field: SetUpPanel.idsIMASDBUser
@@ -37,9 +39,9 @@
       field: AdvancedPanel.catOwner
     - file: jetto.jset
       field: AdvancedPanel.catOwner_R
-  name: user_in
+- name: machine_in
+  doc: Input IDS machine
   type: str
-- doc: Input IDS machine
   keys:
     - file: jetto.jset
       field: SetUpPanel.idsIMASDBMachine
@@ -47,24 +49,24 @@
       field: AdvancedPanel.catMachID
     - file: jetto.jset
       field: AdvancedPanel.catMachID_R
-  name: machine_in
+- name: machine_out
+  doc: Output IDS machine
   type: str
-- doc: Output IDS machine
   keys:
     - file: jetto.jset
       field: SetUpPanel.machine
     - file: jetto.in
       field: MACHID
       section: NLIST1
-  name: machine_out
+- name: noprocessors
+  doc: JobProcessingPanel.numProcessors
   type: str
-- doc: JobProcessingPanel.numProcessors
   keys:
     - file: jetto.jset
       field: JobProcessingPanel.numProcessors
-  name: noprocessors
-  type: str
-- doc: Start time
+- name: tstart
+  doc: Start time
+  type: float
   keys:
     - file: jetto.jset
       field: SetUpPanel.startTime
@@ -77,9 +79,9 @@
     - file: jetto.in
       field: TBEG
       section: NLIST1
-  name: tstart
+- name: tend
+  doc: End time
   type: float
-- doc: End time
   keys:
     - file: jetto.jset
       field: SetUpPanel.endTime
@@ -92,21 +94,21 @@
     - file: jetto.in
       field: TMAX
       section: NLIST1
-  name: tend
-  type: float
-- doc: Location of the run directory
+- name: run_dir
+  doc: Location of the run directory
+  type: str
   keys:
     - file: jetto.jset
       field: AppPanel.openPrvSetDir
-  name: run_dir
+- name: run_dir_name
+  doc: Name of the run directory
   type: str
-- doc: Name of the run directory
   keys:
     - file: jetto.jset
       field: JobProcessingPanel.runDirNumber
-  name: run_dir_name
-  type: str
-- doc: Vacuum toroidal field at R0
+- name: b0
+  doc: Vacuum toroidal field at R0
+  type: float
   keys:
     - file: jetto.jset
       field: EquilEscoRefPanel.BField.ConstValue
@@ -115,14 +117,12 @@
     - file: jetto.in
       field: BTIN
       section: NLIST1
-  name: b0
+- name: major_radius
+  doc: Reference major radius (R0)
   type: float
-- doc: Reference major radius (R0)
   keys:
     - file: jetto.jset
       field: EquilEscoRefPanel.refMajorRadius
     - file: jetto.in
       field: RMJ
       section: NLIST1
-  name: major_radius
-  type: float
