@@ -75,8 +75,8 @@ class IDSMapping(Mapping):
         try:
             pointer, attr = self._deconstruct_key(key)
             ret = getattr(pointer, attr)
-        except AttributeError as ea:
-            raise KeyError(str(ea))
+        except AttributeError as err:
+            raise KeyError(key) from err
 
         return ret
 
@@ -84,9 +84,9 @@ class IDSMapping(Mapping):
 
         try:
             pointer, attr = self._deconstruct_key(key)
-            _ = getattr(pointer, attr)
-        except AttributeError as ea:
-            raise KeyError(str(ea))
+            getattr(pointer, attr)
+        except AttributeError as err:
+            raise KeyError(key) from err
         else:
             setattr(pointer, attr, value)
 

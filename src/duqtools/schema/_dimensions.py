@@ -11,10 +11,11 @@ from ._description_helpers import formatter as f
 
 
 class IDSPathMixin(BaseModel):
-    ids: str = Field('profiles_1d/0/t_i_average',
-                     description=f("""
+    ids: str = Field('core_profiles', description='Root IDS name.')
+    path: str = Field('profiles_1d/0/t_i_average',
+                      description=f("""
             IDS Path of the data to modify.
-            The IDS name, e.g. `core_profiles`, is implied.
+            The root IDS name, e.g. `core_profiles`, is defined separately.
             """))
 
 
@@ -105,6 +106,7 @@ class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
         """Expand list of values into operations with its components."""
         return tuple(
             IDSOperation(ids=self.ids,
+                         path=self.path,
                          operator=self.operator,
                          value=value,
                          scale_to_error=self.scale_to_error)

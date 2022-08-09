@@ -32,9 +32,8 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 def apply_combination(target_in: ImasHandle,
                       combination,
                       ids: str = 'core_profiles') -> None:
-    ids_mapping = target_in.get(ids)
-
     for model in combination:
+        ids_mapping = target_in.get(model.ids)
         apply_model(model, ids_mapping)
 
         logger.info('Writing data entry: %s', target_in)

@@ -37,18 +37,18 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
 
     npfunc = getattr(np, model.operator)
 
-    profile = ids_mapping[model.ids]
+    data = ids_mapping[model.path]
 
     if model.scale_to_error:
-        sigma_key = model.ids + model._upper_suffix
+        sigma_key = model.path + model._upper_suffix
 
         if model.value < 0:
-            lower_key = model.ids + model._lower_suffix
+            lower_key = model.path + model._lower_suffix
             if lower_key in ids_mapping:
                 sigma_key = lower_key
 
         sigma_bound = ids_mapping[sigma_key]
-        sigma = abs(sigma_bound - profile)
+        sigma = abs(sigma_bound - data)
 
         value = sigma * model.value
     else:
@@ -56,6 +56,6 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
 
     logger.info('Apply %s', model)
 
-    logger.debug('data range before: %s - %s', profile.min(), profile.max())
-    npfunc(profile, value, out=profile)
-    logger.debug('data range after: %s - %s', profile.min(), profile.max())
+    logger.debug('data range before: %s - %s', data.min(), data.max())
+    npfunc(data, value, out=data)
+    logger.debug('data range after: %s - %s', data.min(), data.max())
