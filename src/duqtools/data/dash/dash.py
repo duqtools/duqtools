@@ -41,24 +41,25 @@ def ffmt(s):
     return s.replace(prefix + '/', '')
 
 
-def get_options(a_run):
-    a_profile = ImasHandle(**a_run).get('core_profiles', exclude_empty=True)
+def get_options(a_run, ids):
+    a_profile = ImasHandle(**a_run).get(ids, exclude_empty=True)
     return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
 
 
-options = get_options(a_run=df.iloc[0])
-
 with st.sidebar:
+    ids = st.selectbox('Select IDS', ('core_profiles', ), index=0)
+
+    options = get_options(a_run=df.iloc[0], ids=ids)
 
     default_x_key = options.index(f'{prefix}/grid/rho_tor_norm')
     default_y_val = f'{prefix}/t_i_average'
 
-    x_key = st.selectbox('Select IDS (x)',
+    x_key = st.selectbox('Select x',
                          options,
                          index=default_x_key,
                          format_func=ffmt)
 
-    y_keys = st.multiselect('Select IDS (y)',
+    y_keys = st.multiselect('Select y',
                             options,
                             default=default_y_val,
                             format_func=ffmt)

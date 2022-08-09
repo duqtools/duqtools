@@ -52,43 +52,45 @@ def get_imas_ual_version():
     return imas_version, ual_version
 
 
-def add_provenance_info(ids: ImasHandle):
-    """Add provenance information to ids.
+def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
+    """Add provenance information to handle.
 
     Parameters
     ----------
-    ids: ImasHandle
+    handle : ImasHandle
         Handle to add provenance information to.
+    ids : str, optional
+        Which IDS to add provenance to.
     """
 
     import git
     import pkg_resources  # type: ignore
 
-    with ids.open() as data_entry_target:
-        core_profiles = data_entry_target.get('core_profiles')
+    with handle.open() as data_entry_target:
+        entry = data_entry_target.get(ids)
 
         # Set the name
-        core_profiles.code.name = 'dUQtools'
+        entry.code.name = 'dUQtools'
 
         # Get the commit if we are in a repository
         try:
-            core_profiles.code.commit = git.Repo(
+            entry.code.commit = git.Repo(
                 Path(__file__).parent,
                 search_parent_directories=True).head.object.hexsha
         except Exception:
-            core_profiles.code.commit = 'unknown'
+            entry.code.commit = 'unknown'
 
         # Set the version if available
         try:
-            core_profiles.code.version = pkg_resources.get_distribution(
+            entry.code.version = pkg_resources.get_distribution(
                 'duqtools').version
         except Exception:
-            core_profiles.code.version = 'unknown'
+            entry.code.version = 'unknown'
 
         # The repository, always set to duqtools
-        core_profiles.code.repository = 'https://github.com/CarbonCollective/fusion-dUQtools/'
+        entry.code.repository = 'https://github.com/CarbonCollective/fusion-dUQtools/'
 
-        core_profiles.put(db_entry=data_entry_target)
+        entry.put(db_entry=data_entry_target)
 
 
 @add_to_op_queue('Copy ids from template to', '{target}')
@@ -144,4 +146,4 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     idss_in.close()
     idss_out.close()
 
-    add_provenance_info(target)
+    add_provenance_info(handle=target)

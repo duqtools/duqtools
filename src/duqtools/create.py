@@ -29,10 +29,11 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}')
-def apply_combination(target_in: ImasHandle, combination) -> None:
-    ids_mapping = target_in.get('core_profiles')
-
+def apply_combination(target_in: ImasHandle,
+                      combination,
+                      ids: str = 'core_profiles') -> None:
     for model in combination:
+        ids_mapping = target_in.get(model.ids)
         apply_model(model, ids_mapping)
 
         logger.info('Writing data entry: %s', target_in)
@@ -86,7 +87,7 @@ def create(*, force, **kwargs):
                 'Directory is not empty, use `duqtools clean` to clear or '
                 '`--force` to override.')
 
-        locations = (ImasHandle(db=options.data.db,
+        locations = (ImasHandle(db=options.data.imasdb,
                                 shot=source.shot,
                                 run=options.data.run_in_start_at + i)
                      for i in range(len(combinations)))
@@ -107,10 +108,10 @@ def create(*, force, **kwargs):
                      description='Create folder',
                      extra_description=f'{run_drc}')
 
-        target_in = ImasHandle(db=options.data.db,
+        target_in = ImasHandle(db=options.data.imasdb,
                                shot=source.shot,
                                run=options.data.run_in_start_at + i)
-        target_out = ImasHandle(db=options.data.db,
+        target_out = ImasHandle(db=options.data.imasdb,
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
