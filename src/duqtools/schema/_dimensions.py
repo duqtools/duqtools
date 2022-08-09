@@ -12,10 +12,13 @@ from ._description_helpers import formatter as f
 
 class IDSPathMixin(BaseModel):
     ids: str = Field('core_profiles', description='Root IDS name.')
-    path: str = Field('profiles_1d/0/t_i_average',
+    path: str = Field('profiles_1d/$i/t_i_average',
                       description=f("""
             IDS Path of the data to modify.
-            The root IDS name, e.g. `core_profiles`, is defined separately.
+            The time slice can be denoted with '$i', this will match all
+            time slices in the IDS. Alternatively, you can specify the time
+            slice directly, i.e. `profiles_1d/0/t_i_average` to only
+            match and update the 0-th time slice.
             """))
 
 

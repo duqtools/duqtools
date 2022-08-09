@@ -15,7 +15,7 @@ create:
       operator: add
       values: [1, 2, 3]
     - ids: core_profiles
-      path: profiles_1d/0/t_i_average
+      path: profiles_1d/$i/t_i_average
       operator: multiply
       values: [1.1, 1.2, 1.3]
 submit:

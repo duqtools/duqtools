@@ -93,7 +93,7 @@ def split_paths(paths: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
     ----------
     paths : Sequence[str]
         Paths that can be found in the IDS entry. Must contain
-        `/*/` to denote the time component.
+        `/$i/` to denote the time component.
 
     Returns
     -------
@@ -101,7 +101,7 @@ def split_paths(paths: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
         Return the common prefix and corresponding keys.
     """
 
-    split_paths = (path.split('/*/') for path in paths)
+    split_paths = (path.split('/$i/') for path in paths)
 
     prefixes, keys = zip(*split_paths)
 

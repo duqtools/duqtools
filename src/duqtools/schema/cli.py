@@ -22,8 +22,8 @@ class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
     dimensions: List[Union[IDSOperationDim]] = Field([
-        IDSOperationDim(path='profiles_1d/0/t_i_average', ),
-        IDSOperationDim(path='profiles_1d/0/electrons/temperature')
+        IDSOperationDim(path='profiles_1d/$i/t_i_average', ),
+        IDSOperationDim(path='profiles_1d/$i/electrons/temperature')
     ],
                                                      description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
@@ -140,7 +140,7 @@ class MergeStep(BaseModel):
     other data arrays are interpolated to this grid. Both the template and the
     data must contain this data.
 
-    To denote the time step, use `/*/` in both the base grid and the data paths.
+    To denote the time step, use `/$i/` in both the base grid and the data paths.
 
     Note that multiple merge steps can be specified, for example for different
     IDS.
@@ -148,18 +148,18 @@ class MergeStep(BaseModel):
     ids: str = Field('core_profiles',
                      description='Merge fields from this IDS.')
     paths: List[str] = Field(
-        ['profiles_1d/*/t_i_average', 'profiles_1d/*/zeff'],
+        ['profiles_1d/$i/t_i_average', 'profiles_1d/$i/zeff'],
         description=f("""
             This is a list of IDS paths to merge over all runs.
             The mean/error are written to the target IDS.
-            The paths should contain `/*/` for the time component.
+            The paths should contain `/$i/` for the time component.
         """))
-    base_grid: str = Field('profiles_1d/*/grid/rho_tor_norm',
+    base_grid: str = Field('profiles_1d/$i/grid/rho_tor_norm',
                            description=f("""
             The data for this field is taken from the template. The IMAS data to merge should
             also contain this path, because it will be used to rebase all IDS fields
             to same radial grid before merging using interpolation. The path should contain
-            '/*/' to denote the time component.
+            '/$i/' to denote the time component.
             """))
 
 
