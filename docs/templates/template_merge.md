@@ -81,8 +81,8 @@ For example:
 ```yaml title="duqtools.yaml"
 plan:
   - ids: core_profiles
-    base_grid: profiles_1d/*/grid/rho_tor_norm
+    base_grid: profiles_1d/$i/grid/rho_tor_norm
     paths:
-    - profiles_1d/*/t_i_average
-    - profiles_1d/*/zeff
+    - profiles_1d/$i/t_i_average
+    - profiles_1d/$i/zeff
 ```
