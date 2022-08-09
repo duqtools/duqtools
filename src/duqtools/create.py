@@ -87,7 +87,7 @@ def create(*, force, **kwargs):
                 'Directory is not empty, use `duqtools clean` to clear or '
                 '`--force` to override.')
 
-        locations = (ImasHandle(db=options.data.db,
+        locations = (ImasHandle(db=options.data.imasdb,
                                 shot=source.shot,
                                 run=options.data.run_in_start_at + i)
                      for i in range(len(combinations)))
@@ -108,10 +108,10 @@ def create(*, force, **kwargs):
                      description='Create folder',
                      extra_description=f'{run_drc}')
 
-        target_in = ImasHandle(db=options.data.db,
+        target_in = ImasHandle(db=options.data.imasdb,
                                shot=source.shot,
                                run=options.data.run_in_start_at + i)
-        target_out = ImasHandle(db=options.data.db,
+        target_out = ImasHandle(db=options.data.imasdb,
                                 shot=source.shot,
                                 run=options.data.run_out_start_at + i)
 
