@@ -37,25 +37,27 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
 
     npfunc = getattr(np, model.operator)
 
-    data = ids_mapping[model.path]
+    data_map = ids_mapping.findall(model.path)
 
-    if model.scale_to_error:
-        sigma_key = model.path + model._upper_suffix
+    for path, data in data_map.items():
 
-        if model.value < 0:
-            lower_key = model.path + model._lower_suffix
-            if lower_key in ids_mapping:
-                sigma_key = lower_key
+        if model.scale_to_error:
+            sigma_key = path + model._upper_suffix
 
-        sigma_bound = ids_mapping[sigma_key]
-        sigma = abs(sigma_bound - data)
+            if model.value < 0:
+                lower_key = path + model._lower_suffix
+                if lower_key in ids_mapping:
+                    sigma_key = lower_key
 
-        value = sigma * model.value
-    else:
-        value = model.value
+            sigma_bound = ids_mapping[sigma_key]
+            sigma = abs(sigma_bound - data)
 
-    logger.info('Apply %s', model)
+            value = sigma * model.value
+        else:
+            value = model.value
 
-    logger.debug('data range before: %s - %s', data.min(), data.max())
-    npfunc(data, value, out=data)
-    logger.debug('data range after: %s - %s', data.min(), data.max())
+        logger.info('Apply %s', model)
+
+        logger.debug('data range before: %s - %s', data.min(), data.max())
+        npfunc(data, value, out=data)
+        logger.debug('data range after: %s - %s', data.min(), data.max())

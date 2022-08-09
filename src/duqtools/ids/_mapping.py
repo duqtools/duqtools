@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
     from ._handle import ImasHandle
 
+TIME_STR = '$i'
+
 
 def insert_re_caret_dollar(string: str) -> str:
     """Insert regex start (^) / end ($) of line matching characters."""
@@ -23,6 +25,11 @@ def insert_re_caret_dollar(string: str) -> str:
     if not string.endswith('$'):
         string = f'{string}$'
     return string
+
+
+def replace_time_str(string: str) -> str:
+    """Replaces template string with regex digit matching."""
+    return string.replace(TIME_STR, r'(?P<idx>\d+)')
 
 
 class IDSMapping(Mapping):
@@ -195,6 +202,7 @@ class IDSMapping(Mapping):
             New dict with all matching key/value pairs.
         """
         pattern = insert_re_caret_dollar(pattern)
+        pattern = replace_time_str(pattern)
 
         pat = re.compile(pattern)
 
@@ -217,6 +225,7 @@ class IDSMapping(Mapping):
             New dict with all matching key/value pairs.
         """
         pattern = insert_re_caret_dollar(pattern)
+        pattern = replace_time_str(pattern)
 
         pat = re.compile(pattern)
 
@@ -234,7 +243,7 @@ class IDSMapping(Mapping):
         """Find keys matching regex pattern using time index.
 
         Must include $i, which is a special character that matches
-        an integer (`\\d+`)
+        an integer time step (`\\d+`)
 
         i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
         returns a dict with `zeff` and error attributes.
@@ -249,14 +258,13 @@ class IDSMapping(Mapping):
         dict
             New dict with all matching key/value pairs.
         """
-        idx_str = '$i'
-
-        if idx_str not in pattern:
-            raise ValueError(f'Pattern must include {idx_str} to match index.')
+        if TIME_STR not in pattern:
+            raise ValueError(
+                f'Pattern must include ../{TIME_STR}/.. to match index.')
 
         pattern = insert_re_caret_dollar(pattern)
+        pattern = replace_time_str(pattern)
 
-        pattern = pattern.replace(idx_str, r'(?P<idx>\d+)')
         pat = re.compile(pattern)
 
         new_dict: Dict[str, Dict[int, np.ndarray]] = defaultdict(dict)
@@ -266,7 +274,7 @@ class IDSMapping(Mapping):
 
             if m:
                 si, sj = m.span('idx')
-                new_key = key[:si] + idx_str + key[sj:]
+                new_key = key[:si] + TIME_STR + key[sj:]
 
                 idx = int(m.group('idx'))
                 new_dict[new_key][idx] = self[key]
