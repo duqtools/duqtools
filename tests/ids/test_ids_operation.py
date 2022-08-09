@@ -29,35 +29,35 @@ def gen_sample_data():
 TEST_INPUT = (
     {
         'operator': 'add',
-        'ids': 'data/0/x',
+        'path': 'data/0/x',
         'value': 2,
     },
     {
         'operator': 'multiply',
-        'ids': 'data/0/y',
+        'path': 'data/0/y',
         'value': 0.5,
     },
     {
         'operator': 'add',
-        'ids': 'data/0/y',
+        'path': 'data/0/y',
         'value': 0.5,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'ids': 'data/0/y',
+        'path': 'data/0/y',
         'value': -0.5,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'ids': 'data/0/x',
+        'path': 'data/0/x',
         'value': 3.0,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'ids': 'data/0/x',
+        'path': 'data/0/x',
         'value': -3.0,
         'scale_to_error': True,
     },
@@ -80,4 +80,4 @@ def test_apply_model(model, output):
 
     apply_model(model, data)
 
-    assert_equal(data[model.ids], output)
+    assert_equal(data[model.path], output)
