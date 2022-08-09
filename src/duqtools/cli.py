@@ -187,7 +187,7 @@ def cli_status(**kwargs):
               type=str,
               help='IDS of the x value')
 @click.option('-y',
-              'y_vals',
+              'y_paths',
               type=str,
               help='IDS of the y value',
               multiple=True)

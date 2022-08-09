@@ -28,7 +28,7 @@ def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    prefix, (x_val, *y_vals) = split_paths(paths=(x_path, y_paths))
+    prefix, (x_val, *y_vals) = split_paths(paths=(x_path, *y_paths))
 
     source = get_ids_dataframe(handles,
                                ids=ids,
