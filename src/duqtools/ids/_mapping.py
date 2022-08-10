@@ -12,6 +12,7 @@ from ._copy import add_provenance_info
 
 if TYPE_CHECKING:
     import pandas as pd
+    import xarray as xr
 
     from ._handle import ImasHandle
 
@@ -314,6 +315,55 @@ class IDSMapping(Mapping):
         df[TSTEP_COL] = df[TSTEP_COL].astype(int)
 
         return df
+
+    def to_xarray(self,
+                  *variables: str,
+                  prefix: str = 'profiles_1d',
+                  time_steps: Sequence[int] = None) -> xr.Dataset:
+        """Return dataset for given variables.
+
+        Search string:
+        `{prefix}/{time_step}/{variable}`
+
+        Parameters
+        ----------
+        *variables : str
+            Keys to extract, i.e. `zeff`, `grid/rho_tor`
+        prefix : str, optional
+            First part of the data path
+        time_steps : Sequence[int], optional
+            List or array of integer time steps to extract.
+            Defaults to all time steps.
+
+        Returns
+        -------
+        ds : xr.Dataset
+            Return query as Dataset
+        """
+        import xarray as xr
+
+        points_per_var = len(self[f'{prefix}/0/{variables[0]}'])
+
+        if not time_steps:
+            n_time_steps = len(self[TIME_COL])
+            time_steps = range(n_time_steps)
+        else:
+            n_time_steps = len(time_steps)
+
+        ds = xr.Dataset(
+            coords={TSTEP_COL: ([TSTEP_COL], np.arange(n_time_steps))},
+            data_vars={TIME_COL: ([TSTEP_COL], self[TIME_COL])})
+
+        for j, variable in enumerate(variables):
+            arr = np.empty((n_time_steps, points_per_var))
+
+            for t in time_steps:
+                flat_variable = f'{prefix}/{t}/{variable}'
+                arr[t] = self[flat_variable]
+
+            ds[variable] = ([TSTEP_COL, 'x'], arr)
+
+        return ds
 
     def to_numpy(
         self,
