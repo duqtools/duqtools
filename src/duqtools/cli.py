@@ -37,6 +37,8 @@ def debug_option(f):
     def callback(ctx, param, debug):
         if debug:
             logging.getLogger().setLevel(logging.DEBUG)
+            for handle in logging.getLogger().handlers:
+                handle.setLevel(logging.DEBUG)
 
         return debug
 
