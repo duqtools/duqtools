@@ -83,7 +83,8 @@ These instructions operate on the template model. Note that these are compound o
 For example:
 
 ```yaml title="duqtools.yaml"
-ids: zeff
+ids: core_profiles
+path: profiles_1d/0/zeff
 operator: add
 values: [0.01, 0.02, 0.03]
 ```
@@ -91,7 +92,8 @@ values: [0.01, 0.02, 0.03]
 will generate 3 entries, `zeff += 0.01`, `zeff += 0.02`, and `zeff += 0.03`.
 
 ```yaml title="duqtools.yaml"
-ids: profiles_1d/0/t_i_average
+ids: core_profiles
+path: profiles_1d/0/t_i_average
 operator: multiply
 values: [1.1, 1.2, 1.3]
 ```
@@ -124,7 +126,8 @@ There are two ways to specify ranges in *duqtools*.
 This example generates a range from 0.7 to 1.3 with 10 steps:
 
 ```yaml title="duqtools.yaml"
-ids: profiles_1d/0/t_i_average
+ids: core_profiles
+path: profiles_1d/0/t_i_average
 operator: multiply
 values:
   start: 0.7
@@ -144,7 +147,8 @@ values:
 This example generates a range from 0.7 to 1.3 with steps of 0.1:
 
 ```yaml title="duqtools.yaml"
-ids: profiles_1d/0/t_i_average
+ids: core_profiles
+path: profiles_1d/0/t_i_average
 operator: multiply
 values:
   start: 0.7
@@ -157,7 +161,8 @@ values:
 The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
 
 ```yaml title="duqtools.yaml"
-ids: profiles_1d/0/electrons/temperature
+ids: core_profiles
+path: profiles_1d/0/electrons/temperature
 operator: add
 values: [-2, -1, 0, 1, 2]
 scale_to_error: True
@@ -166,7 +171,8 @@ scale_to_error: True
 The following example takes `t_i_average`, and generates a range from $-3\sigma$ to $+3\sigma$ with 10 equivalent steps:
 
 ```yaml title="duqtools.yaml"
-ids: profiles_1d/0/t_i_average
+ids: core_profiles
+path: profiles_1d/0/t_i_average
 operator: add
 values:
   start: -3

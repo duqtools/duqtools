@@ -1,7 +1,8 @@
 create:
   dimensions:
   - operator: multiply
-    ids: profiles_1d/0/t_i_average
+    ids: core_profiles
+    path: profiles_1d/0/t_i_average
     values:
     - 1.1
     - 1.2
@@ -10,7 +11,7 @@ create:
     method: latin-hypercube
     n_samples: 3
   data:
-    db: 'test'
+    imasdb: 'test'
     run_in_start_at: 7010
     run_out_start_at: 7010
   template: ./template_model

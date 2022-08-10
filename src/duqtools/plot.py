@@ -7,13 +7,13 @@ import click
 
 from ._plot_utils import alt_line_chart
 from .ids import ImasHandle, get_ids_dataframe
-from .utils import read_imas_handles_from_file
+from .utils import read_imas_handles_from_file, split_paths
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, extensions,
+def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
          **kwargs):
     """Show subroutine to create plots from IDS data."""
     handles = {}
@@ -28,7 +28,12 @@ def plot(*, x_val, y_vals, imas_paths, input_files, dry_run, extensions,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    source = get_ids_dataframe(handles, keys=(x_val, *y_vals))
+    prefix, (x_val, *y_vals) = split_paths(paths=(x_path, *y_paths))
+
+    source = get_ids_dataframe(handles,
+                               ids=ids,
+                               prefix=prefix,
+                               keys=(x_val, *y_vals))
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')

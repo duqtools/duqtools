@@ -74,11 +74,10 @@ if 'merge' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()
     extra_yamls['wd_yaml'] = model2config('workspace', cfg.workspace)
 
-    from duqtools.jetto import JettoSystem
-    from duqtools.system import DummySystem
+    from duqtools.schema.cli import MergeStep
 
-    extra_schemas['jetto_schema'] = JettoSystem.schema()
-    extra_schemas['dummy_schema'] = DummySystem.schema()
+    extra_schemas['merge_op_schema'] = cfg.merge.plan.schema()
+    extra_yamls['merge_op_yaml'] = model2config('plan', MergeStep())
 
 for name, model in models.items():
     template = get_template(f'template_{name}.md')

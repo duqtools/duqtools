@@ -9,7 +9,7 @@ from typing_extensions import Literal
 from ..models import AbstractSystem
 from ..operations import add_to_op_queue
 from ._imas_functions import imas_from_jset_input
-from ._jset import JettoSettings
+from ._settings_manager import JettoSettingsManager
 
 if TYPE_CHECKING:
     from ..ids import ImasHandle
@@ -46,14 +46,15 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     def imas_from_path(template_drc: Path):
 
-        jset = JettoSettings.from_directory(template_drc)
-        source = imas_from_jset_input(jset)
+        jetto_settings = JettoSettingsManager.from_directory(template_drc)
+        source = imas_from_jset_input(jetto_settings)
         assert source.path().exists()
         return source
 
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}')
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-        jset = JettoSettings.from_directory(run)
-        jset_copy = jset.set_imas_locations(inp=inp, out=out)
-        jset_copy.to_directory(run)
+        jetto_settings = JettoSettingsManager.from_directory(run)
+        jetto_settings_copy = jetto_settings.set_imas_locations(inp=inp,
+                                                                out=out)
+        jetto_settings_copy.to_directory(run)

@@ -188,22 +188,13 @@ class Operations(deque):
 
     def check_unconfirmed_operations(self):
         """Safety check, it should never happen that operations are not
-        executed.
-
-        , check it anyway at program exit
-        """
+        executed."""
         if len(self) != 0:
             self.logger.warning(
-                click.style(
-                    'There are unconfirmed operations in the queue at program exit!',
-                    fg='yellow',
-                    bold=True))
-            for op in self:
-                self.logger.warning('- ' + op.description)
-            self.logger.warning(
-                click.style(
-                    'Did you forget to use the @confirm_operations decorator?',
-                    fg='yellow'))
+                click.style((f'There are still {len(self)} operations '
+                             'in the queue at program exit!'),
+                            fg='red',
+                            bold=True))
 
 
 op_queue = Operations()

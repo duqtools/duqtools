@@ -3,7 +3,7 @@ from pathlib import Path
 from time import sleep
 
 from .config import cfg
-from .jetto import read_namelist
+from .jetto import JettoSettingsManager
 from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
@@ -156,12 +156,13 @@ class Monitor():
 
         infile = (dir / cfg.status.in_file)
         if not infile.exists():
-            debug('%s does not exists, but the job is running', infile)
+            debug('%s does not exist, but the job is running', infile)
             return 0
 
-        nml = read_namelist(infile)
-        self.start = nml['nlist1']['tbeg']
-        self.end = nml['nlist1']['tmax']
+        jsetmanager = JettoSettingsManager.from_directory(dir)
+
+        self.start = jsetmanager.tstart
+        self.end = jsetmanager.tend
         self.time = self.start
 
         self.finished = False
