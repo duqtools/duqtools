@@ -93,7 +93,7 @@ def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
         entry.put(db_entry=data_entry_target)
 
 
-@add_to_op_queue('Copy ids from template to', '{target}')
+@add_to_op_queue('Copy ids from template to', '{target}', quiet=True)
 def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """Copies the ids entry to a new location.
 

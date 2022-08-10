@@ -22,6 +22,8 @@ class Operation(BaseModel):
     following members:
     """
 
+    quiet: bool = Field(False,
+                        description='print out this operation to the screen')
     description: str = Field(
         description='description of the operation to be done')
     action: Callable = Field(
@@ -154,10 +156,11 @@ class Operations(deque):
             with tqdm(iterable=False, bar_format='{desc}', position=0) as dbar:
                 while len(self) != 0:
                     op = self.popleft()
-                    op()
-                    dbar.set_description(op.description)
+                    if not op.quiet:
+                        dbar.set_description(op.description)
                     logger.info(op.description)
                     pbar.update()
+                    op()
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -173,7 +176,8 @@ class Operations(deque):
             click.style('Operations in the Queue:', fg='red', bold=True))
         self.logger.info(click.style('========================', fg='red'))
         for op in self:
-            self.logger.info('- ' + op.description)
+            if not op.quiet:
+                self.logger.info('- ' + op.description)
 
         if self.dry_run:
             self.logger.info('Dry run enabled, not applying op_queue')
@@ -234,7 +238,9 @@ def confirm_operations(func):
         return wrapper
 
 
-def add_to_op_queue(op_desc: str, extra_desc: Optional[str] = None):
+def add_to_op_queue(op_desc: str,
+                    extra_desc: Optional[str] = None,
+                    quiet=False):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
     function arguments.
@@ -271,7 +277,8 @@ def add_to_op_queue(op_desc: str, extra_desc: Optional[str] = None):
                          args=args,
                          kwargs=kwargs,
                          description=op_formatted,
-                         extra_description=extra_formatted)
+                         extra_description=extra_formatted,
+                         quiet=quiet)
 
         return wrapper
 
