@@ -30,7 +30,7 @@ class JettoSystem(AbstractSystem):
     name: Literal['jetto'] = Field('jetto', description='Name of the system.')
 
     @staticmethod
-    @add_to_op_queue('Writing new batchfile', '{run_name}')
+    @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
         from duqtools.jetto import write_batchfile as jetto_write_batchfile
@@ -39,7 +39,7 @@ class JettoSystem(AbstractSystem):
         return jetto_write_batchfile(workspace, run_name, jset)
 
     @staticmethod
-    @add_to_op_queue('Copying template to', '{target_drc}')
+    @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(source_drc: Path, target_drc: Path):
         from duqtools.jetto import copy_files
         return copy_files(source_drc, target_drc)
@@ -53,7 +53,7 @@ class JettoSystem(AbstractSystem):
         return source
 
     @staticmethod
-    @add_to_op_queue('Updating imas locations of', '{run}')
+    @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
         jetto_settings = JettoSettingsManager.from_directory(run)
         jetto_settings_copy = jetto_settings.set_imas_locations(inp=inp,
