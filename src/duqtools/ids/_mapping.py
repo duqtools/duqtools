@@ -365,6 +365,46 @@ class IDSMapping(Mapping):
 
         return ds
 
+    def to_xarray2(self):
+        import re
+        from collections import defaultdict
+
+        import xarray as xr
+
+        DATA_COL = 'x'
+
+        patterns = (
+            r'^profiles_1d/(?P<tstep>\d+)/(?P<x>grid/rho_tor_norm)$',
+            r'^profiles_1d/(?P<tstep>\d+)/(?P<x>t_i_average)$',
+        )
+
+        coords = defaultdict(lambda: defaultdict(list))
+        data_arrs = defaultdict(list)
+
+        for pattern in patterns:
+            pat = re.compile(pattern)
+            dims = list(str(item) for item in pat.groupindex)
+
+            for key in self._keys:
+
+                m = pat.match(key)
+                if m:
+                    break
+                    try:
+                        tstep = int(m.groupdict()[TSTEP_COL])
+                    except KeyError:
+                        pass
+                    else:
+                        coords[m[DATA_COL]][TSTEP_COL].append(tstep)
+
+                    data_arrs[m[DATA_COL]].append(self[m.group()])
+
+        new_data = {}
+        for key, data in data_arrs.items():
+            new_data[key] = xr.DataArray(data, dims=dims, coords=coords[key])
+
+        xr.Dataset(new_data)
+
     def to_numpy(
         self,
         *variables: str,
