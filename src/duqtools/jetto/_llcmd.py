@@ -6,8 +6,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from duqtools.models import WorkDirectory
 
+    from ._jetto_jset import JettoJset
 
-def write_batchfile(workspace: WorkDirectory, run_name: str):
+
+def write_batchfile(workspace: WorkDirectory, run_name: str, jset: JettoJset):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
@@ -15,6 +17,8 @@ def write_batchfile(workspace: WorkDirectory, run_name: str):
     target_drc : Path
         Directory to place batch file into.
     """
+    settings = jset.settings
+    file_details = jset.raw_mapping['File Details']
     run_drc = workspace.cwd / run_name
     llcmd_path = run_drc / '.llcmd'
 
@@ -24,16 +28,16 @@ def write_batchfile(workspace: WorkDirectory, run_name: str):
 
     with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
-#SBATCH -J jetto.{run_name}
+#SBATCH -J duqtools.jetto.{run_name}
 #SBATCH -i /dev/null
 #SBATCH -o {full_path}/ll.out
 #SBATCH -e {full_path}/ll.err
-#SBATCH -p gw
+#SBATCH -p {settings['JobProcessingPanel.machineNumber']}
 
 #SBATCH -N 1
-#SBATCH -n 2
-#SBATCH -t 24:00:00
+#SBATCH -n {settings['JobProcessingPanel.numProcessors']}
+#SBATCH -t {settings['JobProcessingPanel.wallTime']}:00:00
 
 cd {full_path}
-{rjettov_path} -S -I -p -xmpi -x64 {rel_path} v210921_gateway_imas g2fkoech
-""")
+{rjettov_path} -S -I -p -xmpi -x64 {rel_path} \
+{file_details['Version']} {settings['JobProcessingPanel.userid']}""")

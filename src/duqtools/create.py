@@ -120,7 +120,7 @@ def create(*, force, **kwargs):
         apply_combination(target_in, combination)
 
         system.copy_from_template(template_drc, run_drc)
-        system.write_batchfile(workspace, run_name)
+        system.write_batchfile(workspace, run_name, template_drc)
 
         system.update_imas_locations(run=run_drc,
                                      inp=target_in,

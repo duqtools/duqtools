@@ -14,7 +14,8 @@ class DummySystem(AbstractSystem):
     """
 
     @staticmethod
-    def write_batchfile(workspace: WorkDirectory, run_name: str):
+    def write_batchfile(workspace: WorkDirectory, run_name: str,
+                        template_drc: Path):
         pass
 
     @staticmethod
