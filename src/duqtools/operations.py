@@ -219,14 +219,19 @@ def confirm_operations(func):
     def wrapper(*args, **kwargs):
         if op_queue.enabled:
             raise RuntimeError('op_queue already enabled')
-        op_queue.enabled = True
-        ret = func(*args, **kwargs)
-        op_queue.confirm_apply_all()
-        op_queue.clear()
-        op_queue.enabled = False
+        try:
+            op_queue.enabled = True
+            ret = func(*args, **kwargs)
+            op_queue.confirm_apply_all()
+            op_queue.clear()
+            op_queue.enabled = False
+        except Exception:
+            op_queue.clear()
+            op_queue.enabled = False
+            raise
         return ret
 
-    return wrapper
+        return wrapper
 
 
 def add_to_op_queue(op_desc: str, extra_desc: Optional[str] = None):
@@ -286,8 +291,13 @@ def op_queue_context():
 
     if op_queue.enabled:
         raise RuntimeError('op_queue already enabled')
-    op_queue.enabled = True
-    yield
-    op_queue.confirm_apply_all()
-    op_queue.clear()
-    op_queue.enabled = False
+    try:
+        op_queue.enabled = True
+        yield
+        op_queue.confirm_apply_all()
+        op_queue.clear()
+        op_queue.enabled = False
+    except Exception:
+        op_queue.clear()
+        op_queue.enabled = False
+        raise
