@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from ..models import AbstractSystem
 from ..operations import add_to_op_queue
 from ._imas_functions import imas_from_jset_input
+from ._jetto_jset import JettoJset
 from ._settings_manager import JettoSettingsManager
 
 if TYPE_CHECKING:
@@ -33,7 +34,7 @@ class JettoSystem(AbstractSystem):
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
         from duqtools.jetto import write_batchfile as jetto_write_batchfile
-        jset = JettoSettings.from_directory(template_drc)
+        jset = JettoJset.from_directory(template_drc)
 
         return jetto_write_batchfile(workspace, run_name, jset)
 

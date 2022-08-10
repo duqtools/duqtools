@@ -3,14 +3,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ._jset import JettoSettings
-
 if TYPE_CHECKING:
     from duqtools.models import WorkDirectory
 
+    from ._jetto_jset import JettoJset
 
-def write_batchfile(workspace: WorkDirectory, run_name: str,
-                    jset: JettoSettings):
+
+def write_batchfile(workspace: WorkDirectory, run_name: str, jset: JettoJset):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
