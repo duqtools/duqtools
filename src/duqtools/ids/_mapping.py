@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 TIME_STR = '$i'
 
+DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
+
 
 def insert_re_caret_dollar(string: str) -> str:
     """Insert regex start (^) / end ($) of line matching characters."""
@@ -85,6 +87,8 @@ class IDSMapping(Mapping):
             ret = getattr(pointer, attr)
         except AttributeError as err:
             raise KeyError(key) from err
+        except IndexError as err:
+            raise KeyError(key) from err
 
         return ret
 
@@ -94,6 +98,8 @@ class IDSMapping(Mapping):
             pointer, attr = self._deconstruct_key(key)
             getattr(pointer, attr)
         except AttributeError as err:
+            raise KeyError(key) from err
+        except IndexError as err:
             raise KeyError(key) from err
         else:
             setattr(pointer, attr, value)
@@ -316,24 +322,21 @@ class IDSMapping(Mapping):
 
         return df
 
-    def to_xarray(self,
-                  *variables: str,
-                  prefix: str = 'profiles_1d',
-                  time_steps: Sequence[int] = None) -> xr.Dataset:
+    def to_xarray(
+        self,
+        # data_vars: List[Variable],
+        data_vars: Dict[str, str],
+        # coord_vars: List[Variable],
+        coord_vars: Dict[str, str],
+    ) -> xr.Dataset:
         """Return dataset for given variables.
-
-        Search string:
-        `{prefix}/{time_step}/{variable}`
 
         Parameters
         ----------
-        *variables : str
-            Keys to extract, i.e. `zeff`, `grid/rho_tor`
-        prefix : str, optional
-            First part of the data path
-        time_steps : Sequence[int], optional
-            List or array of integer time steps to extract.
-            Defaults to all time steps.
+        data_vars : Dict[str, str]
+            Dictionary of data variables
+        coord_vars : Dict[str, str]
+            Dictionary of coordinate variables.
 
         Returns
         -------
@@ -342,68 +345,37 @@ class IDSMapping(Mapping):
         """
         import xarray as xr
 
-        points_per_var = len(self[f'{prefix}/0/{variables[0]}'])
+        xr_coords = {}
+        xr_data_vars = {}
 
-        if not time_steps:
-            n_time_steps = len(self[TIME_COL])
-            time_steps = range(n_time_steps)
-        else:
-            n_time_steps = len(time_steps)
+        for dim, path in coord_vars.items():
+            xr_coords[dim] = self[path]
+
+        for name, pattern in data_vars.items():
+            dimensions = DIM_PATTERN.findall(pattern)
+
+            if len(dimensions) > 1:
+                raise NotImplementedError
+
+            index_string, dimension = dimensions[0]
+            prefix = pattern.split(index_string)[0].strip('/')
+
+            arr = []
+
+            for index in range(len(self[prefix])):
+                path = pattern.replace(index_string, str(index))
+                arr.append(self[path])
+
+            other_dims = 'xyz'[0:arr[0].ndim]  # 1d: 'x', 2d: 'xy', 3d: 'xyz'
+
+            xr_data_vars[name] = ([dimension, *other_dims], arr)
 
         ds = xr.Dataset(
-            coords={TSTEP_COL: ([TSTEP_COL], np.arange(n_time_steps))},
-            data_vars={TIME_COL: ([TSTEP_COL], self[TIME_COL])})
-
-        for j, variable in enumerate(variables):
-            arr = np.empty((n_time_steps, points_per_var))
-
-            for t in time_steps:
-                flat_variable = f'{prefix}/{t}/{variable}'
-                arr[t] = self[flat_variable]
-
-            ds[variable] = ([TSTEP_COL, 'x'], arr)
-
-        return ds
-
-    def to_xarray2(self):
-        import re
-        from collections import defaultdict
-
-        import xarray as xr
-
-        DATA_COL = 'x'
-
-        patterns = (
-            r'^profiles_1d/(?P<tstep>\d+)/(?P<x>grid/rho_tor_norm)$',
-            r'^profiles_1d/(?P<tstep>\d+)/(?P<x>t_i_average)$',
+            data_vars=xr_data_vars,
+            coords=xr_coords,
         )
 
-        coords = defaultdict(lambda: defaultdict(list))
-        data_arrs = defaultdict(list)
-
-        for pattern in patterns:
-            pat = re.compile(pattern)
-            dims = list(str(item) for item in pat.groupindex)
-
-            for key in self._keys:
-
-                m = pat.match(key)
-                if m:
-                    break
-                    try:
-                        tstep = int(m.groupdict()[TSTEP_COL])
-                    except KeyError:
-                        pass
-                    else:
-                        coords[m[DATA_COL]][TSTEP_COL].append(tstep)
-
-                    data_arrs[m[DATA_COL]].append(self[m.group()])
-
-        new_data = {}
-        for key, data in data_arrs.items():
-            new_data[key] = xr.DataArray(data, dims=dims, coords=coords[key])
-
-        xr.Dataset(new_data)
+        return ds
 
     def to_numpy(
         self,
