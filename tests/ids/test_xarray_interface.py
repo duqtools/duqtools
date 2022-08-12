@@ -2,7 +2,14 @@ import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample
 
-from duqtools.api import IDSMapping
+from duqtools.api import IDSMapping, Variable
+
+TIME_VAR = Variable(
+    name='time',
+    ids='core_profiles',
+    path='time',
+    dims=['time'],
+)
 
 
 @pytest.fixture
@@ -120,26 +127,46 @@ def sample_data():
 
 
 def test_1d(sample_data, expected_dataset_1d):
-    coord_patterns = {'time': 'time'}
+    coord_vars = [TIME_VAR]
 
-    data_patterns = {
-        'xvar': 'nested_profiles_1d/$time/data/grid',
-        'yvar': 'nested_profiles_1d/$time/data/variable',
-    }
+    data_vars = [
+        Variable(
+            name='xvar',
+            ids='core_profiles',
+            path='nested_profiles_1d/$time/data/grid',
+            dims=['x'],
+        ),
+        Variable(
+            name='yvar',
+            ids='core_profiles',
+            path='nested_profiles_1d/$time/data/variable',
+            dims=['x'],
+        ),
+    ]
 
-    dataset_1d = sample_data.to_xarray(data_vars=data_patterns,
-                                       coord_vars=coord_patterns)
+    dataset_1d = sample_data.to_xarray(data_vars=data_vars,
+                                       coord_vars=coord_vars)
     xr.testing.assert_equal(dataset_1d, expected_dataset_1d)
 
 
 def test_2d(sample_data, expected_dataset_2d):
-    coord_patterns = {'time': 'time'}
+    coord_vars = [TIME_VAR]
 
-    data_patterns = {
-        'xvar': 'nested_profiles_2d/$time/data/grid',
-        'yvar': 'nested_profiles_2d/$time/data/variable',
-    }
+    data_vars = [
+        Variable(
+            name='xvar',
+            ids='core_profiles',
+            path='nested_profiles_2d/$time/data/grid',
+            dims=['x', 'y'],
+        ),
+        Variable(
+            name='yvar',
+            ids='core_profiles',
+            path='nested_profiles_2d/$time/data/variable',
+            dims=['x', 'y'],
+        ),
+    ]
 
-    dataset_2d = sample_data.to_xarray(data_vars=data_patterns,
-                                       coord_vars=coord_patterns)
+    dataset_2d = sample_data.to_xarray(data_vars=data_vars,
+                                       coord_vars=coord_vars)
     xr.testing.assert_equal(dataset_2d, expected_dataset_2d)

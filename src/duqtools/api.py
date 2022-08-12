@@ -10,6 +10,7 @@ Data classes:
 
 - [ImasHandle][duqtools.api.ImasHandle]
 - [IDSMapping][duqtools.api.IDSMapping]
+- [Variable][duqtools.api.Variable]
 
 Plotting:
 
@@ -18,8 +19,8 @@ Plotting:
 """
 
 from ._plot_utils import alt_errorband_chart, alt_line_chart
-from .ids import (IDSMapping, ImasHandle, get_ids_dataframe, rebase_on_grid,
-                  rebase_on_time)
+from .ids import (IDSMapping, ImasHandle, Variable, get_ids_dataframe,
+                  rebase_on_grid, rebase_on_time)
 
 __all__ = [
     'get_ids_dataframe',
@@ -27,6 +28,7 @@ __all__ = [
     'rebase_on_time',
     'ImasHandle',
     'IDSMapping',
+    'Variable',
     'alt_line_chart',
     'alt_errorband_chart',
 ]

@@ -9,6 +9,7 @@ import numpy as np
 
 from ._constants import TIME_COL, TSTEP_COL
 from ._copy import add_provenance_info
+from ._variable import Variable
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -324,10 +325,8 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        # data_vars: List[Variable],
-        data_vars: Dict[str, str],
-        # coord_vars: List[Variable],
-        coord_vars: Dict[str, str],
+        data_vars: Sequence[Variable],
+        coord_vars: Sequence[Variable],
     ) -> xr.Dataset:
         """Return dataset for given variables.
 
@@ -348,27 +347,24 @@ class IDSMapping(Mapping):
         xr_coords = {}
         xr_data_vars = {}
 
-        for dim, path in coord_vars.items():
-            xr_coords[dim] = self[path]
+        for var in coord_vars:
+            xr_coords[var.name] = (var.dims, self[var.path])
 
-        for name, pattern in data_vars.items():
-            dimensions = DIM_PATTERN.findall(pattern)
-
+        for var in data_vars:
+            dimensions = DIM_PATTERN.findall(var.path)
             if len(dimensions) > 1:
                 raise NotImplementedError
 
             index_string, dimension = dimensions[0]
-            prefix = pattern.split(index_string)[0].strip('/')
+            prefix = var.path.split(index_string)[0].strip('/')
 
             arr = []
 
             for index in range(len(self[prefix])):
-                path = pattern.replace(index_string, str(index))
+                path = var.path.replace(index_string, str(index))
                 arr.append(self[path])
 
-            other_dims = 'xyz'[0:arr[0].ndim]  # 1d: 'x', 2d: 'xy', 3d: 'xyz'
-
-            xr_data_vars[name] = ([dimension, *other_dims], arr)
+            xr_data_vars[var.name] = ([dimension, *var.dims], arr)
 
         ds = xr.Dataset(
             data_vars=xr_data_vars,
