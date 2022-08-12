@@ -18,8 +18,8 @@ def _get_ids_run_dataframe(handle: ImasHandle,
                            **kwargs) -> pd.DataFrame:
     """Get data for single run."""
     logger.info('Getting data for %s', handle)
-    profile = handle.get(ids, exclude_empty=True)
-    return profile.to_dataframe(*keys, **kwargs)
+    data = handle.get(ids, exclude_empty=True)
+    return data.to_dataframe(*keys, **kwargs)
 
 
 def get_ids_dataframe(handles: Union[Sequence[ImasHandle],

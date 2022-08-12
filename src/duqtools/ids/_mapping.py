@@ -9,13 +9,17 @@ import numpy as np
 
 from ._constants import TIME_COL, TSTEP_COL
 from ._copy import add_provenance_info
+from ._variable import Variable
 
 if TYPE_CHECKING:
     import pandas as pd
+    import xarray as xr
 
     from ._handle import ImasHandle
 
 TIME_STR = '$i'
+
+DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -84,6 +88,8 @@ class IDSMapping(Mapping):
             ret = getattr(pointer, attr)
         except AttributeError as err:
             raise KeyError(key) from err
+        except IndexError as err:
+            raise KeyError(key) from err
 
         return ret
 
@@ -93,6 +99,8 @@ class IDSMapping(Mapping):
             pointer, attr = self._deconstruct_key(key)
             getattr(pointer, attr)
         except AttributeError as err:
+            raise KeyError(key) from err
+        except IndexError as err:
             raise KeyError(key) from err
         else:
             setattr(pointer, attr, value)
@@ -314,6 +322,65 @@ class IDSMapping(Mapping):
         df[TSTEP_COL] = df[TSTEP_COL].astype(int)
 
         return df
+
+    def to_xarray(
+        self,
+        data_vars: Sequence[Variable] = None,
+        coord_vars: Sequence[Variable] = None,
+    ) -> xr.Dataset:
+        """Return dataset for given variables.
+
+        Parameters
+        ----------
+        data_vars : Dict[str, str]
+            Dictionary of data variables
+        coord_vars : Dict[str, str]
+            Dictionary of coordinate variables.
+
+        Returns
+        -------
+        ds : xr.Dataset
+            Return query as Dataset
+        """
+        import xarray as xr
+
+        if not coord_vars:
+            coord_vars = ()
+        if not data_vars:
+            data_vars = ()
+
+        xr_coords = {}
+        xr_data_vars = {}
+
+        for var in coord_vars:
+            xr_coords[var.name] = (var.dims, self[var.path])
+
+        for var in data_vars:
+            dimensions = DIM_PATTERN.findall(var.path)
+            if not dimensions:
+                xr_data_vars[var.name] = (var.dims, self[var.path])
+                continue
+
+            if len(dimensions) > 1:
+                raise NotImplementedError
+
+            index_string, dimension = dimensions[0]
+            prefix = var.path.split(index_string)[0].strip('/')
+
+            arr = []
+
+            for index in range(len(self[prefix])):
+                path = var.path.replace(index_string, str(index))
+                arr.append(self[path])
+
+            xr_data_vars[var.name] = ([dimension, *var.dims], arr)
+
+        ds = xr.Dataset(
+            data_vars=xr_data_vars,
+            coords=xr_coords,
+        )
+
+        return ds
 
     def to_numpy(
         self,
