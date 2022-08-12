@@ -325,8 +325,8 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        data_vars: Sequence[Variable],
-        coord_vars: Sequence[Variable],
+        data_vars: Sequence[Variable] = None,
+        coord_vars: Sequence[Variable] = None,
     ) -> xr.Dataset:
         """Return dataset for given variables.
 
@@ -344,6 +344,11 @@ class IDSMapping(Mapping):
         """
         import xarray as xr
 
+        if not coord_vars:
+            coord_vars = ()
+        if not data_vars:
+            data_vars = ()
+
         xr_coords = {}
         xr_data_vars = {}
 
@@ -352,6 +357,10 @@ class IDSMapping(Mapping):
 
         for var in data_vars:
             dimensions = DIM_PATTERN.findall(var.path)
+            if not dimensions:
+                xr_data_vars[var.name] = (var.dims, self[var.path])
+                continue
+
             if len(dimensions) > 1:
                 raise NotImplementedError
 

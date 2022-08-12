@@ -13,6 +13,54 @@ TIME_VAR = Variable(
 
 
 @pytest.fixture
+def expected_dataset_no_index():
+    return xr.Dataset.from_dict({
+        'coords': {
+            'time': {
+                'dims': ('time', ),
+                'attrs': {},
+                'data': [23, 24, 25]
+            }
+        },
+        'attrs': {},
+        'dims': {
+            'x': 10,
+            'time': 3
+        },
+        'data_vars': {
+            'xvar': {
+                'dims': ('x', ),
+                'attrs': {},
+                'data': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            },
+            'yvar': {
+                'dims': ('x', ),
+                'attrs': {},
+                'data': [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+            }
+        }
+    })
+
+
+@pytest.fixture
+def expected_dataset_0d():
+    return xr.Dataset.from_dict({
+        'coords': {},
+        'attrs': {},
+        'dims': {
+            'x': 1
+        },
+        'data_vars': {
+            'xval': {
+                'dims': ('x', ),
+                'attrs': {},
+                'data': [123]
+            }
+        }
+    })
+
+
+@pytest.fixture
 def expected_dataset_1d():
     return xr.Dataset.from_dict({
         'coords': {
@@ -126,6 +174,42 @@ def sample_data():
     return IDSMapping(Sample)
 
 
+def test_no_time_index(sample_data, expected_dataset_no_index):
+    coord_vars = [TIME_VAR]
+
+    data_vars = [
+        Variable(
+            name='xvar',
+            ids='core_profiles',
+            path='nested_single_profile_1d/data/grid',
+            dims=['x'],
+        ),
+        Variable(
+            name='yvar',
+            ids='core_profiles',
+            path='nested_single_profile_1d/data/variable',
+            dims=['x'],
+        ),
+    ]
+
+    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    xr.testing.assert_equal(dataset, expected_dataset_no_index)
+
+
+def test_0d(sample_data, expected_dataset_0d):
+    data_vars = [
+        Variable(
+            name='xval',
+            ids='core_profiles',
+            path='nested_single_val/val',
+            dims=['x'],
+        ),
+    ]
+    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=None)
+
+    xr.testing.assert_equal(dataset, expected_dataset_0d)
+
+
 def test_1d(sample_data, expected_dataset_1d):
     coord_vars = [TIME_VAR]
 
@@ -144,9 +228,8 @@ def test_1d(sample_data, expected_dataset_1d):
         ),
     ]
 
-    dataset_1d = sample_data.to_xarray(data_vars=data_vars,
-                                       coord_vars=coord_vars)
-    xr.testing.assert_equal(dataset_1d, expected_dataset_1d)
+    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    xr.testing.assert_equal(dataset, expected_dataset_1d)
 
 
 def test_2d(sample_data, expected_dataset_2d):
@@ -167,6 +250,5 @@ def test_2d(sample_data, expected_dataset_2d):
         ),
     ]
 
-    dataset_2d = sample_data.to_xarray(data_vars=data_vars,
-                                       coord_vars=coord_vars)
-    xr.testing.assert_equal(dataset_2d, expected_dataset_2d)
+    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    xr.testing.assert_equal(dataset, expected_dataset_2d)
