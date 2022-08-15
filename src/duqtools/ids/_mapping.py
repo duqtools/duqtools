@@ -44,9 +44,10 @@ class IDSMapping(Mapping):
         Parameters
         ----------
         ids :
-            ids
+            IMAS DB entry for the IDS.
         exclude_empty : bool
-            exclude_empty
+            Hide empty arrays from mapping. You can still get/set these keys directly,
+            but `key in map` returns `False` if `map['key']` is an empty array.
         """
         self._ids = ids
         self.exclude_empty = exclude_empty
@@ -110,6 +111,9 @@ class IDSMapping(Mapping):
 
     def __len__(self):
         return len(self._keys)
+
+    def __contains__(self, key):
+        return key in self._keys
 
     def length_of_key(self, key: str):
         """length_of_key gives you the number of entries of a (partial) ids
