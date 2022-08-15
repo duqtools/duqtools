@@ -274,7 +274,8 @@ def cli_dash(**kwargs):
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
     from .merge import merge
-    merge(**kwargs)
+    with op_queue_context():
+        merge(**kwargs)
 
 
 if __name__ == '__main__':

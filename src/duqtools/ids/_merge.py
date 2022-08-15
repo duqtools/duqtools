@@ -2,23 +2,29 @@ from typing import Sequence
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 from ..operations import add_to_op_queue
 from ._handle import ImasHandle
+from ._io import get_ids_dataframe
 from ._rebase import rebase_on_grid, rebase_on_time
 
 
-@add_to_op_queue('Merge', '{ids} -> {target}')
-def merge_data(data: pd.DataFrame,
-               target: ImasHandle,
-               x_val: str,
-               y_vals: Sequence[str],
-               ids: str = 'core_profiles',
-               prefix: str = 'profiles_1d'):
-    input_data = target.get(ids)
+@add_to_op_queue('Merge', '{target}')
+def merge_data(source_data: xr.Dataset, target: ImasHandle, x_var: str,
+               y_vars: Sequence[str]):
+    raise NotImplementedError
+
+    variables = [x_var, *y_vars]
+    data = get_ids_dataframe(source_data, variables=variables)
+
+    if len(set(var.ids for var in variables)) != 1:
+        raise ValueError('Variables must belong to same IDS')
+
+    input_data = target.get(x_var.ids)
 
     # pick first time step as basis
-    common_basis = input_data[f'{prefix}/0/{x_val}']
+    common_basis = input_data[x_var.path][0]
 
     data = rebase_on_grid(data,
                           grid=x_val,
