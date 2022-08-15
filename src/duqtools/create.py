@@ -77,7 +77,7 @@ def create(*, force, **kwargs):
 
     logger.info('Source data: %s', source)
 
-    matrix = tuple(dim.expand() for dim in dimensions)
+    matrix = tuple(model.expand() for model in dimensions)
     combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
     if not force:

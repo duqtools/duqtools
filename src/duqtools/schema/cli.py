@@ -251,7 +251,7 @@ class ConfigModel(BaseModel):
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
 
-    @root_validator(pre=False)
+    @root_validator(pre=False, skip_on_failure=True)
     def update_variables(cls, values):
         """Grab variable names from different steps and replace them with the
         definitions from the `variables` attribute."""
