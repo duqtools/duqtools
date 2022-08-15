@@ -104,7 +104,10 @@ class ImasHandle(ImasBaseModel):
             Copy data to a new location.
         """
         logger.debug('Copy %s to %s', self, destination)
-        copy_ids_entry(self, destination)
+        try:
+            copy_ids_entry(self, destination)
+        except Exception as err:
+            raise IOError(f'Failed to copy {self}') from err
 
     @add_to_op_queue('Removing ids', '{self}')
     def delete(self):
