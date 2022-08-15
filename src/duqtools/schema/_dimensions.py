@@ -8,14 +8,14 @@ from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
+from ._variable import VariableModel
 
 
 class IDSPathMixin(BaseModel):
-    ids: str = Field('core_profiles', description='Root IDS name.')
-    path: str = Field('profiles_1d/$i/t_i_average',
-                      description=f("""
-            IDS Path of the data to modify.
-            The time slice can be denoted with '$i', this will match all
+    variable: Union[str, VariableModel] = Field('t_i_average',
+                                                description=f("""
+            IDS variable for the data to modify.
+            The time slice can be denoted with '$time', this will match all
             time slices in the IDS. Alternatively, you can specify the time
             slice directly, i.e. `profiles_1d/0/t_i_average` to only
             match and update the 0-th time slice.
@@ -108,8 +108,7 @@ class IDSOperationDim(IDSPathMixin, IDSOperatorMixin, BaseModel):
     def expand(self, *args, **kwargs) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
-            IDSOperation(ids=self.ids,
-                         path=self.path,
+            IDSOperation(variable=self.variable,
                          operator=self.operator,
                          value=value,
                          scale_to_error=self.scale_to_error)
