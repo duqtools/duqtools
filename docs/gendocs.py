@@ -70,13 +70,16 @@ if 'introduction' in models:
     extra_schemas['jetto_schema'] = JettoSystem.schema()
     extra_schemas['dummy_schema'] = DummySystem.schema()
 
+    extra_schemas['variable_schema'] = cfg.variables.__root__[0].schema()
+    extra_yamls['variables_yaml'] = model2config('variables', cfg.variables)
+
 if 'merge' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()
     extra_yamls['wd_yaml'] = model2config('workspace', cfg.workspace)
 
     from duqtools.schema.cli import MergeStep
 
-    extra_schemas['merge_op_schema'] = cfg.merge.plan.schema()
+    extra_schemas['merge_op_schema'] = cfg.merge.plan[0].schema()
     extra_yamls['merge_op_yaml'] = model2config('plan', MergeStep())
 
 for name, model in models.items():

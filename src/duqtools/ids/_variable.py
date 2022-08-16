@@ -1,11 +1,5 @@
-from typing import List
-
-from pydantic import BaseModel
+from ..schema._variable import VariableModel
 
 
-class Variable(BaseModel):
-    """Variable for describing data within a IMAS database."""
-    name: str
-    ids: str
-    path: str
-    dims: List[str]
+class Variable(VariableModel):
+    ...

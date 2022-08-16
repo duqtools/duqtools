@@ -1,24 +1,31 @@
 from typing import Sequence
 
 import numpy as np
-import pandas as pd
 
 from ..operations import add_to_op_queue
+from ..schema import VariableModel
 from ._handle import ImasHandle
+from ._io import get_ids_dataframe
 from ._rebase import rebase_on_grid, rebase_on_time
 
 
-@add_to_op_queue('Merge', '{ids} -> {target}')
-def merge_data(data: pd.DataFrame,
-               target: ImasHandle,
-               x_val: str,
-               y_vals: Sequence[str],
-               ids: str = 'core_profiles',
-               prefix: str = 'profiles_1d'):
-    input_data = target.get(ids)
+@add_to_op_queue('Merge', '{target}')
+def merge_data(source_data: Sequence[ImasHandle], target: ImasHandle,
+               x_var: VariableModel, y_vars: Sequence[VariableModel]):
+    variables = [x_var, *y_vars]
+
+    if len(set(var.ids for var in variables)) != 1:
+        raise ValueError('Variables must belong to same IDS')
+
+    data = get_ids_dataframe(source_data, variables=variables)
+
+    input_data = target.get(x_var.ids)
 
     # pick first time step as basis
-    common_basis = input_data[f'{prefix}/0/{x_val}']
+    common_basis = input_data.get_with_replace(x_var.path, time=0)
+
+    x_val = x_var.name
+    y_vals = [var.name for var in y_vars if var.name != 'time']
 
     data = rebase_on_grid(data,
                           grid=x_val,
@@ -37,17 +44,18 @@ def merge_data(data: pd.DataFrame,
 
     merged = gb.agg(agg_dict)
 
-    ids_mapping = target.get(ids, exclude_empty=False)
+    ids_mapping = target.get(x_var.ids, exclude_empty=False)
 
     for y_val in y_vals:
+        var = [var for var in y_vars if var.name == y_val][0]
         for tstep, group in merged.groupby('tstep'):
 
             mean = np.array(group[y_val, 'mean'])
             stdev = np.array(group[y_val, 'std'])
 
-            key = f'{prefix}/{tstep}/{y_val}'
+            path = var.path.replace('$time', str(tstep))
 
-            ids_mapping[key] = mean
-            ids_mapping[key + '_error_upper'] = mean + stdev
+            ids_mapping[path] = mean
+            ids_mapping[path + '_error_upper'] = mean + stdev
 
     ids_mapping.sync(target)

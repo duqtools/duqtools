@@ -185,7 +185,7 @@ def cli_status(**kwargs):
 @cli.command('plot')
 @click.option('-x',
               'x_path',
-              default='profiles_1d/$i/grid/rho_tor_norm',
+              default='profiles_1d/$time/grid/rho_tor_norm',
               type=str,
               help='IDS of the x value')
 @click.option('-y',
@@ -274,7 +274,8 @@ def cli_dash(**kwargs):
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
     from .merge import merge
-    merge(**kwargs)
+    with op_queue_context():
+        merge(**kwargs)
 
 
 if __name__ == '__main__':

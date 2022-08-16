@@ -175,9 +175,8 @@ def sample_data():
 
 
 def test_no_time_index(sample_data, expected_dataset_no_index):
-    coord_vars = [TIME_VAR]
-
-    data_vars = [
+    variables = [
+        TIME_VAR,
         Variable(
             name='xvar',
             ids='core_profiles',
@@ -192,12 +191,12 @@ def test_no_time_index(sample_data, expected_dataset_no_index):
         ),
     ]
 
-    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    dataset = sample_data.to_xarray(variables=variables)
     xr.testing.assert_equal(dataset, expected_dataset_no_index)
 
 
 def test_0d(sample_data, expected_dataset_0d):
-    data_vars = [
+    variables = [
         Variable(
             name='xval',
             ids='core_profiles',
@@ -205,15 +204,14 @@ def test_0d(sample_data, expected_dataset_0d):
             dims=['x'],
         ),
     ]
-    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=None)
+    dataset = sample_data.to_xarray(variables=variables)
 
     xr.testing.assert_equal(dataset, expected_dataset_0d)
 
 
 def test_1d(sample_data, expected_dataset_1d):
-    coord_vars = [TIME_VAR]
-
-    data_vars = [
+    variables = [
+        TIME_VAR,
         Variable(
             name='xvar',
             ids='core_profiles',
@@ -228,14 +226,13 @@ def test_1d(sample_data, expected_dataset_1d):
         ),
     ]
 
-    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    dataset = sample_data.to_xarray(variables=variables)
     xr.testing.assert_equal(dataset, expected_dataset_1d)
 
 
 def test_2d(sample_data, expected_dataset_2d):
-    coord_vars = [TIME_VAR]
-
-    data_vars = [
+    variables = [
+        TIME_VAR,
         Variable(
             name='xvar',
             ids='core_profiles',
@@ -250,5 +247,5 @@ def test_2d(sample_data, expected_dataset_2d):
         ),
     ]
 
-    dataset = sample_data.to_xarray(data_vars=data_vars, coord_vars=coord_vars)
+    dataset = sample_data.to_xarray(variables=variables)
     xr.testing.assert_equal(dataset, expected_dataset_2d)

@@ -1,6 +1,7 @@
 from ._basemodel import BaseModel
 from ._dimensions import ARange, IDSOperation, IDSOperationDim, LinSpace
 from ._imas import ImasBaseModel
+from ._variable import VariableModel
 
 __all__ = [
     'BaseModel',
@@ -9,4 +10,5 @@ __all__ = [
     'ImasBaseModel',
     'LinSpace',
     'ARange',
+    'VariableModel',
 ]

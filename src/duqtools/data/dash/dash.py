@@ -34,7 +34,7 @@ df = pd.DataFrame.from_dict(
 with st.expander('Click to view runs'):
     st.table(df)
 
-prefix = 'profiles_1d/$i'
+prefix = 'profiles_1d/$time'
 
 
 def ffmt(s):

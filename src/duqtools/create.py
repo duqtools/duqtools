@@ -29,11 +29,9 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
-def apply_combination(target_in: ImasHandle,
-                      combination,
-                      ids: str = 'core_profiles') -> None:
+def apply_combination(target_in: ImasHandle, combination) -> None:
     for model in combination:
-        ids_mapping = target_in.get(model.ids)
+        ids_mapping = target_in.get(model.variable.ids)
         apply_model(model, ids_mapping)
 
         logger.info('Writing data entry: %s', target_in)
@@ -59,6 +57,7 @@ def create(*, force, **kwargs):
         Unused.
     """
     options = cfg.create
+
     if not options:
         logger.warning('No create options specified.')
         return
@@ -78,7 +77,7 @@ def create(*, force, **kwargs):
 
     logger.info('Source data: %s', source)
 
-    matrix = tuple(dim.expand() for dim in dimensions)
+    matrix = tuple(model.expand() for model in dimensions)
     combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
     if not force:

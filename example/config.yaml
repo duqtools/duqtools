@@ -1,5 +1,14 @@
 workspace:
   root: ./
+variables:
+  - name: zeff
+    ids: core_profiles
+    path: profiles_1d/$time/zeff
+    dims: [x]
+  - name: t_i_average
+    ids: core_profiles
+    path: profiles_1d/$time/t_i_average
+    dims: [x]
 create:
   template: template_model
   data:
@@ -10,12 +19,10 @@ create:
     method: latin-hypercube
     n_samples: 3
   dimensions:
-    - ids: core_profiles
-      path: profiles_1d/0/zeff
+    - variable: zeff
       operator: add
       values: [1, 2, 3]
-    - ids: core_profiles
-      path: profiles_1d/0/t_i_average
+    - variable: t_i_average
       operator: multiply
       values: [1.1, 1.2, 1.3]
 status:

@@ -6,11 +6,16 @@ from pathlib import Path
 import click
 
 from ._plot_utils import alt_line_chart
-from .ids import ImasHandle, get_ids_dataframe
-from .utils import read_imas_handles_from_file, split_paths
+from .ids import ImasHandle, Variable, get_ids_dataframe
+from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
+
+
+def _path_to_var(path: str, ids: str) -> Variable:
+    name = path.split('$time/')[-1]
+    return Variable(name=name, path=path, ids=ids, dims=['x'])
 
 
 def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
@@ -28,20 +33,18 @@ def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    prefix, (x_val, *y_vals) = split_paths(paths=(x_path, *y_paths))
+    x_var = _path_to_var(x_path, ids)
+    y_vars = [_path_to_var(y_path, ids) for y_path in y_paths]
 
-    source = get_ids_dataframe(handles,
-                               ids=ids,
-                               prefix=prefix,
-                               keys=(x_val, *y_vals))
+    source = get_ids_dataframe(handles, variables=(x_var, *y_vars))
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')
 
-    for n, y_val in enumerate(y_vals):
-        chart = alt_line_chart(source, x=x_val, y=y_val)
+    for n, y_var in enumerate(y_vars):
+        chart = alt_line_chart(source, x=x_var.name, y=y_var.name)
 
-        click.echo(f'  {x_val} vs. {y_val}:')
+        click.echo(f'  {x_var} vs. {y_var}:')
 
         for extension in extensions:
 

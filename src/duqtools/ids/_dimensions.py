@@ -34,10 +34,12 @@ def apply_model(model: BaseModel, ids_mapping: IDSMapping) -> None:
 
 @apply_model.register
 def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
+    if isinstance(model.variable, str):
+        raise TypeError('`model.variable` must have a `path` attribute.')
 
     npfunc = getattr(np, model.operator)
 
-    data_map = ids_mapping.findall(model.path)
+    data_map = ids_mapping.findall(model.variable.path)
 
     for path, data in data_map.items():
         if model.scale_to_error:
