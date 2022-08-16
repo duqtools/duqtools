@@ -15,7 +15,8 @@ Check out the different subpages of this section that explain the different part
 - [submit](/config/submit)
 - [status](/config/status)
 - [workspace](/config/introduction/#workspace)
-- [system](/config/introduction/#system)
+- [system](/config/introduction/#defining-the-system)
+- [variables](/config/introduction/#specifying-variables)
 
 ### Example config file
 
@@ -57,3 +58,20 @@ system: jetto
 ### dummy
 
 {{ dummy_schema['description'] }}
+
+
+## Specifying variables
+
+{{ variable_schema['description'] }}
+
+{% for name, prop in variable_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+
+Example:
+
+```yaml title="duqtools.yaml"
+{{ variables_yaml }}
+```
