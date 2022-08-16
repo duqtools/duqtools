@@ -22,9 +22,7 @@ def _get_ids_run_dataframe(handle: ImasHandle, *,
     logger.info('Getting data for %s', handle)
     a_variable = variables[0]
     data = handle.get(a_variable.ids, exclude_empty=True)
-    ds = data.to_xarray(coord_vars=[variables[0]],
-                        data_vars=variables[1:],
-                        **kwargs)
+    ds = data.to_xarray(variables=variables, **kwargs)
     return ds.to_dataframe()
 
 

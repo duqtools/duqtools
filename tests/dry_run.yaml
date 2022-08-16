@@ -1,7 +1,15 @@
 variables:
+  - name: zeff
+    ids: core_profiles
+    path: profiles_1d/$time/zeff
+    dims: [x]
   - name: t_i_average
     ids: core_profiles
     path: profiles_1d/$time/t_i_average
+    dims: [x]
+  - name: rho_tor_norm
+    ids: core_profiles
+    path: profiles_1d/$time/grid/rho_tor_norm
     dims: [x]
 create:
   dimensions:

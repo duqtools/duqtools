@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Sequence, Tuple
+from typing import TYPE_CHECKING, Dict
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -84,30 +84,3 @@ def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
         raise ValueError(f'Cannot open file: {inp}')
 
     return handles
-
-
-def split_paths(paths: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
-    """Split paths into its common prefix and keys.
-
-    Parameters
-    ----------
-    paths : Sequence[str]
-        Paths that can be found in the IDS entry. Must contain
-        `/$time/` to denote the time component.
-
-    Returns
-    -------
-    prefix, keys : Tuple[str, List[str]]
-        Return the common prefix and corresponding keys.
-    """
-
-    split_paths = (path.split('/$time/') for path in paths)
-
-    prefixes, keys = zip(*split_paths)
-
-    prefix_set = set(prefixes)
-    if not len(prefix_set) == 1:
-        raise ValueError(
-            f'All keys must have the same prefix, got {prefix_set}')
-
-    return prefixes[0], keys

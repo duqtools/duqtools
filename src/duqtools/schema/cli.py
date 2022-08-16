@@ -1,8 +1,8 @@
 from getpass import getuser
+from pathlib import Path
 from typing import Dict, List, Union
 
-from pydantic import (DirectoryPath, Field, FilePath, ValidationError,
-                      root_validator)
+from pydantic import DirectoryPath, Field, root_validator
 from typing_extensions import Literal
 
 from ._basemodel import BaseModel
@@ -42,7 +42,7 @@ class VariableConfigModel(BaseModel):
     def __getitem__(self, index: int):
         return self.__root__[index]
 
-    def dict(self) -> dict:
+    def to_variable_dict(self) -> dict:
         """Return dict of variables."""
         return {variable.name: variable for variable in self}
 
@@ -199,8 +199,8 @@ class MergeConfigModel(BaseModel):
     Before merging, all keys are rebased on (1) the same radial
     coordinate specified via `base_ids` and (2) the timestamp.
     """
-    data: FilePath = Field('runs.yaml',
-                           description=f("""
+    data: Path = Field('runs.yaml',
+                       description=f("""
             Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
         """))
     template: ImasBaseModel = Field(
@@ -255,7 +255,7 @@ class ConfigModel(BaseModel):
     def update_variables(cls, values):
         """Grab variable names from different steps and replace them with the
         definitions from the `variables` attribute."""
-        var_dict = values['variables'].dict()
+        var_dict = values['variables'].to_variable_dict()
 
         def validate_variable(var: Union[str, VariableModel],
                               dct: Dict[str, VariableModel]) -> VariableModel:
@@ -265,8 +265,7 @@ class ConfigModel(BaseModel):
             try:
                 variable_model = dct[var]
             except KeyError:
-                raise ValidationError(
-                    f'Variable: `{var}` has not been defined.')
+                raise KeyError(f'Variable: `{var}` has not been defined.')
 
             return variable_model
 
