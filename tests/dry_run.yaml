@@ -1,8 +1,12 @@
+variables:
+  - name: t_i_average
+    ids: core_profiles
+    path: profiles_1d/$time/t_i_average
+    dims: [x]
 create:
   dimensions:
-  - operator: multiply
-    ids: core_profiles
-    path: profiles_1d/0/t_i_average
+  - variable: t_i_average
+    operator: multiply
     values:
     - 1.1
     - 1.2

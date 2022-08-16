@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
     from ._handle import ImasHandle
 
-TIME_STR = '$i'
+TIME_STR = '$time'
 
 DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
 
@@ -268,10 +268,10 @@ class IDSMapping(Mapping):
     def find_by_index(self, pattern: str) -> Dict[str, Dict[int, np.ndarray]]:
         """Find keys matching regex pattern using time index.
 
-        Must include $i, which is a special character that matches
+        Must include $time, which is a special character that matches
         an integer time step (`\\d+`)
 
-        i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
+        i.e. `ids.find_by_index('profiles_1d/$time/zeff.*')`
         returns a dict with `zeff` and error attributes.
 
         Parameters
