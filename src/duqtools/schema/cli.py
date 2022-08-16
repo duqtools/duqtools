@@ -44,7 +44,7 @@ class VariableConfigModel(BaseModel):
 
     def dict(self) -> dict:
         """Return dict of variables."""
-        return {variable.name: variable.dict() for variable in self}
+        return {variable.name: variable for variable in self}
 
 
 class CreateConfigModel(BaseModel):

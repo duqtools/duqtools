@@ -3,10 +3,11 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Dict, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
+from ..schema import VariableModel
 from ._constants import TIME_COL, TSTEP_COL
 from ._copy import add_provenance_info
 from ._variable import Variable
@@ -114,6 +115,19 @@ class IDSMapping(Mapping):
 
     def __contains__(self, key):
         return key in self._keys
+
+    def get_with_replace(self, variable: Union[str, VariableModel], **kwargs):
+        """Grab key with placeholder replacement.
+
+        Example: `IDSMapping.get(var, time=0)`
+        """
+        path = variable.path if isinstance(variable,
+                                           VariableModel) else variable
+
+        for placeholder, value in kwargs.items():
+            path = path.replace(f'${placeholder}', str(value))
+
+        return self[path]
 
     def length_of_key(self, key: str):
         """length_of_key gives you the number of entries of a (partial) ids
@@ -329,17 +343,15 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        data_vars: Sequence[Variable] = None,
-        coord_vars: Sequence[Variable] = None,
+        variables: Sequence[Variable],
+        **kwargs,
     ) -> xr.Dataset:
         """Return dataset for given variables.
 
         Parameters
         ----------
-        data_vars : Dict[str, str]
+        variables : Dict[str, Variable]
             Dictionary of data variables
-        coord_vars : Dict[str, str]
-            Dictionary of coordinate variables.
 
         Returns
         -------
@@ -348,19 +360,11 @@ class IDSMapping(Mapping):
         """
         import xarray as xr
 
-        if not coord_vars:
-            coord_vars = ()
-        if not data_vars:
-            data_vars = ()
+        xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
-        xr_coords = {}
-        xr_data_vars = {}
-
-        for var in coord_vars:
-            xr_coords[var.name] = (var.dims, self[var.path])
-
-        for var in data_vars:
+        for var in variables:
             dimensions = DIM_PATTERN.findall(var.path)
+
             if not dimensions:
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
@@ -379,10 +383,7 @@ class IDSMapping(Mapping):
 
             xr_data_vars[var.name] = ([dimension, *var.dims], arr)
 
-        ds = xr.Dataset(
-            data_vars=xr_data_vars,
-            coords=xr_coords,
-        )
+        ds = xr.Dataset(data_vars=xr_data_vars, )
 
         return ds
 
