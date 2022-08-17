@@ -116,18 +116,33 @@ class IDSMapping(Mapping):
     def __contains__(self, key):
         return key in self._keys
 
-    def get_with_replace(self, variable: Union[str, VariableModel], **kwargs):
+    def get_with_replace(self, variable: Union[str, VariableModel],
+                         **kwargs) -> Any:
         """Grab key with placeholder replacement.
 
-        Example: `IDSMapping.get(var, time=0)`
+        Example: `IDSMapping.get_with_replace(var, time=0)`
         """
         path = variable.path if isinstance(variable,
                                            VariableModel) else variable
 
-        for placeholder, value in kwargs.items():
-            path = path.replace(f'${placeholder}', str(value))
+        for old, new in kwargs.items():
+            path = path.replace(f'${old}', str(new))
 
         return self[path]
+
+    def set_with_replace(self, variable: Union[str, VariableModel], value: Any,
+                         **kwargs):
+        """Grab key with placeholder replacement.
+
+        Example: `IDSMapping.set_with_replace(var, value, time=0)`
+        """
+        path = variable.path if isinstance(variable,
+                                           VariableModel) else variable
+
+        for old, new in kwargs.items():
+            path = path.replace(f'${old}', str(new))
+
+        self[path] = value
 
     def length_of_key(self, key: str):
         """length_of_key gives you the number of entries of a (partial) ids
