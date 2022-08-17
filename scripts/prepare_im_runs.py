@@ -166,6 +166,7 @@ class IntegratedModellingRuns:
         zeff_param = 1,
         sensitivity_list = [],
         input_instructions = [],
+        extra_early_options = [],
         boundary_instructions = {}
     ):
 
@@ -195,6 +196,7 @@ class IntegratedModellingRuns:
         self.sensitivity_list = sensitivity_list
         self.zeff_option = zeff_option
         self.zeff_param = zeff_param
+        self.extra_early_options = extra_early_options
         self.boundary_instructions = boundary_instructions
 
         # Trying to be a little flexible with the generator name. It is not used if I am only setting the input.
@@ -297,7 +299,7 @@ class IntegratedModellingRuns:
             print('prepare_input.py not found and needed for this option. Aborting')
             exit()
 
-        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, zeff_param = self.zeff_param, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium)
+        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, zeff_param = self.zeff_param, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium, extra_early_options = self.extra_early_options)
 
 
     def setup_input_sensitivities(self):
