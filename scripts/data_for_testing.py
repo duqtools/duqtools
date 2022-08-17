@@ -6,20 +6,23 @@ class nested_val:
 
 
 class profile_t0:
-    grid = np.arange(10) * 1
-    variable = grid**2
+    grid = np.arange(10) * 1.1
+    variable = grid**1.1
+    variable_error_upper = np.array([])
     val = 1
 
 
 class profile_t1:
-    grid = np.arange(10) * 2
-    variable = grid**2
+    grid = np.arange(10) * 1.2
+    variable = grid**1.2
+    variable_error_upper = np.array([])
     val = 2
 
 
 class profile_t2:
-    grid = np.arange(10) * 3
-    variable = grid**2
+    grid = np.arange(10) * 1.3
+    variable = grid**1.3
+    variable_error_upper = np.array([])
     val = 3
 
 
@@ -36,18 +39,21 @@ class nested_profile_t2:
 
 
 class arr_t0:
-    grid = np.arange(25).reshape(5, 5) * 1
-    variable = grid**1
+    grid = np.arange(25).reshape(5, 5) * 1.1
+    variable = grid**1.1
+    variable_error_upper = np.array([])
 
 
 class arr_t1:
-    grid = np.arange(25).reshape(5, 5) * 2
-    variable = grid**2
+    grid = np.arange(25).reshape(5, 5) * 1.2
+    variable = grid**1.2
+    variable_error_upper = np.array([])
 
 
 class arr_t2:
-    grid = np.arange(25).reshape(5, 5) * 3
-    variable = grid**3
+    grid = np.arange(25).reshape(5, 5) * 1.3
+    variable = grid**1.3
+    variable_error_upper = np.array([])
 
 
 class nested_arr_t0:

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def standardize_grid(ds: xr.Dataset,
                      *,
                      new_dim: str,
-                     existing_dim: str,
+                     old_dim: str,
                      group: str = None,
                      new_dim_data: Union[np.ndarray, int] = 0) -> xr.Dataset:
     """Standardize the grid within a dataset.
@@ -47,7 +47,7 @@ def standardize_grid(ds: xr.Dataset,
     interp_kwargs = {new_dim: new_dim_data}
 
     def standardize(group):
-        group = group.swap_dims({existing_dim: new_dim})
+        group = group.swap_dims({old_dim: new_dim})
         group = group.interp(**interp_kwargs)
         return group
 

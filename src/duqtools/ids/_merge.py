@@ -1,61 +1,87 @@
 from typing import Sequence
 
-import numpy as np
+import xarray as xr
 
 from ..operations import add_to_op_queue
 from ..schema import VariableModel
 from ._handle import ImasHandle
-from ._io import get_ids_dataframe
-from ._rebase import rebase_on_grid, rebase_on_time
+from ._rebase import rebase_on_time, standardize_grid
+
+
+def _get_placeholder_dim(grid_var: VariableModel,
+                         time_var: VariableModel) -> str:
+    dims = [dim for dim in grid_var.dims if dim != time_var.name]
+
+    if len(dims) != 1:
+        raise ValueError('Number of non-time dimensions must be 1.')
+
+    return dims[0]
+
+
+def raise_if_ids_inconsistent(*variables: VariableModel):
+    idss = {var.ids for var in variables}
+    if len(idss) != 1:
+        raise ValueError('Variables must have the same IDS, '
+                         f'got {len(idss)} different values: {idss}')
 
 
 @add_to_op_queue('Merge', '{target}')
 def merge_data(source_data: Sequence[ImasHandle], target: ImasHandle,
-               x_var: VariableModel, y_vars: Sequence[VariableModel]):
-    variables = [x_var, *y_vars]
+               time_var: VariableModel, grid_var: VariableModel,
+               data_vars: Sequence[VariableModel]):
+    raise_if_ids_inconsistent(time_var, grid_var, *data_vars)
 
-    if len(set(var.ids for var in variables)) != 1:
-        raise ValueError('Variables must belong to same IDS')
+    TIME_DIM = time_var.name
+    GRID_DIM = grid_var.name
+    PLACEHOLDER_DIM = _get_placeholder_dim(grid_var, time_var)
+    RUN_DIM = 'run'
+    ids = grid_var.ids
 
-    data = get_ids_dataframe(source_data, variables=variables)
+    variables = [time_var, grid_var, *data_vars]
 
-    input_data = target.get(x_var.ids)
+    target_data_map = target.get(ids)
 
     # pick first time step as basis
-    common_basis = input_data.get_with_replace(x_var.path, time=0)
+    GRID_DIM = grid_var.name
+    grid_dim_data = target_data_map.get_with_replace(grid_var.path, time=0)
+    time_dim_data = target_data_map[time_var.path]
 
-    x_val = x_var.name
-    y_vals = [var.name for var in y_vars if var.name != 'time']
+    datasets = []
+    for handle in source_data:
+        data = handle.get(ids, exclude_empty=True)
+        ds = data.to_xarray(variables=variables)
 
-    data = rebase_on_grid(data,
-                          grid=x_val,
-                          cols=y_vals,
-                          grid_base=common_basis)
+        ds = standardize_grid(
+            ds,
+            new_dim=GRID_DIM,
+            old_dim=PLACEHOLDER_DIM,
+            new_dim_data=grid_dim_data,
+            group=TIME_DIM,
+        )
 
-    common_time = input_data['time']
+        datasets.append(ds)
 
-    # Set to common time basis
-    data = rebase_on_time(data, cols=[x_val, *y_vals], time_base=common_time)
+    datasets = [
+        rebase_on_time(ds, time_dim=TIME_DIM, new_coords=time_dim_data)
+        for ds in datasets
+    ]
 
-    gb = data.groupby(['tstep', x_val])
+    run_data = xr.concat(datasets, RUN_DIM)
 
-    agg_funcs = ['mean', 'std']
-    agg_dict = {y_val: agg_funcs for y_val in y_vals}
+    means = run_data.mean(dim=RUN_DIM)
+    stdevs = run_data.std(dim=RUN_DIM)
 
-    merged = gb.agg(agg_dict)
+    for var in data_vars:
+        if var.name not in run_data.data_vars:
+            continue
 
-    ids_mapping = target.get(x_var.ids, exclude_empty=False)
+        for i, time in enumerate(run_data.time):
+            mean = means.isel({TIME_DIM: i})[var.name].data
+            stdev = stdevs.isel({TIME_DIM: i})[var.name].data
 
-    for y_val in y_vals:
-        var = [var for var in y_vars if var.name == y_val][0]
-        for tstep, group in merged.groupby('tstep'):
+            target_data_map.set_with_replace(var.path, value=mean, time=i)
+            target_data_map.set_with_replace(var.path + '_error_upper',
+                                             value=mean + stdev,
+                                             time=i)
 
-            mean = np.array(group[y_val, 'mean'])
-            stdev = np.array(group[y_val, 'std'])
-
-            path = var.path.replace('$time', str(tstep))
-
-            ids_mapping[path] = mean
-            ids_mapping[path + '_error_upper'] = mean + stdev
-
-    ids_mapping.sync(target)
+    target_data_map.sync(target)
