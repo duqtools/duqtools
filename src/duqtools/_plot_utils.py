@@ -1,8 +1,13 @@
+from typing import Union
+
 import altair as alt
+import numpy as np
 import pandas as pd
+import xarray as xr
 
 
-def alt_line_chart(source: pd.DataFrame, *, x: str, y: str) -> alt.Chart:
+def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
+                   y: str) -> alt.Chart:
     """Generate an altair line chart from a dataframe.
 
     The dataframe must be generated using `duqtools.ids.get_ids_dataframe` (or
@@ -22,11 +27,18 @@ def alt_line_chart(source: pd.DataFrame, *, x: str, y: str) -> alt.Chart:
     alt.Chart
         Return an altair chart.
     """
-    slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
-    select_step = alt.selection_single(name='tstep',
-                                       fields=['tstep'],
+    if isinstance(source, xr.Dataset):
+        source = source.to_dataframe().reset_index()
+
+    if 'slider' not in source:
+        _, idx = np.unique(source['time'], return_inverse=True)
+        source['slider'] = idx
+
+    slider = alt.binding_range(min=0, max=source['slider'].max(), step=1)
+    select_step = alt.selection_single(name='time',
+                                       fields=['slider'],
                                        bind=slider,
-                                       init={'tstep': 0})
+                                       init={'slider': 0})
 
     chart = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
@@ -38,7 +50,8 @@ def alt_line_chart(source: pd.DataFrame, *, x: str, y: str) -> alt.Chart:
     return chart
 
 
-def alt_errorband_chart(source: pd.DataFrame, *, x: str, y: str) -> alt.Chart:
+def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
+                        y: str) -> alt.Chart:
     """Generate an altair errorband plot from a dataframe.
 
     The dataframe must be generated using `duqtools.ids.get_ids_dataframe` (or
@@ -58,11 +71,18 @@ def alt_errorband_chart(source: pd.DataFrame, *, x: str, y: str) -> alt.Chart:
     alt.Chart
         Return an altair chart.
     """
-    slider = alt.binding_range(min=0, max=source['tstep'].max(), step=1)
-    select_step = alt.selection_single(name='tstep',
-                                       fields=['tstep'],
+    if isinstance(source, xr.Dataset):
+        source = source.to_dataframe().reset_index()
+
+    if 'slider' not in source:
+        _, idx = np.unique(source['time'], return_inverse=True)
+        source['slider'] = idx
+
+    slider = alt.binding_range(min=0, max=source['slider'].max(), step=1)
+    select_step = alt.selection_single(name='time',
+                                       fields=['slider'],
                                        bind=slider,
-                                       init={'tstep': 0})
+                                       init={'slider': 0})
 
     line = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
