@@ -19,10 +19,6 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: double-quote-string-fixer
-  - repo: https://github.com/kynan/nbstripout
-    rev: 0.5.0
-    hooks:
-      - id: nbstripout
   - repo: https://github.com/PyCQA/isort
     rev: '5.10.1'
     hooks:
