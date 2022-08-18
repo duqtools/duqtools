@@ -192,9 +192,10 @@ class MergeStep(BaseModel):
             to same radial grid before merging using interpolation. The path should contain
             '/$time/' to denote the time component.
             """))
-    time_variable: Union[str,
-                         VariableModel] = Field('time',
-                                                description=f("""UPDATE ME"""))
+    time_variable: Union[str, VariableModel] = Field('time',
+                                                     description=f("""
+        The data for the time coordinate.
+        """))
 
 
 class MergeConfigModel(BaseModel):
