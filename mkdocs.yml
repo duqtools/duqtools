@@ -17,6 +17,7 @@ nav:
   - Examples:
     - examples/imas_handles.ipynb
     - examples/xarray.ipynb
+    - examples/xarray-2D.ipynb
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 
