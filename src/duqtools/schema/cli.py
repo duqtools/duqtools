@@ -34,6 +34,10 @@ class VariableConfigModel(BaseModel):
                       ids='core_profiles',
                       path='profiles_1d/$time/zeff',
                       dims=['x']),
+        VariableModel(name='time',
+                      ids='core_profiles',
+                      path='time',
+                      dims=['time']),
     ])
 
     def __iter__(self):
@@ -174,7 +178,8 @@ class MergeStep(BaseModel):
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    variables: List[Union[str, VariableModel]] = Field(['t_i_average', 'zeff'],
+    data_variables: List[Union[str,
+                               VariableModel]] = Field(['t_i_average', 'zeff'],
                                                        description=f("""
             This is a list of IDS variables to merge over all runs.
             The mean/error are written to the target IDS.
@@ -187,6 +192,10 @@ class MergeStep(BaseModel):
             to same radial grid before merging using interpolation. The path should contain
             '/$time/' to denote the time component.
             """))
+    time_variable: Union[str, VariableModel] = Field('time',
+                                                     description=f("""
+        The data for the time coordinate.
+        """))
 
 
 class MergeConfigModel(BaseModel):
@@ -276,9 +285,11 @@ class ConfigModel(BaseModel):
         for step in values['merge'].plan:
             step.grid_variable = validate_variable(step.grid_variable,
                                                    var_dict)
-            step.variables = [
+            step.time_variable = validate_variable(step.time_variable,
+                                                   var_dict)
+            step.data_variables = [
                 validate_variable(variable, var_dict)
-                for variable in step.variables
+                for variable in step.data_variables
             ]
 
         return values

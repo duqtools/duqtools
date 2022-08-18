@@ -11,6 +11,10 @@ variables:
     ids: core_profiles
     path: profiles_1d/$time/grid/rho_tor_norm
     dims: [x]
+  - name: time
+    ids: core_profiles
+    path: time
+    dims: [time]
 create:
   dimensions:
   - variable: t_i_average
