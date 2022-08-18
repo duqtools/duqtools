@@ -26,9 +26,13 @@ def raise_if_ids_inconsistent(*variables: VariableModel):
 
 
 @add_to_op_queue('Merge', '{target}')
-def merge_data(source_data: Sequence[ImasHandle], target: ImasHandle,
-               time_var: VariableModel, grid_var: VariableModel,
-               data_vars: Sequence[VariableModel]):
+def merge_data(
+    source_data: Sequence[ImasHandle],
+    target: ImasHandle,
+    time_var: VariableModel,
+    grid_var: VariableModel,
+    data_vars: Sequence[VariableModel],
+):
     raise_if_ids_inconsistent(time_var, grid_var, *data_vars)
 
     TIME_DIM = time_var.name
