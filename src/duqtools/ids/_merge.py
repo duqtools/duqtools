@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Dict, Sequence
 
 import xarray as xr
 
@@ -27,7 +27,7 @@ def raise_if_ids_inconsistent(*variables: VariableModel):
 
 @add_to_op_queue('Merge', '{target}')
 def merge_data(
-    source_data: Sequence[ImasHandle],
+    source_data: Dict[str, ImasHandle],
     target: ImasHandle,
     time_var: VariableModel,
     grid_var: VariableModel,
@@ -51,7 +51,7 @@ def merge_data(
     time_dim_data = target_data_map[time_var.path]
 
     datasets = []
-    for handle in source_data:
+    for run, handle in source_data.items():
         data = handle.get(ids, exclude_empty=True)
         ds = data.to_xarray(variables=variables)
 

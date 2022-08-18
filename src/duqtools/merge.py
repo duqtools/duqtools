@@ -25,5 +25,6 @@ def merge(**kwargs):
 
         merge_data(source_data=handles,
                    target=target,
-                   x_var=step.grid_variable,
-                   y_vars=step.variables)
+                   time_var=step.time_variable,
+                   grid_var=step.grid_variable,
+                   data_vars=step.data_variables)
