@@ -15,6 +15,17 @@ if TYPE_CHECKING:
     from ..schema._variable import VariableModel
 
 
+def _get_ids_run_dataframe_legacy(handle: ImasHandle,
+                                  *,
+                                  ids: str = 'core_profiles',
+                                  keys: Sequence[str],
+                                  **kwargs) -> pd.DataFrame:
+    """Get data for single run."""
+    logger.info('Getting data for %s', handle)
+    profile = handle.get(ids, exclude_empty=True)
+    return profile.to_dataframe(*keys, **kwargs)
+
+
 def _get_ids_run_dataframe(handle: ImasHandle, *,
                            variables: Sequence[VariableModel],
                            **kwargs) -> pd.DataFrame:

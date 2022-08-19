@@ -6,7 +6,8 @@ import streamlit as st
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
 from duqtools.ids import ImasHandle, merge_data, rebase_on_grid, rebase_on_time
-from duqtools.ids._io import _get_ids_run_dataframe
+from duqtools.ids._io import \
+    _get_ids_run_dataframe_legacy as _get_ids_run_dataframe
 from duqtools.utils import read_imas_handles_from_file
 
 try:
@@ -19,7 +20,7 @@ st.title('Plot IDS')
 with st.sidebar:
     st.header('Input data')
     work_dir = st.text_input('Work directory', default_workdir)
-    data_file = st.text_input('Data file', 'runs.yaml')
+    data_file = st.text_input('Data file', 'data.csv')
 
 inp = Path(work_dir) / data_file
 
@@ -68,7 +69,8 @@ with st.sidebar:
         'Show errorbar',
         help=(
             'Show standard deviation band around mean y-value. All '
-            'y-values are interpolated to put them on a common basis for x.'))
+            'y-values are interpolated to put them on a common basis for x.'),
+        disabled=True)
 
 
 @st.experimental_memo()
@@ -106,70 +108,70 @@ for y_val in y_vals:
 
     st.altair_chart(chart, use_container_width=True)
 
-with st.form('merge_form'):
+# with st.form('merge_form'):
 
-    st.subheader('Merge data')
+#     st.subheader('Merge data')
 
-    st.write("""
-        With this form you can merge all runs into a new IMAS DB entry.
+#     st.write("""
+#         With this form you can merge all runs into a new IMAS DB entry.
 
-        The mean and standard deviation are calculated over all the
-        runs for the fields specified in the side bar.
+#         The mean and standard deviation are calculated over all the
+#         runs for the fields specified in the side bar.
 
-        Note that it does not do error propagation yet if the source data have
-        error bars already.
-        """)
+#         Note that it does not do error propagation yet if the source data have
+#         error bars already.
+#         """)
 
-    a_run = df.iloc[0]
+#     a_run = df.iloc[0]
 
-    st.markdown('**Template IMAS entry**')
-    st.write(
-        """This IMAS entry will be used as the template. The template is copied,
-        and any existing data is overwritten for the given fields.""")
+#     st.markdown('**Template IMAS entry**')
+#     st.write(
+#         """This IMAS entry will be used as the template. The template is copied,
+#         and any existing data is overwritten for the given fields.""")
 
-    cols = st.columns((20, 20, 30, 30))
+#     cols = st.columns((20, 20, 30, 30))
 
-    template = {
-        'user': cols[0].text_input('User',
-                                   value=a_run.user,
-                                   key='user_template'),
-        'db': cols[1].text_input('Machine', value=a_run.db, key='db_template'),
-        'shot': cols[2].number_input('Shot',
-                                     value=a_run.shot,
-                                     key='shot_template'),
-        'run': cols[3].number_input('Run', value=a_run.run,
-                                    key='run_template'),
-    }
+#     template = {
+#         'user': cols[0].text_input('User',
+#                                    value=a_run.user,
+#                                    key='user_template'),
+#         'db': cols[1].text_input('Machine', value=a_run.db, key='db_template'),
+#         'shot': cols[2].number_input('Shot',
+#                                      value=a_run.shot,
+#                                      key='shot_template'),
+#         'run': cols[3].number_input('Run', value=a_run.run,
+#                                     key='run_template'),
+#     }
 
-    template = ImasHandle(**template)
+#     template = ImasHandle(**template)
 
-    st.markdown('**Target IMAS entry**')
-    st.write('The data will be stored in the DB entry given below.')
+#     st.markdown('**Target IMAS entry**')
+#     st.write('The data will be stored in the DB entry given below.')
 
-    cols = st.columns((20, 20, 30, 30))
+#     cols = st.columns((20, 20, 30, 30))
 
-    target = {
-        'user':
-        cols[0].text_input('User',
-                           value=a_run.user,
-                           key='user_target',
-                           disabled=True),
-        'db':
-        cols[1].text_input('Machine', value=a_run.db, key='db_target'),
-        'shot':
-        cols[2].number_input('Shot', value=a_run.shot, key='shot_target'),
-        'run':
-        cols[3].number_input('Run', step=1, key='run_target'),
-    }
+#     target = {
+#         'user':
+#         cols[0].text_input('User',
+#                            value=a_run.user,
+#                            key='user_target',
+#                            disabled=True),
+#         'db':
+#         cols[1].text_input('Machine', value=a_run.db, key='db_target'),
+#         'shot':
+#         cols[2].number_input('Shot', value=a_run.shot, key='shot_target'),
+#         'run':
+#         cols[3].number_input('Run', step=1, key='run_target'),
+#     }
 
-    target = ImasHandle(**target)
+#     target = ImasHandle(**target)
 
-    submitted = st.form_submit_button('Save')
+#     submitted = st.form_submit_button('Save')
 
-    if submitted:
-        data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
-        template.copy_data_to(target)
-        merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
+#     if submitted:
+#         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
+#         template.copy_data_to(target)
+#         merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
-        st.success('Success!')
-        st.balloons()
+#         st.success('Success!')
+#         st.balloons()
