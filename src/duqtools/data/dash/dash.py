@@ -3,17 +3,21 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import xarray as xr
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
-from duqtools.ids import ImasHandle, merge_data, rebase_on_grid, rebase_on_time
-from duqtools.ids._io import \
-    _get_ids_run_dataframe_legacy as _get_ids_run_dataframe
+from duqtools.api import Variable
+from duqtools.ids import (ImasHandle, merge_data, rebase_on_grid,
+                          rebase_on_time, standardize_grid)
 from duqtools.utils import read_imas_handles_from_file
 
 try:
     default_workdir = sys.argv[1]
 except IndexError:
     default_workdir = str(Path.cwd())
+
+PREFIX = 'profiles_1d/$time'
+PREFIX0 = 'profiles_1d/0'
 
 st.title('Plot IDS')
 
@@ -35,16 +39,11 @@ df = pd.DataFrame.from_dict(
 with st.expander('Click to view runs'):
     st.table(df)
 
-prefix = 'profiles_1d/$time'
 
-
-def ffmt(s):
-    return s.replace(prefix + '/', '')
-
-
+@st.experimental_memo
 def get_options(a_run, ids):
     a_profile = ImasHandle(**a_run).get(ids, exclude_empty=True)
-    return sorted(a_profile.find_by_index(f'{prefix}/.*').keys())
+    return sorted(a_profile.find_by_group('profiles_1d/0/(.*)').keys())
 
 
 with st.sidebar:
@@ -52,59 +51,95 @@ with st.sidebar:
 
     options = get_options(a_run=df.iloc[0], ids=ids)
 
-    default_x_key = options.index(f'{prefix}/grid/rho_tor_norm')
-    default_y_val = f'{prefix}/t_i_average'
+    default_x_key = options.index('grid/rho_tor_norm')
+    default_y_val = 't_i_average'
 
-    x_key = st.selectbox('Select x',
-                         options,
-                         index=default_x_key,
-                         format_func=ffmt)
+    x_key = st.selectbox('Select x', options, index=default_x_key)
 
-    y_keys = st.multiselect('Select y',
-                            options,
-                            default=default_y_val,
-                            format_func=ffmt)
+    y_keys = st.multiselect('Select y', options, default=default_y_val)
 
     show_error_bar = st.checkbox(
         'Show errorbar',
         help=(
             'Show standard deviation band around mean y-value. All '
             'y-values are interpolated to put them on a common basis for x.'),
-        disabled=True)
+    )
+
+TIME_VAR = dict(
+    name='time',
+    ids=ids,
+    path='time',
+    dims=['time'],
+)
+
+X_VAR = dict(name=x_key, ids=ids, path=f'{PREFIX}/{x_key}', dims=['x'])
+
+Y_VARS = tuple(
+    dict(name=y_key, ids=ids, path=f'{PREFIX}/{y_key}', dims=['x'])
+    for y_key in y_keys)
 
 
-@st.experimental_memo()
-def get_data(df, **kwargs):
-    """Get and concatanate data for all runs."""
-    runs_data = {
-        str(name): _get_ids_run_dataframe(ImasHandle(**row), **kwargs)
-        for name, row in df.iterrows()
-    }
+@st.experimental_memo
+def _get_dataset(handles, *, time_var, x_var, y_vars):
+    datasets = []
 
-    return pd.concat(runs_data,
-                     names=('run',
-                            'index')).reset_index('run').reset_index(drop=True)
+    time_var = Variable(**time_var)
+    x_var = Variable(**x_var)
+    y_vars = tuple((Variable(**y_var) for y_var in y_vars))
+
+    variables = tuple((time_var, x_var, *y_vars))
+
+    for name, handle in handles.items():
+        handle = ImasHandle(**handle)
+
+        data_map = handle.get(x_var.ids)
+
+        ds = data_map.to_xarray(variables=variables)
+
+        ds = standardize_grid(
+            ds,
+            new_dim=x_var.name,
+            old_dim=x_var.dims[0],
+            new_dim_data=0,
+            group=time_var.name,
+        )
+        datasets.append(ds)
+
+    reference_grid = datasets[0][x_var.name].data
+
+    datasets = [
+        rebase_on_grid(ds, coord_dim=x_var.name, new_coords=reference_grid)
+        for ds in datasets
+    ]
+
+    reference_time = datasets[0][time_var.name].data
+
+    datasets = [
+        rebase_on_time(ds, time_dim=time_var.name, new_coords=reference_time)
+        for ds in datasets
+    ]
+
+    dataset = xr.concat(datasets, 'run')
+    dataset['run'] = list(handles.keys())
+
+    return dataset
 
 
-rebase_on_grid = st.experimental_memo(rebase_on_grid)
-rebase_on_time = st.experimental_memo(rebase_on_time)
+def get_dataset(handles, *, time_var, x_var, y_vars):
+    """Convert to hashable types before calling `_get_dataset`."""
+    handles = {name: handle.dict() for name, handle in handles.items()}
+    return _get_dataset(handles, time_var=time_var, x_var=x_var, y_vars=y_vars)
 
-y_vals = tuple(ffmt(y_key) for y_key in y_keys)
-x_val = ffmt(x_key)
 
-for y_val in y_vals:
-    st.header(f'{x_val} vs. {y_val}')
+source = get_dataset(handles, time_var=TIME_VAR, x_var=X_VAR, y_vars=Y_VARS)
 
-    source = get_data(df, keys=(x_val, y_val), prefix='profiles_1d')
+for y_key in y_keys:
+    st.header(f'{x_key} vs. {y_key}')
 
     if show_error_bar:
-        source = rebase_on_grid(source, grid=x_val, cols=(y_val, ))
-        source = rebase_on_time(source, cols=(x_val, y_val))
-
-        chart = alt_errorband_chart(source, x=x_val, y=y_val)
-
+        chart = alt_errorband_chart(source, x=x_key, y=y_key)
     else:
-        chart = alt_line_chart(source, x=x_val, y=y_val)
+        chart = alt_line_chart(source, x=x_key, y=y_key)
 
     st.altair_chart(chart, use_container_width=True)
 
@@ -169,7 +204,7 @@ for y_val in y_vals:
 #     submitted = st.form_submit_button('Save')
 
 #     if submitted:
-#         data = get_data(df, keys=[x_val, *y_vals], prefix='profiles_1d')
+#         data = get_data(df, keys=[x_val, *y_vals], PREFIX='profiles_1d')
 #         template.copy_data_to(target)
 #         merge_data(data=data, target=target, x_val=x_val, y_vals=y_vals)
 
