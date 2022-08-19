@@ -1,6 +1,8 @@
 import logging
 from typing import Iterable
 
+import pandas as pd
+
 from duqtools.config import cfg
 
 from .ids import ImasHandle, apply_model
@@ -38,12 +40,18 @@ def apply_combination(target_in: ImasHandle, combination) -> None:
         ids_mapping.sync(target_in)
 
 
-@add_to_op_queue('Writing out', '{workspace.runs_yaml}', quiet=True)
+@add_to_op_queue('Writing runs', '{workspace.runs_yaml}', quiet=True)
 def write_runs_file(runs: list, workspace) -> None:
-
     runs = Runs.parse_obj(runs)
     with open(workspace.runs_yaml, 'w') as f:
         runs.yaml(stream=f)
+
+
+@add_to_op_queue('Writing csv', '{fname}', quiet=True)
+def write_runs_csv(runs, fname: str = 'data.csv'):
+    run_map = {run['dirname']: run['data_out'].dict() for run in runs}
+    df = pd.DataFrame.from_dict(run_map, orient='index')
+    df.to_csv(fname)
 
 
 def create(*, force, **kwargs):
@@ -133,3 +141,4 @@ def create(*, force, **kwargs):
         })
 
     write_runs_file(runs, workspace)
+    write_runs_csv(runs)
