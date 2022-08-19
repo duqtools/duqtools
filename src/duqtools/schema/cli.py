@@ -16,10 +16,6 @@ from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
 from .workdir import WorkDirectoryModel
 
 
-class DeprecatedValueError(ValueError):
-    ...
-
-
 class VariableConfigModel(BaseModel):
     __root__: List[VariableModel] = Field([
         VariableModel(name='rho_tor_norm',
@@ -166,14 +162,21 @@ class StatusConfigModel(BaseModel):
 class MergeStep(BaseModel):
     """These parameters describe which paths should be merged.
 
-    The IDS parameter (`ids`) describes the where the data are retrieved from.
-    This IDS then contains the given `paths`, which belong to this IDS.
+    Three sets of variables need to be defined:
+    - time_variable: this points to the data for the time coordinate
+    - grid_variable: this points to the data for the grid variable
+    - data_variables: these point to the data to be merged
 
-    The base grid points to the data which should be used as the common basis. All
-    other data arrays are interpolated to this grid. Both the template and the
-    data must contain this data.
+    Note that all variables must be from the same IDS.
 
-    To denote the time step, use `/$time/` in both the base grid and the data paths.
+    The grid and data variables must share a common dimension. The grid variable
+    will be used to rebase all data variables to a common grid.
+
+    The time variable will be used to rebase the grid variable and the data variables
+    to a common time coordinate. To denote the time index, use `/$time/` in both
+    the grid and data variables.
+
+    Rebasing involves interpolation.
 
     Note that multiple merge steps can be specified, for example for different
     IDS.
@@ -181,21 +184,25 @@ class MergeStep(BaseModel):
     data_variables: List[Union[str,
                                VariableModel]] = Field(['t_i_average', 'zeff'],
                                                        description=f("""
-            This is a list of IDS variables to merge over all runs.
-            The mean/error are written to the target IDS.
+            This is a list of data variables to be merged. This means
+            that the mean and error for these data over all runs are calculated
+            and written back to the ouput data location.
             The paths should contain `/$time/` for the time component.
-        """))
+            """))
     grid_variable: Union[str, VariableModel] = Field('rho_tor_norm',
                                                      description=f("""
-            The data for this variable is taken from the template. The IMAS data to merge should
-            also contain this path, because it will be used to rebase all IDS fields
-            to same radial grid before merging using interpolation. The path should contain
-            '/$time/' to denote the time component.
+            This variable points to the data for the grid coordinate. It must share a common
+            placeholder dimension with the data variables.
+            It will be used to rebase all data variables to same (radial) grid before merging
+            using interpolation.
+            The path should contain '/$time/' to denote the time component.
             """))
     time_variable: Union[str, VariableModel] = Field('time',
                                                      description=f("""
-        The data for the time coordinate.
-        """))
+            This variable determines the time coordinate to merge on. This ensures
+            that the data from all runs are on the same time coordinates before
+            merging.
+            """))
 
 
 class MergeConfigModel(BaseModel):
@@ -211,7 +218,7 @@ class MergeConfigModel(BaseModel):
     data: Path = Field('runs.yaml',
                        description=f("""
             Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
-        """))
+            """))
     template: ImasBaseModel = Field(
         {
             'user': getuser(),
@@ -219,7 +226,10 @@ class MergeConfigModel(BaseModel):
             'shot': 94785,
             'run': 1
         },
-        description='This IMAS DB entry will be used as the template.')
+        description=f("""
+            This IMAS DB entry will be used as the template.
+            It is copied to the output location.
+            """))
     output: ImasBaseModel = Field(
         {
             'db': 'jet',
