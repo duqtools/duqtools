@@ -220,3 +220,6 @@ class ConfigModel(BaseModel):
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
                                      description='backend system to use')
+    quiet: bool = Field(
+        False,
+        description='dont output to stdout, except for mandatory prompts')

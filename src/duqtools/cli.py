@@ -32,6 +32,24 @@ def config_option(f):
                         callback=callback)(f)
 
 
+def quiet_option(f):
+
+    def callback(ctx, param, quiet):
+        if quiet:
+            # logging.getLogger().handlers = [] # remove output methods
+            cfg.quiet = True
+
+        return quiet
+
+    return click.option('-q',
+                        '--quiet',
+                        is_flag=True,
+                        default=False,
+                        help='Don\'t output anything to the screen'
+                        ' (except mandatory prompts).',
+                        callback=callback)(f)
+
+
 def debug_option(f):
 
     def callback(ctx, param, debug):
@@ -85,8 +103,7 @@ def logfile_option(f):
 
     def callback(ctx, param, logfile):
         streams = {'stdout': stdout, 'stderr': stderr}
-
-        logger.info(f'logging to {logfile}')
+        logger.debug(f'logging to {logfile}')
         logging.getLogger().handlers = []
 
         if logfile in streams.keys():
@@ -120,7 +137,7 @@ def logfile_option(f):
 
 
 def common_options(func):
-    for wrapper in (logfile_option, debug_option, config_option,
+    for wrapper in (logfile_option, debug_option, config_option, quiet_option,
                     dry_run_option, yes_option):
         # config_option MUST BE BEFORE dry_run_option
         # logfile_option must be before debug_option

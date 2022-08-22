@@ -49,6 +49,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
             include={
                 'workspace': True,
                 'create': {'dimensions', 'sampler', 'template', 'data'},
+                'quiet': False,
             })
 
     op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
