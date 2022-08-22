@@ -173,6 +173,8 @@ values:
 
 ### Sampling between error bounds
 
+From the data model convention, only the upper error node (`_error_upper`) should be filled in case of symmetrical error bars. If the lower error node (`_error_lower`) is also filled, *duqtools* will scale to the upper error for values larger than 0, and to the lower error for values smaller than 0.
+
 The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
 
 ```yaml title="duqtools.yaml"

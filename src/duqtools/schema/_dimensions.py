@@ -37,9 +37,9 @@ class IDSOperatorMixin(BaseModel):
                                  description=f("""
         If True, multiply value(s) by the error (sigma).
 
-        With asymmetric errors (i.e. both lower/upper error are available),
-        scale negative values to the lower error, and positive values to upper
-        error.
+        With asymmetric errors (i.e. both lower/upper error nodes are available),
+        scale to the lower error node for values < 0, and to the upper error node
+        for values > 0.
         """))
 
     _upper_suffix: str = '_error_upper'
