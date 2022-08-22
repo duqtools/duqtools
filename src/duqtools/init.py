@@ -28,7 +28,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
     RuntimeError
         When the config already exists.
     """
-    cfg = Config()
+    cfg = object.__new__(Config)
     BaseModel.__init__(cfg)
 
     logger.debug(cfg)
@@ -49,6 +49,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
             include={
                 'workspace': True,
                 'create': {'dimensions', 'sampler', 'template', 'data'},
+                'quiet': False,
             })
 
     op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),

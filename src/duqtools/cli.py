@@ -4,7 +4,7 @@ from sys import stderr, stdout
 
 import click
 
-from ._logging_utils import TermEscapeCodeFormatter
+from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen
 from .config import cfg
 from .operations import op_queue, op_queue_context
 
@@ -29,6 +29,25 @@ def config_option(f):
                         '--config',
                         default='duqtools.yaml',
                         help='Path to config.',
+                        callback=callback,
+                        is_eager=True)(f)
+
+
+def quiet_option(f):
+
+    def callback(ctx, param, quiet):
+        if quiet:
+            duqlog_screen.handlers = []  # remove output methods
+            cfg.quiet = True
+
+        return quiet
+
+    return click.option('-q',
+                        '--quiet',
+                        is_flag=True,
+                        default=False,
+                        help='Don\'t output anything to the screen'
+                        ' (except mandatory prompts).',
                         callback=callback)(f)
 
 
@@ -45,14 +64,14 @@ def debug_option(f):
     return click.option('--debug',
                         is_flag=True,
                         help='Enable debug print statements.',
-                        callback=callback)(f)
+                        callback=callback,
+                        is_eager=True)(f)
 
 
 def dry_run_option(f):
 
     def callback(ctx, param, dry_run):
         if dry_run:
-            logger.info('--dry-run enabled')
             op_queue.dry_run = True
         else:
             op_queue.dry_run = False
@@ -69,7 +88,6 @@ def yes_option(f):
 
     def callback(ctx, param, yes):
         if yes:
-            logger.info('--yes enabled')
             op_queue.yes = True
         else:
             op_queue.yes = False
@@ -85,15 +103,14 @@ def logfile_option(f):
 
     def callback(ctx, param, logfile):
         streams = {'stdout': stdout, 'stderr': stderr}
-
-        logger.info(f'logging to {logfile}')
+        level = logging.getLogger().handlers[0].level
         logging.getLogger().handlers = []
 
         if logfile in streams.keys():
-            logging.basicConfig(stream=streams[logfile], level=logging.INFO)
+            logging.basicConfig(stream=streams[logfile], level=level)
         else:
             fhandler = logging.FileHandler(logfile)
-            fhandler.setLevel(logging.INFO)
+            fhandler.setLevel(level)
 
             # Remove fancies from logfiles
             escaped_format = TermEscapeCodeFormatter(logging.BASIC_FORMAT)
@@ -116,15 +133,31 @@ def logfile_option(f):
                         help='where to send the logfile,'
                         ' the special values stderr/stdout'
                         ' will send it there respectively.',
-                        callback=callback)(f)
+                        callback=callback,
+                        is_eager=True)(f)
 
 
 def common_options(func):
-    for wrapper in (logfile_option, debug_option, config_option,
+    """common_options.
+
+    IMPORTANT: wrappers can be executed in any order, determined by
+    the order of options on the command line
+    This means that sometimes the order of arguments matters,
+    specifically for stuff like debug flags.
+
+    We can control this a bit with the is_eager flag, currently is_eager are:
+    - debug_option
+    - config_option
+    - logfile_option
+
+    Ideally we can determine the full order of processing, but this requires us
+    to only have the options set a flag, and then do the processing afterwards
+    in a different wrapper
+    """
+    for wrapper in (logfile_option, debug_option, config_option, quiet_option,
                     dry_run_option, yes_option):
-        # config_option MUST BE BEFORE dry_run_option
-        # logfile_option must be before debug_option
         func = wrapper(func)
+
     return func
 
 

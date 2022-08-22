@@ -10,6 +10,8 @@ from typing import Callable, Optional
 import click
 from pydantic import Field
 
+from ._logging_utils import duqlog_screen
+from .config import cfg
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -96,13 +98,6 @@ class Operations(deque):
     yes = False  # Apply operations without prompt
     enabled = False  # Actually do something
     dry_run = False  # Never apply any operations (do not even ask)
-    logger = logging.getLogger('operations')
-
-    def __init__(self):
-        super().__init__()
-        stream = logging.StreamHandler()
-        stream.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(stream)
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
@@ -134,7 +129,7 @@ class Operations(deque):
                 f'Appended {item.description} to the operations queue')
             super().append(item)
         else:
-            self.logger.info('- ' + item.description)
+            duqlog_screen.info('- ' + item.description)
             item()
 
     def apply(self) -> Operation:
@@ -150,17 +145,24 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        logger.info(click.style('Applying Operations', fg='red', bold=True))
-        with tqdm(total=len(self), position=1) as pbar:
-            pbar.set_description('Applying operations')
-            with tqdm(iterable=False, bar_format='{desc}', position=0) as dbar:
-                while len(self) != 0:
-                    op = self.popleft()
-                    if not op.quiet:
-                        dbar.set_description(op.description)
-                    logger.info(op.description)
-                    pbar.update()
-                    op()
+        duqlog_screen.info(
+            click.style('Applying Operations', fg='red', bold=True))
+        if not cfg.quiet:
+            with tqdm(total=len(self), position=1) as pbar:
+                pbar.set_description('Applying operations')
+                with tqdm(iterable=False, bar_format='{desc}',
+                          position=0) as dbar:
+                    while len(self) != 0:
+                        op = self.popleft()
+                        if not op.quiet:
+                            dbar.set_description(op.description)
+                        logger.info(op.description)
+                        pbar.update()
+                        op()
+        else:
+            while len(self) != 0:
+                op = self.popleft()
+                op()
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -171,16 +173,16 @@ class Operations(deque):
         """
 
         # To print the descriptions we need to get them
-        self.logger.info('')
-        self.logger.info(
+        duqlog_screen.info('')
+        duqlog_screen.info(
             click.style('Operations in the Queue:', fg='red', bold=True))
-        self.logger.info(click.style('========================', fg='red'))
+        duqlog_screen.info(click.style('========================', fg='red'))
         for op in self:
             if not op.quiet:
-                self.logger.info('- ' + op.description)
+                duqlog_screen.info('- ' + op.description)
 
         if self.dry_run:
-            self.logger.info('Dry run enabled, not applying op_queue')
+            duqlog_screen.info('Dry run enabled, not applying op_queue')
             return False
 
         ans = self.yes or click.confirm(
@@ -194,7 +196,7 @@ class Operations(deque):
         """Safety check, it should never happen that operations are not
         executed."""
         if len(self) != 0:
-            self.logger.warning(
+            duqlog_screen.warning(
                 click.style((f'There are still {len(self)} operations '
                              'in the queue at program exit!'),
                             fg='red',
