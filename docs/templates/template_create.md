@@ -83,8 +83,11 @@ These instructions operate on the template model. Note that these are compound o
 For example:
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/zeff
+variable:
+  - name: zeff
+    ids: core_profiles
+    path: profiles_1d/0/zeff
+    dims: [x]
 operator: add
 values: [0.01, 0.02, 0.03]
 ```
@@ -92,8 +95,11 @@ values: [0.01, 0.02, 0.03]
 will generate 3 entries, `zeff += 0.01`, `zeff += 0.02`, and `zeff += 0.03`.
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/t_i_average
+variable:
+  - name: t_i_average
+    ids: core_profiles
+    path: profiles_1d/0/t_i_average
+    dims: [x]
 operator: multiply
 values: [1.1, 1.2, 1.3]
 ```
@@ -107,6 +113,17 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 !!! note
 
     The python equivalent is essentially `np.<operator>(ids, value, out=ids)` for each of the given values.
+
+!!! note
+
+    If you want to copy all time ranges, you can use `path: profiles_1d/$time/t_i_average`. The `$time` substring will
+    duqtools to apply the operation to all available time slices.
+
+### Specifying variables
+
+To specify variables so that they can be re-used, you can use the `variables` sub-section. The rest of the examples will use this shortened form.
+
+For more info, see [here](/config/introduction/#specifying-variables).
 
 ### Specify value ranges
 
@@ -126,8 +143,7 @@ There are two ways to specify ranges in *duqtools*.
 This example generates a range from 0.7 to 1.3 with 10 steps:
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/t_i_average
+variable: t_i_average
 operator: multiply
 values:
   start: 0.7
@@ -147,8 +163,7 @@ values:
 This example generates a range from 0.7 to 1.3 with steps of 0.1:
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/t_i_average
+variable: t_i_average
 operator: multiply
 values:
   start: 0.7
@@ -158,11 +173,12 @@ values:
 
 ### Sampling between error bounds
 
+From the data model convention, only the upper error node (`_error_upper`) should be filled in case of symmetrical error bars. If the lower error node (`_error_lower`) is also filled, *duqtools* will scale to the upper error for values larger than 0, and to the lower error for values smaller than 0.
+
 The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/electrons/temperature
+variable: electrons/temperature
 operator: add
 values: [-2, -1, 0, 1, 2]
 scale_to_error: True
@@ -171,8 +187,7 @@ scale_to_error: True
 The following example takes `t_i_average`, and generates a range from $-3\sigma$ to $+3\sigma$ with 10 equivalent steps:
 
 ```yaml title="duqtools.yaml"
-ids: core_profiles
-path: profiles_1d/0/t_i_average
+variable: t_i_average
 operator: add
 values:
   start: -3

@@ -80,9 +80,14 @@ For example:
 
 ```yaml title="duqtools.yaml"
 plan:
-  - ids: core_profiles
-    base_grid: profiles_1d/$i/grid/rho_tor_norm
-    paths:
-    - profiles_1d/$i/t_i_average
-    - profiles_1d/$i/zeff
+  - grid_variable: rho_tor_norm
+    variables:
+    - time
+    - t_i_average
+    - zeff
 ```
+
+
+!!! note
+
+    In the current version of duqtools, the *time* coordinate variable must be specified here, even though it won't be merged. This will change in a future version of duqtools.

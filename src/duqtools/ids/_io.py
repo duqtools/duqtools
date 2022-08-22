@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Sequence, Union
 
+import numpy as np
+
 from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)
@@ -10,21 +12,26 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import pandas as pd
 
+    from ..schema._variable import VariableModel
 
-def _get_ids_run_dataframe(handle: ImasHandle,
-                           *,
-                           ids: str = 'core_profiles',
-                           keys: Sequence[str],
+
+def _get_ids_run_dataframe(handle: ImasHandle, *,
+                           variables: Sequence[VariableModel],
                            **kwargs) -> pd.DataFrame:
     """Get data for single run."""
     logger.info('Getting data for %s', handle)
-    profile = handle.get(ids, exclude_empty=True)
-    return profile.to_dataframe(*keys, **kwargs)
+    a_variable = variables[0]
+    data = handle.get(a_variable.ids, exclude_empty=True)
+    ds = data.to_xarray(variables=variables, **kwargs)
+    return ds.to_dataframe()
 
 
-def get_ids_dataframe(handles: Union[Sequence[ImasHandle],
-                                     Dict[str, ImasHandle]], *, ids: str,
-                      keys: Sequence[str], **kwargs) -> pd.DataFrame:
+def get_ids_dataframe(
+    handles: Union[Sequence[ImasHandle], Dict[str, ImasHandle]],
+    *,
+    variables: Sequence[VariableModel],
+    **kwargs,
+) -> pd.DataFrame:
     """Read a dict of IMAS handles into a structured pandas dataframe.
 
     The returned dataframe will have the columns:
@@ -40,10 +47,8 @@ def get_ids_dataframe(handles: Union[Sequence[ImasHandle],
         Dict with IMAS handles. The key is used as the 'run' name in
         the dataframe. If the handles are specified as a sequence,
         The Imas string representation will be used as the key.
-    ids : str
-        IDS to extract data from (e.g. `'core_profiles'`).
-    keys : Sequence[str]
-        IDS keys to extract. These will be used as columns in the
+    variables : Sequence[Variable]
+        Variables to extract. These will be used as columns in the
         data frame.
     **kwargs
         These keyword parameters are passed to
@@ -60,10 +65,17 @@ def get_ids_dataframe(handles: Union[Sequence[ImasHandle],
         handles = {handle.to_string(): handle for handle in handles}
 
     runs_data = {
-        str(name): _get_ids_run_dataframe(handle, ids=ids, keys=keys, **kwargs)
+        str(name): _get_ids_run_dataframe(handle,
+                                          variables=variables,
+                                          **kwargs)
         for name, handle in handles.items()
     }
 
-    return pd.concat(runs_data,
-                     names=('run',
-                            'index')).reset_index('run').reset_index(drop=True)
+    df = pd.concat(runs_data, names=('run', 'time', 'index')).reset_index(
+        ('run', 'time')).reset_index(drop=True)
+
+    _, idx = np.unique(df['time'], return_inverse=True)
+
+    df['tstep'] = idx
+
+    return df

@@ -3,19 +3,24 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Dict, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
+from ..schema import VariableModel
 from ._constants import TIME_COL, TSTEP_COL
 from ._copy import add_provenance_info
+from ._variable import Variable
 
 if TYPE_CHECKING:
     import pandas as pd
+    import xarray as xr
 
     from ._handle import ImasHandle
 
-TIME_STR = '$i'
+TIME_STR = '$time'
+
+DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -40,9 +45,10 @@ class IDSMapping(Mapping):
         Parameters
         ----------
         ids :
-            ids
+            IMAS DB entry for the IDS.
         exclude_empty : bool
-            exclude_empty
+            Hide empty arrays from mapping. You can still get/set these keys directly,
+            but `key in map` returns `False` if `map['key']` is an empty array.
         """
         self._ids = ids
         self.exclude_empty = exclude_empty
@@ -84,6 +90,8 @@ class IDSMapping(Mapping):
             ret = getattr(pointer, attr)
         except AttributeError as err:
             raise KeyError(key) from err
+        except IndexError as err:
+            raise KeyError(key) from err
 
         return ret
 
@@ -94,6 +102,8 @@ class IDSMapping(Mapping):
             getattr(pointer, attr)
         except AttributeError as err:
             raise KeyError(key) from err
+        except IndexError as err:
+            raise KeyError(key) from err
         else:
             setattr(pointer, attr, value)
 
@@ -102,6 +112,37 @@ class IDSMapping(Mapping):
 
     def __len__(self):
         return len(self._keys)
+
+    def __contains__(self, key):
+        return key in self._keys
+
+    def get_with_replace(self, variable: Union[str, VariableModel],
+                         **kwargs) -> Any:
+        """Grab key with placeholder replacement.
+
+        Example: `IDSMapping.get_with_replace(var, time=0)`
+        """
+        path = variable.path if isinstance(variable,
+                                           VariableModel) else variable
+
+        for old, new in kwargs.items():
+            path = path.replace(f'${old}', str(new))
+
+        return self[path]
+
+    def set_with_replace(self, variable: Union[str, VariableModel], value: Any,
+                         **kwargs):
+        """Grab key with placeholder replacement.
+
+        Example: `IDSMapping.set_with_replace(var, value, time=0)`
+        """
+        path = variable.path if isinstance(variable,
+                                           VariableModel) else variable
+
+        for old, new in kwargs.items():
+            path = path.replace(f'${old}', str(new))
+
+        self[path] = value
 
     def length_of_key(self, key: str):
         """length_of_key gives you the number of entries of a (partial) ids
@@ -242,10 +283,10 @@ class IDSMapping(Mapping):
     def find_by_index(self, pattern: str) -> Dict[str, Dict[int, np.ndarray]]:
         """Find keys matching regex pattern using time index.
 
-        Must include $i, which is a special character that matches
+        Must include $time, which is a special character that matches
         an integer time step (`\\d+`)
 
-        i.e. `ids.find_by_index('profiles_1d/$i/zeff.*')`
+        i.e. `ids.find_by_index('profiles_1d/$time/zeff.*')`
         returns a dict with `zeff` and error attributes.
 
         Parameters
@@ -314,6 +355,52 @@ class IDSMapping(Mapping):
         df[TSTEP_COL] = df[TSTEP_COL].astype(int)
 
         return df
+
+    def to_xarray(
+        self,
+        variables: Sequence[Variable],
+        **kwargs,
+    ) -> xr.Dataset:
+        """Return dataset for given variables.
+
+        Parameters
+        ----------
+        variables : Dict[str, Variable]
+            Dictionary of data variables
+
+        Returns
+        -------
+        ds : xr.Dataset
+            Return query as Dataset
+        """
+        import xarray as xr
+
+        xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
+
+        for var in variables:
+            dimensions = DIM_PATTERN.findall(var.path)
+
+            if not dimensions:
+                xr_data_vars[var.name] = (var.dims, self[var.path])
+                continue
+
+            if len(dimensions) > 1:
+                raise NotImplementedError
+
+            index_string, dimension = dimensions[0]
+            prefix = var.path.split(index_string)[0].strip('/')
+
+            arr = []
+
+            for index in range(len(self[prefix])):
+                path = var.path.replace(index_string, str(index))
+                arr.append(self[path])
+
+            xr_data_vars[var.name] = ([dimension, *var.dims], arr)
+
+        ds = xr.Dataset(data_vars=xr_data_vars, )
+
+        return ds
 
     def to_numpy(
         self,

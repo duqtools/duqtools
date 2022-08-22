@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from duqtools.ids import IDSMapping, apply_model
+from duqtools.ids import IDSMapping, Variable, apply_model
 from duqtools.schema import IDSOperation
 
 assert_equal = np.testing.assert_array_equal
@@ -26,38 +26,47 @@ def gen_sample_data():
     return IDSMapping(Data)
 
 
+def get_test_var(path):
+    return Variable(
+        name='var',
+        path=path,
+        ids='test',
+        dims=[],
+    )
+
+
 TEST_INPUT = (
     {
         'operator': 'add',
-        'path': 'data/0/x',
+        'variable': get_test_var('data/0/x'),
         'value': 2,
     },
     {
         'operator': 'multiply',
-        'path': 'data/0/y',
+        'variable': get_test_var('data/0/y'),
         'value': 0.5,
     },
     {
         'operator': 'add',
-        'path': 'data/0/y',
+        'variable': get_test_var('data/0/y'),
         'value': 0.5,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'path': 'data/0/y',
+        'variable': get_test_var('data/0/y'),
         'value': -0.5,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'path': 'data/0/x',
+        'variable': get_test_var('data/0/x'),
         'value': 3.0,
         'scale_to_error': True,
     },
     {
         'operator': 'add',
-        'path': 'data/0/x',
+        'variable': get_test_var('data/0/x'),
         'value': -3.0,
         'scale_to_error': True,
     },
@@ -80,4 +89,4 @@ def test_apply_model(model, output):
 
     apply_model(model, data)
 
-    assert_equal(data[model.path], output)
+    assert_equal(data[model.variable.path], output)

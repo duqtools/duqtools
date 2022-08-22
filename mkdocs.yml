@@ -15,7 +15,9 @@ nav:
     - Public API: api.md
     - Operations: operations.md
   - Examples:
-    - Getting started: examples/getting_started.ipynb
+    - examples/imas_handles.ipynb
+    - examples/xarray.ipynb
+    - examples/xarray-2D.ipynb
   - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
   - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
 

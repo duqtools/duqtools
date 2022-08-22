@@ -1,29 +1,58 @@
 from getpass import getuser
-from typing import List, Union
+from pathlib import Path
+from typing import Dict, List, Union
 
-from pydantic import DirectoryPath, Field, FilePath
+from pydantic import DirectoryPath, Field, root_validator
 from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import IDSOperationDim
 from ._imas import ImasBaseModel
+from ._variable import VariableModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .workdir import WorkDirectoryModel
 
 
-class DeprecatedValueError(ValueError):
-    ...
+class VariableConfigModel(BaseModel):
+    __root__: List[VariableModel] = Field([
+        VariableModel(name='rho_tor_norm',
+                      ids='core_profiles',
+                      path='profiles_1d/$time/grid/rho_tor_norm',
+                      dims=['x']),
+        VariableModel(name='t_i_average',
+                      ids='core_profiles',
+                      path='profiles_1d/$time/t_i_average',
+                      dims=['x']),
+        VariableModel(name='zeff',
+                      ids='core_profiles',
+                      path='profiles_1d/$time/zeff',
+                      dims=['x']),
+        VariableModel(name='time',
+                      ids='core_profiles',
+                      path='time',
+                      dims=['time']),
+    ])
+
+    def __iter__(self):
+        yield from self.__root__
+
+    def __getitem__(self, index: int):
+        return self.__root__[index]
+
+    def to_variable_dict(self) -> dict:
+        """Return dict of variables."""
+        return {variable.name: variable for variable in self}
 
 
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
     dimensions: List[Union[IDSOperationDim]] = Field([
-        IDSOperationDim(path='profiles_1d/$i/t_i_average', ),
-        IDSOperationDim(path='profiles_1d/$i/electrons/temperature')
+        IDSOperationDim(variable='t_i_average'),
+        IDSOperationDim(variable='zeff')
     ],
                                                      description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
@@ -133,33 +162,46 @@ class StatusConfigModel(BaseModel):
 class MergeStep(BaseModel):
     """These parameters describe which paths should be merged.
 
-    The IDS parameter (`ids`) describes the where the data are retrieved from.
-    This IDS then contains the given `paths`, which belong to this IDS.
+    Three sets of variables need to be defined:
+    - time_variable: this points to the data for the time coordinate
+    - grid_variable: this points to the data for the grid variable
+    - data_variables: these point to the data to be merged
 
-    The base grid points to the data which should be used as the common basis. All
-    other data arrays are interpolated to this grid. Both the template and the
-    data must contain this data.
+    Note that all variables must be from the same IDS.
 
-    To denote the time step, use `/$i/` in both the base grid and the data paths.
+    The grid and data variables must share a common dimension. The grid variable
+    will be used to rebase all data variables to a common grid.
+
+    The time variable will be used to rebase the grid variable and the data variables
+    to a common time coordinate. To denote the time index, use `/$time/` in both
+    the grid and data variables.
+
+    Rebasing involves interpolation.
 
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    ids: str = Field('core_profiles',
-                     description='Merge fields from this IDS.')
-    paths: List[str] = Field(
-        ['profiles_1d/$i/t_i_average', 'profiles_1d/$i/zeff'],
-        description=f("""
-            This is a list of IDS paths to merge over all runs.
-            The mean/error are written to the target IDS.
-            The paths should contain `/$i/` for the time component.
-        """))
-    base_grid: str = Field('profiles_1d/$i/grid/rho_tor_norm',
-                           description=f("""
-            The data for this field is taken from the template. The IMAS data to merge should
-            also contain this path, because it will be used to rebase all IDS fields
-            to same radial grid before merging using interpolation. The path should contain
-            '/$i/' to denote the time component.
+    data_variables: List[Union[str,
+                               VariableModel]] = Field(['t_i_average', 'zeff'],
+                                                       description=f("""
+            This is a list of data variables to be merged. This means
+            that the mean and error for these data over all runs are calculated
+            and written back to the ouput data location.
+            The paths should contain `/$time/` for the time component.
+            """))
+    grid_variable: Union[str, VariableModel] = Field('rho_tor_norm',
+                                                     description=f("""
+            This variable points to the data for the grid coordinate. It must share a common
+            placeholder dimension with the data variables.
+            It will be used to rebase all data variables to same (radial) grid before merging
+            using interpolation.
+            The path should contain '/$time/' to denote the time component.
+            """))
+    time_variable: Union[str, VariableModel] = Field('time',
+                                                     description=f("""
+            This variable determines the time coordinate to merge on. This ensures
+            that the data from all runs are on the same time coordinates before
+            merging.
             """))
 
 
@@ -173,10 +215,10 @@ class MergeConfigModel(BaseModel):
     Before merging, all keys are rebased on (1) the same radial
     coordinate specified via `base_ids` and (2) the timestamp.
     """
-    data: FilePath = Field('runs.yaml',
-                           description=f("""
+    data: Path = Field('runs.yaml',
+                       description=f("""
             Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
-        """))
+            """))
     template: ImasBaseModel = Field(
         {
             'user': getuser(),
@@ -184,7 +226,10 @@ class MergeConfigModel(BaseModel):
             'shot': 94785,
             'run': 1
         },
-        description='This IMAS DB entry will be used as the template.')
+        description=f("""
+            This IMAS DB entry will be used as the template.
+            It is copied to the output location.
+            """))
     output: ImasBaseModel = Field(
         {
             'db': 'jet',
@@ -192,7 +237,7 @@ class MergeConfigModel(BaseModel):
             'run': 9999
         },
         description='Merged data will be written to this IMAS DB entry.')
-    plan: List[MergeStep] = Field(MergeStep(),
+    plan: List[MergeStep] = Field([MergeStep()],
                                   description='List of merging operations.')
 
 
@@ -216,6 +261,10 @@ class ConfigModel(BaseModel):
         MergeConfigModel(),
         description='Configuration for the merge subcommand')
 
+    variables: VariableConfigModel = Field(
+        VariableConfigModel(),
+        description='Define variables for use in the subcommands.')
+
     workspace: WorkDirectoryModel = WorkDirectoryModel()
     system: Literal['jetto',
                     'dummy'] = Field('jetto',
@@ -223,3 +272,37 @@ class ConfigModel(BaseModel):
     quiet: bool = Field(
         False,
         description='dont output to stdout, except for mandatory prompts')
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def update_variables(cls, values):
+        """Grab variable names from different steps and replace them with the
+        definitions from the `variables` attribute."""
+        var_dict = values['variables'].to_variable_dict()
+
+        def validate_variable(var: Union[str, VariableModel],
+                              dct: Dict[str, VariableModel]) -> VariableModel:
+            if isinstance(var, VariableModel):
+                return var
+
+            try:
+                variable_model = dct[var]
+            except KeyError:
+                raise KeyError(f'Variable: `{var}` has not been defined.')
+
+            return variable_model
+
+        for dimension in values['create'].dimensions:
+            dimension.variable = validate_variable(dimension.variable,
+                                                   var_dict)
+
+        for step in values['merge'].plan:
+            step.grid_variable = validate_variable(step.grid_variable,
+                                                   var_dict)
+            step.time_variable = validate_variable(step.time_variable,
+                                                   var_dict)
+            step.data_variables = [
+                validate_variable(variable, var_dict)
+                for variable in step.data_variables
+            ]
+
+        return values
