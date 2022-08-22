@@ -4,8 +4,10 @@ from ..schema.cli import ConfigModel
 
 
 class Config(ConfigModel):
-    """Config class containing all configs, is a singleton and can be used with
-    import duqtools.config.Config as Cfg Cfg().<variable you want>"""
+    """Config class containing all configs, can be used with:
+
+    from duqtools.config import cfg; cfg.<variable you want>
+    """
 
     _instance = None
 

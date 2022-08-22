@@ -28,7 +28,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
     RuntimeError
         When the config already exists.
     """
-    cfg = Config()
+    cfg = object.__new__(Config)
     BaseModel.__init__(cfg)
 
     logger.debug(cfg)
