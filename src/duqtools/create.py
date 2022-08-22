@@ -47,7 +47,7 @@ def write_runs_file(runs: list, workspace) -> None:
         runs.yaml(stream=f)
 
 
-@add_to_op_queue('Writing csv', '{fname}', quiet=True)
+@add_to_op_queue('Writing csv', quiet=True)
 def write_runs_csv(runs, fname: str = 'data.csv'):
     run_map = {run['dirname']: run['data_out'].dict() for run in runs}
     df = pd.DataFrame.from_dict(run_map, orient='index')
