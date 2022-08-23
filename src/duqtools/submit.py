@@ -25,18 +25,17 @@ def submit_job(lockfile, cmd, run_dir):
         f.write(ret.stdout)
 
 
-def submit(*, force: bool, max_jobs: float, **kwargs):
+def submit(*, force: bool, max_jobs: int, **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
     Parameters
     ----------
     force : bool
-        force the submission even in the presence of lockfiles
+        Force the submission even in the presence of lockfiles
+    max_jobs : int
+        Maximum number of jobs to submit at once
     """
-    if not max_jobs:
-        max_jobs = float('inf')
-
     if not cfg.submit:
         raise Exception('submit field required in config file')
 
@@ -90,6 +89,6 @@ def submit(*, force: bool, max_jobs: float, **kwargs):
 
         n_submitted += 1
 
-        if n_submitted >= max_jobs:
+        if max_jobs and (n_submitted >= max_jobs):
             info(f'Max jobs ({max_jobs}) reached.')
             break
