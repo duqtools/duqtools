@@ -198,6 +198,10 @@ def cli_create(**kwargs):
 @cli.command('submit')
 @common_options
 @click.option('--force', is_flag=True, help='Re-submit running jobs.')
+@click.option('--max',
+              'max_jobs',
+              type=int,
+              help='Maximum number of jobs to submit.')
 def cli_submit(**kwargs):
     """Submit the UQ runs."""
     from .submit import submit
