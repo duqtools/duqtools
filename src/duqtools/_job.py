@@ -13,15 +13,16 @@ class Job:
         self.dir = Path(dir)
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.dir!r})'
+        run = str(self.dir)
+        return f'{self.__class__.__name__}({run!r})'
 
     @property
     def has_submit_script(self) -> bool:
-        return (self.dir / cfg.submit.submit_script_name).exists()
+        return self.submit_script.exists()
 
     @property
     def has_status(self) -> bool:
-        return (self.dir / cfg.status.status_file).exists()
+        return self.status_file.exists()
 
     @property
     def is_submitted(self) -> bool:
@@ -58,3 +59,11 @@ class Job:
     @property
     def status_file(self) -> Path:
         return self.dir / cfg.status.status_file
+
+    @property
+    def submit_script(self) -> Path:
+        return self.dir / cfg.submit.submit_script_name
+
+    @property
+    def lockfile(self) -> Path:
+        return self.dir / 'duqtools.submit.lock'
