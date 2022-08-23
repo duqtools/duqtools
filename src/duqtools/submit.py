@@ -1,5 +1,7 @@
 import logging
+import queue
 import subprocess
+from collections import deque
 from typing import Any, List
 
 import click
@@ -25,6 +27,67 @@ def submit_job(cmd, job):
     info(f'submission returned: {ret.stdout}')
     with open(lockfile, 'wb') as f:
         f.write(ret.stdout)
+
+
+import time
+
+
+class Task:
+
+    def __init__(self, i):
+        t0 = time.perf_counter()
+        self.i = i
+
+    def finished():
+        t1 = time.perf_counter()
+        if (t1 - t0) > (self.i + 5):
+            print('Finished')
+            return True
+        return False
+
+
+def job_task(cmd, job):
+    lockfile = job.lockfile
+
+    debug(f'Put lockfile in place for {lockfile}')
+    lockfile.touch()
+
+    info(f'submitting script {cmd}')
+    ret = subprocess.run(cmd, check=True, capture_output=True)
+    info(f'submission returned: {ret.stdout}')
+    with open(lockfile, 'wb') as f:
+        f.write(ret.stdout)
+
+    while not job.is_completed:
+        print(job, 'not completed')
+        yield
+
+
+import time
+
+
+def scheduler(queue, cmd, max_jobs=10):
+    tasks = deque()
+
+    for _ in range(max_jobs):
+        job = queue.popleft()
+        task = job_task(cmd, job)
+        tasks.append(task)
+
+    while tasks:
+        print('loop')
+        time.sleep(0.5)
+        task = tasks.popleft()
+        try:
+            next(task)  # Run to the next yield
+            tasks.append(task)  # Reschedule
+        except StopIteration:
+            pass
+
+        if queue and len(tasks) < max_jobs:
+            job = queue.popleft()
+            task = job_task(cmd, job)
+            tasks.append(task)
 
 
 def submission_script_ok(job):
@@ -92,6 +155,10 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
 
     n_submitted = 0
 
+    submit_cmd = cfg.submit.submit_command.split()
+
+    job_queue = deque()
+
     for job in jobs:
         if not submission_script_ok(job):
             continue
@@ -100,13 +167,18 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
         if not lockfile_ok(job, force=force):
             continue
 
-        submit_cmd = cfg.submit.submit_command.split()
         cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
 
-        submit_job(cmd, job)
+        job_queue.append(job)
+
+        # submit_job(cmd, job)
 
         n_submitted += 1
 
-        if max_jobs and (n_submitted >= max_jobs):
-            info(f'Max jobs ({max_jobs}) reached.')
-            break
+        # if max_jobs and (n_submitted >= max_jobs):
+        #     info(f'Max jobs ({max_jobs}) reached.')
+        #     break
+
+    print('scheduler')
+
+    scheduler(job_queue, cmd=submit_cmd, max_jobs=max_jobs)
