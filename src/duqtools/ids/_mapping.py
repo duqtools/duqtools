@@ -376,6 +376,7 @@ class IDSMapping(Mapping):
         import xarray as xr
 
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
+        xr_coords_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
         for var in variables:
             dimensions = DIM_PATTERN.findall(var.path)
@@ -396,9 +397,30 @@ class IDSMapping(Mapping):
                 path = var.path.replace(index_string, str(index))
                 arr.append(self[path])
 
-            xr_data_vars[var.name] = ([dimension, *var.dims], arr)
+            xr_data_vars[var.name] = ([*var.dims], arr)
 
-        ds = xr.Dataset(data_vars=xr_data_vars, )
+        # Determine which variables are actually coordinates
+        # And fix the coordinates of variables to the basis dimensions
+        for key, val in xr_data_vars.items():
+            dims, arr = val
+            new_dims = []
+            for dim in dims:
+                if dim not in xr_data_vars:  # basis dimension
+                    new_dims.append(dim)
+                else:  # not a basis dimension, figure out the basis
+                    for data_val in xr_data_vars[dim][0]:
+                        new_dims.append(data_val)
+                    # add coordinate to coords_vars
+                    xr_coords_vars[dim] = xr_data_vars[dim]
+            # Update dimension
+            xr_data_vars[key] = (new_dims, arr)
+
+        # delete coordinates from data
+        for key in xr_coords_vars:
+            if key in xr_data_vars.keys():
+                del xr_data_vars[key]
+
+        ds = xr.Dataset(data_vars=xr_data_vars, coords=xr_coords_vars)
 
         return ds
 
