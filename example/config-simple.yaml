@@ -2,12 +2,12 @@ workspace: ./workspace
 variables:
   - name: zeff
     ids: core_profiles
-    path: profiles_1d/$time/zeff
-    dims: [x]
+    path: profiles_1d/*/zeff
+    dims: [time,x]
   - name: t_i_average
     ids: core_profiles
-    path: profiles_1d/$time/t_i_average
-    dims: [x]
+    path: profiles_1d/*/t_i_average
+    dims: [time,x]
 create:
   template: template_model
   data:
