@@ -72,7 +72,7 @@ def test_find_group():
 
 def test_find_index():
     s = IDSMapping(Sample)
-    inp = 'data/$time/x'
+    inp = 'data/*/x'
     d = s.find_by_index(inp)
 
     assert len(d) == 1

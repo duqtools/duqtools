@@ -20,8 +20,6 @@ if TYPE_CHECKING:
 
 TIME_STR = '$time'
 
-DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
-
 
 def insert_re_caret_dollar(string: str) -> str:
     """Insert regex start (^) / end ($) of line matching characters."""
@@ -356,6 +354,18 @@ class IDSMapping(Mapping):
 
         return df
 
+    def _fill_array_from_partial_path(self, partial_path):
+        arr = []
+        for index in range(len(self[partial_path[0]])):
+            path = partial_path[0] + '/' + str(index) + '/' + partial_path[1]
+            if len(partial_path) > 2:
+                sub_partial_path = [path] + partial_path[2:]
+                sub_arr = self._fill_array_from_partial_path(sub_partial_path)
+                arr.append(sub_arr)
+            else:
+                arr.append(self[path])
+        return arr
+
     def to_xarray(
         self,
         variables: Sequence[Variable],
@@ -376,51 +386,19 @@ class IDSMapping(Mapping):
         import xarray as xr
 
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
-        xr_coords_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
         for var in variables:
-            dimensions = DIM_PATTERN.findall(var.path)
+            partial_path = var.path.split('/*/')
 
-            if not dimensions:
+            if len(partial_path) == 1:
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            if len(dimensions) > 1:
-                raise NotImplementedError
-
-            index_string, dimension = dimensions[0]
-            prefix = var.path.split(index_string)[0].strip('/')
-
-            arr = []
-
-            for index in range(len(self[prefix])):
-                path = var.path.replace(index_string, str(index))
-                arr.append(self[path])
+            arr = self._fill_array_from_partial_path(partial_path)
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 
-        # Determine which variables are actually coordinates
-        # And fix the coordinates of variables to the basis dimensions
-        for key, val in xr_data_vars.items():
-            dims, arr = val
-            new_dims = []
-            for dim in dims:
-                if dim not in xr_data_vars:  # basis dimension
-                    new_dims.append(dim)
-                else:  # not a basis dimension, figure out the basis
-                    for data_val in xr_data_vars[dim][0]:
-                        new_dims.append(data_val)
-                    # add coordinate to coords_vars
-                    xr_coords_vars[dim] = xr_data_vars[dim]
-            # Update dimension
-            xr_data_vars[key] = (new_dims, arr)
-
-        # delete coordinates from data
-        for key in xr_coords_vars:
-            if key in xr_data_vars.keys():
-                del xr_data_vars[key]
-
-        ds = xr.Dataset(data_vars=xr_data_vars, coords=xr_coords_vars)
+        ds = xr.Dataset(data_vars=xr_data_vars)
 
         return ds
 

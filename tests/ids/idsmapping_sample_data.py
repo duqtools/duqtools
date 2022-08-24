@@ -35,19 +35,34 @@ class nested_profile_t2:
     data = profile_t2
 
 
+class ion_1:
+    variable = np.arange(25.0).reshape(5, 5) * 1
+
+
+class ion_2:
+    variable = np.arange(25.0).reshape(5, 5) * 2
+
+
+class ion_3:
+    variable = np.arange(25.0).reshape(5, 5) * 3
+
+
 class arr_t0:
     grid = np.arange(25.0).reshape(5, 5) * 1
     variable = grid**1
+    ions = [ion_1, ion_2, ion_3]
 
 
 class arr_t1:
     grid = np.arange(25.0).reshape(5, 5) * 2
     variable = grid**2
+    ions = [ion_1, ion_2, ion_3]
 
 
 class arr_t2:
     grid = np.arange(25.0).reshape(5, 5) * 3
     variable = grid**3
+    ions = [ion_1, ion_2, ion_3]
 
 
 class nested_arr_t0:

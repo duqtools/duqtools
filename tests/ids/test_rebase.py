@@ -21,14 +21,14 @@ def variables1d():
         Variable(
             name='xvar',
             ids='core_profiles',
-            path='nested_profiles_1d/$time/data/grid',
-            dims=['x'],
+            path='nested_profiles_1d/*/data/grid',
+            dims=['time', 'x'],
         ),
         Variable(
             name='yvar',
             ids='core_profiles',
-            path='nested_profiles_1d/$time/data/variable',
-            dims=['x'],
+            path='nested_profiles_1d/*/data/variable',
+            dims=['time', 'x'],
         ),
     ]
     return variables
