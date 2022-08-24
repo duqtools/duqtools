@@ -134,7 +134,7 @@ class Monitor():
         self.finished = False
 
     def set_status(self):
-        if not self.job.status_file.exists():
+        if not self.job.has_status:
             status = 'No status'
         elif not self.job.is_submitted:
             status = 'Unsubmitted '
@@ -162,7 +162,7 @@ class Monitor():
 
     def update(self):
         self.set_status()
-        if self.job.status_file.exists():
+        if self.job.has_status:
             if self.job.is_completed or self.job.is_failed:
                 self.pbar.n = 100 if self.job.is_completed else 0
                 self.pbar.refresh()

@@ -1,8 +1,8 @@
 import logging
-import queue
 import subprocess
+import time
 from collections import deque
-from typing import Any, List
+from typing import Any, Deque, List
 
 import click
 
@@ -29,23 +29,6 @@ def submit_job(cmd, job):
         f.write(ret.stdout)
 
 
-import time
-
-
-class Task:
-
-    def __init__(self, i):
-        t0 = time.perf_counter()
-        self.i = i
-
-    def finished():
-        t1 = time.perf_counter()
-        if (t1 - t0) > (self.i + 5):
-            print('Finished')
-            return True
-        return False
-
-
 def job_task(cmd, job):
     lockfile = job.lockfile
 
@@ -58,36 +41,45 @@ def job_task(cmd, job):
     with open(lockfile, 'wb') as f:
         f.write(ret.stdout)
 
-    while not job.is_completed:
-        print(job, 'not completed')
+    while not job.has_status:
+        print(job, 'no status')
+        yield
+
+    while job.is_running:
+        print(job, 'running')
         yield
 
 
-import time
+def scheduler(queue, submit_cmd, max_jobs=10):
+    max_jobs = 2
 
-
-def scheduler(queue, cmd, max_jobs=10):
     tasks = deque()
+    completed = deque()
 
     for _ in range(max_jobs):
         job = queue.popleft()
+        cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
+
         task = job_task(cmd, job)
         tasks.append(task)
 
     while tasks:
-        print('loop')
         time.sleep(0.5)
         task = tasks.popleft()
         try:
             next(task)  # Run to the next yield
             tasks.append(task)  # Reschedule
         except StopIteration:
-            pass
+            completed.append(task)
 
         if queue and len(tasks) < max_jobs:
             job = queue.popleft()
             task = job_task(cmd, job)
             tasks.append(task)
+
+        print(
+            f'running: {len(tasks)}, queue: {len(queue)}, completed: {len(completed)}'
+        )
 
 
 def submission_script_ok(job):
@@ -102,7 +94,7 @@ def submission_script_ok(job):
 
 def status_file_ok(job, *, force):
     status_file = job.status_file
-    if status_file.exists() and not force:
+    if job.has_status and not force:
         if not status_file.is_file():
             logger.warning('Status file %s is not a file', status_file)
         with open(status_file, 'r') as f:
@@ -157,7 +149,7 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
 
     submit_cmd = cfg.submit.submit_command.split()
 
-    job_queue = deque()
+    job_queue: Deque[Job] = deque()
 
     for job in jobs:
         if not submission_script_ok(job):
@@ -167,7 +159,7 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
         if not lockfile_ok(job, force=force):
             continue
 
-        cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
+        # cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
 
         job_queue.append(job)
 
@@ -181,4 +173,4 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
 
     print('scheduler')
 
-    scheduler(job_queue, cmd=submit_cmd, max_jobs=max_jobs)
+    scheduler(job_queue, submit_cmd=submit_cmd, max_jobs=max_jobs)
