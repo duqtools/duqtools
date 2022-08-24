@@ -198,8 +198,12 @@ def cli_create(**kwargs):
 @cli.command('submit')
 @common_options
 @click.option('--force', is_flag=True, help='Re-submit running jobs.')
-@click.option('--max',
-              'max_jobs',
+@click.option(
+    '--schedule',
+    is_flag=True,
+    help='Schedule and submit jobs automatically. `max_jobs` must be defined.')
+@click.option('-j',
+              '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
 def cli_submit(**kwargs):

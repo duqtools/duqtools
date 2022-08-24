@@ -1,8 +1,8 @@
 import logging
-import subprocess
 import time
 from collections import deque
-from typing import Any, Deque, List
+from itertools import cycle
+from typing import Deque, Sequence
 
 import click
 
@@ -15,56 +15,42 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
+def Spinner(frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'):
+    """Simple spinner animation."""
+    yield from cycle(frames)
+
+
 @add_to_op_queue('Submitting', '{job}')
-def submit_job(cmd, job):
-    lockfile = job.lockfile
-
-    debug(f'Put lockfile in place for {lockfile}')
-    lockfile.touch()
-
-    info(f'submitting script {cmd}')
-    ret = subprocess.run(cmd, check=True, capture_output=True)
-    info(f'submission returned: {ret.stdout}')
-    with open(lockfile, 'wb') as f:
-        f.write(ret.stdout)
+def _submit_job(job: Job):
+    job.submit()
 
 
-def job_task(cmd, job):
-    lockfile = job.lockfile
+def job_submitter(jobs: Sequence[Job], *, max_jobs):
+    for n, job in enumerate(jobs):
 
-    debug(f'Put lockfile in place for {lockfile}')
-    lockfile.touch()
+        if max_jobs and (n >= max_jobs):
+            info(f'Max jobs ({max_jobs}) reached.')
+            break
 
-    info(f'submitting script {cmd}')
-    ret = subprocess.run(cmd, check=True, capture_output=True)
-    info(f'submission returned: {ret.stdout}')
-    with open(lockfile, 'wb') as f:
-        f.write(ret.stdout)
-
-    while not job.has_status:
-        print(job, 'no status')
-        yield
-
-    while job.is_running:
-        print(job, 'running')
-        yield
+        _submit_job(job)
 
 
-def scheduler(queue, submit_cmd, max_jobs=10):
-    max_jobs = 2
+@add_to_op_queue('Start job scheduler')
+def job_scheduler(queue: Deque[Job], max_jobs=10):
+    interval = 1.0
 
-    tasks = deque()
-    completed = deque()
+    s = Spinner()
+
+    tasks: Deque[Job] = deque()
+    completed: Deque[Job] = deque()
 
     for _ in range(max_jobs):
         job = queue.popleft()
-        cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
-
-        task = job_task(cmd, job)
+        task = job.start()
         tasks.append(task)
 
     while tasks:
-        time.sleep(0.5)
+        time.sleep(interval)
         task = tasks.popleft()
         try:
             next(task)  # Run to the next yield
@@ -74,11 +60,13 @@ def scheduler(queue, submit_cmd, max_jobs=10):
 
         if queue and len(tasks) < max_jobs:
             job = queue.popleft()
-            task = job_task(cmd, job)
+            task = job.start()
             tasks.append(task)
 
         print(
-            f'running: {len(tasks)}, queue: {len(queue)}, completed: {len(completed)}'
+            f' {next(s)} Running: {len(tasks)},'
+            f' queue: {len(queue)}, completed: {len(completed)}',
+            end='\033[K\r',
         )
 
 
@@ -123,7 +111,7 @@ def lockfile_ok(job, *, force):
     return True
 
 
-def submit(*, force: bool, max_jobs: int, **kwargs):
+def submit(*, force: bool, max_jobs: int, schedule: bool, **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -133,6 +121,9 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
         Force the submission even in the presence of lockfiles
     max_jobs : int
         Maximum number of jobs to submit at once
+    schedule : bool
+        Schedule `max_jobs` to run at once, keeps the process alive until
+        finished.
     """
     if not cfg.submit:
         raise Exception('submit field required in config file')
@@ -145,10 +136,6 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
     jobs = [Job(run.dirname) for run in runs]
     debug('Case directories: %s', jobs)
 
-    n_submitted = 0
-
-    submit_cmd = cfg.submit.submit_command.split()
-
     job_queue: Deque[Job] = deque()
 
     for job in jobs:
@@ -159,18 +146,7 @@ def submit(*, force: bool, max_jobs: int, **kwargs):
         if not lockfile_ok(job, force=force):
             continue
 
-        # cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
-
         job_queue.append(job)
 
-        # submit_job(cmd, job)
-
-        n_submitted += 1
-
-        # if max_jobs and (n_submitted >= max_jobs):
-        #     info(f'Max jobs ({max_jobs}) reached.')
-        #     break
-
-    print('scheduler')
-
-    scheduler(job_queue, submit_cmd=submit_cmd, max_jobs=max_jobs)
+    submitter = job_scheduler if schedule else job_submitter
+    submitter(job_queue, max_jobs=max_jobs)
