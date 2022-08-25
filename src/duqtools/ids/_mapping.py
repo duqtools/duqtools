@@ -20,8 +20,6 @@ if TYPE_CHECKING:
 
 TIME_STR = '$time'
 
-DIM_PATTERN = re.compile(r'(?P<index>\$(?P<dim>\w+))\/')
-
 
 def insert_re_caret_dollar(string: str) -> str:
     """Insert regex start (^) / end ($) of line matching characters."""
@@ -356,6 +354,23 @@ class IDSMapping(Mapping):
 
         return df
 
+    def _fill_array_from_parts(self, *parts: str):
+        arr = []
+        root, sub, *remaining = parts
+        nodes = self[root]
+
+        for index in range(len(nodes)):
+            path = f'{root}/{index}/{sub}'
+
+            if remaining:
+                sub_arr = self._fill_array_from_parts(path, *remaining)
+            else:
+                sub_arr = self[path]
+
+            arr.append(sub_arr)
+
+        return arr
+
     def to_xarray(
         self,
         variables: Sequence[Variable],
@@ -378,27 +393,17 @@ class IDSMapping(Mapping):
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
         for var in variables:
-            dimensions = DIM_PATTERN.findall(var.path)
+            parts = var.path.split('/*/')
 
-            if not dimensions:
+            if len(parts) == 1:
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            if len(dimensions) > 1:
-                raise NotImplementedError
+            arr = self._fill_array_from_parts(*parts)
 
-            index_string, dimension = dimensions[0]
-            prefix = var.path.split(index_string)[0].strip('/')
+            xr_data_vars[var.name] = ([*var.dims], arr)
 
-            arr = []
-
-            for index in range(len(self[prefix])):
-                path = var.path.replace(index_string, str(index))
-                arr.append(self[path])
-
-            xr_data_vars[var.name] = ([dimension, *var.dims], arr)
-
-        ds = xr.Dataset(data_vars=xr_data_vars, )
+        ds = xr.Dataset(data_vars=xr_data_vars)
 
         return ds
 

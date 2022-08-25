@@ -14,8 +14,8 @@ info, debug = logger.info, logger.debug
 
 
 def _path_to_var(path: str, ids: str) -> Variable:
-    name = path.split('$time/')[-1]
-    return Variable(name=name, path=path, ids=ids, dims=['x'])
+    name = path.split('/*/')[-1]
+    return Variable(name=name, path=path, ids=ids, dims=['time', 'x'])
 
 
 def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
