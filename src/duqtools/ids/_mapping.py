@@ -358,18 +358,19 @@ class IDSMapping(Mapping):
         arr = []
         root, sub, *remaining = parts
         nodes = self[root]
-        
+
         for index in range(len(nodes)):
             path = f'{root}/{index}/{sub}'
-            
+
             if remaining:
                 sub_arr = self._fill_array_from_parts(path, *remaining)
             else:
                 sub_arr = self[path]
-            
+
             arr.append(sub_arr)
 
         return arr
+
     def to_xarray(
         self,
         variables: Sequence[Variable],
@@ -398,7 +399,7 @@ class IDSMapping(Mapping):
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            arr = self._fill_array_from_partial_path(*parts)
+            arr = self._fill_array_from_parts(*parts)
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 
