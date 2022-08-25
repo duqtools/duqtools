@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from ._plot_utils import alt_line_chart
-from .ids import ImasHandle, Variable, get_ids_dataframe
+from .ids import ImasHandle, Variable
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)

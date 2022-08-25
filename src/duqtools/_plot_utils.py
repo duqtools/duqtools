@@ -10,9 +10,6 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
                    y: str) -> alt.Chart:
     """Generate an altair line chart from a dataframe.
 
-    The dataframe must be generated using `duqtools.ids.get_ids_dataframe` (or
-    have the same format).
-
     Parameters
     ----------
     source : pd.DataFrame
@@ -53,9 +50,6 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
 def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
                         y: str) -> alt.Chart:
     """Generate an altair errorband plot from a dataframe.
-
-    The dataframe must be generated using `duqtools.ids.get_ids_dataframe` (or
-    have the same format).
 
     Parameters
     ----------

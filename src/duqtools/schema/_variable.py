@@ -19,9 +19,7 @@ class VariableModel(BaseModel):
 
     The IDS path may contain indices. You can point to a single index, by simply giving the
     complete path (i.e. `profiles_1d/0/t_i_average` for the 0th time slice).
-    To retrieve all time slices, you can use `profiles_1d/$time/t_i_average`.
-    Any part of the path may be indexed by prefixing that part by a dollar sign. To indicate
-    the time index, we used `...\\$time\\...`.
+    To retrieve all time slices, you can use `profiles_1d/*/t_i_average`.
     """
     name: str = Field(description=f("""
         Name of the variable.

@@ -173,7 +173,7 @@ class MergeStep(BaseModel):
     will be used to rebase all data variables to a common grid.
 
     The time variable will be used to rebase the grid variable and the data variables
-    to a common time coordinate. To denote the time index, use `/$time/` in both
+    to a common time coordinate. To denote the time index, use `/*/` in both
     the grid and data variables.
 
     Rebasing involves interpolation.
@@ -187,7 +187,7 @@ class MergeStep(BaseModel):
             This is a list of data variables to be merged. This means
             that the mean and error for these data over all runs are calculated
             and written back to the ouput data location.
-            The paths should contain `/$time/` for the time component.
+            The paths should contain `/*/` for the time component or other dimensions.
             """))
     grid_variable: Union[str, VariableModel] = Field('rho_tor_norm',
                                                      description=f("""
@@ -195,7 +195,7 @@ class MergeStep(BaseModel):
             placeholder dimension with the data variables.
             It will be used to rebase all data variables to same (radial) grid before merging
             using interpolation.
-            The path should contain '/$time/' to denote the time component.
+            The path should contain '/*/' to denote the time component or other dimension.
             """))
     time_variable: Union[str, VariableModel] = Field('time',
                                                      description=f("""

@@ -70,36 +70,6 @@ def test_find_group():
     assert ('0', 'y') in d
 
 
-def test_find_index():
-    s = IDSMapping(Sample)
-    inp = 'data/$time/x'
-    d = s.find_by_index(inp)
-
-    assert len(d) == 1
-    assert inp in d
-    assert_equal(d[inp][0], np.array([0, 1]))
-    assert_equal(d[inp][1], np.array([4, 5]))
-    assert_equal(d[inp][2], np.array([8, 9]))
-
-
-def test_to_numpy():
-    s = IDSMapping(Sample)
-    cols, ret = s.to_numpy('x', 'y', prefix='data')
-
-    assert cols == ('tstep', 'time', 'x', 'y')
-    assert ret.shape == (6, 4)
-    assert_equal(ret[:, 0], [0, 0, 1, 1, 2, 2])
-
-
-def test_to_dataframe():
-    s = IDSMapping(Sample)
-    df = s.to_dataframe('x', 'y', prefix='data')
-
-    assert tuple(df.columns) == ('tstep', 'time', 'x', 'y')
-    assert df.shape == (6, 4)
-    assert_equal(df['tstep'], [0, 0, 1, 1, 2, 2])
-
-
 def test_length():
     s = IDSMapping(Sample)
 

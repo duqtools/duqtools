@@ -87,6 +87,8 @@ def test_submit(cmdline_workdir):
         assert (not Path('./run_0002/duqtools.lock').exists())
 
 
+@pytest.mark.xfail(
+    reason='https://github.com/CarbonCollective/fusion-dUQtools/issues/257')
 @pytest.mark.dependency(depends=['test_real_create'])
 def test_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
