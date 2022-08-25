@@ -394,7 +394,7 @@ class IDSMapping(Mapping):
         for var in variables:
             parts = var.path.split('/*/')
 
-            if len(partial_path) == 1:
+            if len(parts) == 1:
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
