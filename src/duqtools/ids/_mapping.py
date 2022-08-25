@@ -111,30 +111,36 @@ class IDSMapping(Mapping):
     def __contains__(self, key):
         return key in self._keys
 
-    def get_first(self, variable: Union[str, VariableModel], **kwargs) -> Any:
-        """Grab key with placeholder replacement.
-
-        Example: `IDSMapping.get_with_replace(var, time=0)`
-        """
+    @staticmethod
+    def _path_at_index(variable: Union[str, VariableModel],
+                       index: Union[int, Sequence[int]]):
         path = variable.path if isinstance(variable,
                                            VariableModel) else variable
 
-        path_first = path.replace('*', '0')
+        if isinstance(index, int):
+            index = (index, )
 
-        return self[path_first]
+        for i in index:
+            path = path.replace('*', str(i), 1)
 
-    def set_with_replace(self, variable: Union[str, VariableModel], value: Any,
-                         **kwargs):
-        """Grab key with placeholder replacement.
+        return path
 
-        Example: `IDSMapping.set_with_replace(var, value, time=0)`
+    def get_at_index(self, variable: Union[str, VariableModel],
+                     index: Union[int, Sequence[int]], **kwargs) -> Any:
+        """Grab key with index replacement.
+
+        Example: `IDSMapping.get_at_index(var, index=0)`
         """
-        path = variable.path if isinstance(variable,
-                                           VariableModel) else variable
+        path = self._path_at_index(variable, index)
+        return self[path]
 
-        for old, new in kwargs.items():
-            path = path.replace(f'${old}', str(new))
+    def set_at_index(self, variable: Union[str, VariableModel],
+                     index: Union[int, Sequence[int]], value: Any, **kwargs):
+        """Grab key with index replacement.
 
+        Example: `IDSMapping.set_at_index(var, value, index=0)`
+        """
+        path = self._path_at_index(variable, index)
         self[path] = value
 
     def length_of_key(self, key: str):

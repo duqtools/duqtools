@@ -48,7 +48,7 @@ def merge_data(
     # pick first time step as basis
     GRID_DIM = grid_var.name
 
-    grid_dim_data = target_data_map.get_first(grid_var)
+    grid_dim_data = target_data_map.get_at_index(grid_var, 0)
     time_dim_data = target_data_map[time_var.path]
 
     datasets = []
@@ -84,9 +84,9 @@ def merge_data(
             mean = means.isel({TIME_DIM: i})[var.name].data
             stdev = stdevs.isel({TIME_DIM: i})[var.name].data
 
-            target_data_map.set_with_replace(var.path, value=mean, time=i)
-            target_data_map.set_with_replace(var.path + '_error_upper',
-                                             value=mean + stdev,
-                                             time=i)
+            target_data_map.set_at_index(var.path, value=mean, index=i)
+            target_data_map.set_at_index(var.path + '_error_upper',
+                                         value=mean + stdev,
+                                         index=i)
 
     target_data_map.sync(target)
