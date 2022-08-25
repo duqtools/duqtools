@@ -47,7 +47,8 @@ def merge_data(
 
     # pick first time step as basis
     GRID_DIM = grid_var.name
-    grid_dim_data = target_data_map.get_with_replace(grid_var.path, time=0)
+
+    grid_dim_data = target_data_map.get_first(grid_var)
     time_dim_data = target_data_map[time_var.path]
 
     datasets = []

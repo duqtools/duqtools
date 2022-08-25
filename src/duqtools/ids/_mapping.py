@@ -111,8 +111,7 @@ class IDSMapping(Mapping):
     def __contains__(self, key):
         return key in self._keys
 
-    def get_with_replace(self, variable: Union[str, VariableModel],
-                         **kwargs) -> Any:
+    def get_first(self, variable: Union[str, VariableModel], **kwargs) -> Any:
         """Grab key with placeholder replacement.
 
         Example: `IDSMapping.get_with_replace(var, time=0)`
@@ -120,10 +119,9 @@ class IDSMapping(Mapping):
         path = variable.path if isinstance(variable,
                                            VariableModel) else variable
 
-        for old, new in kwargs.items():
-            path = path.replace(f'${old}', str(new))
+        path_first = path.replace('*', '0')
 
-        return self[path]
+        return self[path_first]
 
     def set_with_replace(self, variable: Union[str, VariableModel], value: Any,
                          **kwargs):
