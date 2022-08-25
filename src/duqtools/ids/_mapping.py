@@ -354,18 +354,22 @@ class IDSMapping(Mapping):
 
         return df
 
-    def _fill_array_from_partial_path(self, partial_path):
+    def _fill_array_from_parts(self, *parts: str):
         arr = []
-        for index in range(len(self[partial_path[0]])):
-            path = partial_path[0] + '/' + str(index) + '/' + partial_path[1]
-            if len(partial_path) > 2:
-                sub_partial_path = [path] + partial_path[2:]
-                sub_arr = self._fill_array_from_partial_path(sub_partial_path)
-                arr.append(sub_arr)
+        root, sub, *remaining = parts
+        nodes = self[root]
+        
+        for index in range(len(nodes)):
+            path = f'{root}/{index}/{sub}'
+            
+            if remaining:
+                sub_arr = self._fill_array_from_parts(path, *remaining)
             else:
-                arr.append(self[path])
-        return arr
+                sub_arr = self[path]
+            
+            arr.append(sub_arr)
 
+        return arr
     def to_xarray(
         self,
         variables: Sequence[Variable],
