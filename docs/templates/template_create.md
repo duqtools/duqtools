@@ -116,7 +116,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
 !!! note
 
-    If you want to copy all time ranges, you can use `path: profiles_1d/$time/t_i_average`. The `$time` substring will
+    If you want to copy all time ranges, you can use `path: profiles_1d/*/t_i_average`. The `*` substring will
     duqtools to apply the operation to all available time slices.
 
 ### Specifying variables

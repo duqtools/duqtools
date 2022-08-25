@@ -14,7 +14,7 @@ try:
 except IndexError:
     default_workdir = str(Path.cwd())
 
-PREFIX = 'profiles_1d/$time'
+PREFIX = 'profiles_1d/*'
 PREFIX0 = 'profiles_1d/0'
 
 

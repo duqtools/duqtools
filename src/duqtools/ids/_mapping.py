@@ -1,24 +1,21 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
 from ..schema import VariableModel
-from ._constants import TIME_COL, TSTEP_COL
 from ._copy import add_provenance_info
 from ._variable import Variable
 
 if TYPE_CHECKING:
-    import pandas as pd
     import xarray as xr
 
     from ._handle import ImasHandle
 
-TIME_STR = '$time'
+INDEX_STR = '$index'
 
 
 def insert_re_caret_dollar(string: str) -> str:
@@ -30,9 +27,9 @@ def insert_re_caret_dollar(string: str) -> str:
     return string
 
 
-def replace_time_str(string: str) -> str:
+def replace_index_str(string: str) -> str:
     """Replaces template string with regex digit matching."""
-    return string.replace(TIME_STR, r'(?P<idx>\d+)')
+    return string.replace(INDEX_STR, r'(?P<idx>\d+)')
 
 
 class IDSMapping(Mapping):
@@ -241,7 +238,7 @@ class IDSMapping(Mapping):
             New dict with all matching key/value pairs.
         """
         pattern = insert_re_caret_dollar(pattern)
-        pattern = replace_time_str(pattern)
+        pattern = replace_index_str(pattern)
 
         pat = re.compile(pattern)
 
@@ -264,7 +261,7 @@ class IDSMapping(Mapping):
             New dict with all matching key/value pairs.
         """
         pattern = insert_re_caret_dollar(pattern)
-        pattern = replace_time_str(pattern)
+        pattern = replace_index_str(pattern)
 
         pat = re.compile(pattern)
 
@@ -277,82 +274,6 @@ class IDSMapping(Mapping):
                 new[idx] = self[key]
 
         return new
-
-    def find_by_index(self, pattern: str) -> Dict[str, Dict[int, np.ndarray]]:
-        """Find keys matching regex pattern using time index.
-
-        Must include $time, which is a special character that matches
-        an integer time step (`\\d+`)
-
-        i.e. `ids.find_by_index('profiles_1d/$time/zeff.*')`
-        returns a dict with `zeff` and error attributes.
-
-        Parameters
-        ----------
-        pattern : str
-            Regex pattern, must include a group matching a digit.
-
-        Returns
-        -------
-        dict
-            New dict with all matching key/value pairs.
-        """
-        if TIME_STR not in pattern:
-            raise ValueError(
-                f'Pattern must include ../{TIME_STR}/.. to match index.')
-
-        pattern = insert_re_caret_dollar(pattern)
-        pattern = replace_time_str(pattern)
-
-        pat = re.compile(pattern)
-
-        new_dict: Dict[str, Dict[int, np.ndarray]] = defaultdict(dict)
-
-        for key in self._keys:
-            m = pat.match(key)
-
-            if m:
-                si, sj = m.span('idx')
-                new_key = key[:si] + TIME_STR + key[sj:]
-
-                idx = int(m.group('idx'))
-                new_dict[new_key][idx] = self[key]
-
-        return new_dict
-
-    def to_dataframe(self,
-                     *variables: str,
-                     prefix: str = 'profiles_1d',
-                     time_steps: Sequence[int] = None) -> pd.DataFrame:
-        """Return long format dataframe for given variables.
-
-        Search string:
-        `{prefix}/{time_step}/{variable}`
-
-        Parameters
-        ----------
-        *variables : str
-            Keys to extract, i.e. `zeff`, `grid/rho_tor`
-        prefix : str, optional
-            First part of the data path
-        time_steps : Sequence[int], optional
-            List or array of integer time steps to extract.
-            Defaults to all time steps.
-
-        Returns
-        -------
-        df : pd.DataFrame
-            Contains a column for the time step and each of the variables.
-        """
-        import pandas as pd
-        columns, arr = self.to_numpy(*variables,
-                                     prefix=prefix,
-                                     time_steps=time_steps)
-
-        df = pd.DataFrame(arr, columns=columns)
-        df[TSTEP_COL] = df[TSTEP_COL].astype(int)
-
-        return df
 
     def _fill_array_from_parts(self, *parts: str):
         arr = []
@@ -406,58 +327,3 @@ class IDSMapping(Mapping):
         ds = xr.Dataset(data_vars=xr_data_vars)
 
         return ds
-
-    def to_numpy(
-        self,
-        *variables: str,
-        prefix: str = 'profiles_1d',
-        time_steps: Sequence[int] = None
-    ) -> Tuple[Tuple[str, ...], np.ndarray]:
-        """Return numpy array containing data for given variables.
-
-        Search string:
-        `{prefix}/{time_step}/{variable}`
-
-        Parameters
-        ----------
-        *variables : str
-            Keys to extract, i.e. `zeff`, `grid/rho_tor`
-        prefix : str, optional
-            First part of the data path
-        time_steps : Sequence[int], optional
-            List or array of integer time steps to extract.
-            Defaults to all time steps.
-
-        Returns
-        -------
-        columns, array : Tuple[Tuple[str], np.ndarray]
-            Numpy array with a column for the time step and each of the
-            variables.
-        """
-        points_per_var = len(self[f'{prefix}/0/{variables[0]}'])
-
-        if not time_steps:
-            n_time_steps = len(self[TIME_COL])
-            time_steps = range(n_time_steps)
-        else:
-            n_time_steps = len(time_steps)
-
-        columns = (TSTEP_COL, TIME_COL, *variables)
-        n_vars = len(columns)
-
-        arr = np.empty((n_time_steps * points_per_var, n_vars))
-
-        timestamps = self[TIME_COL]
-
-        for t in time_steps:
-            for j, variable in enumerate(variables):
-                flat_variable = f'{prefix}/{t}/{variable}'
-
-                i_begin = t * points_per_var
-                i_end = i_begin + points_per_var
-
-                arr[i_begin:i_end, 0] = t
-                arr[i_begin:i_end, 1] = timestamps[t]
-                arr[i_begin:i_end, j + 2] = self[flat_variable]
-
-        return columns, arr
