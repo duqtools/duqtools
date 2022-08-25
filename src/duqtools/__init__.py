@@ -3,5 +3,10 @@ __email__ = 's.smeets@esciencecenter.nl'
 __version__ = '0.3.0'
 
 import logging
+import warnings
 
 logging.basicConfig(level=logging.INFO)
+
+warnings.filterwarnings(
+    'ignore',
+    'Explicit custom root behavior not yet implemented for pydantic_yaml')
