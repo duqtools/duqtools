@@ -70,6 +70,17 @@ def test_find_group():
     assert ('0', 'y') in d
 
 
+def test_get_set_at_index():
+    s = IDSMapping(Sample)
+    values = np.array([111, 222])
+
+    s.set_at_index('data/*/x', 1, values)
+    assert_equal(s['data/1/x'], values)
+
+    ret = s.get_at_index('data/*/x', 1)
+    assert_equal(ret, values)
+
+
 def test_length():
     s = IDSMapping(Sample)
 
