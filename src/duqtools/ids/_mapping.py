@@ -398,7 +398,7 @@ class IDSMapping(Mapping):
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            arr = self._fill_array_from_partial_path(partial_path)
+            arr = self._fill_array_from_partial_path(*parts)
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 
