@@ -197,7 +197,9 @@ def cli_create(**kwargs):
 
 @cli.command('submit')
 @common_options
-@click.option('--force', is_flag=True, help='Re-submit running jobs.')
+@click.option('--force',
+              is_flag=True,
+              help='Re-submit running or completed jobs.')
 @click.option(
     '--schedule',
     is_flag=True,
@@ -207,7 +209,15 @@ def cli_create(**kwargs):
               type=int,
               help='Maximum number of jobs to submit.')
 def cli_submit(**kwargs):
-    """Submit the UQ runs."""
+    """Submit the UQ runs.
+
+    This subcommand will read `runs.yaml`, and start all runs which are not yet
+    running. By default, It will not re-submit running or finished jobs.
+
+    There is a scheduler that will continue to submit jobs until the specified
+    maximum number of jobs is running. Once a job has completed, a new job will
+    be submitted from the queue to fill the spot.
+    """
     from .submit import submit
     with op_queue_context():
         submit(**kwargs)
