@@ -392,7 +392,7 @@ class IDSMapping(Mapping):
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
         for var in variables:
-            partial_path = var.path.split('/*/')
+            parts = var.path.split('/*/')
 
             if len(partial_path) == 1:
                 xr_data_vars[var.name] = (var.dims, self[var.path])
