@@ -48,6 +48,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
         cfg_yaml = cfg.yaml(
             include={
                 'workspace': True,
+                'variables': True,
                 'create': {'dimensions', 'sampler', 'template', 'data'},
                 'quiet': False,
             })

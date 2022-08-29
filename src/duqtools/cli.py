@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
-from sys import stderr, stdout
+from sys import exit, stderr, stdout
 
 import click
+from pydantic import ValidationError
 
 from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen
 from .config import cfg
@@ -21,7 +22,10 @@ def config_option(f):
 
     def callback(ctx, param, config):
         if ctx.command.name != 'init':
-            cfg.parse_file(config)
+            try:
+                cfg.parse_file(config)
+            except ValidationError as e:
+                exit(e)
 
         return config
 
@@ -180,7 +184,10 @@ def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
     with op_queue_context():
-        init(**kwargs)
+        try:
+            init(**kwargs)
+        except RuntimeError as e:
+            exit(e)
 
 
 @cli.command('create')

@@ -3,6 +3,7 @@ from pathlib import Path
 from .config import cfg
 from .ids import ImasHandle
 from .jetto import JettoSystem
+from .jettopythontools import JettoPythonToolsSystem
 from .models import AbstractSystem, WorkDirectory
 
 
@@ -39,6 +40,8 @@ def get_system():
     """
     if (cfg.system == 'jetto'):
         return JettoSystem
+    elif (cfg.system == 'jetto-pythontools'):
+        return JettoPythonToolsSystem
     elif (cfg.system == 'dummy'):
         return DummySystem
     else:
