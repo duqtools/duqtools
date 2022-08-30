@@ -1,0 +1,109 @@
+{
+	"shot_in": {
+		"jset_id": "SetUpPanel.idsIMASDBShot",
+		"jset_id": "AdvancedPanel.catShotID",
+		"jset_id": "AdvancedPanel.catShotID_R",
+		"nml_id": {
+			"namelist": "INESCO",
+			"field": "NPULSE"
+		},
+		"type": "int",
+		"dimension": "scalar"
+	},
+  "shot_out": {
+		"jset_id": "SetUpPanel.shotNum",
+		"type": "int",
+		"dimension": "scalar"
+  },
+  "run_in": {
+		"jset_id": "SetUpPanel.idsIMASDBRunid",
+		"type": "int",
+		"dimension": "scalar"
+  },
+  "run_out": {
+		"jset_id": "SetUpPanel.idsRunid",
+		"type": "int",
+		"dimension": "scalar"
+  },
+  "user_in": {
+		"jset_id": "SetUpPanel.idsIMASDBUser",
+		"jset_id": "AdvancedPanel.catOwner",
+		"jset_id": "AdvancedPanel.catOwner_R",
+		"type": "str",
+		"dimension": "scalar"
+  },
+  "machine_in": {
+		"jset_id": "SetUpPanel.idsIMASDBMachine",
+		"jset_id": "AdvancedPanel.catMachID",
+		"jset_id": "AdvancedPanel.catMachID_R",
+		"type": "str",
+		"dimension": "scalar"
+  },
+  "machine_out": {
+		"jset_id": "SetUpPanel.machine",
+		"nml_id": {
+			"namelist": "NLIST1",
+			"field": "MACHID"
+		},
+		"type": "str",
+		"dimension": "scalar"
+  },
+  "noprocessors": {
+		"jset_id": "SetUpPanel.numProcessors",
+		"type": "int",
+		"dimension": "scalar"
+  },
+  "tstart": {
+		"jset_id": "SetUpPanel.startTime",
+		"jset_id": "EquilEscoRefPanel.tvalue.tinterval.startRange",
+		"jset_id": "EquilEscoRefPanel.rangeStart",
+		"jset_id": "OutputStdPanel.profileRangeStart",
+		"nml_id": {
+			"namelist": "NLIST1",
+			"field": "TBEG"
+		},
+		"type": "real",
+		"dimension": "scalar"
+  },
+  "tend": {
+		"jset_id": "SetUpPanel.endTime",
+		"jset_id": "EquilEscoRefPanel.tvalue.tinterval.endRange",
+		"jset_id": "EquilEscoRefPanel.rangeEnd",
+		"jset_id": "OutputStdPanel.profileRangeEnd",
+		"nml_id": {
+			"namelist": "NLIST1",
+			"field": "TMAX"
+		},
+		"type": "real",
+		"dimension": "scalar"
+  },
+  "run_dir": {
+    "jset_id": "AppPanel.openPrvSetDir",
+		"type": "str",
+		"dimension": "scalar"
+  },
+  "run_dir_name": {
+    "jset_id": "JobProcessingPanel.runDirNumber",
+		"type": "str",
+		"dimension": "scalar"
+  },
+  "b0": {
+    "jset_id": "EquilEscoRefPanel.BField.ConstValue",
+    "jset_id": "EquilEscoRefPanel.BField",
+		"nml_id": {
+			"namelist": "NLIST1",
+			"field": "BTIN"
+		},
+		"type": "real",
+		"dimension": "scalar"
+  },
+  "major_radius": {
+    "jset_id": "EquilEscoRefPanel.refMajorRadius",
+		"nml_id": {
+			"namelist": "NLIST1",
+			"field": "RMJ"
+		},
+		"type": "real",
+		"dimension": "scalar"
+  }
+}

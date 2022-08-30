@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from pathlib import Path
 
+# from jetto_tools import config, lookup, template
+from jetto_tools import lookup
 from pydantic import Field
 from typing_extensions import Literal
 
 from ..ids import ImasHandle
 from ..models import AbstractSystem, WorkDirectory
 from ..operations import add_to_op_queue
+
+jetto_lookup = lookup.from_file(
+    Path(__file__).resolve().parent / 'lookup.json')
 
 
 class JettoPythonToolsSystem(AbstractSystem):
