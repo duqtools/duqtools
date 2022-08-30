@@ -9,6 +9,4 @@ coverage:
         threshold: 5%
         paths:
           - src/duqtools
-    patch: true
-    changes: true
 comment: false
