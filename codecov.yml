@@ -1,0 +1,12 @@
+coverage:
+  range: "70...100"
+
+  status:
+    project:
+      default: false
+      duqtools:
+        target: auto
+        threshold: 5%
+        paths:
+          - src/duqtools
+comment: false
