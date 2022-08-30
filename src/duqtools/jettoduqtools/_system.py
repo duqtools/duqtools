@@ -8,8 +8,10 @@ from typing_extensions import Literal
 
 from ..models import AbstractSystem
 from ..operations import add_to_op_queue
+from ._copy import copy_files
 from ._imas_functions import imas_from_jset_input
 from ._jetto_jset import JettoJset
+from ._llcmd import write_batchfile as jetto_write_batchfile
 from ._settings_manager import JettoSettingsManager
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
     from ..models import WorkDirectory
 
 
-class JettoSystem(AbstractSystem):
+class JettoDuqtoolsSystem(AbstractSystem):
     """This system implements a wrapper around JETTO, which is part of the
     JINTRAC modelling framework for integrated simulation of Tokamaks.
 
@@ -33,7 +35,6 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
-        from duqtools.jetto import write_batchfile as jetto_write_batchfile
         jset = JettoJset.from_directory(template_drc)
 
         return jetto_write_batchfile(workspace, run_name, jset)
@@ -41,7 +42,6 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(source_drc: Path, target_drc: Path):
-        from duqtools.jetto import copy_files
         return copy_files(source_drc, target_drc)
 
     @staticmethod

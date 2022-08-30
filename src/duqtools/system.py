@@ -2,7 +2,7 @@ from pathlib import Path
 
 from .config import cfg
 from .ids import ImasHandle
-from .jetto import JettoSystem
+from .jettoduqtools import JettoDuqtoolsSystem
 from .jettopythontools import JettoPythonToolsSystem
 from .models import AbstractSystem, WorkDirectory
 
@@ -38,9 +38,9 @@ def get_system():
     Get the system to do operations with TODO make it a variable, not a
     function
     """
-    if (cfg.system == 'jetto'):
-        return JettoSystem
-    elif (cfg.system == 'jetto-pythontools'):
+    if (cfg.system == 'jetto-duqtools'):
+        return JettoDuqtoolsSystem
+    elif (cfg.system in ['jetto', 'jetto-pythontools']):
         return JettoPythonToolsSystem
     elif (cfg.system == 'dummy'):
         return DummySystem

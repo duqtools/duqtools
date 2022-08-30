@@ -3,11 +3,11 @@
 from ._copy import copy_files
 from ._llcmd import write_batchfile
 from ._settings_manager import JettoSettingsManager
-from ._system import JettoSystem
+from ._system import JettoDuqtoolsSystem
 
 __all__ = [
     'write_batchfile',
     'JettoSettingsManager',
     'copy_files',
-    'JettoSystem',
+    'JettoDuqtoolsSystem',
 ]

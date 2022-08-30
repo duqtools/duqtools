@@ -266,8 +266,9 @@ class ConfigModel(BaseModel):
         description='Define variables for use in the subcommands.')
 
     workspace: WorkDirectoryModel = WorkDirectoryModel()
-    system: Literal['jetto', 'dummy', 'jetto-pythontools'] = Field(
-        'jetto', description='backend system to use')
+    system: Literal['jetto', 'dummy', 'jetto-pythontools',
+                    'jetto-duqtools'] = Field(
+                        'jetto', description='backend system to use')
     quiet: bool = Field(
         False,
         description='dont output to stdout, except for mandatory prompts')

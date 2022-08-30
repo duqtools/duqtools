@@ -3,7 +3,7 @@ from time import sleep
 
 from ._job import Job
 from .config import cfg
-from .jetto import JettoSettingsManager
+from .jettoduqtools import JettoSettingsManager
 from .models import WorkDirectory
 
 logger = logging.getLogger(__name__)
