@@ -3,6 +3,9 @@ coverage:
 
   status:
     project:
-      default:
-        only_pulls: true
+      default: false
+      duqtools:
+        threshold: 50%
+        paths:
+          - src/duqtools
 comment: false
