@@ -5,7 +5,10 @@ coverage:
     project:
       default: false
       duqtools:
-        threshold: 50%
+        target: auto
+        threshold: 5%
         paths:
           - src/duqtools
+    patch: true
+    changes: true
 comment: false
