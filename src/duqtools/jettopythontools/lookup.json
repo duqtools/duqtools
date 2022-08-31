@@ -1,8 +1,8 @@
 {
 	"shot_in": {
-		"jset_id": "SetUpPanel.idsIMASDBShot",
-		"jset_id": "AdvancedPanel.catShotID",
-		"jset_id": "AdvancedPanel.catShotID_R",
+		"jset_flex_id": ["SetUpPanel.idsIMASDBShot",
+		 "AdvancedPanel.catShotID",
+		 "AdvancedPanel.catShotID_R"],
 		"nml_id": {
 			"namelist": "INESCO",
 			"field": "NPULSE"
@@ -21,21 +21,23 @@
 		"dimension": "scalar"
   },
   "run_out": {
-		"jset_id": "SetUpPanel.idsRunid",
+		"jset_id": "JobProcessingPanel.idsRunid",
 		"type": "int",
 		"dimension": "scalar"
   },
   "user_in": {
-		"jset_id": "SetUpPanel.idsIMASDBUser",
-		"jset_id": "AdvancedPanel.catOwner",
-		"jset_id": "AdvancedPanel.catOwner_R",
+    "jset_flex_id":[
+	  "SetUpPanel.idsIMASDBUser",
+		"AdvancedPanel.catOwner",
+		"AdvancedPanel.catOwner_R"],
 		"type": "str",
 		"dimension": "scalar"
   },
   "machine_in": {
-		"jset_id": "SetUpPanel.idsIMASDBMachine",
-		"jset_id": "AdvancedPanel.catMachID",
-		"jset_id": "AdvancedPanel.catMachID_R",
+    "jset_flex_id":[
+		"SetUpPanel.idsIMASDBMachine",
+		"AdvancedPanel.catMachID",
+		"AdvancedPanel.catMachID_R"],
 		"type": "str",
 		"dimension": "scalar"
   },
@@ -49,15 +51,16 @@
 		"dimension": "scalar"
   },
   "noprocessors": {
-		"jset_id": "SetUpPanel.numProcessors",
+		"jset_id": "JobProcessingPanel.numProcessors",
 		"type": "int",
 		"dimension": "scalar"
   },
   "tstart": {
-		"jset_id": "SetUpPanel.startTime",
-		"jset_id": "EquilEscoRefPanel.tvalue.tinterval.startRange",
-		"jset_id": "EquilEscoRefPanel.rangeStart",
-		"jset_id": "OutputStdPanel.profileRangeStart",
+    "jset_flex_id":[
+		"SetUpPanel.startTime",
+		"EquilEscoRefPanel.tvalue.tinterval.startRange",
+		"EquilIdsRefPanel.rangeStart",
+		"OutputStdPanel.profileRangeStart"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "TBEG"
@@ -66,10 +69,11 @@
 		"dimension": "scalar"
   },
   "tend": {
-		"jset_id": "SetUpPanel.endTime",
-		"jset_id": "EquilEscoRefPanel.tvalue.tinterval.endRange",
-		"jset_id": "EquilEscoRefPanel.rangeEnd",
-		"jset_id": "OutputStdPanel.profileRangeEnd",
+    "jset_flex_id":[
+		"SetUpPanel.endTime",
+		"EquilEscoRefPanel.tvalue.tinterval.endRange",
+		"EquilIdsRefPanel.rangeEnd",
+		"OutputStdPanel.profileRangeEnd"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "TMAX"
@@ -88,8 +92,9 @@
 		"dimension": "scalar"
   },
   "b0": {
-    "jset_id": "EquilEscoRefPanel.BField.ConstValue",
-    "jset_id": "EquilEscoRefPanel.BField",
+    "jset_flex_id":[
+    "EquilEscoRefPanel.BField.ConstValue",
+    "EquilEscoRefPanel.BField"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "BTIN"
