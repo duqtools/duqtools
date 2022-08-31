@@ -1,8 +1,9 @@
 {
 	"shot_in": {
-		"jset_flex_id": ["SetUpPanel.idsIMASDBShot",
-		 "AdvancedPanel.catShotID",
-		 "AdvancedPanel.catShotID_R"],
+		"jset_id": "SetUpPanel.idsIMASDBShot",
+		"jset_flex_id": [
+      "AdvancedPanel.catShotID",
+      "AdvancedPanel.catShotID_R"],
 		"nml_id": {
 			"namelist": "INESCO",
 			"field": "NPULSE"
@@ -26,18 +27,18 @@
 		"dimension": "scalar"
   },
   "user_in": {
+    "jset_id": "SetUpPanel.idsIMASDBUser",
     "jset_flex_id":[
-	  "SetUpPanel.idsIMASDBUser",
-		"AdvancedPanel.catOwner",
-		"AdvancedPanel.catOwner_R"],
+      "AdvancedPanel.catOwner",
+      "AdvancedPanel.catOwner_R"],
 		"type": "str",
 		"dimension": "scalar"
   },
   "machine_in": {
+		"jset_id": "SetUpPanel.idsIMASDBMachine",
     "jset_flex_id":[
-		"SetUpPanel.idsIMASDBMachine",
-		"AdvancedPanel.catMachID",
-		"AdvancedPanel.catMachID_R"],
+      "AdvancedPanel.catMachID",
+      "AdvancedPanel.catMachID_R"],
 		"type": "str",
 		"dimension": "scalar"
   },
@@ -56,11 +57,11 @@
 		"dimension": "scalar"
   },
   "tstart": {
+		"jset_id": "SetUpPanel.startTime",
     "jset_flex_id":[
-		"SetUpPanel.startTime",
-		"EquilEscoRefPanel.tvalue.tinterval.startRange",
-		"EquilIdsRefPanel.rangeStart",
-		"OutputStdPanel.profileRangeStart"],
+      "EquilEscoRefPanel.tvalue.tinterval.startRange",
+      "EquilIdsRefPanel.rangeStart",
+      "OutputStdPanel.profileRangeStart"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "TBEG"
@@ -69,11 +70,11 @@
 		"dimension": "scalar"
   },
   "tend": {
+		"jset_id": "SetUpPanel.endTime",
     "jset_flex_id":[
-		"SetUpPanel.endTime",
-		"EquilEscoRefPanel.tvalue.tinterval.endRange",
-		"EquilIdsRefPanel.rangeEnd",
-		"OutputStdPanel.profileRangeEnd"],
+      "EquilEscoRefPanel.tvalue.tinterval.endRange",
+      "EquilIdsRefPanel.rangeEnd",
+      "OutputStdPanel.profileRangeEnd"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "TMAX"
@@ -92,9 +93,9 @@
 		"dimension": "scalar"
   },
   "b0": {
+    "jset_id": "EquilEscoRefPanel.BField.ConstValue",
     "jset_flex_id":[
-    "EquilEscoRefPanel.BField.ConstValue",
-    "EquilEscoRefPanel.BField"],
+      "EquilEscoRefPanel.BField"],
 		"nml_id": {
 			"namelist": "NLIST1",
 			"field": "BTIN"
