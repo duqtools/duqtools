@@ -51,6 +51,7 @@ jobs:
         run: python -m pytest
 
       - name: upload code coverage to codecov.io
+        if: always() || failure()
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
