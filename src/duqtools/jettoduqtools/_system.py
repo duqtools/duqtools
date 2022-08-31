@@ -49,7 +49,6 @@ class JettoDuqtoolsSystem(AbstractSystem):
 
         jetto_settings = JettoSettingsManager.from_directory(template_drc)
         source = imas_from_jset_input(jetto_settings)
-        assert source.path().exists()
         return source
 
     @staticmethod

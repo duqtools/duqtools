@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import logging
-import xml.sax
-import xml.sax.handler
 from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -11,32 +9,10 @@ from packaging import version
 
 from .._logging_utils import LoggingContext
 from ..operations import add_to_op_queue
-from ._imas import imas
+from ._imas import Parser, imas
 
 if TYPE_CHECKING:
     from .ids import ImasHandle
-
-PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
-
-
-class Parser(xml.sax.handler.ContentHandler):
-
-    def __init__(self):
-        xml.sax.handler.ContentHandler.__init__(self)
-        self.idss = []
-
-    def startElement(self, name: str, attrs):
-        if name == 'IDS':
-            ids = {}
-            for i in attrs.getNames():
-                ids[i] = attrs.getValue(i)
-            self.idss.append(ids)
-
-    @classmethod
-    def load_idsdef(cls):
-        parser = cls()
-        xml.sax.parse(PATH_IDSDEF, parser)
-        return parser
 
 
 def get_imas_ual_version():

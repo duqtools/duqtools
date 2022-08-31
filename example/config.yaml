@@ -32,7 +32,7 @@ create:
     run_out_start_at: 8000
   sampler:
     method: latin-hypercube
-    n_samples: 3
+    n_samples: 1
   dimensions:
     - variable: zeff
       operator: add

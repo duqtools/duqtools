@@ -7,7 +7,7 @@ import pytest
 from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
-pytest.importorskip('imas')  # These tests require imas to be installed
+# pytest.importorskip('imas')  # These tests require imas to be installed
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -24,12 +24,13 @@ def collect_cov(cmdline_workdir):
         shutil.copy(cov_file, Path.cwd())
 
 
-@pytest.fixture(scope='session')
-def cmdline_workdir(tmp_path_factory):
+@pytest.fixture(scope='session',
+                params=['dry_run.yaml', 'dry_run_jettoduqtools.yaml'])
+def cmdline_workdir(tmp_path_factory, request):
     # Create working directory for cmdline tests, and set up input files
     workdir = tmp_path_factory.mktemp('test_cmdline')
     (workdir / Path('workspace')).mkdir()
-    shutil.copy(Path.cwd() / 'tests' / 'dry_run.yaml', workdir / 'config.yaml')
+    shutil.copy(Path.cwd() / 'tests' / request.param, workdir / 'config.yaml')
     shutil.copytree(Path.cwd() / 'example' / 'template_model',
                     workdir / Path('template_model'))
     return workdir
