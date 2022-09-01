@@ -64,10 +64,12 @@ if 'introduction' in models:
     extra_schemas['wd_schema'] = cfg.workspace.schema()
     extra_yamls['wd_yaml'] = model2config('workspace', cfg.workspace)
 
-    from duqtools.jetto import JettoSystem
+    from duqtools.jettoduqtools import JettoDuqtoolsSystem
+    from duqtools.jettopythontools import JettoPythonToolsSystem
     from duqtools.system import DummySystem
 
-    extra_schemas['jetto_schema'] = JettoSystem.schema()
+    extra_schemas['jetto_schema'] = JettoDuqtoolsSystem.schema()
+    extra_schemas['jetto_pythontools_schema'] = JettoPythonToolsSystem.schema()
     extra_schemas['dummy_schema'] = DummySystem.schema()
 
     extra_schemas['variable_schema'] = cfg.variables.__root__[0].schema()
