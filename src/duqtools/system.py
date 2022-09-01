@@ -42,9 +42,9 @@ def get_system():
     Get the system to do operations with TODO make it a variable, not a
     function
     """
-    if (cfg.system == 'jetto-duqtools'):
+    if (cfg.system in ['jetto', 'jetto-duqtools']):
         return JettoDuqtoolsSystem
-    elif (cfg.system in ['jetto', 'jetto-pythontools']):
+    elif (cfg.system in ['jetto-pythontools']):
         return JettoPythonToolsSystem
     elif (cfg.system == 'dummy'):
         return DummySystem
