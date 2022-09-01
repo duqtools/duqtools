@@ -51,9 +51,13 @@ Currently there are two systems available. They are distinguished by specifying 
 system: jetto
 ```
 
-### jetto
+### jetto, jetto-duqtools
 
 {{ jetto_schema['description'] }}
+
+### jetto-pythontools
+
+{{ jetto_pythontools_schema['description'] }}
 
 ### dummy
 

@@ -21,15 +21,15 @@ class VariableConfigModel(BaseModel):
         VariableModel(name='rho_tor_norm',
                       ids='core_profiles',
                       path='profiles_1d/*/grid/rho_tor_norm',
-                      dims=['x']),
+                      dims=['time', 'x']),
         VariableModel(name='t_i_average',
                       ids='core_profiles',
                       path='profiles_1d/*/t_i_average',
-                      dims=['x']),
+                      dims=['time', 'x']),
         VariableModel(name='zeff',
                       ids='core_profiles',
                       path='profiles_1d/*/zeff',
-                      dims=['x']),
+                      dims=['time', 'x']),
         VariableModel(name='time',
                       ids='core_profiles',
                       path='time',
@@ -266,9 +266,9 @@ class ConfigModel(BaseModel):
         description='Define variables for use in the subcommands.')
 
     workspace: WorkDirectoryModel = WorkDirectoryModel()
-    system: Literal['jetto',
-                    'dummy'] = Field('jetto',
-                                     description='backend system to use')
+    system: Literal['jetto', 'dummy', 'jetto-pythontools',
+                    'jetto-duqtools'] = Field(
+                        'jetto', description='backend system to use')
     quiet: bool = Field(
         False,
         description='dont output to stdout, except for mandatory prompts')

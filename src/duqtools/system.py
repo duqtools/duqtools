@@ -2,8 +2,9 @@ from pathlib import Path
 
 from .config import cfg
 from .ids import ImasHandle
-from .jetto import JettoSystem
-from .models import AbstractSystem, WorkDirectory
+from .jettoduqtools import JettoDuqtoolsSystem
+from .jettopythontools import JettoPythonToolsSystem
+from .models import AbstractSystem, Job, WorkDirectory
 
 
 class DummySystem(AbstractSystem):
@@ -16,6 +17,10 @@ class DummySystem(AbstractSystem):
     @staticmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
+        pass
+
+    @staticmethod
+    def submit_job(job: Job):
         pass
 
     @staticmethod
@@ -37,8 +42,10 @@ def get_system():
     Get the system to do operations with TODO make it a variable, not a
     function
     """
-    if (cfg.system == 'jetto'):
-        return JettoSystem
+    if (cfg.system in ['jetto', 'jetto-duqtools']):
+        return JettoDuqtoolsSystem
+    elif (cfg.system in ['jetto-pythontools']):
+        return JettoPythonToolsSystem
     elif (cfg.system == 'dummy'):
         return DummySystem
     else:

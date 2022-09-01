@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from duqtools.jetto._jetto_in import JettoIn
-from duqtools.jetto._namelist import read_namelist, write_namelist
+from duqtools.jettoduqtools._jetto_in import JettoIn
+from duqtools.jettoduqtools._namelist import read_namelist, write_namelist
 
 JETTOIN = {
     'section1': {

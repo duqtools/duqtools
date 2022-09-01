@@ -1,11 +1,9 @@
 import logging
-import subprocess as sp
 from pathlib import Path
-from typing import Any, List
 
 import click
 
-from .config import cfg
+from ..config import cfg
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -73,18 +71,11 @@ class Job:
         return self.dir / 'duqtools.submit.lock'
 
     def submit(self):
-        submit_cmd = cfg.submit.submit_command.split()
-
-        cmd: List[Any] = [*submit_cmd, str(self.submit_script)]
-
+        from ..system import get_system
         debug(f'Put lockfile in place for {self.lockfile}')
         self.lockfile.touch()
 
-        info(f'submitting script {cmd}')
-        ret = sp.run(cmd, check=True, capture_output=True)
-        info(f'submission returned: {ret.stdout}')
-        with open(self.lockfile, 'wb') as f:
-            f.write(ret.stdout)
+        get_system().submit_job(self)
 
     def start(self):
         click.echo(f'Submitting {self}\033[K')

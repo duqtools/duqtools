@@ -1,10 +1,9 @@
 import logging
 from time import sleep
 
-from ._job import Job
 from .config import cfg
-from .jetto import JettoSettingsManager
-from .models import WorkDirectory
+from .jettoduqtools import JettoSettingsManager
+from .models import Job, WorkDirectory
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from duqtools.jetto import JettoSettingsManager
+from duqtools.jettoduqtools import JettoSettingsManager
 
 this_path = Path(__file__).parent
 

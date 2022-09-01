@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from duqtools.jetto._jetto_jset import JettoJset, read_jset, write_jset
+from duqtools.jettoduqtools._jetto_jset import JettoJset, read_jset, write_jset
 
 JSET = {
     'section 1': {

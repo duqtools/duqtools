@@ -9,6 +9,7 @@ from ..schema import BaseModel, ImasBaseModel
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from ._job import Job
     from .workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,11 @@ class AbstractSystem(ABC, BaseModel):
     @abstractmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def submit_job(job: Job):
         pass
 
     @staticmethod
