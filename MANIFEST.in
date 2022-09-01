@@ -1,3 +1,3 @@
-recursive-include src *.txt *.md *.py *.yaml
+recursive-include src *.txt *.md *.py *.yaml *.json
 include LICENSE
 include README.md
