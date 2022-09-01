@@ -4,7 +4,7 @@ from .config import cfg
 from .ids import ImasHandle
 from .jettoduqtools import JettoDuqtoolsSystem
 from .jettopythontools import JettoPythonToolsSystem
-from .models import AbstractSystem, WorkDirectory
+from .models import AbstractSystem, Job, WorkDirectory
 
 
 class DummySystem(AbstractSystem):
@@ -17,6 +17,10 @@ class DummySystem(AbstractSystem):
     @staticmethod
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
+        pass
+
+    @staticmethod
+    def submit_job(job: Job):
         pass
 
     @staticmethod

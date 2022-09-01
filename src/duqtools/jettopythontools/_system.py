@@ -3,13 +3,14 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from jetto_tools import config, job, jset, lookup, namelist, template
+from jetto_tools import config
+from jetto_tools import job as jetto_job
+from jetto_tools import jset, lookup, namelist, template
 from pydantic import Field
 from typing_extensions import Literal
 
-from .._logging_utils import duqlog_screen
 from ..ids import ImasHandle
-from ..models import AbstractSystem, WorkDirectory
+from ..models import AbstractSystem, Job, WorkDirectory
 from ..operations import add_to_op_queue
 
 logger = logging.getLogger(__name__)
@@ -37,31 +38,17 @@ class JettoPythonToolsSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
-        jetto_template = template.from_directory(workspace.cwd / run_name)
+        pass  # Not required, we submit via prominence
+
+    @staticmethod
+    @add_to_op_queue('Submitting job', '{job}', quiet=True)
+    def submit_job(job: Job):
+
+        jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
-        jetto_manager = job.JobManager()
+        jetto_manager = jetto_job.JobManager()
 
-        # jetto_job = jetto_manager.submit_job_to_batch(jetto_config, run_name)
-
-        # Do some manual manipulation instead, submit_job_to_batch is too restrictive
-        # ( we want to be able to write to directories outside $runs_home )
-
-        # jetto-pythontools does not carry its own jetto-scripts, thus we skip it
-        # in absence of a real jetto environment
-
-        try:
-            jetto_source_dir = jetto_manager._find_jetto_source_dir(
-                jetto_config)
-        except job.JobManagerError:
-            duqlog_screen.warning(
-                'no jetto_source available, not creating submission files')
-            return
-
-        jetto_manager._export_batchfile(jetto_config, workspace.cwd / run_name)
-        jetto_manager._export_rjettov_script(jetto_source_dir,
-                                             workspace.cwd / run_name)
-        jetto_manager._export_utils_script(jetto_source_dir,
-                                           workspace.cwd / run_name)
+        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)

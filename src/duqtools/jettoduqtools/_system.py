@@ -1,18 +1,23 @@
 from __future__ import annotations
 
+import logging
+import subprocess as sp
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List
 
 from pydantic import Field
 from typing_extensions import Literal
 
-from ..models import AbstractSystem
+from ..config import cfg
+from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
 from ._copy import copy_files
 from ._imas_functions import imas_from_jset_input
 from ._jetto_jset import JettoJset
 from ._llcmd import write_batchfile as jetto_write_batchfile
 from ._settings_manager import JettoSettingsManager
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from ..ids import ImasHandle
@@ -38,6 +43,22 @@ class JettoDuqtoolsSystem(AbstractSystem):
         jset = JettoJset.from_directory(template_drc)
 
         return jetto_write_batchfile(workspace, run_name, jset)
+
+    @staticmethod
+    @add_to_op_queue('Submitting job', '{job}', quiet=True)
+    def submit_job(job: Job):
+        if not job.has_submit_script:
+            raise FileNotFoundError(job.submit_script)
+
+        submit_cmd = cfg.submit.submit_command.split()
+        cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
+
+        logger.info(f'submitting script {cmd}')
+
+        ret = sp.run(cmd, check=True, capture_output=True)
+        logger.info('submission returned: ' + str(ret.stdout))
+        with open(job.lockfile, 'wb') as f:
+            f.write(ret.stdout)
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)

@@ -6,9 +6,8 @@ from typing import Deque, Sequence
 
 import click
 
-from ._job import Job
 from .config import cfg
-from .models import WorkDirectory
+from .models import Job, WorkDirectory
 from .operations import add_to_op_queue, op_queue
 
 logger = logging.getLogger(__name__)
@@ -139,8 +138,6 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, **kwargs):
     job_queue: Deque[Job] = deque()
 
     for job in jobs:
-        if not submission_script_ok(job):
-            continue
         if not status_file_ok(job, force=force):
             continue
         if not lockfile_ok(job, force=force):
