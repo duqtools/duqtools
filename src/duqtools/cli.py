@@ -19,95 +19,70 @@ except ImportError:
 
 
 def config_option(f):
+    return click.option('-c',
+                        '--config',
+                        default='duqtools.yaml',
+                        help='Path to config.')(f)
 
-    def callback(ctx, param, config):
+
+def quiet_option(f):
+    return click.option('-q',
+                        '--quiet',
+                        is_flag=True,
+                        default=False,
+                        help='Don\'t output anything to the screen'
+                        ' (except mandatory prompts).')(f)
+
+
+def debug_option(f):
+    return click.option('--debug',
+                        is_flag=True,
+                        help='Enable debug print statements.')(f)
+
+
+def dry_run_option(f):
+    return click.option('--dry-run',
+                        is_flag=True,
+                        help='Execute without any side-effects.')(f)
+
+
+def yes_option(f):
+    return click.option('--yes',
+                        is_flag=True,
+                        help='Answer yes to questions automatically.')(f)
+
+
+def logfile_option(f):
+    return click.option('--logfile',
+                        '-l',
+                        is_flag=False,
+                        default='duqtools.log',
+                        help='where to send the logfile,'
+                        ' the special values stderr/stdout'
+                        ' will send it there respectively.')(f)
+
+
+def parse_common_options(func):
+    """With this function it becomes possible to parse the options in user
+    defined order."""
+
+    def parse_options(ctx, *, logfile, debug, quiet, dry_run, config, yes,
+                      **kwargs):
+        # Config option
         if ctx.command.name != 'init':
             try:
                 cfg.parse_file(config)
             except ValidationError as e:
                 exit(e)
 
-        return config
-
-    return click.option('-c',
-                        '--config',
-                        default='duqtools.yaml',
-                        help='Path to config.',
-                        callback=callback,
-                        is_eager=True)(f)
-
-
-def quiet_option(f):
-
-    def callback(ctx, param, quiet):
-        if quiet:
-            duqlog_screen.handlers = []  # remove output methods
-            cfg.quiet = True
-
-        return quiet
-
-    return click.option('-q',
-                        '--quiet',
-                        is_flag=True,
-                        default=False,
-                        help='Don\'t output anything to the screen'
-                        ' (except mandatory prompts).',
-                        callback=callback)(f)
-
-
-def debug_option(f):
-
-    def callback(ctx, param, debug):
+        # Debug option
         if debug:
-            logging.getLogger().setLevel(logging.DEBUG)
-            for handle in logging.getLogger().handlers:
-                handle.setLevel(logging.DEBUG)
-
-        return debug
-
-    return click.option('--debug',
-                        is_flag=True,
-                        help='Enable debug print statements.',
-                        callback=callback,
-                        is_eager=True)(f)
-
-
-def dry_run_option(f):
-
-    def callback(ctx, param, dry_run):
-        if dry_run:
-            op_queue.dry_run = True
+            level = logging.DEBUG
         else:
-            op_queue.dry_run = False
+            level = logging.INFO
 
-        return dry_run
-
-    return click.option('--dry-run',
-                        is_flag=True,
-                        help='Execute without any side-effects.',
-                        callback=callback)(f)
-
-
-def yes_option(f):
-
-    def callback(ctx, param, yes):
-        if yes:
-            op_queue.yes = True
-        else:
-            op_queue.yes = False
-        return yes
-
-    return click.option('--yes',
-                        is_flag=True,
-                        help='Answer yes to questions automatically.',
-                        callback=callback)(f)
-
-
-def logfile_option(f):
-
-    def callback(ctx, param, logfile):
+        # Logfile option
         streams = {'stdout': stdout, 'stderr': stderr}
-        level = logging.getLogger().handlers[0].level
         logging.getLogger().handlers = []
 
         if logfile in streams.keys():
@@ -128,36 +103,34 @@ def logfile_option(f):
         logger.info('------------------------------------------------')
         logger.info('')
 
-        return logfile
+        # Yes option
+        op_queue.yes = yes
 
-    return click.option('--logfile',
-                        '-l',
-                        is_flag=False,
-                        default='duqtools.log',
-                        help='where to send the logfile,'
-                        ' the special values stderr/stdout'
-                        ' will send it there respectively.',
-                        callback=callback,
-                        is_eager=True)(f)
+        # Dry run option
+        op_queue.dry_run = dry_run
+
+        # Quiet option
+        if quiet:
+            duqlog_screen.handlers = []  # remove output methods
+            cfg.quiet = True
+
+    def callback(ctx, **kwargs):
+        parse_options(ctx, **kwargs)
+        func(**kwargs)
+
+    return callback
 
 
 def common_options(func):
     """common_options.
 
-    IMPORTANT: wrappers can be executed in any order, determined by
-    the order of options on the command line
-    This means that sometimes the order of arguments matters,
-    specifically for stuff like debug flags.
-
-    We can control this a bit with the is_eager flag, currently is_eager are:
-    - debug_option
-    - config_option
-    - logfile_option
-
-    Ideally we can determine the full order of processing, but this requires us
-    to only have the options set a flag, and then do the processing afterwards
-    in a different wrapper
+    IMPORTANT: This must be the last click option specified before
+    the execution of the actual function, otherwise options will be
+    missing
     """
+
+    func = click.pass_context(parse_common_options(func))
+
     for wrapper in (logfile_option, debug_option, config_option, quiet_option,
                     dry_run_option, yes_option):
         func = wrapper(func)
@@ -175,11 +148,11 @@ def cli(**kwargs):
 
 
 @cli.command('init')
-@common_options
 @click.option('--full',
               is_flag=True,
               help='Create a config file with all possible config values.')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
+@common_options
 def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
@@ -191,10 +164,10 @@ def cli_init(**kwargs):
 
 
 @cli.command('create')
-@common_options
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
+@common_options
 def cli_create(**kwargs):
     """Create the UQ run files."""
     from .create import create
@@ -203,7 +176,6 @@ def cli_create(**kwargs):
 
 
 @cli.command('submit')
-@common_options
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
@@ -215,6 +187,7 @@ def cli_create(**kwargs):
               '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
+@common_options
 def cli_submit(**kwargs):
     """Submit the UQ runs.
 
@@ -231,9 +204,9 @@ def cli_submit(**kwargs):
 
 
 @cli.command('status')
-@common_options
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
+@common_options
 def cli_status(**kwargs):
     """Print the status of the UQ runs."""
     from .status import status
@@ -283,11 +256,11 @@ def cli_plot(**kwargs):
 
 
 @cli.command('clean')
-@common_options
 @click.option('--out', is_flag=True, help='Remove output data.')
 @click.option('--force',
               is_flag=True,
               help='Overwrite backup file if necessary.')
+@common_options
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup
@@ -296,8 +269,8 @@ def cli_clean(**kwargs):
 
 
 @cli.command('go')
-@common_options
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
+@common_options
 def cli_go(**kwargs):
     """Run create - submit - status - dash in succession, very useful for
     existing tested and working pipelines
