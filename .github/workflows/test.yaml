@@ -56,4 +56,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # optional, but more stable
           files: ./coverage.xml
-          fail_ci_if_error: false # optional (default = false)
+          fail_ci_if_error: true # optional (default = false)
