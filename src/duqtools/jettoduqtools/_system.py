@@ -79,3 +79,9 @@ class JettoDuqtoolsSystem(AbstractSystem):
         jetto_settings_copy = jetto_settings.set_imas_locations(inp=inp,
                                                                 out=out)
         jetto_settings_copy.to_directory(run)
+
+    @staticmethod
+    def set_jetto_variable(run: Path, key: str, value):
+        jetto_settings = JettoSettingsManager.from_directory(run)
+        jetto_settings[key] = value
+        jetto_settings.to_directory(run)

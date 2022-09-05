@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 
-from duqtools.ids import IDSMapping, Variable, apply_model
-from duqtools.schema import IDSOperation
+from duqtools.apply_model import apply_model
+from duqtools.ids import IDSMapping
+from duqtools.schema import IDSOperation, IDSVariableModel
 
 assert_equal = np.testing.assert_array_equal
 
@@ -27,7 +28,7 @@ def gen_sample_data():
 
 
 def get_test_var(path):
-    return Variable(
+    return IDSVariableModel(
         name='var',
         path=path,
         ids='test',
@@ -87,6 +88,6 @@ def test_apply_model(model, output):
     data = gen_sample_data()
     model = IDSOperation(**model)
 
-    apply_model(model, data)
+    apply_model(model, ids_mapping=data)
 
     assert_equal(data[model.variable.path], output)

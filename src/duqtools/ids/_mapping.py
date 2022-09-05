@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
-from ..schema import VariableModel
+from ..schema import IDSVariableModel
 from ._copy import add_provenance_info
-from ._variable import Variable
 
 if TYPE_CHECKING:
     import xarray as xr
@@ -112,10 +111,10 @@ class IDSMapping(Mapping):
         return key in self._keys
 
     @staticmethod
-    def _path_at_index(variable: Union[str, VariableModel],
+    def _path_at_index(variable: Union[str, IDSVariableModel],
                        index: Union[int, Sequence[int]]):
         path = variable.path if isinstance(variable,
-                                           VariableModel) else variable
+                                           IDSVariableModel) else variable
 
         if isinstance(index, int):
             index = (index, )
@@ -125,7 +124,7 @@ class IDSMapping(Mapping):
 
         return path
 
-    def get_at_index(self, variable: Union[str, VariableModel],
+    def get_at_index(self, variable: Union[str, IDSVariableModel],
                      index: Union[int, Sequence[int]], **kwargs) -> Any:
         """Grab key with index replacement.
 
@@ -134,7 +133,7 @@ class IDSMapping(Mapping):
         path = self._path_at_index(variable, index)
         return self[path]
 
-    def set_at_index(self, variable: Union[str, VariableModel],
+    def set_at_index(self, variable: Union[str, IDSVariableModel],
                      index: Union[int, Sequence[int]], value: Any, **kwargs):
         """Grab key with index replacement.
 
@@ -298,14 +297,14 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        variables: Sequence[Variable],
+        variables: Sequence[IDSVariableModel],
         **kwargs,
     ) -> xr.Dataset:
         """Return dataset for given variables.
 
         Parameters
         ----------
-        variables : Dict[str, Variable]
+        variables : Dict[str, IDSVariableModel]
             Dictionary of data variables
 
         Returns

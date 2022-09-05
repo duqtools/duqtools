@@ -7,6 +7,7 @@ variables:
   ids: core_profiles
   name: rho_tor_norm
   path: profiles_1d/*/grid/rho_tor_norm
+- name: major_radius
 - dims:
   - time
   - x
@@ -34,6 +35,9 @@ create:
     method: latin-hypercube
     n_samples: 3
   dimensions:
+    - variable: major_radius
+      operator: copyto
+      values: [295, 296, 297]
     - variable: zeff
       operator: add
       values: [1, 2, 3]

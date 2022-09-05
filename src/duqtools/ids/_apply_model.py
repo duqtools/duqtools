@@ -1,39 +1,39 @@
 from __future__ import annotations
 
 import logging
-from functools import singledispatch
+from typing import Union
 
 import numpy as np
 
-from ..schema import BaseModel, IDSOperation
+from ..apply_model import apply_model
+from ..schema import IDSOperation
+from ._handle import ImasHandle
 from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
 
-@singledispatch
-def apply_model(model: BaseModel, ids_mapping: IDSMapping) -> None:
-    """Apply operation in model to IDS. Data are modified in-place.
+@apply_model.register  # type: ignore
+def _apply_ids(model: IDSOperation, *,
+               ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
+    """_. Implementation for IDS operations.
 
     Parameters
     ----------
-    model
-        The model describes the operation to apply to the data.
-    ids_mapping : IDSMapping
-        Core profiles IDSMapping, data to apply operation to.
-        Must contain the IDS path.
+    model : IDSOperation
+        model
+    target_in : ImasHandle, IDSMapping
+        ImasHandle/IDSHandle, data to apply operation to.
 
-    Raises
-    ------
-    NotImplementedError
-        When the model is unknown
+    Returns
+    -------
+    None
     """
+    target_in = None
+    if type(ids_mapping) == ImasHandle:
+        target_in = ids_mapping
+        ids_mapping = ids_mapping.get(model.variable.ids)
 
-    raise NotImplementedError(f'Unknown model: {model}')
-
-
-@apply_model.register
-def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
 
@@ -67,3 +67,7 @@ def _(model: IDSOperation, ids_mapping: IDSMapping) -> None:
         logger.debug('data range before: %s - %s', data.min(), data.max())
         npfunc(data, value, out=data)
         logger.debug('data range after: %s - %s', data.min(), data.max())
+
+    if target_in:
+        logger.info('Writing data entry: %s', target_in)
+        ids_mapping.sync(target_in)

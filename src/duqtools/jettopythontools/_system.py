@@ -94,3 +94,12 @@ class JettoPythonToolsSystem(AbstractSystem):
         jetto_config['run_out'] = out.run
 
         jetto_config.export(run)  # Just overwrite the poor files
+
+    @staticmethod
+    def set_jetto_variable(run: Path, key: str, value):
+        jetto_template = template.from_directory(run)
+        jetto_config = config.RunConfig(jetto_template)
+
+        jetto_config[key] = value
+
+        jetto_config.export(run)  # Just overwrite the poor files

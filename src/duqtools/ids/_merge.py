@@ -3,13 +3,13 @@ from typing import Dict, Sequence
 import xarray as xr
 
 from ..operations import add_to_op_queue
-from ..schema import VariableModel
+from ..schema import IDSVariableModel
 from ._handle import ImasHandle
 from ._rebase import rebase_on_time, standardize_grid
 
 
-def _get_placeholder_dim(grid_var: VariableModel,
-                         time_var: VariableModel) -> str:
+def _get_placeholder_dim(grid_var: IDSVariableModel,
+                         time_var: IDSVariableModel) -> str:
     dims = [dim for dim in grid_var.dims if dim != time_var.name]
 
     if len(dims) != 1:
@@ -18,7 +18,7 @@ def _get_placeholder_dim(grid_var: VariableModel,
     return dims[0]
 
 
-def raise_if_ids_inconsistent(*variables: VariableModel):
+def raise_if_ids_inconsistent(*variables: IDSVariableModel):
     idss = {var.ids for var in variables}
     if len(idss) != 1:
         raise ValueError('Variables must have the same IDS, '
@@ -29,9 +29,9 @@ def raise_if_ids_inconsistent(*variables: VariableModel):
 def merge_data(
     source_data: Dict[str, ImasHandle],
     target: ImasHandle,
-    time_var: VariableModel,
-    grid_var: VariableModel,
-    data_vars: Sequence[VariableModel],
+    time_var: IDSVariableModel,
+    grid_var: IDSVariableModel,
+    data_vars: Sequence[IDSVariableModel],
 ):
     raise_if_ids_inconsistent(time_var, grid_var, *data_vars)
 

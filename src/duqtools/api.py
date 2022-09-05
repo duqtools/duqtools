@@ -18,8 +18,8 @@ Plotting:
 """
 
 from ._plot_utils import alt_errorband_chart, alt_line_chart
-from .ids import (IDSMapping, ImasHandle, Variable, rebase_on_grid,
-                  rebase_on_time)
+from .ids import IDSMapping, ImasHandle, rebase_on_grid, rebase_on_time
+from .schema import IDSVariableModel as Variable
 
 __all__ = [
     'rebase_on_grid',
