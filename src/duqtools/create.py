@@ -1,11 +1,12 @@
 import logging
+from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
 
-from duqtools.config import cfg
-
-from .ids import ImasHandle, apply_model
+from .apply_model import apply_model
+from .config import cfg
+from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
 from .operations import add_to_op_queue, op_queue
@@ -31,9 +32,10 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
-def apply_combination(target_in: ImasHandle, combination) -> None:
+def apply_combination(target_in: ImasHandle, run_dir: Path,
+                      combination) -> None:
     for model in combination:
-        apply_model(model, ids_mapping=target_in)
+        apply_model(model, run_dir=run_dir, ids_mapping=target_in)
 
 
 @add_to_op_queue('Writing runs', '{workspace.runs_yaml}', quiet=True)
@@ -119,9 +121,10 @@ def create(*, force, **kwargs):
 
         source.copy_data_to(target_in)
 
-        apply_combination(target_in, combination)
-
         system.copy_from_template(template_drc, run_drc)
+
+        apply_combination(target_in, run_drc, combination)
+
         system.write_batchfile(workspace, run_name, template_drc)
 
         system.update_imas_locations(run=run_drc,

@@ -43,3 +43,8 @@ class AbstractSystem(ABC, BaseModel):
     def update_imas_locations(run: Path, inp: ImasBaseModel,
                               out: ImasBaseModel):
         pass
+
+    @staticmethod
+    @abstractmethod
+    def set_jetto_variable(run: Path, key: str, value):
+        pass

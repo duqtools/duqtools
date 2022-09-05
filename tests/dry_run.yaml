@@ -1,4 +1,5 @@
 variables:
+  - name: major_radius
   - name: zeff
     ids: core_profiles
     path: profiles_1d/*/zeff
@@ -17,6 +18,9 @@ variables:
     dims: [time]
 create:
   dimensions:
+  - variable: major_radius
+    operator: copyto
+    values: [295,297]
   - variable: t_i_average
     operator: multiply
     values:
@@ -31,5 +35,6 @@ create:
     run_in_start_at: 7010
     run_out_start_at: 7010
   template: ./template_model
+system: jetto-pythontools
 workspace:
   root: .

@@ -73,6 +73,12 @@ class JettoSettingsManager:
 
         return super().__new__(cls)
 
+    def __getitem__(self, key: str):
+        return getattr(self, key)
+
+    def __setitem__(self, key: str, value):
+        setattr(self, key, value)
+
     def copy(self):
         """Return a copy of this instance."""
         return deepcopy(self)

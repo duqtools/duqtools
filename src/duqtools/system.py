@@ -35,6 +35,10 @@ class DummySystem(AbstractSystem):
     def update_imas_locations(run: Path, inp, out):
         pass
 
+    @staticmethod
+    def set_jetto_variable(run: Path, key: str, value):
+        pass
+
 
 def get_system():
     """get_system.

@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 
-from duqtools.ids import IDSMapping, apply_model
+from duqtools.apply_model import apply_model
+from duqtools.ids import IDSMapping
 from duqtools.schema import IDSOperation, IDSVariableModel
 
 assert_equal = np.testing.assert_array_equal
