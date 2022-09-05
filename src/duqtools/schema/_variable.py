@@ -7,6 +7,28 @@ from ._description_helpers import formatter as f
 
 
 class VariableModel(BaseModel):
+    pass
+
+
+class JettoVariableModel(VariableModel):
+    """Variable for describing variables specific to Jetto, These variables
+    need to be defined as a lookup table lookup.json (jetto-pythontools), or in
+    the jintrac_config_vars.yaml (jetto-duqtools). Otherwise there will be an
+    error on accessing them.
+
+    Issue #282 plans on adding lookup-table support to this variable
+    """
+
+    type: str = Field('jetto-variable',
+                      description='discriminator for the variable type')
+
+    name: str = Field(description=f("""
+        Name of the variable
+        Used for the lookup table to find actual fields
+        """))
+
+
+class IDSVariableModel(VariableModel):
     """Variable for describing data within a IMAS database.
 
     The variable can be given a name, which will be used in the rest of the config
@@ -21,6 +43,9 @@ class VariableModel(BaseModel):
     complete path (i.e. `profiles_1d/0/t_i_average` for the 0th time slice).
     To retrieve all time slices, you can use `profiles_1d/*/t_i_average`.
     """
+    type: str = Field('IDS-variable',
+                      description='discriminator for the variable type')
+
     name: str = Field(description=f("""
         Name of the variable.
         This will be used to reference this variable.

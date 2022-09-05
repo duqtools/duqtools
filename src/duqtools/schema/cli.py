@@ -7,9 +7,9 @@ from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import IDSOperationDim
+from ._dimensions import OperationDim
 from ._imas import ImasBaseModel
-from ._variable import VariableModel
+from ._variable import IDSVariableModel, JettoVariableModel, VariableModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
@@ -17,23 +17,23 @@ from .workdir import WorkDirectoryModel
 
 
 class VariableConfigModel(BaseModel):
-    __root__: List[VariableModel] = Field([
-        VariableModel(name='rho_tor_norm',
-                      ids='core_profiles',
-                      path='profiles_1d/*/grid/rho_tor_norm',
-                      dims=['time', 'x']),
-        VariableModel(name='t_i_average',
-                      ids='core_profiles',
-                      path='profiles_1d/*/t_i_average',
-                      dims=['time', 'x']),
-        VariableModel(name='zeff',
-                      ids='core_profiles',
-                      path='profiles_1d/*/zeff',
-                      dims=['time', 'x']),
-        VariableModel(name='time',
-                      ids='core_profiles',
-                      path='time',
-                      dims=['time']),
+    __root__: List[Union[JettoVariableModel, IDSVariableModel]] = Field([
+        IDSVariableModel(name='rho_tor_norm',
+                         ids='core_profiles',
+                         path='profiles_1d/*/grid/rho_tor_norm',
+                         dims=['time', 'x']),
+        IDSVariableModel(name='t_i_average',
+                         ids='core_profiles',
+                         path='profiles_1d/*/t_i_average',
+                         dims=['time', 'x']),
+        IDSVariableModel(name='zeff',
+                         ids='core_profiles',
+                         path='profiles_1d/*/zeff',
+                         dims=['time', 'x']),
+        IDSVariableModel(name='time',
+                         ids='core_profiles',
+                         path='time',
+                         dims=['time']),
     ])
 
     def __iter__(self):
@@ -50,11 +50,10 @@ class VariableConfigModel(BaseModel):
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[Union[IDSOperationDim]] = Field([
-        IDSOperationDim(variable='t_i_average'),
-        IDSOperationDim(variable='zeff')
-    ],
-                                                     description=f("""
+    dimensions: List[OperationDim] = Field(
+        [OperationDim(variable='t_i_average'),
+         OperationDim(variable='zeff')],
+        description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
@@ -181,24 +180,24 @@ class MergeStep(BaseModel):
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    data_variables: List[Union[str,
-                               VariableModel]] = Field(['t_i_average', 'zeff'],
-                                                       description=f("""
+    data_variables: List[Union[str, IDSVariableModel]] = Field(
+        ['t_i_average', 'zeff'],
+        description=f("""
             This is a list of data variables to be merged. This means
             that the mean and error for these data over all runs are calculated
             and written back to the ouput data location.
             The paths should contain `/*/` for the time component or other dimensions.
             """))
-    grid_variable: Union[str, VariableModel] = Field('rho_tor_norm',
-                                                     description=f("""
+    grid_variable: Union[str, IDSVariableModel] = Field('rho_tor_norm',
+                                                        description=f("""
             This variable points to the data for the grid coordinate. It must share a common
             placeholder dimension with the data variables.
             It will be used to rebase all data variables to same (radial) grid before merging
             using interpolation.
             The path should contain '/*/' to denote the time component or other dimension.
             """))
-    time_variable: Union[str, VariableModel] = Field('time',
-                                                     description=f("""
+    time_variable: Union[str, IDSVariableModel] = Field('time',
+                                                        description=f("""
             This variable determines the time coordinate to merge on. This ensures
             that the data from all runs are on the same time coordinates before
             merging.

@@ -33,11 +33,7 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
 def apply_combination(target_in: ImasHandle, combination) -> None:
     for model in combination:
-        ids_mapping = target_in.get(model.variable.ids)
-        apply_model(model, ids_mapping)
-
-        logger.info('Writing data entry: %s', target_in)
-        ids_mapping.sync(target_in)
+        apply_model(model, target_in=target_in)
 
 
 @add_to_op_queue('Writing runs', '{workspace.runs_yaml}', quiet=True)
@@ -84,7 +80,6 @@ def create(*, force, **kwargs):
         source = ImasHandle.parse_obj(options.template_data)
 
     logger.info('Source data: %s', source)
-
     matrix = tuple(model.expand() for model in dimensions)
     combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
