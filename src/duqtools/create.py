@@ -33,7 +33,7 @@ def fail_if_locations_exist(locations: Iterable[ImasHandle]):
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
 def apply_combination(target_in: ImasHandle, combination) -> None:
     for model in combination:
-        apply_model(model, target_in=target_in)
+        apply_model(model, ids_mapping=target_in)
 
 
 @add_to_op_queue('Writing runs', '{workspace.runs_yaml}', quiet=True)

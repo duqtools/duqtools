@@ -3,10 +3,11 @@ import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample
 
-from duqtools.ids import (IDSMapping, Variable, rebase_on_grid, rebase_on_time,
+from duqtools.ids import (IDSMapping, rebase_on_grid, rebase_on_time,
                           standardize_grid)
+from duqtools.schema import IDSVariableModel
 
-TIME_VAR = Variable(
+TIME_VAR = IDSVariableModel(
     name='time',
     ids='core_profiles',
     path='time',
@@ -18,13 +19,13 @@ TIME_VAR = Variable(
 def variables1d():
     variables = [
         TIME_VAR,
-        Variable(
+        IDSVariableModel(
             name='xvar',
             ids='core_profiles',
             path='nested_profiles_1d/*/data/grid',
             dims=['time', 'x'],
         ),
-        Variable(
+        IDSVariableModel(
             name='yvar',
             ids='core_profiles',
             path='nested_profiles_1d/*/data/variable',

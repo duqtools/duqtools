@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 from functools import singledispatch
+from typing import Union
 
 import numpy as np
 
 from ..schema import BaseModel, IDSOperation, JettoOperation
 from ._handle import ImasHandle
+from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -30,19 +32,26 @@ def apply_model(model: BaseModel, **kwargs) -> None:
 
 
 @apply_model.register
-def _(model: IDSOperation, *, target_in: ImasHandle, **kwargs) -> None:
+def _(model: IDSOperation, *, ids_mapping: Union[ImasHandle, IDSMapping],
+      **kwargs) -> None:
     """_. Implementation for IDS operations.
 
     Parameters
     ----------
-    target_in : ImasHandle
-        ImasHandle, data to apply operation to.
+    model : IDSOperation
+        model
+    target_in : ImasHandle, IDSMapping
+        ImasHandle/IDSHandle, data to apply operation to.
 
     Returns
     -------
     None
     """
-    ids_mapping = target_in.get(model.variable.ids)
+    target_in = None
+    if type(ids_mapping) == ImasHandle:
+        target_in = ids_mapping
+        ids_mapping = ids_mapping.get(model.variable.ids)
+
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
 
@@ -77,8 +86,9 @@ def _(model: IDSOperation, *, target_in: ImasHandle, **kwargs) -> None:
         npfunc(data, value, out=data)
         logger.debug('data range after: %s - %s', data.min(), data.max())
 
-    logger.info('Writing data entry: %s', target_in)
-    ids_mapping.sync(target_in)
+    if target_in:
+        logger.info('Writing data entry: %s', target_in)
+        ids_mapping.sync(target_in)
 
 
 @apply_model.register
