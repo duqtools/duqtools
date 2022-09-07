@@ -1,5 +1,15 @@
 variables:
   - name: major_radius
+    lookup:
+      name: major_radius
+      doc: Reference major radius (R0)
+      type: float
+      keys:
+        - file: jetto.jset
+          field: EquilEscoRefPanel.refMajorRadius
+        - file: jetto.in
+          field: RMJ
+          section: NLIST1
   - name: zeff
     ids: core_profiles
     path: profiles_1d/*/zeff

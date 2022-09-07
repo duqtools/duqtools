@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from ..schema import BaseModel, ImasBaseModel
+from ..schema import BaseModel, ImasBaseModel, JettoVar
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -46,5 +46,5 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
-    def set_jetto_variable(run: Path, key: str, value):
+    def set_jetto_variable(run: Path, key: str, value, variable: JettoVar):
         pass

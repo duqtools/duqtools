@@ -5,6 +5,7 @@ from .ids import ImasHandle
 from .jettoduqtools import JettoDuqtoolsSystem
 from .jettopythontools import JettoPythonToolsSystem
 from .models import AbstractSystem, Job, WorkDirectory
+from .schema import JettoVar
 
 
 class DummySystem(AbstractSystem):
@@ -36,7 +37,7 @@ class DummySystem(AbstractSystem):
         pass
 
     @staticmethod
-    def set_jetto_variable(run: Path, key: str, value):
+    def set_jetto_variable(run: Path, key: str, value, variable: JettoVar):
         pass
 
 

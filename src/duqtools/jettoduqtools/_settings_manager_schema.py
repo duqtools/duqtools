@@ -1,38 +1,9 @@
-from __future__ import annotations
+from typing import List
 
-from typing import List, Optional, Type
-
-from pydantic import BaseModel, validator
-from pydantic_yaml import YamlModelMixin
-from typing_extensions import Literal
+from ..schema import BaseModel, JettoVar
 
 
-class JettoField(BaseModel):
-    file: Literal['jetto.jset', 'jetto.in']
-    field: str
-    section: Optional[str] = None
-
-    @validator('section')
-    def section_lower(cls, v):
-        return v.lower()
-
-
-class JettoVar(BaseModel):
-    doc: str
-    name: str
-    type: Type
-    keys: List[JettoField]
-
-    @validator('type', pre=True)
-    def validate_type(cls, v):
-        return {
-            'str': str,
-            'int': int,
-            'float': float,
-        }[v]
-
-
-class JettoConfigModel(YamlModelMixin, BaseModel):
+class JettoConfigModel(BaseModel):
     __root__: List[JettoVar] = []
 
     def __iter__(self):

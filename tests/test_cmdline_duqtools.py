@@ -7,7 +7,7 @@ import pytest
 
 from duqtools.utils import work_directory
 
-config_file = 'test_cmdline_config_duqtools.yaml'
+config_file = 'config_jetto_duqtools.yaml'
 
 
 @pytest.fixture(scope='session', autouse=True)
