@@ -102,14 +102,5 @@
 		},
 		"type": "real",
 		"dimension": "scalar"
-  },
-  "major_radius": {
-    "jset_id": "EquilEscoRefPanel.refMajorRadius",
-		"nml_id": {
-			"namelist": "NLIST1",
-			"field": "RMJ"
-		},
-		"type": "real",
-		"dimension": "scalar"
   }
 }

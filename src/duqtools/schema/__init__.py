@@ -1,6 +1,8 @@
 from ._basemodel import BaseModel
-from ._dimensions import IDSOperation, IDSOperationDim, JettoOperation
+from ._dimensions import (IDSOperation, IDSOperationDim, JettoOperation,
+                          OperationDim)
 from ._imas import ImasBaseModel
+from ._jetto import JettoField, JettoVar, JsetField, NamelistField
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel
 
@@ -10,6 +12,11 @@ __all__ = [
     'IDSOperationDim',
     'IDSVariableModel',
     'JettoOperation',
+    'JettoField',
+    'JettoVar',
+    'JsetField',
+    'NamelistField',
+    'OperationDim',
     'ImasBaseModel',
     'LinSpace',
     'ARange',

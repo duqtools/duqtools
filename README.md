@@ -5,6 +5,7 @@
 | PyPI | [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/duqtools)](https://pypi.org/project/duqtools/) [![PyPI](https://img.shields.io/pypi/v/duqtools.svg?style=flat)](https://pypi.org/project/duqtools/) |
 | SonarCloud | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=CarbonCollective_fusion-dUQtools&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=CarbonCollective_fusion-dUQtools) |
 | CodeCov.io | [![codecov](https://codecov.io/gh/CarbonCollective/fusion-dUQtools/branch/main/graph/badge.svg?token=TE9SBYJY8L)](https://codecov.io/gh/CarbonCollective/fusion-dUQtools)
+
 # Duqtools
 
 *Duqtools* is a tool for **D**ynamic **U**ndertainty **Q**uantification for Tokamak reactor simulations modelling.

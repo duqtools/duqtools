@@ -3,7 +3,7 @@ from pathlib import Path
 
 from .config import Config
 from .operations import op_queue
-from .schema import BaseModel
+from .schema import BaseModel, OperationDim
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,14 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
     """
     cfg = object.__new__(Config)
     BaseModel.__init__(cfg)
+
+    cfg.create.dimensions = [
+        OperationDim(variable='t_i_average'),
+        OperationDim(variable='zeff'),
+        OperationDim(variable='major_radius',
+                     values=[296, 297],
+                     operator='copyto')
+    ]
 
     logger.debug(cfg)
 

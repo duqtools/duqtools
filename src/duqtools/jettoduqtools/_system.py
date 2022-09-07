@@ -11,6 +11,7 @@ from typing_extensions import Literal
 from ..config import cfg
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
+from ..schema import JettoVar
 from ._copy import copy_files
 from ._imas_functions import imas_from_jset_input
 from ._jetto_jset import JettoJset
@@ -81,7 +82,12 @@ class JettoDuqtoolsSystem(AbstractSystem):
         jetto_settings_copy.to_directory(run)
 
     @staticmethod
-    def set_jetto_variable(run: Path, key: str, value):
+    def set_jetto_variable(run: Path,
+                           key: str,
+                           value,
+                           lookup: JettoVar = None):
         jetto_settings = JettoSettingsManager.from_directory(run)
+        if lookup:
+            jetto_settings.add_entry(lookup)
         jetto_settings[key] = value
         jetto_settings.to_directory(run)

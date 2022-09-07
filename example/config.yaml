@@ -5,23 +5,38 @@ variables:
   - time
   - x
   ids: core_profiles
+  type: IDS
   name: rho_tor_norm
   path: profiles_1d/*/grid/rho_tor_norm
 - name: major_radius
+  type: Jetto
+  lookup:
+    name: major_radius
+    doc: Reference major radius (R0)
+    type: float
+    keys:
+      - file: jetto.jset
+        field: EquilEscoRefPanel.refMajorRadius
+      - file: jetto.in
+        field: RMJ
+        section: NLIST1
 - dims:
   - time
   - x
+  type: IDS
   ids: core_profiles
   name: t_i_average
   path: profiles_1d/*/t_i_average
 - dims:
   - time
   - x
+  type: IDS
   ids: core_profiles
   name: zeff
   path: profiles_1d/*/zeff
 - dims:
   - time
+  type: IDS
   ids: core_profiles
   name: time
   path: time

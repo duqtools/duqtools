@@ -12,6 +12,8 @@ from typing_extensions import Literal
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, WorkDirectory
 from ..operations import add_to_op_queue
+from ..schema import JettoVar
+from ._jettovar_to_json import jettovar_to_json
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +98,16 @@ class JettoPythonToolsSystem(AbstractSystem):
         jetto_config.export(run)  # Just overwrite the poor files
 
     @staticmethod
-    def set_jetto_variable(run: Path, key: str, value):
+    def set_jetto_variable(run: Path,
+                           key: str,
+                           value,
+                           variable: JettoVar = None):
         jetto_template = template.from_directory(run)
+
+        if variable:
+            extra_lookup = lookup.from_json(jettovar_to_json(variable))
+            jetto_template._lookup.update(extra_lookup)
+
         jetto_config = config.RunConfig(jetto_template)
 
         jetto_config[key] = value

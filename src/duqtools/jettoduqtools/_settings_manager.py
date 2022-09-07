@@ -29,9 +29,10 @@ from importlib_resources import files
 from duqtools.api import ImasHandle
 
 from .._types import PathLike
+from ..schema import JettoField, JettoVar
 from ._jetto_in import JettoIn
 from ._jetto_jset import JettoJset
-from ._settings_manager_schema import JettoConfigModel, JettoField
+from ._settings_manager_schema import JettoConfigModel
 
 CFG_PATH = files('duqtools.data') / 'jintrac_config_vars.yaml'
 CONFIG = JettoConfigModel.parse_file(CFG_PATH)
@@ -43,13 +44,29 @@ class JettoSettingsManager:
         self.handlers = {}
 
     def __new__(cls, *args, **kwargs):
+        for variable in CONFIG:
+            cls.add_entry(variable)
+        return super().__new__(cls)
+
+    def __getitem__(self, key: str):
+        return getattr(self, key)
+
+    def __setitem__(self, key: str, value):
+        getattr(self, key)  # Check if attribute exists, throws error if False
+        setattr(self, key, value)
+
+    @classmethod
+    def add_entry(cls, variable: JettoVar):
 
         def setter(keys: List[JettoField]):
 
             def f(self, value):
                 for key in keys:
                     entry = self.handlers[key.file]
-                    entry.set(key.field, value, section=key.section)
+                    section = None
+                    if hasattr(key, 'section'):
+                        section = key.section
+                    entry.set(key.field, value, section=section)
 
             return f
 
@@ -57,27 +74,21 @@ class JettoSettingsManager:
 
             def f(self):
                 entry = self.handlers[key.file]
-                value = entry.get(key.field, section=key.section)
+                section = None
+                if hasattr(key, 'section'):
+                    section = key.section
+                value = entry.get(key.field, section=section)
 
                 return setting_type(value)
 
             return f
 
-        for variable in CONFIG:
-            prop = property(
-                fget=getter(variable.keys[0], variable.type),
-                fset=setter(variable.keys),
-                doc=variable.doc,
-            )
-            setattr(cls, variable.name, prop)
-
-        return super().__new__(cls)
-
-    def __getitem__(self, key: str):
-        return getattr(self, key)
-
-    def __setitem__(self, key: str, value):
-        setattr(self, key, value)
+        prop = property(
+            fget=getter(variable.keys[0], variable.get_type()),
+            fset=setter(variable.keys),
+            doc=variable.doc,
+        )
+        setattr(cls, variable.name, prop)
 
     def copy(self):
         """Return a copy of this instance."""

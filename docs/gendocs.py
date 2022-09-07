@@ -13,6 +13,7 @@ import mkdocs_gen_files
 from ruamel import yaml
 
 from duqtools.config import cfg
+from duqtools.schema import OperationDim
 
 this_dir = Path(__file__).parent
 
@@ -29,6 +30,13 @@ models = {
     'create': cfg.create,
     'merge': cfg.merge,
 }
+
+# Repair auto replace of init:
+cfg.create.dimensions = [
+    OperationDim(variable='t_i_average'),
+    OperationDim(variable='zeff'),
+    OperationDim(variable='major_radius', values=[296, 297], operator='copyto')
+]
 
 
 def model2config(key: str, model) -> str:
@@ -72,7 +80,8 @@ if 'introduction' in models:
     extra_schemas['jetto_pythontools_schema'] = JettoPythonToolsSystem.schema()
     extra_schemas['dummy_schema'] = DummySystem.schema()
 
-    extra_schemas['variable_schema'] = cfg.variables.__root__[0].schema()
+    extra_schemas['ids_variable_schema'] = cfg.variables.__root__[0].schema()
+    extra_schemas['jetto_variable_schema'] = cfg.variables.__root__[4].schema()
     extra_yamls['variables_yaml'] = model2config('variables', cfg.variables)
 
 if 'merge' in models:
@@ -90,7 +99,7 @@ for name, model in models.items():
     yaml_example = model2config(name, model)
 
     rendered = template.render(
-        schema=model.schema(),
+        schema=model.schema(),  # type: ignore
         yaml_example=yaml_example,
         **extra_schemas,
         **extra_yamls,

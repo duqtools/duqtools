@@ -31,4 +31,5 @@ from .ids._apply_model import _apply_ids  # noqa: E402, F401
 def _apply_jetto(model: JettoOperation, run_dir: Path, **kwargs) -> None:
     from .system import get_system
     system = get_system()
-    system.set_jetto_variable(run_dir, model.variable.name, model.value)
+    system.set_jetto_variable(run_dir, model.variable.name, model.value,
+                              model.variable.lookup)

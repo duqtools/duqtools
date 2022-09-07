@@ -7,7 +7,7 @@ import pytest
 from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
-config_file = 'dry_run_jettoduqtools.yaml'
+config_file = 'config_jetto_duqtools.yaml'
 
 
 @pytest.fixture(scope='session', autouse=True)

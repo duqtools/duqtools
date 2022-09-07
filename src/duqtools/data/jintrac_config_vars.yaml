@@ -117,12 +117,3 @@
     - file: jetto.in
       field: BTIN
       section: NLIST1
-- name: major_radius
-  doc: Reference major radius (R0)
-  type: float
-  keys:
-    - file: jetto.jset
-      field: EquilEscoRefPanel.refMajorRadius
-    - file: jetto.in
-      field: RMJ
-      section: NLIST1

@@ -6,7 +6,8 @@ from pathlib import Path
 import click
 
 from ._plot_utils import alt_line_chart
-from .ids import ImasHandle, Variable
+from .ids import ImasHandle
+from .schema import IDSVariableModel as Variable
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,9 @@ def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
     x_var = _path_to_var(x_path, ids)
     y_vars = [_path_to_var(y_path, ids) for y_path in y_paths]
 
-    source = get_ids_dataframe(handles, variables=(x_var, *y_vars))
+    # TODO this should be fixed
+    source = get_ids_dataframe(  # noqa: F821
+        handles, variables=(x_var, *y_vars))
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')
