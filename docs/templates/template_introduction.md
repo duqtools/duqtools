@@ -63,12 +63,22 @@ system: jetto
 
 {{ dummy_schema['description'] }}
 
+## Specifying Variables
 
-## Specifying variables
+### IDS variables
 
-{{ variable_schema['description'] }}
+{{ ids_variable_schema['description'] }}
 
-{% for name, prop in variable_schema['properties'].items() %}
+{% for name, prop in ids_variable_schema['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}
+
+### Jetto variables
+
+{{ jetto_variable_schema['description'] }}
+
+{% for name, prop in jetto_variable_schema['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

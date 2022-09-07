@@ -12,13 +12,8 @@ class VariableModel(BaseModel):
 
 
 class JettoVariableModel(VariableModel):
-    """Variable for describing variables specific to Jetto, These variables
-    need to be defined as a lookup table lookup.json (jetto-pythontools), or in
-    the jintrac_config_vars.yaml (jetto-duqtools). Otherwise there will be an
-    error on accessing them.
-
-    Issue #282 plans on adding lookup-table support to this variable
-    """
+    """Variable for describing variables specific to Jetto, The lookup table
+    can be defined as a JettoVar under the lookup key."""
 
     type: str = Field('jetto-variable',
                       description='discriminator for the variable type')

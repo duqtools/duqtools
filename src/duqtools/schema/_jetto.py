@@ -10,14 +10,14 @@ from ._description_helpers import formatter as f
 
 
 class JsetField(BaseModel):
-    file: Literal['jetto.jset']
-    field: str
+    file: Literal['jetto.jset'] = Field('jetto.jset')
+    field: str = Field('EquilEscoRefPanel.refMajorRadius')
 
 
 class NamelistField(BaseModel):
-    file: Literal['jetto.in']
-    field: str
-    section: str
+    file: Literal['jetto.in'] = Field('jetto.in')
+    field: str = Field('RMJ')
+    section: str = Field('NLIST1')
 
     @validator('section')
     def section_lower(cls, v):
@@ -29,13 +29,13 @@ JettoField = Annotated[Union[JsetField, NamelistField],
 
 
 class JettoVar(BaseModel):
-    doc: str
-    name: str
-    type: Literal['str', 'int', 'float']
+    doc: str = Field('Reference major radius (R0)')
+    name: str = Field('major_radius')
+    type: Literal['str', 'int', 'float'] = Field('float')
     keys: List[JettoField] = Field(
-        f("""
-    keys to update when this jetto variable is requested
-    """))
+        [JsetField(), NamelistField()],
+        description=f(
+            """keys to update when this jetto variable is requested"""))
 
     def get_type(self):
         return {

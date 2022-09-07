@@ -9,6 +9,7 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import OperationDim
 from ._imas import ImasBaseModel
+from ._jetto import JettoVar
 from ._variable import IDSVariableModel, JettoVariableModel, VariableModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
@@ -34,6 +35,7 @@ class VariableConfigModel(BaseModel):
                          ids='core_profiles',
                          path='time',
                          dims=['time']),
+        JettoVariableModel(name='major_radius', lookup=JettoVar()),
     ])
 
     def __iter__(self):
@@ -50,10 +52,13 @@ class VariableConfigModel(BaseModel):
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[OperationDim] = Field(
-        [OperationDim(variable='t_i_average'),
-         OperationDim(variable='zeff')],
-        description=f("""
+    dimensions: List[OperationDim] = Field([
+        OperationDim(variable='t_i_average'),
+        OperationDim(variable='zeff'),
+        OperationDim(
+            variable='major_radius', values=[296, 297], operator='copyto')
+    ],
+                                           description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
