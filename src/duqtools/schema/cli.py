@@ -1,8 +1,8 @@
 from getpass import getuser
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List, Union
 
-from pydantic import DirectoryPath, Field, root_validator
+from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
 
 from ._basemodel import BaseModel
@@ -10,7 +10,7 @@ from ._description_helpers import formatter as f
 from ._dimensions import OperationDim
 from ._imas import ImasBaseModel
 from ._jetto import JettoVar
-from ._variable import IDSVariableModel, JettoVariableModel, VariableModel
+from ._variable import IDSVariableModel, JettoVariableModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
@@ -185,24 +185,23 @@ class MergeStep(BaseModel):
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    data_variables: List[Union[str, IDSVariableModel]] = Field(
-        ['t_i_average', 'zeff'],
-        description=f("""
+    data_variables: List[str] = Field(['t_i_average', 'zeff'],
+                                      description=f("""
             This is a list of data variables to be merged. This means
             that the mean and error for these data over all runs are calculated
             and written back to the ouput data location.
             The paths should contain `/*/` for the time component or other dimensions.
             """))
-    grid_variable: Union[str, IDSVariableModel] = Field('rho_tor_norm',
-                                                        description=f("""
+    grid_variable: str = Field('rho_tor_norm',
+                               description=f("""
             This variable points to the data for the grid coordinate. It must share a common
             placeholder dimension with the data variables.
             It will be used to rebase all data variables to same (radial) grid before merging
             using interpolation.
             The path should contain '/*/' to denote the time component or other dimension.
             """))
-    time_variable: Union[str, IDSVariableModel] = Field('time',
-                                                        description=f("""
+    time_variable: str = Field('time',
+                               description=f("""
             This variable determines the time coordinate to merge on. This ensures
             that the data from all runs are on the same time coordinates before
             merging.
@@ -276,37 +275,3 @@ class ConfigModel(BaseModel):
     quiet: bool = Field(
         False,
         description='dont output to stdout, except for mandatory prompts')
-
-    @root_validator(pre=False, skip_on_failure=True)
-    def update_variables(cls, values):
-        """Grab variable names from different steps and replace them with the
-        definitions from the `variables` attribute."""
-        var_dict = values['variables'].to_variable_dict()
-
-        def validate_variable(var: Union[str, VariableModel],
-                              dct: Dict[str, VariableModel]) -> VariableModel:
-            if isinstance(var, VariableModel):
-                return var
-
-            try:
-                variable_model = dct[var]
-            except KeyError:
-                raise KeyError(f'Variable: `{var}` has not been defined.')
-
-            return variable_model
-
-        for dimension in values['create'].dimensions:
-            dimension.variable = validate_variable(dimension.variable,
-                                                   var_dict)
-
-        for step in values['merge'].plan:
-            step.grid_variable = validate_variable(step.grid_variable,
-                                                   var_dict)
-            step.time_variable = validate_variable(step.time_variable,
-                                                   var_dict)
-            step.data_variables = [
-                validate_variable(variable, var_dict)
-                for variable in step.data_variables
-            ]
-
-        return values

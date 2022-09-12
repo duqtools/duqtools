@@ -7,11 +7,7 @@ from ._description_helpers import formatter as f
 from ._jetto import JettoVar
 
 
-class VariableModel(BaseModel):
-    pass
-
-
-class JettoVariableModel(VariableModel):
+class JettoVariableModel(BaseModel):
     """Variable for describing variables specific to Jetto, The lookup table
     can be defined as a JettoVar under the lookup key."""
 
@@ -27,7 +23,7 @@ class JettoVariableModel(VariableModel):
     """))
 
 
-class IDSVariableModel(VariableModel):
+class IDSVariableModel(BaseModel):
     """Variable for describing data within a IMAS database.
 
     The variable can be given a name, which will be used in the rest of the config

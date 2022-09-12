@@ -54,10 +54,18 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
     """))
 
     def expand(self, *args, **kwargs):
-        if type(self.variable) == JettoVariableModel:
-            return JettoOperationDim.expand(self, *args, **kwargs)
-        elif type(self.variable) == IDSVariableModel:
-            return IDSOperationDim.expand(self, *args, **kwargs)
+        from ..config import cfg
+        variable = cfg.variables.to_variable_dict()[self.variable]
+        if type(variable) == JettoVariableModel:
+            return JettoOperationDim.expand(self,
+                                            *args,
+                                            variable=variable,
+                                            **kwargs)
+        elif type(variable) == IDSVariableModel:
+            return IDSOperationDim.expand(self,
+                                          *args,
+                                          variable=variable,
+                                          **kwargs)
         else:
             raise NotImplementedError(
                 f'{self.variable} expand not implemented')
@@ -93,10 +101,10 @@ class IDSOperationDim(IDSPathMixin, OperatorMixin, DimMixin, BaseModel):
     the given values.
     """
 
-    def expand(self, *args, **kwargs) -> Tuple[IDSOperation, ...]:
+    def expand(self, *args, variable, **kwargs) -> Tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
-            IDSOperation(variable=self.variable,
+            IDSOperation(variable=variable,
                          operator=self.operator,
                          value=value,
                          scale_to_error=self.scale_to_error)
@@ -120,10 +128,10 @@ class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
 
 class JettoOperationDim(JettoPathMixin, OperatorMixin, DimMixin, BaseModel):
 
-    def expand(self, *args, **kwargs) -> Tuple[JettoOperation, ...]:
+    def expand(self, *args, variable, **kwargs) -> Tuple[JettoOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
-            JettoOperation(variable=self.variable,
+            JettoOperation(variable=variable,
                            operator=self.operator,
                            value=value,
                            scale_to_error=self.scale_to_error)
