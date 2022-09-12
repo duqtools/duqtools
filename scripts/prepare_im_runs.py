@@ -441,7 +441,7 @@ class IntegratedModellingRuns:
         self.setup_jetto_simulation()
     
         if self.density_feedback == True:
-            self.setup_feedback_on_density(self.run_input)
+            self.setup_feedback_on_density()
 
         self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, abs(b0), r0)
         #self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, b0, r0)
