@@ -196,10 +196,6 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_param =
             set_flat_Zeff(db, shot, run_input, run_start, 'median')
             print('Setting flat Zeff with median value on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
-        elif zeff_option == 'parabolic':
-            set_parabolic_zeff(db, shot, run_input, run_start, zeff_mult = zeff_mult)
-            print('Setting parabolic zeff profile on index ' + str(run_start))
-            run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and not average and zeff_option == 'impurity from flattop':
             set_impurity_composition_from_flattop(db, shot, run_input, run_start, verbose = verbose)
             print('Setting impurity composition from flattop on index ' + str(run_start))
