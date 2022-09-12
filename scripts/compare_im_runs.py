@@ -1116,8 +1116,8 @@ def generate_data_tables(run_specs, signals, time_begin, time_end, signal_operat
             sigop_vars = sigop_tmp.split(';')
             fops = True
             empty_vars = []
-            for ii in len(sigop_vars):
-                if sigop_vars[ii] == '':
+            for ii, sigop_var in enumerate(sigop_vars):
+                if sigop_var == '':
                     empty_vars.append(ii)
             for ii in empty_vars[::-1]:
                 del sigop_vars[ii]
