@@ -9,15 +9,12 @@ import functools
 import copy
 from scipy import integrate
 from scipy.interpolate import interp1d, UnivariateSpline
-#from extra_tools_im import *
 #import idstools
 #from idstools import *
 from packaging import version
 from os import path
 import inspect
 import types
-#All the keys needed to map the structure in the dictionary are stored here
-#from keys_lists import *
 
 import matplotlib.pyplot as plt
 
@@ -50,7 +47,7 @@ if imas is not None:
 1 - setup_input_baserun(db, shot, run_exp, run_input, zeff_option = None, instructions = [], time_start = 0, time_end = 100)
 '''
 
-def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 1, instructions = [], boundary_instructions = {}, time_start = 0, time_end = 100, verbose = False, core_profiles = None, equilibrium = None):
+def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_param = 1, instructions = [], boundary_instructions = {}, time_start = 0, time_end = 100, verbose = False, core_profiles = None, equilibrium = None, extra_early_options = []):
 
     '''
 
@@ -166,6 +163,11 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
 
     ion_number = check_ion_number(db, shot, run_input)
 
+    if 'add early profiles' in instructions:
+        add_early_profiles(db, shot, run_input, run_start, extra_early_options = extra_early_options)
+        print('Adding early profiles on index ' + str(run_start))
+        run_input, run_start = run_start, run_start+1
+
     if 'set boundaries' in instructions:
         set_boundaries_te(db, shot, run_input, run_start, te_sep = boundary_sep_te, ti_sep = boundary_sep_ti, method = boundary_method)
         print('Setting boundaries te and ti on index ' + str(run_start))
@@ -176,11 +178,10 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         print('Correcting te at the boundaries on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
 
-    if 'add early profiles' in instructions:
-
-        add_early_profiles(db, shot, run_input, run_start)
-        print('Adding early profiles on index ' + str(run_start))
-        run_input, run_start = run_start, run_start+1
+    #if 'add early profiles' in instructions:
+    #    add_early_profiles(db, shot, run_input, run_start)
+    #    print('Adding early profiles on index ' + str(run_start))
+    #    run_input, run_start = run_start, run_start+1
 
     if zeff_option is not None:
         if zeff_option == 'flat maximum':
@@ -194,10 +195,6 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
         elif zeff_option == 'flat median':
             set_flat_Zeff(db, shot, run_input, run_start, 'median')
             print('Setting flat Zeff with median value on index ' + str(run_start))
-            run_input, run_start = run_start, run_start+1
-        elif zeff_option == 'parabolic':
-            set_parabolic_zeff(db, shot, run_input, run_start, zeff_mult = zeff_mult)
-            print('Setting parabolic zeff profile on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and not average and zeff_option == 'impurity from flattop':
             set_impurity_composition_from_flattop(db, shot, run_input, run_start, verbose = verbose)
@@ -215,7 +212,7 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
             print('Setting impurity composition using ne and ip scaling on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         elif ion_number > 1 and not average and zeff_option == 'hyperbole':
-            set_hyperbole_zeff(db, shot, run_input, run_start)
+            set_hyperbole_zeff(db, shot, run_input, run_start, zeff_param = zeff_param)
             print('Setting descending hiperbolic initial impurity composition on index ' + str(run_start))
             run_input, run_start = run_start, run_start+1
         else:
@@ -223,11 +220,15 @@ def setup_input(db, shot, run_input, run_start, zeff_option = None, zeff_mult = 
             exit()
 
     if 'parabolic zeff' in instructions:
-        set_parabolic_zeff(db, shot, run_input, run_start, zeff_mult = zeff_mult)
+        set_parabolic_zeff(db, shot, run_input, run_start, zeff_param = zeff_param)
         print('Setting parabolic zeff profile on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
     elif 'peaked zeff' in instructions:
-        set_peaked_zeff_profile(db, shot, run_input, run_start, zeff_mult = zeff_mult)
+        set_peaked_zeff_profile(db, shot, run_input, run_start, zeff_param = zeff_param)
+        print('Setting peaked zeff profile on index ' + str(run_start))
+        run_input, run_start = run_start, run_start+1
+    elif 'peaked zeff evolved' in instructions:
+        set_peaked_ev_zeff_profile(db, shot, run_input, run_start, zeff_param = zeff_param)
         print('Setting peaked zeff profile on index ' + str(run_start))
         run_input, run_start = run_start, run_start+1
     elif 'parabolic zeff' in instructions and 'peaked zeff' in instructions:
@@ -379,7 +380,6 @@ class IntegratedModellingDict:
                             traces[parts[0] + '[' + str(index) + parts[1]] = np.asarray(traces[parts[0] + '[' + str(index) + parts[1]])
                     index += 1
 
-    # ---------------------------- WORK IN PROGRESS -----------------------------
             elif len(parts) == 3:
                 for profile in self.ids_struct[ids_iden].profiles_1d:
                     array1 = eval('profile.' + parts[0])
@@ -477,9 +477,6 @@ class IntegratedModellingDict:
             profiles_1d[key] = np.asarray(profiles_1d[key])
     
         # Filling traces
-
-        # WORK IN PROGRESS -------------------------------
-
         for tag in keys_list['traces'][ids_iden]:
             parts = tag.split('[')
             if len(parts) == 1:
@@ -510,10 +507,6 @@ class IntegratedModellingDict:
                         if type(traces[parts[0] + '[' + str(index) + parts[1]][0]) != str:
                             traces[parts[0] + '[' + str(index) + parts[1]] = np.asarray(traces[parts[0] + '[' + str(index) + parts[1]])
                     index += 1
-
-
-        # --------------------------------------------------
-
 
         # Transforming to numpy arrays. Not to be done when dealing with strings, imas does not recognize np.str_
         for key in traces:
@@ -561,8 +554,7 @@ class IntegratedModellingDict:
             if len(self.ids_struct[ids_iden].source) == 0:
                 break
     
-            i_source = get_index_source(split[0])
-    
+            i_source = self.get_index_source(split[0])
             parts = split[1].split('[')
     
             if len(parts) == 1:
@@ -586,7 +578,7 @@ class IntegratedModellingDict:
             if len(self.ids_struct[ids_iden].source) == 0:
                 break
     
-            i_source = get_index_source(split[0])
+            i_source = self.get_index_source(split[0])
     
             parts = split[1].split('[')
     
@@ -753,6 +745,7 @@ class IntegratedModellingDict:
         self.ids_dict['extras']['b0'] = np.asarray([np.average(self.ids_dict['extras']['b0'])])
         self.fill_ids_struct()
 
+
     def update_times_traces(self, new_times, changing_idss):
     
         '''
@@ -762,6 +755,7 @@ class IntegratedModellingDict:
         '''
 
         for changing_ids in changing_idss:
+
             for key in self.ids_dict['traces'].keys():
                 # It handles the interpolations for when strings are involved (the usecase I found is with labels)
                 #if key in self.all_keys['traces'][changing_ids] and 'label' in key:
@@ -779,30 +773,50 @@ class IntegratedModellingDict:
 
         if 'equilibrium' in changing_idss:
             self.ids_dict['extras']['b0'] = fit_and_substitute(self.ids_dict['time']['equilibrium'], new_times, self.ids_dict['extras']['b0'])
-    
+
+
     def update_times_profiles(self, new_times, changing_idss):
     
         # Rebasing the profiles in time
         for changing_ids in changing_idss:
             for key in self.ids_dict['profiles_1d'].keys():
                 if key in self.all_keys['profiles_1d'][changing_ids] and len(self.ids_dict['profiles_1d'][key]) != 0:
-    
+
                     old_times = self.ids_dict['time'][changing_ids]
                     # Getting the dimensions of the radial grid and time
                     x_dim = np.shape(self.ids_dict['profiles_1d'][key])[1]
                     time_dim = np.shape(self.ids_dict['profiles_1d'][key])[0]
                     profiles_new = {}
-    
+                    '''
                     for i in np.arange(x_dim):
                         if key in profiles_new:
                             profiles_new[key] = np.hstack((profiles_new[key], fit_and_substitute(old_times, new_times, self.ids_dict['profiles_1d'][key][:,i])))
                         else:
                             profiles_new[key] = fit_and_substitute(old_times, new_times, self.ids_dict['profiles_1d'][key][:,i])
-    
+                    # New and untested
+                    #if x_dim != 0:
                     profiles_new[key] = profiles_new[key].reshape(x_dim, len(new_times))
                     self.ids_dict['profiles_1d'][key] = np.transpose(np.asarray(profiles_new[key]))
- 
-# WORK IN PROGRESS ----------------------------------------
+                    '''
+                    if x_dim != 0:
+                        for i in np.arange(x_dim):
+                            if key in profiles_new:
+                                profiles_new[key] = np.hstack((profiles_new[key], fit_and_substitute(old_times, new_times, self.ids_dict['profiles_1d'][key][:,i])))
+                            else:
+                                profiles_new[key] = fit_and_substitute(old_times, new_times, self.ids_dict['profiles_1d'][key][:,i])
+                    # New and untested
+                        profiles_new[key] = profiles_new[key].reshape(x_dim, len(new_times))
+                        self.ids_dict['profiles_1d'][key] = np.transpose(np.asarray(profiles_new[key]))
+
+                    else:
+                        for i in np.arange(time_dim):
+                            if key in profiles_new:
+                                profiles_new[key] = np.hstack((profiles_new[key], np.asarray([])))
+                            else:
+                                profiles_new[key] = np.asarray([])
+
+                        self.ids_dict['profiles_1d'][key] = np.asarray(profiles_new[key])
+
 
     def update_times_2d_profiles(self, new_times, changing_idss):
 
@@ -827,8 +841,8 @@ class IntegratedModellingDict:
 
                     profiles_new[key] = profiles_new[key].reshape(x_dim, y_dim, len(new_times))
                     self.ids_dict['profiles_2d'][key] = np.transpose(np.asarray(profiles_new[key]),[2,0,1])
-# ---------------------------------------------------------------
    
+
     def update_times_times(self, new_times, changing_idss):
     
         for changing_ids in changing_idss:
@@ -947,8 +961,6 @@ class IntegratedModellingDict:
             if(len(parts)) == 1:
                 setattr(self.ids_struct[ids_iden].global_quantities, tag, self.ids_dict['traces'][tag])
     
-    # ---------------------------- WORK IN PROGRESS -----------------------------
-    
             elif(len(parts)) == 2:
                 index2 = 0
                 while parts[0] + '[' + str(index2) + parts[1] in self.ids_dict['traces'].keys():
@@ -966,8 +978,6 @@ class IntegratedModellingDict:
  + parts[1][2:] + '\', trace)')
 
                     index2 += 1
-
-    # -------------------------------------------------------------------------------
 
 
             elif(len(parts)) == 3:
@@ -995,13 +1005,12 @@ class IntegratedModellingDict:
                     index2 += 1
 
         self.ids_struct[ids_iden].time = self.ids_dict['time']['core_profiles']
-    
+
+
     def fill_equilibrium(self):
     
         ids_iden = 'equilibrium'
         self.fill_basic_quantities(ids_iden)
-
-# WORK IN PROGRESS --------------------------------------
 
         for tag in keys_list['profiles_2d']['equilibrium']:
             if '[' not in tag:
@@ -1027,8 +1036,6 @@ class IntegratedModellingDict:
 
                         eval('rsetattr(self.ids_struct[\'equilibrium\'].time_slice[' + str(index1) + '].' + parts[0] + '[' + str(index2) + '], \'' + parts[1][2:] + '\', profile_2d)')
                     index2 += 1
-#----------------------------------
-
 
         # Should append the time slice also for the splitted tags, to avoid ordering problems
         for tag in keys_list['profiles_1d']['equilibrium']:
@@ -1063,7 +1070,6 @@ class IntegratedModellingDict:
     
                     rsetattr(self.ids_struct[ids_iden].time_slice[index], tag, trace)
 
-# WORK IN PROGRESS --------------------------------------------------------
             else:
                 parts = tag.split('[')
                 index2 = 0
@@ -1082,8 +1088,6 @@ class IntegratedModellingDict:
  + parts[1][2:] + '\', trace)')
 
                     index2 += 1
-
-# ---------------------------------------------------------------------------
 
 
         # These are not in time_slice, so need to be treated separately
@@ -1128,7 +1132,7 @@ class IntegratedModellingDict:
                     break
     
                 split = tag.split('#')
-                i_source = get_index_source(split[0])
+                i_source = self.get_index_source(split[0])
     
                 parts = split[1].split('[')
                 if len(parts) == 1:
@@ -1375,6 +1379,7 @@ def open_integrated_modelling(db, shot, run, username='', backend='mdsplus'):
 
     return(ids_struct)
 
+
 def open_and_get_core_profiles(db, shot, run, username='', backend='mdsplus'):
 
     imas_backend = imasdef.MDSPLUS_BACKEND
@@ -1457,6 +1462,7 @@ def open_and_get_equilibrium_tag(db, shot, run, tag, username='', backend='mdspl
 
     return(time, variable)
 
+
 def open_and_get_summary(db, shot, run, username=None, backend='mdsplus'):
 
     imas_backend = imasdef.MDSPLUS_BACKEND
@@ -1482,6 +1488,7 @@ def open_and_get_summary(db, shot, run, username=None, backend='mdsplus'):
     data_entry.close()
 
     return(summary)
+
 
 def open_and_get_core_sources(db, shot, run, username='', backend='mdsplus'):
 
@@ -1536,6 +1543,7 @@ def open_and_get_nbi(db, shot, run, username='', backend='mdsplus'):
 
     return(nbi)
 
+
 def open_and_get_all(db, shot, run, username='', backend='mdsplus'):
 
     '''
@@ -1565,6 +1573,7 @@ def open_and_get_all(db, shot, run, username='', backend='mdsplus'):
 
     return(ids_dict)
 
+
 def put_integrated_modelling(db, shot, run, run_target, ids_struct, backend='mdsplus'):
 
     '''
@@ -1587,8 +1596,9 @@ def put_integrated_modelling(db, shot, run, run_target, ids_struct, backend='mds
 
     for ids in ids_list:
     # If the time vector is empty the IDS is empty or broken, do not put
-        if len(ids_struct[ids].time) !=0:
-            data_entry.put(ids_struct[ids])
+        if ids in ids_struct:
+            if len(ids_struct[ids].time) !=0:
+                data_entry.put(ids_struct[ids])
 
     data_entry.close()
 
@@ -1688,9 +1698,8 @@ t die close to the boundaries.
 
     print('zeff corrected')
 
-# WORK IN PROGRESS
 
-def set_parabolic_zeff(db, shot, run, run_target, zeff_mult = 1, db_target = None, shot_target = None, username = None, username_target = None):
+def set_parabolic_zeff(db, shot, run, run_target, zeff_param = 1, db_target = None, shot_target = None, username = None, username_target = None):
 
     '''
 
@@ -1719,7 +1728,10 @@ def set_parabolic_zeff(db, shot, run, run_target, zeff_mult = 1, db_target = Non
         average_zeff.append(np.average(profile))
 
     for index in range(np.shape(ids_dict['profiles_1d']['zeff'])[0]):
-        norm = zeff_mult * (average_zeff[index]-1)/2
+        if type(zeff_param) != list:
+            norm = zeff_param * (average_zeff[index]-1)/2
+        else:
+            norm = zeff_param[0] * (average_zeff[index]-1)/2
         ids_dict['profiles_1d']['zeff'][index] = average_zeff[index] + norm/2 - norm * np.sqrt(1-ids_dict['profiles_1d']['grid.rho_tor_norm'][index])
 
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
@@ -1734,7 +1746,7 @@ def set_parabolic_zeff(db, shot, run, run_target, zeff_mult = 1, db_target = Non
 
     print('zeff turned parabolic')
 
-def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False, zeff_mult = 1):
+def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False, zeff_param = 1):
 
     if not username:
         username=getpass.getuser()
@@ -1748,7 +1760,6 @@ def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_ta
     ids_data = IntegratedModellingDict(db, shot, run, username = username)
     ids_dict = ids_data.ids_dict
 
-
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 5, ids_dict['profiles_1d']['zeff'], 5)
 
@@ -1758,7 +1769,10 @@ def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_ta
         average_zeff.append(np.average(profile))
 
     for index in range(np.shape(ids_dict['profiles_1d']['zeff'])[0]):
-        norm = zeff_mult * (average_zeff[index]-1)/2
+        if type(zeff_param) != list:
+            norm = zeff_param * (average_zeff[index]-1)/2
+        else:
+            norm = zeff_param[0] * (average_zeff[index]-1)/2
         ids_dict['profiles_1d']['zeff'][index] = average_zeff[index] - norm/2 + norm * np.sqrt(1-ids_dict['profiles_1d']['grid.rho_tor_norm'][index])
 
     ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
@@ -1772,7 +1786,55 @@ def set_peaked_zeff_profile(db, shot, run, run_target, db_target = None, shot_ta
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
 
 
-def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False):
+def set_peaked_ev_zeff_profile(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False, zeff_param = 1):
+
+    if not username:
+        username=getpass.getuser()
+    if not db_target:
+        db_target = db
+    if not shot_target:
+        shot_target = shot
+    if not username_target:
+        username_target = username
+
+    ids_data = IntegratedModellingDict(db, shot, run, username = username)
+    ids_dict = ids_data.ids_dict
+
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 5, ids_dict['profiles_1d']['zeff'], 5)
+
+    #time_eq = ids_dict['time']['equilibrium']
+    #ip = ids_dict['traces']['global_quantities.ip']
+    #index_start_ft_eq, index_end_ft_eq = identify_flattop_ip(ip, time_eq)
+    time_cp = ids_dict['time']['core_profiles']
+
+    average_zeff = []
+
+    for profile in ids_dict['profiles_1d']['zeff']:
+        average_zeff.append(np.average(profile))
+
+    # Very early want a flat zeff profile, they start to get out slightly later
+    for index in range(np.shape(ids_dict['profiles_1d']['zeff'])[0]):
+        if type(zeff_param) != list:
+            zeff_param = np.where(time_cp < 0.05, zeff_param*20*time_cp, zeff_param)
+            norm = zeff_param * (average_zeff[index]-1)/2
+        else:
+            zeff_param = np.where(time_cp < 0.05, zeff_param[0]*20*time_cp, zeff_param[0])
+            norm = zeff_param * (average_zeff[index]-1)/2
+        ids_dict['profiles_1d']['zeff'][index] = average_zeff[index] - norm[index]/2 + norm[index] * np.sqrt(1-ids_dict['profiles_1d']['grid.rho_tor_norm'][index])
+
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] > 1, ids_dict['profiles_1d']['zeff'], 1.02)
+    ids_dict['profiles_1d']['zeff'] = np.where(ids_dict['profiles_1d']['zeff'] < 5, ids_dict['profiles_1d']['zeff'], 5)
+
+    # Put the data back in the ids structure
+
+    ids_data.ids_dict = ids_dict
+    ids_data.fill_ids_struct()
+
+    put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
+
+
+def set_hyperbole_zeff(db, shot, run, run_target, zeff_param = 1.0, db_target = None, shot_target = None, username = None, username_target = None, verbose = False):
 
     if not username:
         username=getpass.getuser()
@@ -1787,16 +1849,29 @@ def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target 
     ids_dict = ids_data.ids_dict
 
     time_eq = ids_dict['time']['equilibrium']
+    time_cp = ids_dict['time']['core_profiles']
     ip = ids_dict['traces']['global_quantities.ip']
 
     # The steady state is identified
-    index_start_ft, index_end_ft = identify_flattop_ip(ip, time_eq)
+    if type(zeff_param) != list:
+        index_start_ft_eq, index_end_ft_eq = identify_flattop_ip(ip, time_eq)
+    else:
+        # The rationale behind specifying a value is that zeff might decrease more or less independently from the current (if it depends on other variables)
+        index_start_ft_eq = np.abs(time_eq - zeff_param[1]).argmin(0)
+        #index_end_ft = np.abs(time_eq - (time_eq[-1] - zeff_param[1])).argmin(0)
+        index_end_ft_eq = len(time_eq) - 1
 
-    # Coef1 is calculated for Zeff to be continuous when the ramp up ends
-    zeff_target, time_target = ids_dict['profiles_1d']['zeff'][index_start_ft][0], time_eq[index_start_ft]
+    # Need the indexes for core_profile
+    index_start_ft = np.abs(time_cp - time_eq[index_start_ft_eq]).argmin(0)
+    index_end_ft = np.abs(time_cp - time_eq[index_end_ft_eq]).argmin(0)
+
+    # The function needs to be continuous. If the parameter is not a list zeff is continuous when the ramp ends. Otherwise a value can be specified.
+    zeff_target, time_target = ids_dict['profiles_1d']['zeff'][index_start_ft][0], time_cp[index_start_ft]
 
     # c is the parameter controlling how fast zeff descents after the beginning. Z0 is zeff at t=0
-    z0 = 4
+    #z0 = 4
+    z0 = 3
+    #z0 = ids_dict['profiles_1d']['zeff'][0][0]
     c = 10
     #b = (zeff_target - z0)/(-1 + 1/((c*time_target)**2 +1))
     b = (zeff_target-z0)/(-1+1/((c*time_target)**4+1))
@@ -1825,7 +1900,6 @@ def set_hyperbole_zeff(db, shot, run, run_target, db_target = None, shot_target 
     ids_data.fill_ids_struct()
 
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
-
 
 
 def set_ip_ne_scaled_zeff(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, verbose = False):
@@ -2270,20 +2344,23 @@ def identify_flattop_ip(ip, time):
         dip_dt = np.gradient(smooth_ip, time)  
 
         index, index_flattop_begin, index_flattop_end = 0, 0, 0
-        while dip_dt[index] < -limit_derivative and index < (len(dip_dt)-1):
+        #while dip_dt[index] < -limit_derivative and index < (len(dip_dt)-1):
+        # Asimmetric limits try to delay the beginning to when the current is more stable
+        while dip_dt[index] < -(limit_derivative-4000) and index < (len(dip_dt)-1):
             index += 1
         index_flattop_begin = index
 
         if index == len(dip_dt-1):
-            limit_derivative -= 5000
+            limit_derivative -= 4000
             continue
 
-        while dip_dt[index] > -limit_derivative and dip_dt[index] < limit_derivative and index < (len(dip_dt)-1):
+        #while dip_dt[index] > -limit_derivative and dip_dt[index] < limit_derivative and index < (len(dip_dt)-1):
+        while dip_dt[index] > -(limit_derivative-4000) and dip_dt[index] < limit_derivative and index < (len(dip_dt)-1):
             index += 1
         index_flattop_end = index
 
         time_interval = time[index_flattop_end] - time[index_flattop_begin]
-        limit_derivative += 5000
+        limit_derivative += 4000
 
     return(index_flattop_begin, index_flattop_end)
 
@@ -2525,7 +2602,7 @@ def set_boundaries_te(db, shot, run, run_target, te_sep, ti_sep = None, method =
                 ti_sep_time.append(ti_sep)
         elif method == 'linear':
             if te_sep is list and ti_sep is list:
-                te_sep_time.append((ti_sep[1]-te_sep[0])*(time-time[0])/time[-1])
+                te_sep_time.append((te_sep[1]-te_sep[0])*(time-time[0])/time[-1])
                 if ti_sep:
                     ti_sep_time.append((ti_sep[1]-ti_sep[0])*(time-time[0])/time[-1])
             else:
@@ -2535,9 +2612,62 @@ def set_boundaries_te(db, shot, run, run_target, te_sep, ti_sep = None, method =
             te_sep_time.append(e_temperatures[itime][-1] + te_sep)
             if ti_sep:
                 ti_sep_time.append(e_temperatures[itime][-1] + ti_sep)
+        elif method == 'add no start':
+            if itime > 1 and time < 0.1:
+                te_sep_time.append(e_temperatures[itime][-1] + te_sep*(0.1-time)*10)
+                if ti_sep:
+                    ti_sep_time.append(e_temperatures[itime][-1] + ti_sep*(0.1-time)*10)
+            elif itime > 1 and time > 0.1:
+                te_sep_time.append(e_temperatures[itime][-1] + te_sep)
+                if ti_sep:
+                    ti_sep_time.append(e_temperatures[itime][-1] + ti_sep)
+            else:
+                te_sep_time.append(e_temperatures[itime][-1])
+                if ti_sep:
+                    ti_sep_time.append(e_temperatures[itime][-1])
+        elif method == 'add early':
+            # Sets initial temperature at 20 eV and goes linearly to whatever value there is at 0.05. Still adds
+            print(len(times), len(e_temperatures[:,-1]))
+            f_space = interp1d(times, e_temperatures[:,-1])
+            t_continuity = f_space(0.05)
+
+            if time < 0.05:
+                te_sep_time.append((t_continuity - 20 + te_sep)*20*time + 20)
+                if ti_sep:
+                    ti_sep_time.append((t_continuity - 20 + ti_sep)*20*time + 20)
+            else:
+                te_sep_time.append(e_temperatures[itime][-1] + te_sep)
+                if ti_sep:
+                    ti_sep_time.append(e_temperatures[itime][-1] + ti_sep)
+
         else:
             print('method for boundary settings not recognized. Aborting')
             exit()
+
+    te_sep_time, ti_sep_time = np.asarray(te_sep_time), np.asarray(ti_sep_time)
+    te_sep_time = np.where(te_sep_time > 30, te_sep_time, 30)
+    te_sep_time = np.where(te_sep_time < 100, te_sep_time, 100)
+    '''
+    # limit is stricter at the very beginning, where measurements are difficult
+    te_sep_time_tmp = []
+    for te_sep_t, time in zip(te_sep_time, times):
+        if te_sep_t > 80 and time < 0.1:
+            te_sep_time_tmp.append(80)
+        else:
+            te_sep_time_tmp.append(te_sep_t)
+    te_sep_time = np.asarray(te_sep_time_tmp)
+
+    ti_sep_time = np.where(ti_sep_time > 30, ti_sep_time, 30)
+    ti_sep_time = np.where(ti_sep_time < 100, ti_sep_time, 100)
+
+    ti_sep_time_tmp = []
+    for ti_sep_t, time in zip(ti_sep_time, times):
+        if ti_sep_t > 80 and time < 0.1:
+            ti_sep_time_tmp.append(80)
+        else:
+            ti_sep_time_tmp.append(ti_sep_t)
+    ti_sep_time = np.asarray(ti_sep_time_tmp)
+    '''
 
 
     new_e_temperatures, new_i_temperatures = [], []
@@ -2654,7 +2784,7 @@ def shift_profiles(profile_tag, db, shot, run, db_target, shot_target, run_targe
 
     put_integrated_modelling(db, shot, run, run_target, ids_data.ids_struct)
 
-def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None):
+def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target = None, username = None, username_target = None, extra_early_options = []):
 
     '''
 
@@ -2679,6 +2809,8 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
     old_times = ids_dict['time']['core_profiles']
     new_times = old_times[:]
     
+    x = ids_dict['profiles_1d']['grid.rho_tor_norm'][0]
+
     while new_times[0] > 0.01:
         new_times = np.insert(new_times, 0, new_times[0] - (new_times[1] - new_times[0]))
 
@@ -2688,7 +2820,27 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
     for variable in ['electrons.density_thermal', 'electrons.density', 'electrons.temperature', 'q', 't_i_average']:
 
         old_profiles = ids_dict['profiles_1d'][variable]
-        first_profile = np.full(np.size(ids_dict['profiles_1d'][variable][0]), ids_dict['profiles_1d'][variable][0][-1])
+        # Assuming (empirically, and it makes sense) that the initial temperature at the boundaries is lower at the very beginning, while the plasma warms up
+        # That did not work. Assuming boundaries are fixed, but temperature is slightly peaked
+        # Not activate now. Comments left to remember the history of changes
+        if variable == 'electrons.temperature':
+            #first_profile = 2*ids_dict['profiles_1d'][variable][0][-1] - ids_dict['profiles_1d'][variable][0][-1]*x
+            first_profile = np.full(np.size(ids_dict['profiles_1d'][variable][0]), ids_dict['profiles_1d'][variable][0][-1])
+        # Assumes that ions and electrons are thermalized at the beginning. Should be a fair assumption
+        elif variable == 't_i_average':
+            #first_profile = 2*ids_dict['profiles_1d']['electrons.temperature'][0][-1] - ids_dict['profiles_1d']['electrons.temperature'][0][-1]*x
+            first_profile = np.full(np.size(ids_dict['profiles_1d']['electrons.temperature'][0]), ids_dict['profiles_1d']['electrons.temperature'][0][-1])
+        # Setting a parabolic and not flat initial q profile
+        elif variable == 'q':
+            if 'flat q profile' in extra_early_options:
+                first_profile = np.full(np.size(ids_dict['profiles_1d'][variable][0]), ids_dict['profiles_1d'][variable][0][-1])
+            else:
+                norm = ids_dict['profiles_1d']['q'][0][-1]/2
+                ave_q_profile = np.average(ids_dict['profiles_1d']['q'][0])
+                first_profile = ids_dict['profiles_1d']['q'][0][-1] - norm * np.sqrt(1-ids_dict['profiles_1d']['grid.rho_tor_norm'][0])
+        else:
+            first_profile = np.full(np.size(ids_dict['profiles_1d'][variable][0]), ids_dict['profiles_1d'][variable][0][-1])
+
         old_profiles = np.insert(old_profiles, 0, first_profile, axis = 0)
 
         x_dim = np.shape(old_profiles)[1]
@@ -2703,7 +2855,13 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
 
         new_profiles[variable] = new_profiles[variable].reshape(x_dim, len(new_times))
 
+    #When the current is negative, the fit extrapolation might flip it back to positive. Enforcing 0 current a t=0
+    old_current = np.insert(ids_dict['traces']['global_quantities.ip'], 0, 0)
+    old_times = np.insert(ids_dict['time']['equilibrium'], 0, 0)
+
     ids_data.update_times(new_times, ['core_profiles'])
+    # Maybe it does not work, especially if the coordinates start to merge. Testing
+    ids_data.update_times(new_times, ['equilibrium'])
     
     # The fit in time of rho tor norm might mix the grid, which needs to be sorted.
     new_rho_tor_norm = np.asarray([])
@@ -2715,7 +2873,8 @@ def add_early_profiles(db, shot, run, run_target, db_target = None, shot_target 
             new_rho_tor_norm = np.sort(rho_tor_norm_profile)/max(rho_tor_norm_profile)
 
     ids_dict['profiles_1d']['grid.rho_tor_norm'] = new_rho_tor_norm.reshape(len(new_times), x_dim)
-    
+    ids_dict['traces']['global_quantities.ip'] = fit_and_substitute(old_times, new_times, old_current)
+
     for variable in ['electrons.density_thermal', 'electrons.density', 'electrons.temperature', 'q', 't_i_average']:
         ids_dict['profiles_1d'][variable] = np.transpose(np.asarray(new_profiles[variable]))
 
@@ -2946,16 +3105,20 @@ ids_list = [
 keys_list['profiles_2d']['core_profiles'] = [
 ]
 
+#electrons.velocity_tor and grid.rho_pol_norm are untested
 keys_list['profiles_1d']['core_profiles'] = [
     'q',
     'electrons.density_thermal',
     'electrons.density',
     'electrons.temperature',
+    'electrons.velocity_tor',
     'ion[].temperature',
     'ion[].density',
     't_i_average',
     'zeff',
-    'grid.rho_tor_norm'
+    'grid.rho_tor',
+    'grid.rho_tor_norm',
+    'grid.rho_pol_norm'
 ]
 
 keys_list['traces']['core_profiles'] = [
@@ -2997,10 +3160,14 @@ keys_list['traces']['summary'] = [
 
 keys_list['profiles_1d']['equilibrium'] = [
     'profiles_1d.psi',
+    'profiles_1d.phi',
     'profiles_1d.f',
     'profiles_1d.q',
     'profiles_1d.pressure',
+    'profiles_1d.rho_tor',
     'profiles_1d.rho_tor_norm',
+    'profiles_1d.area',
+    'profiles_1d.volume',
     'boundary.outline.r',
     'boundary.outline.z',
     'profiles_2d[].grid.dim1',

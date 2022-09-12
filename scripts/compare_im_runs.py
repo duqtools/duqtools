@@ -395,6 +395,7 @@ def get_onedict(sigvec,user,db,shot,runid,time_begin,time_end=None,sid=None,tid=
                         if ytable is None:
                             ytable = []
                         ytable.append(val)
+                        new_x = val["x"]
                 else:
                     ytable = np.hstack((ytable, val["y"])) if ytable is not None else np.array([val["y"]]).flatten()
                 # Time of time slice stored as key of raw_data_dict, extract and stack into an actual time vector
@@ -526,7 +527,8 @@ def plot_traces(plot_data, plot_vars=None, single_time_reference=False):
         first_run = None
         for run in plot_data:
             if signame in plot_data[run]:
-                pdata[run] = {"time": plot_data[run][signame+".t"], "data": plot_data[run][signame]}
+                if run != 'time_signals' and run != 'profile_signals':
+                    pdata[run] = {"time": plot_data[run][signame+".t"], "data": plot_data[run][signame]}
                 if first_run is not None and t_basis is None:
                     t_basis = pdata[run]["time"]
                 if first_run is None:
@@ -559,6 +561,8 @@ def plot_interpolated_traces(interpolated_data, plot_vars=None):
     if isinstance(plot_vars, list):
         signal_list = plot_vars
     for signame in signal_list:
+        print(signal_list)
+        print(interpolated_data)
         if signame in interpolated_data:
             print("Plotting %s" % (signame))
             fig = plt.figure()
@@ -581,14 +585,27 @@ def plot_gif_profiles(plot_data, plot_vars=None, single_time_reference=False):
         first_run = None
         tvec = None
         for run in plot_data:
-            if signame in plot_data[run]:
-                pdata[run] = []
-                if first_run is None:
-                    first_run = run
-                    if not single_time_reference:
+            if run != 'time_signals' and run != 'profile_signals':
+                if signame in plot_data[run]:
+                    pdata[run] = []
+                    if first_run is None:
+                        first_run = run
+                        if not single_time_reference:
+                            for tidx in range(len(plot_data[run][signame])):
+                                pdata[run].append({"time": plot_data[run][signame+".t"][tidx], "rho": plot_data[run][signame][tidx]["x"], "data": plot_data[run][signame][tidx]["y"]})
+                                tvec = np.hstack((tvec, plot_data[run][signame+".t"][tidx])) if tvec is not None else np.array([plot_data[run][signame+".t"][tidx]])
+                    else:
+                        tvec_new = np.array([])
+                        tvec_final = np.array([])
+                        tidxvec = []
                         for tidx in range(len(plot_data[run][signame])):
+                            tvec_new = np.hstack((tvec_new, plot_data[run][signame+".t"][tidx]))
+                        if tvec is None:
+                            tvec = tvec_new.copy()
+                        for tidx_orig in range(len(tvec)):
+                            tidx = np.abs(tvec[tidx_orig] - tvec_new).argmin(0)
                             pdata[run].append({"time": plot_data[run][signame+".t"][tidx], "rho": plot_data[run][signame][tidx]["x"], "data": plot_data[run][signame][tidx]["y"]})
-                            tvec = np.hstack((tvec, plot_data[run][signame+".t"][tidx])) if tvec is not None else np.array([plot_data[run][signame+".t"][tidx]])
+                            tvec_final = np.hstack((tvec_final, plot_data[run][signame+".t"][tidx])) if tvec_final is not None else np.array([plot_data[run][signame+".t"][tidx]])
                 else:
                     tvec_new = np.array([])
                     tvec_final = np.array([])
@@ -750,7 +767,7 @@ def print_time_traces(data_dict, data_vars=None, inverted_layout=False):
                         print("%s %s average: %10.6e" % (run, signame, float(val)))
                         out_dict[run][signame] = val
         else:
-            for run in data_dict[signame]:
+            for run in data_dict:
                 if signame in data_dict and len(data_dict[run][signame]) > 0:
                     if run not in out_dict:
                         out_dict[run] = {}
@@ -846,7 +863,10 @@ def perform_time_trace_analysis(analysis_dict, **kwargs):
         abs_err_dict = compute_absolute_error_for_all_traces(analysis_dict)
         signal_list = abs_err_dict.pop("time_signals")
         out_dict.update(abs_err_dict)
-        out_signal_list.extend(signal_list)
+        for signal in signal_list:
+            if signal not in out_signal_list:
+                out_signal_list.append(signal)
+        #out_signal_list.extend(signal_list)
     out_dict["time_signals"] = out_signal_list
     return out_dict
 
@@ -858,7 +878,10 @@ def perform_profile_analysis(analysis_dict, **kwargs):
         avg_abs_err_dict = compute_average_absolute_error_for_all_profiles(analysis_dict)
         signal_list = avg_abs_err_dict.pop("profile_signals")
         out_dict.update(avg_abs_err_dict)
-        out_signal_list.extend(signal_list)
+        for signal in signal_list:
+            if signal not in out_signal_list:
+                out_signal_list.append(signal)
+        #out_signal_list.extend(signal_list)
     out_dict["time_signals"] = out_signal_list
     return out_dict
 
@@ -868,12 +891,13 @@ def perform_sign_correction(raw_dict, ref_tag):
         if tag != ref_tag:
             for key in raw_dict[tag]:
                 if not key.endswith(".x") and not key.endswith(".t") and key in raw_dict[ref_tag]:
-                    if isinstance(raw_dict[tag][key][0], dict):
-                        for ii in range(len(raw_dict[tag][key])):
-                            if np.mean(raw_dict[ref_tag][key][ii]["y"]) * np.mean(raw_dict[tag][key][ii]["y"]) < 0.0:
-                                raw_dict[tag][key][ii]["y"] = -raw_dict[tag][key][ii]["y"]
-                    elif np.mean(raw_dict[ref_tag][key]) * np.mean(raw_dict[tag][key]) < 0.0:
-                        raw_dict[tag][key] = -raw_dict[tag][key]
+                    if tag != 'time_signals' and tag != 'profile_signals':
+                        if isinstance(raw_dict[tag][key][0], dict):
+                            if np.mean(raw_dict[ref_tag][key][0]["y"]) * np.mean(raw_dict[tag][key][0]["y"]) < 0.0:
+                                for ii in range(len(raw_dict[tag][key])):
+                                    raw_dict[tag][key][ii]["y"] = -raw_dict[tag][key][ii]["y"]
+                        elif np.mean(raw_dict[ref_tag][key]) * np.mean(raw_dict[tag][key]) < 0.0:
+                            raw_dict[tag][key] = -raw_dict[tag][key]
     return raw_dict
 
 def standardize_basis_vectors(raw_dict, ref_tag, time_basis=None):
@@ -1292,6 +1316,7 @@ def compare_runs(signals, dblist, shotlist, runlist, time_begin, time_end=None, 
         time_error_averages = print_time_trace_errors(time_error_dict)
         profile_error_averages = print_profile_errors(profile_error_dict)
 
+    return time_averages, time_error_averages, profile_error_averages
 
 ####### COMMAND LINE INTERFACE #######
 

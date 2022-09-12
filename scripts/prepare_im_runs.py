@@ -59,20 +59,64 @@ import copy
 
 --------------- AVAILABLE FUNCTIONS: ------------------
 
+Class IntegratedModellingRuns: sets up everything needed for an integrated modelling simulation.
+
+instructions_list: possibilities are 'setup base', 'setup sens', 'create base', 'create sens', 'run base', 'run sens'
+
+'setup base'  - Setup the input for a baserun
+'setup sens'  - Setup the input for a sensitivity
+'create base' - Create the baserun folder
+'create sens' - Create the sensitivities folders
+'run base'    - Run the baserun
+'run sens'    - Run the sensitivities
+
+Action: setup_create_compare()
+
+db:                    Name of the ids database
+run input:             The run where the experimental data are
+run start:             Where the actual input for the run is taken after manipulation
+generator_name:        Name of the generator from which all the settings that will not be changed will be taken
+time_start:            Starting time for the simulation. Options are: time_start, 'core_profiles', 'equilibrium'. For the latter 2 the first time in the respective ids will be used
+time_end:              Time_end, auto (untested)
+esco_timesteps:        Number of times esco will be called (homogeneous)
+output_timesteps:      Number of times the output will be printed (homogeneous)
+force_run:             If true, will not stop if the output ids aready exists
+density_feedback:      If True, will setup the density feedback, with the density in summary.line_averaged.density. Does not use the pulse scheduler (It does not work yet)
+pulse_scheduler:       Will fill the pulse scheduler to setup current and Bt
+zeff_options:          Describe how to set the time trace for zeff
+-- 'flat maximum'           Sets the maximum zeff everywhere
+-- 'flat minimum'           Sets the minimum zeff everywhere
+-- 'flat median'            Sets the median zeff everywhere
+-- 'impurity from flattop'  Auto detects the flattop, averages the impurity composition there and imposes during the ramp-up
+-- 'linear descending zeff' Zeff descends linearly
+-- 'ip ne scaled'           Uses scaling from ASDEX
+-- 'hyperbole'              Decreases zeff rapidly, starting from 4 and merging to the zeff value at the end of the ramp-up
+
+sensitivity_list:      Can contain some basic sensitivities. Best to use the duqtools unless interested in peaking of te or setting initial q profile keeping q95
+input_instructions:    Options for the input. They will be applied one by one generating new idss, starting from time_start-len(input_instructions)
+-- average - rebase    Averages relevant IDSs or rebase the equilibrium IDS with the core profiles time base
+-- flipping ip         Can be added, but will be added authomatically when the current is positive because I still cannot make positive current work
+-- nbi heating         Sets up NBI. Not ready yet
+-- set boundaries      Will setup the boundaries for te and ti. 
+   -- 'constant'       Can set them constant
+   -- 'add'            To add a constant value and keep the time evolution
+   -- 'linear'         To increase linearly between two extremes
+-- correct boundaries  Will increase the boundaries when below 20 eV
+-- add early profiles  Will extrapolate the profiles to 0.01. Not implemented for the 2d equilibrium yet
+-- parabolic zeff, peaked zeff  Sets a hollow or a peaked profile for Zeff
+-- correct zeff        Corrects Zeff where it is below 1.02 or above 4
+-- flat q profile      Sets up a flat q profile with the boundary values everywhere
+
+
+boundary_instructions: Options to modify the boundaries for te and ti. It modifies the edge and keeps the axis the same, linearly
+
+
 1 - setup_input_baserun(verbose = False):
 2 - setup_input_sensitivities()
 3 - create_baserun()
 4 - create_sensitivities(force_run = False)
 5 - run_baserun()
 6 - run_sensitivities(force_run = False)
-
-Steps nesessary:
-1 - Setup the input for a baserun
-2 - Setup the input for a sensitivity
-3 - Create the baserun folder
-4 - Create the sensitivities folders
-5 - Run the baserun
-6 - Run the sensitivities
 
 
 # Setting up a single folder ready for integrated modelling
@@ -84,6 +128,14 @@ setup_feedback_on_density()
 modify_jset(path, sensitivity_name, ids_number, ids_output_number, db, username, shot)
 modify_jset_line(sensitivity_name, line_start, new_content)
 modify_llcmd(sensitivity_name, baserun_name)
+add_item_lookup
+
+
+# Used to modify jetto extranamelist
+get_extraname_fields()
+add_extraname_fields()
+put_extraname_fields()
+
 
 # Small utilities, hopefully temporary
 check_and_flip_ip(db, shot, run, shot_target, run_target)
@@ -111,9 +163,10 @@ class IntegratedModellingRuns:
 	density_feedback = False,
         pulse_scheduler = False,
 	zeff_option = None,
-        zeff_mult = 1,
+        zeff_param = 1,
         sensitivity_list = [],
         input_instructions = [],
+        extra_early_options = [],
         boundary_instructions = {}
     ):
 
@@ -142,7 +195,8 @@ class IntegratedModellingRuns:
         self.input_instructions = input_instructions
         self.sensitivity_list = sensitivity_list
         self.zeff_option = zeff_option
-        self.zeff_mult = zeff_mult
+        self.zeff_param = zeff_param
+        self.extra_early_options = extra_early_options
         self.boundary_instructions = boundary_instructions
 
         # Trying to be a little flexible with the generator name. It is not used if I am only setting the input.
@@ -245,7 +299,7 @@ class IntegratedModellingRuns:
             print('prepare_input.py not found and needed for this option. Aborting')
             exit()
 
-        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, zeff_mult = self.zeff_mult, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium)
+        self.core_profiles, self.equilibrium = prepare_im_input.setup_input(self.db, self.shot, self.run_input, self.run_start, zeff_option = self.zeff_option, zeff_param = self.zeff_param, instructions = self.input_instructions, boundary_instructions = self.boundary_instructions, time_start = self.time_start, time_end = self.time_end, core_profiles = self.core_profiles, equilibrium = self.equilibrium, extra_early_options = self.extra_early_options)
 
 
     def setup_input_sensitivities(self):
@@ -387,7 +441,7 @@ class IntegratedModellingRuns:
         self.setup_jetto_simulation()
     
         if self.density_feedback == True:
-            self.setup_feedback_on_density(self.run_input)
+            self.setup_feedback_on_density()
 
         self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, abs(b0), r0)
         #self.modify_jset(self.path, self.baserun_name, self.run_start, self.run_output, b0, r0)
@@ -675,7 +729,7 @@ class IntegratedModellingRuns:
         self.line_ave_density = pulse_schedule.density_control.n_e_line.reference.data
 
 
-    def setup_feedback_on_density(self, run_interpretive):
+    def setup_feedback_on_density(self):
         '''
     
         Still deciding what exactly this will be. Some step to setup a run with automatic density feedback control

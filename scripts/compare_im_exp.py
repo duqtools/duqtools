@@ -19,6 +19,16 @@ import imas
 from compare_im_runs import *
 from prepare_im_input import open_and_get_core_profiles
 
+'''
+
+Compare the model or the fit to the experimental data, considering errorbars.
+
+Example of usage:
+
+plot_exp_vs_model('tcv', 64965, 5, 517, 0.05, 0.15, signals = ['ti', 'ni'], verbose = 0)
+
+'''
+
 
 def plot_exp_vs_model(db, shot, run_exp, run_model, time_begin, time_end, signals = ['te', 'ne', 'ti', 'ni'], verbose = False):
 
@@ -59,6 +69,8 @@ def plot_exp_vs_model(db, shot, run_exp, run_model, time_begin, time_end, signal
     t_cxrs = np.asarray(t_cxrs).flatten()
     t_cxrs = t_cxrs[np.where(t_cxrs < time_begin, False, True)]
     t_cxrs = t_cxrs[np.where(t_cxrs > time_end, False, True)]
+
+    errors = []
 
     for variable in variable_names:
         exp_data = get_onesig(core_profiles_exp,variable_names[variable][0],time_begin,time_end=time_end)
@@ -133,7 +145,7 @@ def plot_exp_vs_model(db, shot, run_exp, run_model, time_begin, time_end, signal
         #fit_values = np.asarray(fit_values).flatten()
         #exp_values = np.asarray(exp_values).flatten()
 
-        if verbose:
+        if verbose == 2:
             for i, time in enumerate(exp_data):
 
                 plt.errorbar(exp_data[time]['x'], exp_data[time]['y'], yerr=errorbar[time]['y'], linestyle = ' ', label = 'experiment')
@@ -157,18 +169,20 @@ def plot_exp_vs_model(db, shot, run_exp, run_model, time_begin, time_end, signal
 
             error_time.append(sum(error_time_space)/len(exp_data[time]['y']))
 
-        plt.plot(time_vector_exp, error_time, label = 'Agreement')
-        plt.title(variable)
-        plt.legend()
-        plt.show()
+        if verbose == 1:
+            plt.plot(time_vector_exp, error_time, label = 'Agreement')
+            plt.title(variable)
+            plt.legend()
+            plt.show()
 
         error_variable = sum(error_time)/len(exp_data)
-
+        errors.append(error_variable)
         print('The error for ' + variable + ' is ' + str(error_variable))
 
-if __name__ == "__main__":
-    plot_exp_vs_model('tcv', 64965, 5, 517, 0.05, 0.15, signals = ['ti', 'ni'], verbose = True)
-    #plot_exp_vs_model('tcv', 64965, 5, 517, 0.05, 0.15, verbose = True)
-    #plot_exp_vs_model('tcv', 56653, 1, 200, 0.05, 0.15, verbose = True)
+    return(errors)
 
+
+if __name__ == "__main__":
+
+    print('plot and compares experimental data with fits or model')
 
