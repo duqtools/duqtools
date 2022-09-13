@@ -42,21 +42,7 @@ variables:
   path: time
 - name: t_start
   type: Jetto
-  lookup:
-    name: t_start
-    type: float
-    keys:
-    - file: jetto.in
-      field: TBEG
-      section: NLIST1
 - name: t_end
-  lookup:
-    name: t_end
-    type: float
-    keys:
-    - file: jetto.in
-      field: TMAX
-      section: NLIST1
   type: Jetto
 create:
   template: template_model
