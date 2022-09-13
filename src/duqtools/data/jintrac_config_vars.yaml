@@ -1,3 +1,33 @@
+- name: t_start
+  doc: Start time of simulation
+  type: float
+  keys:
+  - file: jetto.in
+    field: TBEG
+    section: NLIST1
+  - file: jetto.jset
+    field: SetUpPanel.startTime
+  - file: jetto.jset
+    field: OutPutStdPanel.rangeStart
+  - file: jetto.jset
+    field: EquilIdsRefPanel.rangeStart
+  - file: jetto.jset
+    field: EquilEscoRefPanel.tvalue.tinterval.startRange
+- name: t_end
+  doc: End time of simulation
+  type: float
+  keys:
+  - file: jetto.in
+    field: TMAX
+    section: NLIST1
+  - file: jetto.jset
+    field: SetUpPanel.endTime
+  - file: jetto.jset
+    field: OutPutStdPanel.rangeEnd
+  - file: jetto.jset
+    field: EquilIdsRefPanel.rangeEnd
+  - file: jetto.jset
+    field: EquilEscoRefPanel.tvalue.tinterval.endRange
 - name: shot_in
   doc: Input IDS shot
   type: int

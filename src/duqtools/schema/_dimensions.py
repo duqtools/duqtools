@@ -71,6 +71,23 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
                 f'{self.variable} expand not implemented')
 
 
+class CoupledDim(BaseModel):
+    __root__: List[OperationDim]
+
+    @validator('__root__')
+    def check_dimensions_match(cls, dims):
+        if len(dims) > 0:
+            refdim = len(dims[0].values)
+            for dim in dims[1:]:
+                if not len(dim.values) == refdim:
+                    raise ValueError('dimensions do not match in coupled dim')
+        return dims
+
+    def expand(self, *args, **kwargs):
+        expanded = [operation.expand() for operation in self.__root__]
+        return [entry for entry in zip(*expanded)]  # Transpose
+
+
 ########################
 # IDS Specific
 ########################

@@ -199,3 +199,17 @@ scale_to_error: True
 !!! note
 
     When you specify a sigma range, make sure you use `add` as the operator. While the other operators are also supported, they do not make much sense in this context.
+
+### Coupling Variables
+
+It is possible to couple the sampling of two variables, simply add them as a single `List` entry to the configurations file:
+
+
+```yaml title="duqtools.yaml"
+-  - variable: t_start
+     operator: copyto
+     values: [0.1, 0.2, 0.3]
+   - variable: t_end
+     operator: copyto
+     values: [1.1, 1.2, 1.3]
+```  

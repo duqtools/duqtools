@@ -1,4 +1,22 @@
 {
+  "t_start": {
+		"jset_id": "SetUpPanel.startTime",
+    "nml_id": {
+      "namelist": "NLIST1",
+      "field": "TBEG"
+    },
+    "type": "real",
+    "dimension": "scalar"
+  },
+  "t_end": {
+		"jset_id": "SetUpPanel.endTime",
+    "nml_id": {
+      "namelist": "NLIST1",
+      "field": "TMAX"
+    },
+    "type": "real",
+    "dimension": "scalar"
+  },
 	"shot_in": {
 		"jset_id": "SetUpPanel.idsIMASDBShot",
 		"jset_flex_id": [

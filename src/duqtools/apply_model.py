@@ -24,6 +24,12 @@ def apply_model(model: BaseModel, **kwargs) -> None:
     raise NotImplementedError(f'Unknown model: {model}')
 
 
+@apply_model.register
+def _apply_coupled(model: tuple, **kwargs) -> None:  # type: ignore
+    for mode in model:
+        apply_model(mode, **kwargs)
+
+
 from .ids._apply_model import _apply_ids  # noqa: E402, F401
 
 
