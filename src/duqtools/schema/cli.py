@@ -7,7 +7,7 @@ from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import OperationDim
+from ._dimensions import CoupledDim, OperationDim
 from ._imas import ImasBaseModel
 from ._jetto import JettoVar
 from ._variable import IDSVariableModel, JettoVariableModel
@@ -52,13 +52,13 @@ class VariableConfigModel(BaseModel):
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[OperationDim] = Field([
+    dimensions: List[Union[CoupledDim, OperationDim]] = Field([
         OperationDim(variable='t_i_average'),
         OperationDim(variable='zeff'),
         OperationDim(
             variable='major_radius', values=[296, 297], operator='copyto')
     ],
-                                           description=f("""
+                                                              description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.

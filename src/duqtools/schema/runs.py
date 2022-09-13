@@ -13,7 +13,8 @@ class Run(BaseModel):
     dirname: DirectoryPath = Field(None, description='Directory of run')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
-    operations: List[Union[IDSOperation, JettoOperation]]
+    operations: List[Union[IDSOperation, JettoOperation,
+                           List[Union[IDSOperation, JettoOperation]]]]
 
 
 class Runs(BaseModel):

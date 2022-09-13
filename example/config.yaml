@@ -40,6 +40,24 @@ variables:
   ids: core_profiles
   name: time
   path: time
+- name: t_start
+  type: Jetto
+  lookup:
+    name: t_start
+    type: float
+    keys:
+    - file: jetto.in
+      field: TBEG
+      section: NLIST1
+- name: t_end
+  lookup:
+    name: t_end
+    type: float
+    keys:
+    - file: jetto.in
+      field: TMAX
+      section: NLIST1
+  type: Jetto
 create:
   template: template_model
   data:
@@ -50,6 +68,12 @@ create:
     method: latin-hypercube
     n_samples: 3
   dimensions:
+    -  - variable: t_start
+         operator: copyto
+         values: [0.1, 0.2, 0.3]
+       - variable: t_end
+         operator: copyto
+         values: [1.1, 1.2, 1.3]
     - variable: major_radius
       operator: copyto
       values: [295, 296, 297]
