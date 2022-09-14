@@ -4,10 +4,12 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from pytest_dependency import depends
 
 from duqtools.utils import work_directory
 
-config_file = 'config_jetto_python_tools.yaml'
+config_file_name = 'config_jetto.yaml'
+systems = ['jetto-duqtools', 'jetto-pythontools']
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -24,14 +26,22 @@ def collect_cov(cmdline_workdir):
         shutil.copy(cov_file, Path.cwd())
 
 
+@pytest.fixture(scope='session', params=systems)
+def system(request):
+    return request.param
+
+
 @pytest.fixture(scope='session')
-def cmdline_workdir(tmp_path_factory, request):
+def cmdline_workdir(tmp_path_factory, system):
     # Create working directory for cmdline tests, and set up input files
-    workdir = tmp_path_factory.mktemp('test_cmdline')
-    (workdir / Path('workspace')).mkdir()
-    shutil.copy(Path.cwd() / 'tests' / config_file, workdir / 'config.yaml')
+    workdir = tmp_path_factory.mktemp('test_cmdline_{system}')
     shutil.copytree(Path.cwd() / 'example' / 'template_model',
-                    workdir / Path('template_model'))
+                    workdir / 'template_model')
+
+    with open(Path.cwd() / 'tests' / config_file_name, 'r') as fi:
+        with open(workdir / 'config.yaml', 'w') as fo:
+            fo.write(fi.read())
+            fo.write(f'\nsystem: {system}')
     return workdir
 
 
@@ -44,9 +54,13 @@ def test_example_create(cmdline_workdir):
         assert (result.returncode == 0)
 
 
-@pytest.mark.dependency(depends=['test_example_create'])
-@pytest.mark.skip(reason='No prominence system available')
-def test_example_submit(cmdline_workdir):
+@pytest.mark.dependency()
+def test_example_submit(cmdline_workdir, system, request):
+    depends(request, [f'test_example_create[{system}]'])
+
+    if system == 'jetto-pythontools':
+        pytest.xfail('Prominence system does not yet work')
+
     cmd = 'duqtools submit -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
@@ -54,8 +68,10 @@ def test_example_submit(cmdline_workdir):
         assert (result.returncode == 0)
 
 
-@pytest.mark.dependency(depends=['test_example_create'])
-def test_example_status(cmdline_workdir):
+@pytest.mark.dependency()
+def test_example_status(cmdline_workdir, system, request):
+    depends(request, [f'test_example_create[{system}]'])
+
     cmd = 'duqtools status -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
@@ -63,7 +79,7 @@ def test_example_status(cmdline_workdir):
         assert (result.returncode == 0)
 
 
-@pytest.mark.dependency(depends=['test_example_status'])
+@pytest.mark.dependency()
 @pytest.mark.skip(reason='Should be fixed')
 def test_example_plot(cmdline_workdir):
     cmd = 'duqtools plot -c config.yaml --yes'.split()
