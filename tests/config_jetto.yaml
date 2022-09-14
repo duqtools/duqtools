@@ -52,6 +52,5 @@ create:
   template: ./template_model
 submit:
   submit_command: "true"
-system: jetto-duqtools
 workspace:
   root: .
