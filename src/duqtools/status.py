@@ -122,7 +122,7 @@ class Monitor():
         infile = job.in_file
         if not infile.exists():
             debug('%s does not exist, but the job is running', infile)
-            return 0
+            return
 
         jsetmanager = JettoSettingsManager.from_directory(job.dir)
 
