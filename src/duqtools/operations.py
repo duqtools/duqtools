@@ -237,7 +237,7 @@ def confirm_operations(func):
             raise
         return ret
 
-        return wrapper
+    return wrapper
 
 
 def add_to_op_queue(op_desc: str,
