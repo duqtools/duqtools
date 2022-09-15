@@ -7,6 +7,23 @@ import xarray as xr
 logger = logging.getLogger(__name__)
 
 
+def standardize_time(ds: xr.Dataset, *, start: int = 0) -> None:
+    """Standardize the time within a dataset.
+
+    Simply subtracts time[0] from all time entries and adds `start`
+    Note: this does not interpolate the times between different datasets
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        Source dataset
+    start : int, optional
+        Where to start the returned time series
+    """
+
+    ds['time'] = ds['time'] - ds['time'][0] + start
+
+
 def standardize_grid(ds: xr.Dataset,
                      *,
                      new_dim: str,

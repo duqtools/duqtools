@@ -4,7 +4,7 @@ import xarray as xr
 from idsmapping_sample_data import Sample
 
 from duqtools.ids import (IDSMapping, rebase_on_grid, rebase_on_time,
-                          standardize_grid)
+                          standardize_grid, standardize_time)
 from duqtools.schema import IDSVariableModel
 
 TIME_VAR = IDSVariableModel(
@@ -75,6 +75,13 @@ def expected_standardized():
             }
         }
     })
+
+
+@pytest.fixture
+def expected_standardized_time(expected_standardized):
+    expected = expected_standardized.copy()
+    expected['time'] = [1, 2, 3]
+    return expected
 
 
 @pytest.fixture
@@ -149,6 +156,11 @@ def expected_time():
 
 def test_standardize_grid_valid(sample_dataset, expected_standardized):
     xr.testing.assert_equal(sample_dataset, expected_standardized)
+
+
+def test_standardize_time_valid(sample_dataset, expected_standardized_time):
+    standardize_time(sample_dataset, start=1)
+    xr.testing.assert_equal(sample_dataset, expected_standardized_time)
 
 
 def test_rebase_on_grid(sample_dataset, expected_grid):
