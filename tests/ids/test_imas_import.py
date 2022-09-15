@@ -5,8 +5,11 @@ def test_imas():
 
     from duqtools.ids._imas import imas, imasdef
 
+    if (type(imas) is not Mock) and \
+       (type(imasdef) is not Mock):
+        # Great, all passed
+        return
+
     pytest.xfail(
         'this is only to test imas imports, expected to fail on non-imas systems'
     )
-    assert type(imas) is not Mock
-    assert type(imasdef) is not Mock
