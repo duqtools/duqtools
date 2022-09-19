@@ -81,6 +81,10 @@ def test_example_status(cmdline_workdir, system, request):
 
 @pytest.mark.dependency()
 def test_example_plot(cmdline_workdir):
+    from duqtools.ids import imas_mocked
+    if imas_mocked:
+        pytest.xfail('Imas needed for plotting Imas data')
+
     cmd = ('duqtools plot -c config.yaml -m g2vazizi/test/94875/8000'
            ' -y profiles_1d/*/t_i_average').split()
 
