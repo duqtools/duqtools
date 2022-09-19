@@ -8,6 +8,7 @@ import xarray as xr
 
 from ._plot_utils import alt_line_chart
 from .ids import ImasHandle, imas_mocked
+from .operations import op_queue
 from .schema import IDSVariableModel as Variable
 from .utils import read_imas_handles_from_file
 
@@ -55,16 +56,23 @@ def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
     click.echo('')
 
     for n, y_var in enumerate(y_vars):
-        chart = alt_line_chart(dataset, x=x_var.name, y=y_var.name)
+        create_chart(n, x_var, y_var, dataset, extensions)
 
-        click.echo(f'  {x_var} vs. {y_var}:')
 
-        for extension in extensions:
+def create_chart(n, x_var, y_var, dataset, extensions):
+    chart = alt_line_chart(dataset, x=x_var.name, y=y_var.name)
 
-            outfile = Path(f'chart_{n}.{extension}')
-            click.secho(f'    file:///{outfile.absolute()}', bold=True)
+    click.echo(f'  {x_var} vs. {y_var}:')
 
-            if not dry_run:
-                chart.save(outfile, scale_factor=2.0)
+    for extension in extensions:
 
-        click.echo('')
+        outfile = Path(f'chart_{n}.{extension}')
+        click.secho(f'    file:///{outfile.absolute()}', bold=True)
+
+        op_queue.add(chart.save,
+                     args=(outfile, ),
+                     kwargs={'scale_factor': 2.0},
+                     description='Saving chart',
+                     extra_description=f'{outfile}'),
+
+    click.echo('')
