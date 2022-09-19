@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import click
+import xarray as xr
 
 from ._plot_utils import alt_line_chart
 from .ids import ImasHandle
@@ -36,16 +37,22 @@ def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
 
     x_var = _path_to_var(x_path, ids)
     y_vars = [_path_to_var(y_path, ids) for y_path in y_paths]
+    variables = [x_var] + y_vars
 
-    # TODO this should be fixed
-    source = get_ids_dataframe(  # noqa: F821
-        handles, variables=(x_var, *y_vars))
+    datasets = []
+    for handle in handles.values():
+        data_map = handle.get(x_var.ids)
+        ds = data_map.to_xarray(variables=variables)
+        datasets.append(ds)
+
+    # TODO interpolating?
+    dataset = xr.concat(datasets, 'run')
 
     click.echo('You can now view your plot in your browser:')
     click.echo('')
 
     for n, y_var in enumerate(y_vars):
-        chart = alt_line_chart(source, x=x_var.name, y=y_var.name)
+        chart = alt_line_chart(dataset, x=x_var.name, y=y_var.name)
 
         click.echo(f'  {x_var} vs. {y_var}:')
 
