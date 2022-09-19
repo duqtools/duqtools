@@ -7,7 +7,7 @@ import click
 import xarray as xr
 
 from ._plot_utils import alt_line_chart
-from .ids import ImasHandle, imas_mocked
+from .ids import ImasHandle
 from .operations import op_queue
 from .schema import IDSVariableModel as Variable
 from .utils import read_imas_handles_from_file
@@ -24,9 +24,6 @@ def _path_to_var(path: str, ids: str) -> Variable:
 def plot(*, x_path, y_paths, ids, imas_paths, input_files, dry_run, extensions,
          **kwargs):
 
-    if imas_mocked:
-        raise ImportError('imas library needed to plot IMAS data')
-    """Show subroutine to create plots from IDS data."""
     handles = {}
 
     for n, imas_path in enumerate(imas_paths):
