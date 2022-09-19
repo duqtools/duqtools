@@ -80,11 +80,15 @@ def test_example_status(cmdline_workdir, system, request):
 
 
 @pytest.mark.dependency()
-@pytest.mark.skip(reason='Should be fixed')
 def test_example_plot(cmdline_workdir):
-    cmd = 'duqtools plot -c config.yaml --yes'.split()
+    from duqtools.ids import imas_mocked
+    if imas_mocked:
+        pytest.xfail('Imas needed for plotting Imas data')
+
+    cmd = ('duqtools plot -c config.yaml -m g2vazizi/test/94875/8000'
+           ' -y profiles_1d/*/t_i_average').split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
         assert (result.returncode == 0)
-        assert (Path('./plot_0000.png').exists())
+        assert (Path('./chart_0.html').exists())

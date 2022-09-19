@@ -252,7 +252,8 @@ def cli_status(**kwargs):
 def cli_plot(**kwargs):
     """Plot some IDS data."""
     from .plot import plot
-    plot(**kwargs)
+    with op_queue_context():
+        plot(**kwargs)
 
 
 @cli.command('clean')

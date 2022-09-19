@@ -3,6 +3,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
+imas_mocked = False
 
 try:
     import xml.sax
@@ -35,6 +36,7 @@ try:
 
 except (ModuleNotFoundError, ImportError):
     from unittest.mock import MagicMock as Mock
+    imas_mocked = True
     ids = Mock()
     ids.open_env = lambda *_, **__: [1]
 

@@ -1,6 +1,7 @@
 import logging
 
 from ._handle import ImasHandle
+from ._imas import imas_mocked
 from ._mapping import IDSMapping
 from ._merge import merge_data
 from ._rebase import (rebase_on_grid, rebase_on_time, standardize_grid,
@@ -16,4 +17,5 @@ __all__ = [
     'rebase_on_time',
     'standardize_grid',
     'standardize_time',
+    'imas_mocked',
 ]
