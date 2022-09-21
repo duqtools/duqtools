@@ -72,6 +72,7 @@ pytest
 The documentation uses the [mkdocs](https://www.mkdocs.org/). To build the docs for yourself:
 
 ```console
+pip install -e .[docs]
 mkdocs serve
 ```
 
