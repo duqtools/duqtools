@@ -21,7 +21,28 @@ Check out [the command-line interface](/command-line-interface/#create) for more
 For example:
 
 ```yaml title="duqtools.yaml"
-{{ yaml_example }}
+create:
+  template: /pfs/work/username/jetto/runs/duqtools_template
+  data:
+    imasdb: test
+    run_in_start_at: 7000
+    run_out_start_at: 8000
+  dimensions:
+  - operator: multiply
+    scale_to_error: false
+    values: [1.1, 1.2, 1.3]
+    variable: t_i_average
+  - operator: multiply
+    scale_to_error: false
+    values: [1.1, 1.2, 1.3]
+    variable: zeff
+  - operator: copyto
+    scale_to_error: false
+    values: [296.0, 297.0]
+    variable: major_radius
+  sampler:
+    method: latin-hypercube
+    n_samples: 3
 ```
 
 
@@ -64,7 +85,10 @@ template_data:
 For example:
 
 ```yaml title="duqtools.yaml"
-{{ data_loc_yaml }}
+data:
+  imasdb: test
+  run_in_start_at: 7000
+  run_out_start_at: 8000
 ```
 
 ## Dimensions

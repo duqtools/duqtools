@@ -22,7 +22,23 @@ Check out [the command-line interface](/command-line-interface/#merge) for more 
 For example:
 
 ```yaml title="duqtools.yaml"
-{{ yaml_example }}
+merge:
+  data: runs.yaml
+  output:
+    db: jet
+    run: 9999
+    shot: 94785
+  plan:
+  - data_variables:
+    - t_i_average
+    - zeff
+    grid_variable: rho_tor_norm
+    time_variable: time
+  template:
+    db: jet
+    run: 1
+    shot: 94785
+    user: stef
 ```
 
 ## Template and output locations
@@ -80,11 +96,11 @@ For example:
 
 ```yaml title="duqtools.yaml"
 plan:
-  - grid_variable: rho_tor_norm
-    variables:
-    - time
-    - t_i_average
-    - zeff
+- grid_variable: rho_tor_norm
+  variables:
+  - time
+  - t_i_average
+  - zeff
 ```
 
 
