@@ -9,7 +9,6 @@ from ._variable import IDSVariableModel, JettoVariableModel
 __all__ = [
     'ARange',
     'BaseModel',
-    'DataLocation',
     'IDSOperation',
     'IDSOperationDim',
     'IDSVariableModel',
