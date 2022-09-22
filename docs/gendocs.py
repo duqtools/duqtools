@@ -11,68 +11,55 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-from duqtools.config import cfg
-from duqtools.schema import OperationDim
+from duqtools.jettoduqtools import JettoDuqtoolsSystem
+from duqtools.jettopythontools import JettoPythonToolsSystem
+from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
+                             ImasBaseModel, JettoVariableModel, LinSpace,
+                             OperationDim)
+from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
+                                 MergeConfigModel, MergeStep,
+                                 StatusConfigModel, SubmitConfigModel)
+from duqtools.schema.data_location import DataLocation
+from duqtools.schema.workdir import WorkDirectoryModel
+from duqtools.system import DummySystem
 
 this_dir = Path(__file__).parent
-
 sys.path.append(str(this_dir))
 
 from templates import get_template  # noqa
 
 SUBDIR = 'config'
 
-pages = 'introduction', 'status', 'submit', 'create', 'merge'
-
-schemas = {
-    'schema': cfg.schema(),
-    'status_schema': cfg.status.schema(),
-    'submit_schema': cfg.submit.schema(),
-    'create_schema': cfg.create.schema(),
-    'merge_schema': cfg.merge.schema(),
+objects = {
+    ARange,
+    ConfigModel,
+    CreateConfigModel,
+    DataLocation,
+    DummySystem,
+    IDSOperationDim,
+    IDSVariableModel,
+    ImasBaseModel,
+    JettoDuqtoolsSystem,
+    JettoPythonToolsSystem,
+    JettoVariableModel,
+    LinSpace,
+    MergeConfigModel,
+    MergeStep,
+    OperationDim,
+    StatusConfigModel,
+    SubmitConfigModel,
+    WorkDirectoryModel,
 }
 
-# Repair auto replace of init:
-cfg.create.dimensions = [
-    OperationDim(variable='t_i_average'),
-    OperationDim(variable='zeff'),
-    OperationDim(variable='major_radius', values=[296, 297], operator='copyto')
-]
+schemas = {
+    f'schema_{obj.__name__}': obj.schema()  # type: ignore
+    for obj in objects
+}
 
-if 'create' in pages:
-    from duqtools.schema import (ARange, IDSOperationDim, ImasBaseModel,
-                                 LinSpace)
-
-    schemas['ops_schema'] = IDSOperationDim.schema()
-    schemas['data_loc_schema'] = cfg.create.data.schema()
-
-    schemas['linspace_schema'] = LinSpace.schema()
-    schemas['arange_schema'] = ARange.schema()
-
-    schemas['imas_basemodel_schema'] = ImasBaseModel.schema()
-
-if 'introduction' in pages:
-    from duqtools.jettoduqtools import JettoDuqtoolsSystem
-    from duqtools.jettopythontools import JettoPythonToolsSystem
-    from duqtools.system import DummySystem
-
-    schemas['wd_schema'] = cfg.workspace.schema()
-
-    schemas['jetto_schema'] = JettoDuqtoolsSystem.schema()
-    schemas['jetto_pythontools_schema'] = JettoPythonToolsSystem.schema()
-    schemas['dummy_schema'] = DummySystem.schema()
-
-    schemas['ids_variable_schema'] = cfg.variables.__root__[0].schema()
-    schemas['jetto_variable_schema'] = cfg.variables.__root__[4].schema()
-
-if 'merge' in pages:
-    schemas['wd_schema'] = cfg.workspace.schema()
-    schemas['merge_op_schema'] = cfg.merge.plan[0].schema()
-
-for page in pages:
+for page in 'introduction', 'status', 'submit', 'create', 'merge':
     template = get_template(f'template_{page}.md')
 
-    rendered = template.render(**schemas, )
+    rendered = template.render(**schemas)
 
     filename = f'{SUBDIR}/{page}.md'
 

@@ -11,9 +11,9 @@ Check out [the command-line interface](/command-line-interface/#clean) for more 
 
 ## The `submit` config
 
-{{ submit_schema['description'] }}
+{{ schema_SubmitConfigModel['description'] }}
 
-{% for name, prop in submit_schema['properties'].items() %}
+{% for name, prop in schema_SubmitConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

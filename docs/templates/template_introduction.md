@@ -114,9 +114,9 @@ submit:
 
 ## Workspace
 
-{{ wd_schema['description'] }}
+{{ schema_WorkDirectoryModel['description'] }}
 
-{% for name, prop in wd_schema['properties'].items() %}
+{% for name, prop in schema_WorkDirectoryModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -139,32 +139,32 @@ system: jetto
 
 ### jetto, jetto-duqtools
 
-{{ jetto_schema['description'] }}
+{{ schema_JettoDuqtoolsSystem['description'] }}
 
 ### jetto-pythontools
 
-{{ jetto_pythontools_schema['description'] }}
+{{ schema_JettoPythonToolsSystem['description'] }}
 
 ### dummy
 
-{{ dummy_schema['description'] }}
+{{ schema_DummySystem['description'] }}
 
 ## Specifying Variables
 
 ### IDS variables
 
-{{ ids_variable_schema['description'] }}
+{{ schema_IDSVariableModel['description'] }}
 
-{% for name, prop in ids_variable_schema['properties'].items() %}
+{% for name, prop in schema_IDSVariableModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
 
 ### Jetto variables
 
-{{ jetto_variable_schema['description'] }}
+{{ schema_JettoVariableModel['description'] }}
 
-{% for name, prop in jetto_variable_schema['properties'].items() %}
+{% for name, prop in schema_JettoVariableModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

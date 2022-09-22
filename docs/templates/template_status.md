@@ -11,9 +11,9 @@ Check out [the command-line interface](/command-line-interface/#status) for more
 
 ## The `status` config
 
-{{ status_schema['description'] }}
+{{ schema_StatusConfigModel['description'] }}
 
-{% for name, prop in status_schema['properties'].items() %}
+{% for name, prop in schema_StatusConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

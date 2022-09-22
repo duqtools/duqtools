@@ -12,9 +12,9 @@ Check out [the command-line interface](/command-line-interface/#merge) for more 
 
 ## The `merge` config
 
-{{ schema['description'] }}
+{{ schema_MergeConfigModel['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in schema_MergeConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -45,7 +45,7 @@ merge:
 
 Both are specified using the IMAS scheme.
 
-{% for name, prop in imas_basemodel_schema['properties'].items() %}
+{% for name, prop in schema_ImasBaseModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -71,9 +71,9 @@ output:
 
 ## Merge plan
 
-{{ merge_op_schema['description'] }}
+{{ schema_MergeStep['description'] }}
 
-{% for name, prop in merge_op_schema['properties'].items() %}
+{% for name, prop in schema_MergeStep['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

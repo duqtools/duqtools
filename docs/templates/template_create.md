@@ -11,9 +11,9 @@ Check out [the command-line interface](/command-line-interface/#create) for more
 
 ## The `create` config
 
-{{ schema['description'] }}
+{{ schema_CreateConfigModel['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in schema_CreateConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -56,7 +56,7 @@ template: /pfs/work/stef/jetto/runs/duqtools_template
 
 In some cases, it may be useful to re-use the same set of model settings, but with different input data. If the `template_data` field is specified, these data will be used instead. To do so, specify `template_data` with the fields below:
 
-{% for name, prop in imas_basemodel_schema['properties'].items() %}
+{% for name, prop in schema_ImasBaseModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -75,9 +75,9 @@ template_data:
 
 ## Data location
 
-{{ data_loc_schema['description'] }}
+{{ schema_DataLocation['description'] }}
 
-{% for name, prop in data_loc_schema['properties'].items() %}
+{% for name, prop in schema_DataLocation['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -97,9 +97,9 @@ These instructions operate on the template model. Note that these are compound o
 
 ### Arithmetic operations
 
-{{ ops_schema['description'] }}
+{{ schema_IDSOperationDim['description'] }}
 
-{% for name, prop in ops_schema['properties'].items() %}
+{% for name, prop in schema_IDSOperationDim['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -157,9 +157,9 @@ There are two ways to specify ranges in *duqtools*.
 
 #### By number of samples
 
-{{ linspace_schema['description'] }}
+{{ schema_LinSpace['description'] }}
 
-{% for name, prop in linspace_schema['properties'].items() %}
+{% for name, prop in schema_LinSpace['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -177,9 +177,9 @@ values:
 
 #### By stepsize
 
-{{ arange_schema['description'] }}
+{{ schema_ARange['description'] }}
 
-{% for name, prop in linspace_schema['properties'].items() %}
+{% for name, prop in schema_ARange['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
