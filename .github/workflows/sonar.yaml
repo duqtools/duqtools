@@ -1,16 +1,21 @@
 name: SonarCloud
+
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
-    types: [openened, synchronize, reopened, ready_for_review]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   workflow_dispatch:
 
 jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v2
         with:
