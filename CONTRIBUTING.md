@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-Welcome! *Duqtools* is an open-source project that aims to work with a wide range of IMAS data for fusion research. If you're trying *duqtools* with your data, your experience, questions, bugs you encounted, and suggestions for improvement are important to the success of the project.
+Welcome! *Duqtools* is an open-source project that aims to work with a wide range of IMAS data for fusion research. If you're trying *duqtools* with your data, your experience, questions, bugs you encountered, and suggestions for improvement are important to the success of the project.
 
 We have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 

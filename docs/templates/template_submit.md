@@ -11,9 +11,9 @@ Check out [the command-line interface](/command-line-interface/#clean) for more 
 
 ## The `submit` config
 
-{{ schema['description'] }}
+{{ schema_SubmitConfigModel['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in schema_SubmitConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -25,5 +25,7 @@ Check out [the command-line interface](/command-line-interface/#clean) for more 
 ### Example
 
 ```yaml title="duqtools.yaml"
-{{ yaml_example }}
+submit:
+  submit_command: sbatch
+  submit_script_name: .llcmd
 ```

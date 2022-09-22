@@ -11,9 +11,9 @@ Check out [the command-line interface](/command-line-interface/#status) for more
 
 ## The `status` config
 
-{{ schema['description'] }}
+{{ schema_StatusConfigModel['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in schema_StatusConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -25,5 +25,11 @@ Check out [the command-line interface](/command-line-interface/#status) for more
 ### Example
 
 ```yaml title="duqtools.yaml"
-{{ yaml_example }}
+status:
+  in_file: jetto.in
+  msg_completed: 'Status : Completed successfully'
+  msg_failed: 'Status : Failed'
+  msg_running: 'Status : Running'
+  out_file: jetto.out
+  status_file: jetto.status
 ```

@@ -12,9 +12,9 @@ Check out [the command-line interface](/command-line-interface/#merge) for more 
 
 ## The `merge` config
 
-{{ schema['description'] }}
+{{ schema_MergeConfigModel['description'] }}
 
-{% for name, prop in schema['properties'].items() %}
+{% for name, prop in schema_MergeConfigModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -22,14 +22,30 @@ Check out [the command-line interface](/command-line-interface/#merge) for more 
 For example:
 
 ```yaml title="duqtools.yaml"
-{{ yaml_example }}
+merge:
+  data: runs.yaml
+  output:
+    db: jet
+    run: 9999
+    shot: 94785
+  plan:
+  - data_variables:
+    - t_i_average
+    - zeff
+    grid_variable: rho_tor_norm
+    time_variable: time
+  template:
+    db: jet
+    run: 1
+    shot: 94785
+    user: stef
 ```
 
 ## Template and output locations
 
 Both are specified using the IMAS scheme.
 
-{% for name, prop in imas_basemodel_schema['properties'].items() %}
+{% for name, prop in schema_ImasBaseModel['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -55,9 +71,9 @@ output:
 
 ## Merge plan
 
-{{ merge_op_schema['description'] }}
+{{ schema_MergeStep['description'] }}
 
-{% for name, prop in merge_op_schema['properties'].items() %}
+{% for name, prop in schema_MergeStep['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}
@@ -80,11 +96,11 @@ For example:
 
 ```yaml title="duqtools.yaml"
 plan:
-  - grid_variable: rho_tor_norm
-    variables:
-    - time
-    - t_i_average
-    - zeff
+- grid_variable: rho_tor_norm
+  variables:
+  - time
+  - t_i_average
+  - zeff
 ```
 
 
