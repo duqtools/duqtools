@@ -1,6 +1,6 @@
 __author__ = 'Carbon Collective'
 __email__ = 's.smeets@esciencecenter.nl'
-__version__ = '0.3.0'
+__version__ = '1.0.0'
 
 import logging
 import warnings
