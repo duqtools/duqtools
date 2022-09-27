@@ -1,13 +1,14 @@
 name: SonarCloud
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - main # needed to update badges in readme
+  pull_request:
     types:
       - opened
+      - synchronized
       - reopened
-      - synchronize
       - ready_for_review
   workflow_dispatch:
 
