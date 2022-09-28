@@ -1,0 +1,40 @@
+variables:
+- dims:
+  - time
+  - x
+  ids: core_profiles
+  name: rho_tor_norm
+  path: profiles_1d/*/grid/rho_tor_norm
+  type: IDS-variable
+- dims:
+  - time
+  - x
+  ids: core_profiles
+  name: t_i_average
+  path: profiles_1d/*/t_i_average
+  type: IDS-variable
+- dims:
+  - time
+  - x
+  ids: core_profiles
+  name: zeff
+  path: profiles_1d/*/zeff
+  type: IDS-variable
+- dims:
+  - time
+  ids: core_profiles
+  name: time
+  path: time
+  type: IDS-variable
+- lookup:
+    doc: Reference major radius (R0)
+    keys:
+    - field: EquilEscoRefPanel.refMajorRadius
+      file: jetto.jset
+    - field: RMJ
+      file: jetto.in
+      section: NLIST1
+    name: major_radius
+    type: float
+  name: major_radius
+  type: jetto-variable
