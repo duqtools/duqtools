@@ -92,3 +92,18 @@ def test_example_plot(cmdline_workdir):
         result = subprocess.run(cmd)
         assert (result.returncode == 0)
         assert (Path('./chart_0.html').exists())
+
+
+def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):
+    if system == 'jetto-pythontools':
+        pytest.xfail(
+            'we dont have the correct input files for jetto-pythontools')
+
+    shutil.copytree(cmdline_workdir, tmp_path / 'run')
+    os.remove(tmp_path / 'run' / 'template_model' / 'jetto.sin')
+
+    cmd = 'duqtools create -c config.yaml --force --yes'.split()
+
+    with work_directory(tmp_path / 'run'):
+        result = subprocess.run(cmd)
+        assert (result.returncode == 0)
