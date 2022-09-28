@@ -9,44 +9,10 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, OperationDim
 from ._imas import ImasBaseModel
-from ._jetto import JettoVar
-from ._variable import IDSVariableModel, JettoVariableModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .workdir import WorkDirectoryModel
-
-
-class VariableConfigModel(BaseModel):
-    __root__: List[Union[JettoVariableModel, IDSVariableModel]] = Field([
-        IDSVariableModel(name='rho_tor_norm',
-                         ids='core_profiles',
-                         path='profiles_1d/*/grid/rho_tor_norm',
-                         dims=['time', 'x']),
-        IDSVariableModel(name='t_i_average',
-                         ids='core_profiles',
-                         path='profiles_1d/*/t_i_average',
-                         dims=['time', 'x']),
-        IDSVariableModel(name='zeff',
-                         ids='core_profiles',
-                         path='profiles_1d/*/zeff',
-                         dims=['time', 'x']),
-        IDSVariableModel(name='time',
-                         ids='core_profiles',
-                         path='time',
-                         dims=['time']),
-        JettoVariableModel(name='major_radius', lookup=JettoVar()),
-    ])
-
-    def __iter__(self):
-        yield from self.__root__
-
-    def __getitem__(self, index: int):
-        return self.__root__[index]
-
-    def to_variable_dict(self) -> dict:
-        """Return dict of variables."""
-        return {variable.name: variable for variable in self}
 
 
 class CreateConfigModel(BaseModel):
@@ -263,10 +229,6 @@ class ConfigModel(BaseModel):
     merge: MergeConfigModel = Field(
         MergeConfigModel(),
         description='Configuration for the merge subcommand')
-
-    variables: VariableConfigModel = Field(
-        VariableConfigModel(),
-        description='Define variables for use in the subcommands.')
 
     workspace: WorkDirectoryModel = WorkDirectoryModel()
     system: Literal['jetto', 'dummy', 'jetto-pythontools',

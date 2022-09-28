@@ -54,17 +54,15 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
     """))
 
     def expand(self, *args, **kwargs):
-        from ..config import cfg
-        variable = cfg.variables.to_variable_dict()[self.variable]
-        if type(variable) == JettoVariableModel:
+        if isinstance(self.variable, JettoVariableModel):
             return JettoOperationDim.expand(self,
                                             *args,
-                                            variable=variable,
+                                            variable=self.variable,
                                             **kwargs)
-        elif type(variable) == IDSVariableModel:
+        elif isinstance(self.variable, IDSVariableModel):
             return IDSOperationDim.expand(self,
                                           *args,
-                                          variable=variable,
+                                          variable=self.variable,
                                           **kwargs)
         else:
             raise NotImplementedError(
