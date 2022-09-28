@@ -22,13 +22,18 @@ def copy_files(source_drc: Path, target_drc: Path):
             'rjettov',
             'utils_jetto',
             'jetto.ex',
-            'jetto.sin',
             'jetto.sgrid',
             'jetto.jset',
     ):
         src = source_drc / filename
         dst = target_drc / filename
         shutil.copyfile(src, dst)
+
+    for optional in ('jetto.sin', ):
+        src = source_drc / optional
+        dst = target_drc / optional
+        if src.exists():
+            shutil.copyfile(src, dst)
 
     for filename in ('rjettov', 'utils_jetto'):
         path = target_drc / filename
