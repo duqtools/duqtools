@@ -86,7 +86,10 @@ class SubmitConfigModel(BaseModel):
 
     submit_script_name: str = Field(
         '.llcmd', description='Name of the submission script.')
-    submit_command: str = Field('sbatch', description='Submission command.')
+    submit_command: str = Field('sbatch',
+                                description='Submission command for slurm.')
+    submit_system: Literal['prominence', 'slurm'] = Field(
+        'slurm', description='System to submit jobs to')
 
 
 class StatusConfigModel(BaseModel):

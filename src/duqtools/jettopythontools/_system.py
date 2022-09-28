@@ -4,15 +4,14 @@ import logging
 from pathlib import Path
 
 from importlib_resources import files
-from jetto_tools import config
-from jetto_tools import job as jetto_job
-from jetto_tools import jset, lookup, namelist, template
+from jetto_tools import config, jset, lookup, namelist, template
 from pydantic import Field
 from typing_extensions import Literal
 
 from ..ids import ImasHandle
-from ..models import AbstractSystem, Job, WorkDirectory
-from ..operations import add_to_op_queue
+from ..jettosystem import JettoSystem
+from ..models import WorkDirectory
+from ..operations import add_to_op_queue, op_queue
 from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
 
@@ -22,7 +21,7 @@ lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 jetto_lookup = lookup.from_file(lookup_file)
 
 
-class JettoPythonToolsSystem(AbstractSystem):
+class JettoPythonToolsSystem(JettoSystem):
     """This system implements a wrapper around jettopythontools, which is a
     wrapper around jetto, which is part of the JINTRAC modelling framework for
     integrated simulation of Tokamaks.
@@ -41,17 +40,13 @@ class JettoPythonToolsSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
-        pass  # Not required, we submit via prominence
+        from ..jettoduqtools import JettoDuqtoolsSystem
 
-    @staticmethod
-    @add_to_op_queue('Submitting job', '{job}', quiet=True)
-    def submit_job(job: Job):
-
-        jetto_template = template.from_directory(job.dir)
-        jetto_config = config.RunConfig(jetto_template)
-        jetto_manager = jetto_job.JobManager()
-
-        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
+        # broken, use our own implementation
+        enabled = op_queue.enabled
+        op_queue.enabled = False
+        JettoDuqtoolsSystem.write_batchfile(workspace, run_name, template_drc)
+        op_queue.enabled = enabled
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
