@@ -95,9 +95,8 @@ def test_example_plot(cmdline_workdir):
 
 
 def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):
-    if system == 'jetto-pythontools':
-        pytest.xfail(
-            'we dont have the correct input files for jetto-pythontools')
+    pytest.xfail('we dont have an input file without sanco for'
+                 ' jetto-pythontools (yet) to test')
 
     shutil.copytree(cmdline_workdir, tmp_path / 'run')
     os.remove(tmp_path / 'run' / 'template_model' / 'jetto.sin')
