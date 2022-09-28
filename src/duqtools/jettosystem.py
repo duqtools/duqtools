@@ -1,17 +1,14 @@
 import logging
 import subprocess as sp
-from typing import TYPE_CHECKING, Any, List
+from typing import Any, List
 
 from jetto_tools import config
 from jetto_tools import job as jetto_job
 from jetto_tools import template
 
 from .config import cfg
-from .models import AbstractSystem
+from .models import AbstractSystem, Job
 from .operations import add_to_op_queue
-
-if TYPE_CHECKING:
-    from .models import Job
 
 logger = logging.getLogger(__name__)
 
