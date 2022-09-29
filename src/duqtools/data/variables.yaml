@@ -1,31 +1,26 @@
-- dims:
-  - time
-  - x
+- name: rho_tor_norm
   ids: core_profiles
-  name: rho_tor_norm
   path: profiles_1d/*/grid/rho_tor_norm
+  dims: [time, x]
   type: IDS-variable
-- dims:
-  - time
-  - x
+- name: t_i_average
   ids: core_profiles
-  name: t_i_average
   path: profiles_1d/*/t_i_average
+  dims: [time, x]
   type: IDS-variable
-- dims:
-  - time
-  - x
+- name: zeff
   ids: core_profiles
-  name: zeff
   path: profiles_1d/*/zeff
+  dims: [time, x]
   type: IDS-variable
-- dims:
-  - time
+- name: time
   ids: core_profiles
-  name: time
   path: time
+  dims: [time]
   type: IDS-variable
-- lookup:
+- name: major_radius
+  type: jetto-variable
+  lookup:
     doc: Reference major radius (R0)
     keys:
     - field: EquilEscoRefPanel.refMajorRadius
@@ -35,5 +30,5 @@
       section: NLIST1
     name: major_radius
     type: float
-  name: major_radius
-  type: jetto-variable
+- name: t_start
+- name: t_end

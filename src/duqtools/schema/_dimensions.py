@@ -54,15 +54,18 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
     """))
 
     def expand(self, *args, **kwargs):
-        if isinstance(self.variable, JettoVariableModel):
+        from duqtools.config import var_lookup
+        variable = var_lookup[self.variable]
+
+        if isinstance(variable, JettoVariableModel):
             return JettoOperationDim.expand(self,
                                             *args,
-                                            variable=self.variable,
+                                            variable=variable,
                                             **kwargs)
-        elif isinstance(self.variable, IDSVariableModel):
+        elif isinstance(variable, IDSVariableModel):
             return IDSOperationDim.expand(self,
                                           *args,
-                                          variable=self.variable,
+                                          variable=variable,
                                           **kwargs)
         else:
             raise NotImplementedError(
@@ -84,11 +87,6 @@ class CoupledDim(BaseModel):
     def expand(self, *args, **kwargs):
         expanded = [operation.expand() for operation in self.__root__]
         return [entry for entry in zip(*expanded)]  # Transpose
-
-
-########################
-# IDS Specific
-########################
 
 
 class IDSPathMixin(BaseModel):
@@ -124,11 +122,6 @@ class IDSOperationDim(IDSPathMixin, OperatorMixin, DimMixin, BaseModel):
                          value=value,
                          scale_to_error=self.scale_to_error)
             for value in self.values)
-
-
-########################
-# Jetto Specific
-########################
 
 
 class JettoPathMixin(BaseModel):
