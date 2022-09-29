@@ -123,7 +123,8 @@ class SubmitConfigModel(BaseModel):
     submit_command: str = Field('sbatch',
                                 description='Submission command for slurm.')
     submit_system: Literal['prominence', 'slurm'] = Field(
-        'slurm', description='System to submit jobs to')
+        'slurm',
+        description='System to submit jobs to [slurm (default), prominence]')
 
 
 class StatusConfigModel(BaseModel):
