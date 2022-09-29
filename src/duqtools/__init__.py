@@ -1,10 +1,8 @@
 # https://setuptools.pypa.io/en/latest/pkg_resources.html#workingset-objects
-__requires__ = ["jetto_tools>=1.8.6"]
-import pkg_resources
-import jetto_tools
-print(jetto_tools.__version__)
+import __main__
 
-assert jetto_tools.__version__ == '1.8.6'
+__main__.__requires__ = ['jetto_tools>=1.8.6']
+import pkg_resources
 
 __author__ = 'Carbon Collective'
 __email__ = 's.smeets@esciencecenter.nl'
