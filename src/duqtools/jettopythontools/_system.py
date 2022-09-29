@@ -58,8 +58,9 @@ class JettoPythonToolsSystem(AbstractSystem):
     def copy_from_template(source_drc: Path, target_drc: Path):
         jetto_jset = jset.read(source_drc / 'jetto.jset')
         jetto_namelist = namelist.read(source_drc / 'jetto.in')
-        jetto_sanco = namelist.read(source_drc /
-                                    'jetto.sin')  # required but unused
+        jetto_sanco = None
+        if (source_drc / 'jetto.sin').exists():
+            jetto_sanco = namelist.read(source_drc / 'jetto.sin')
         jetto_template = template.Template(jetto_jset,
                                            jetto_namelist,
                                            jetto_lookup,
