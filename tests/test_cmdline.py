@@ -58,14 +58,23 @@ def test_example_create(cmdline_workdir):
 def test_example_submit(cmdline_workdir, system, request):
     depends(request, [f'test_example_create[{system}]'])
 
-    if system == 'jetto-pythontools':
-        pytest.xfail('Prominence system does not yet work')
-
     cmd = 'duqtools submit -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)
         assert (result.returncode == 0)
+
+
+@pytest.mark.dependency()
+def test_example_submit_array(cmdline_workdir, system, request):
+    depends(request, [f'test_example_submit[{system}]'])
+
+    cmd = 'duqtools submit --array -c config.yaml --yes --force'.split()
+
+    with work_directory(cmdline_workdir):
+        result = subprocess.run(cmd)
+        assert (result.returncode == 0)
+        assert (Path('duqtools_slurm_array.sh').exists())
 
 
 @pytest.mark.dependency()
