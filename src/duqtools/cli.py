@@ -187,6 +187,7 @@ def cli_create(**kwargs):
               '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
+@click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
 @common_options
 def cli_submit(**kwargs):
     """Submit the UQ runs.

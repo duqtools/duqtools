@@ -2,13 +2,16 @@ import logging
 import time
 from collections import deque
 from itertools import cycle
+from pathlib import Path
 from typing import Deque, Sequence
 
 import click
 
+from ._logging_utils import duqlog_screen
 from .config import cfg
 from .models import Job, WorkDirectory
 from .operations import add_to_op_queue, op_queue
+from .system import get_system
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -69,6 +72,19 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
         )
 
 
+def job_array_submitter(jobs: Sequence[Job], *, max_jobs):
+    if len(jobs) == 0:
+        duqlog_screen.error('No jobs to submit, not creating array ...')
+        return
+
+    for job in jobs:
+        op_queue.add(action=lambda: None,
+                     description='Adding to array',
+                     extra_description=f'{job}')
+
+    get_system().submit_array(jobs)
+
+
 def submission_script_ok(job):
     submission_script = job.submit_script
     if not submission_script.is_file():
@@ -110,7 +126,8 @@ def lockfile_ok(job, *, force):
     return True
 
 
-def submit(*, force: bool, max_jobs: int, schedule: bool, **kwargs):
+def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
+           **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -142,8 +159,14 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, **kwargs):
             continue
         if not lockfile_ok(job, force=force):
             continue
-
         job_queue.append(job)
 
+    if array and Path('duqtools_slurm_array.sh').exists() and not force:
+        logger.warning(
+            'duqtools_slurm_array.sh exists, not submitting, use ---force to overwrite'
+        )
+        return
+
     submitter = job_scheduler if schedule else job_submitter
+    submitter = job_array_submitter if array else submitter
     submitter(job_queue, max_jobs=max_jobs)

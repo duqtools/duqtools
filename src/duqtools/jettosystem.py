@@ -1,6 +1,6 @@
 import logging
 import subprocess as sp
-from typing import Any, List
+from typing import Any, List, Sequence
 
 from jetto_tools import config
 from jetto_tools import job as jetto_job
@@ -27,7 +27,6 @@ class JettoSystem(AbstractSystem):
                 ' not implemented')
 
     @staticmethod
-    @add_to_op_queue('Submitting job', '{job}', quiet=True)
     def submit_slurm(job: Job):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
@@ -43,7 +42,6 @@ class JettoSystem(AbstractSystem):
             f.write(ret.stdout)
 
     @staticmethod
-    @add_to_op_queue('Submitting job via prominence', '{job}', quiet=True)
     def submit_prominence(job: Job):
 
         jetto_template = template.from_directory(job.dir)
@@ -51,3 +49,38 @@ class JettoSystem(AbstractSystem):
         jetto_manager = jetto_job.JobManager()
 
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
+
+    @staticmethod
+    def submit_array(jobs: Sequence[Job]):
+        if cfg.submit.submit_system == 'slurm':
+            JettoSystem.submit_array_slurm(jobs)
+        else:
+            raise NotImplementedError(
+                'array submission type {cfg.submit.submit_system}'
+                ' not implemented')
+
+    @staticmethod
+    @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
+    def submit_array_slurm(jobs: Sequence[Job]):
+        for job in jobs:
+            job.lockfile.touch()
+
+        # Get the first jobs submission script as a template
+        template = []
+        for line in open(jobs[0].submit_script, 'r').readlines():
+            if line.startswith('#SBATCH') or line.startswith('#!'):
+                template.append(line)
+        # Append our own options, later options have precedence
+        template.append('#SBATCH -o duqtools_slurm_array.out\n')
+        template.append('#SBATCH -e duqtools_slurm_array.err\n')
+        template.append('#SBATCH -J duqtools_array\n')
+
+        scripts = [str(job.submit_script) for job in jobs]
+        script_str = 'scripts=(' + ' '.join(scripts) + ')\n'
+        template.append(script_str)
+
+        template.append('${scripts[$SLURM_ARRAY_TASK_ID]}\n')
+
+        logger.info('writing duqtools_slurm_array.sh file')
+        with open('duqtools_slurm_array.sh', 'w') as f:
+            f.write(''.join(template))
