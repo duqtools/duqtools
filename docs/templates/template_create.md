@@ -51,7 +51,7 @@ create:
 By default the template IMAS data to modify is extracted from the path specified in the `template` field.
 
 ```yaml title="duqtools.yaml"
-template: /pfs/work/stef/jetto/runs/duqtools_template
+template: /pfs/work/username/jetto/runs/duqtools_template
 ```
 
 In some cases, it may be useful to re-use the same set of model settings, but with different input data. If the `template_data` field is specified, these data will be used instead. To do so, specify `template_data` with the fields below:
@@ -64,9 +64,9 @@ In some cases, it may be useful to re-use the same set of model settings, but wi
 For example:
 
 ```yaml title="duqtools.yaml"
-template: /pfs/work/g2ssmee/jetto/runs/duqtools_template
+template: /pfs/work/username/jetto/runs/duqtools_template
 template_data:
-  user: g2ssmee
+  user: username
   db: jet
   shot: 91234
   run: 5
@@ -91,6 +91,26 @@ data:
   run_out_start_at: 8000
 ```
 
+## Samplers
+
+Depending on the number of dimensions, a hypercube is constructed from which duqtools will select a number of entries. For a setup with 3 dimension of size $i$, $j$, $k$, a hypercube of $i\times j\times k$ elements will e constructed, where each element is a one of the combinations.
+
+By default the entire hypercube is sampled:
+
+```yaml title="duqtools.yaml"
+sampler:
+  method: cartesian-product
+```
+
+For smarter sampling, use one of the other methods: [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling), [`sobol`](en.wikipedia.org/wiki/Sobol_sequence), or [`halton`](en.wikipedia.org/wiki/Halton_sequence).
+`n_samples` gives the number of samples to extract. For example:
+
+```yaml title="duqtools.yaml"
+sampler:
+  method: latin-hypercube
+  n_samples: 5
+```
+
 ## Dimensions
 
 These instructions operate on the template model. Note that these are compound operations, so they are expanded to fill the matrix with possible entries for data modifications (depending on the sampling method).
@@ -107,11 +127,7 @@ These instructions operate on the template model. Note that these are compound o
 For example:
 
 ```yaml title="duqtools.yaml"
-variable:
-  - name: zeff
-    ids: core_profiles
-    path: profiles_1d/0/zeff
-    dims: [x]
+variable: zeff
 operator: add
 values: [0.01, 0.02, 0.03]
 ```
@@ -119,11 +135,7 @@ values: [0.01, 0.02, 0.03]
 will generate 3 entries, `zeff += 0.01`, `zeff += 0.02`, and `zeff += 0.03`.
 
 ```yaml title="duqtools.yaml"
-variable:
-  - name: t_i_average
-    ids: core_profiles
-    path: profiles_1d/0/t_i_average
-    dims: [x]
+variable: t_i_average
 operator: multiply
 values: [1.1, 1.2, 1.3]
 ```
@@ -143,13 +155,13 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
     If you want to copy all time ranges, you can use `path: profiles_1d/*/t_i_average`. The `*` substring will
     duqtools to apply the operation to all available time slices.
 
-### Specifying variables
+### Variables
 
-To specify variables so that they can be re-used, you can use the `variables` sub-section. The rest of the examples will use this shortened form.
+To specify variables so that they can be re-used, you can use the `variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name :zeff` in `variables.yaml`.
 
 For more info, see [here](/config/introduction/#specifying-variables).
 
-### Specify value ranges
+### Value ranges
 
 Although it is possible to specify value ranges explicitly in an operator, sometimes it may be easier to specify a range.
 

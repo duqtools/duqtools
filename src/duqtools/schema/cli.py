@@ -39,9 +39,9 @@ class CreateConfigModel(BaseModel):
                                              discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
-        or hypercube. By default, the cartesian product is taken. For more
-        efficient sampling of the space, the following `method` choices are
-        available:
+        or hypercube. By default, the cartesian product is taken
+        (`method: cartesian-product`). For more efficient sampling of the space,
+        the following `method` choices are available:
         [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling),
         [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
         [`halton`](en.wikipedia.org/wiki/Halton_sequence).

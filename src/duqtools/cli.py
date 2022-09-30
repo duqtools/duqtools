@@ -154,9 +154,6 @@ def _cli(**kwargs):
 
 
 @_cli.command('init')
-@click.option('--full',
-              is_flag=True,
-              help='Create a config file with all possible config values.')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
 @common_options
 def cli_init(**kwargs):
