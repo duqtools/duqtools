@@ -10,7 +10,7 @@ from ._imas import ImasBaseModel
 
 
 class Run(BaseModel):
-    dirname: DirectoryPath = Field(None, description='Directory of run')
+    dirname: DirectoryPath = Field(description='Directory of run')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
     operations: List[Union[IDSOperation, JettoOperation,

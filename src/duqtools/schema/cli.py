@@ -1,6 +1,5 @@
-from getpass import getuser
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 from pydantic import DirectoryPath, Field
 from typing_extensions import Literal
@@ -18,13 +17,7 @@ from .workdir import WorkDirectoryModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[Union[CoupledDim, OperationDim]] = Field([
-        OperationDim(variable='t_i_average'),
-        OperationDim(variable='zeff'),
-        OperationDim(
-            variable='major_radius', values=[296, 297], operator='copyto')
-    ],
-                                                              description=f("""
+    dimensions: List[Union[CoupledDim, OperationDim]] = Field(description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
@@ -35,7 +28,7 @@ class CreateConfigModel(BaseModel):
         """))
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default=LHSSampler(),
+                   CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
@@ -48,9 +41,7 @@ class CreateConfigModel(BaseModel):
         Where `n_samples` gives the number of samples to extract.
         """))
 
-    template: DirectoryPath = Field(
-        f'/pfs/work/{getuser()}/jetto/runs/duqtools_template',
-        description=f("""
+    template: DirectoryPath = Field(description=f("""
         Template directory to modify. Duqtools copies and updates the settings
         required for the specified system from this directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
@@ -59,15 +50,13 @@ class CreateConfigModel(BaseModel):
         the UQ runs.
         """))
 
-    template_data: ImasBaseModel = Field(None,
-                                         description=f("""
+    template_data: Optional[ImasBaseModel] = Field(description=f("""
         Specify the location of the template data to modify. This overrides the
         location of the data specified in settings file in the template
         directory.
         """))
 
-    data: DataLocation = Field(DataLocation(),
-                               description=f("""
+    data: DataLocation = Field(description=f("""
         Where to store the in/output IDS data.
         The data key specifies the machine or imas
         database name where to store the data (`imasdb`). duqtools will write the input
@@ -151,23 +140,20 @@ class MergeStep(BaseModel):
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    data_variables: List[str] = Field(['t_i_average', 'zeff'],
-                                      description=f("""
+    data_variables: List[str] = Field(description=f("""
             This is a list of data variables to be merged. This means
             that the mean and error for these data over all runs are calculated
             and written back to the ouput data location.
             The paths should contain `/*/` for the time component or other dimensions.
             """))
-    grid_variable: str = Field('rho_tor_norm',
-                               description=f("""
+    grid_variable: str = Field(description=f("""
             This variable points to the data for the grid coordinate. It must share a common
             placeholder dimension with the data variables.
             It will be used to rebase all data variables to same (radial) grid before merging
             using interpolation.
             The path should contain '/*/' to denote the time component or other dimension.
             """))
-    time_variable: str = Field('time',
-                               description=f("""
+    time_variable: str = Field(description=f("""
             This variable determines the time coordinate to merge on. This ensures
             that the data from all runs are on the same time coordinates before
             merging.
@@ -188,52 +174,37 @@ class MergeConfigModel(BaseModel):
                        description=f("""
             Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
             """))
-    template: ImasBaseModel = Field(
-        {
-            'user': getuser(),
-            'db': 'jet',
-            'shot': 94785,
-            'run': 1
-        },
-        description=f("""
+    template: ImasBaseModel = Field(description=f("""
             This IMAS DB entry will be used as the template.
             It is copied to the output location.
             """))
     output: ImasBaseModel = Field(
-        {
-            'db': 'jet',
-            'shot': 94785,
-            'run': 9999
-        },
         description='Merged data will be written to this IMAS DB entry.')
-    plan: List[MergeStep] = Field([MergeStep()],
-                                  description='List of merging operations.')
+    plan: List[MergeStep] = Field(description='List of merging operations.')
 
 
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
-    plot: dict = Field(None,
-                       deprecated=True,
-                       description='Options are specified via CLI.',
-                       exclude=True)
-
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
         description='Configuration for the submit subcommand')
-    create: CreateConfigModel = Field(
-        CreateConfigModel(),
+
+    create: Optional[CreateConfigModel] = Field(
         description='Configuration for the create subcommand')
+
     status: StatusConfigModel = Field(
         StatusConfigModel(),
         description='Configuration for the status subcommand')
-    merge: MergeConfigModel = Field(
-        MergeConfigModel(),
+
+    merge: Optional[MergeConfigModel] = Field(
         description='Configuration for the merge subcommand')
 
-    workspace: WorkDirectoryModel = WorkDirectoryModel()
+    workspace: WorkDirectoryModel
+
     system: Literal['jetto', 'dummy', 'jetto-pythontools',
                     'jetto-duqtools'] = Field(
                         'jetto', description='backend system to use')
+
     quiet: bool = Field(
         False,
         description='dont output to stdout, except for mandatory prompts')
