@@ -1,12 +1,14 @@
 import shutil
 from pathlib import Path
 
-from duqtools.jettoduqtools import JettoSettingsManager
+import pytest
 
 this_path = Path(__file__).parent
 
 
 def test_settings_manager(tmp_path):
+    pytest.xfail('about to be removed')
+    from duqtools.jettoduqtools import JettoSettingsManager
     shutil.copyfile(this_path / 'trimmed_jetto.in', tmp_path / 'jetto.in')
     shutil.copyfile(this_path / 'trimmed_jetto.jset', tmp_path / 'jetto.jset')
 
