@@ -6,7 +6,9 @@ coverage:
       default: false
       duqtools:
         target: auto
-        threshold: 5%
+        threshold: 50%
         paths:
           - src/duqtools
 comment: false
+github_checks:
+  annotations: false
