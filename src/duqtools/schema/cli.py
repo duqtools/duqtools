@@ -140,23 +140,20 @@ class MergeStep(BaseModel):
     Note that multiple merge steps can be specified, for example for different
     IDS.
     """
-    data_variables: List[str] = Field(['t_i_average', 'zeff'],
-                                      description=f("""
+    data_variables: List[str] = Field(description=f("""
             This is a list of data variables to be merged. This means
             that the mean and error for these data over all runs are calculated
             and written back to the ouput data location.
             The paths should contain `/*/` for the time component or other dimensions.
             """))
-    grid_variable: str = Field('rho_tor_norm',
-                               description=f("""
+    grid_variable: str = Field(description=f("""
             This variable points to the data for the grid coordinate. It must share a common
             placeholder dimension with the data variables.
             It will be used to rebase all data variables to same (radial) grid before merging
             using interpolation.
             The path should contain '/*/' to denote the time component or other dimension.
             """))
-    time_variable: str = Field('time',
-                               description=f("""
+    time_variable: str = Field(description=f("""
             This variable determines the time coordinate to merge on. This ensures
             that the data from all runs are on the same time coordinates before
             merging.
@@ -183,8 +180,7 @@ class MergeConfigModel(BaseModel):
             """))
     output: ImasBaseModel = Field(
         description='Merged data will be written to this IMAS DB entry.')
-    plan: List[MergeStep] = Field([MergeStep()],
-                                  description='List of merging operations.')
+    plan: List[MergeStep] = Field(description='List of merging operations.')
 
 
 class ConfigModel(BaseModel):

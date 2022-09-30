@@ -9,7 +9,7 @@ from ._basemodel import BaseModel
 
 class ImasBaseModel(BaseModel):
     """This model describes an IMAS data location."""
-    user: str = Field(description='Username.')
+    user: str = Field(None, description='Username.')
     db: str = Field(description='IMAS db/machine name.')
     shot: int = Field(description='IMAS Shot number.')
     run: int = Field(description='IMAS Run number.')
