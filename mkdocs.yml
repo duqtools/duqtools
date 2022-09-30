@@ -47,8 +47,10 @@ extra_css:
 
 markdown_extensions:
   - admonition
-  - mkdocs-click
   - attr_list
+  - markdown_include.include:
+      base_path: docs
+  - mkdocs-click
   - pymdownx.extra
   - pymdownx.arithmatex:
       generic: true

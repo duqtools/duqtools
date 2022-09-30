@@ -29,7 +29,7 @@ Typically this means:
 
 One of the code owners will review your code and request changes if needed. Once your changes have been approved, your contributions will become part of *duqtools*. 🎉
 
-## Getting started with develoment
+## Getting started with development
 
 ### Setup
 
