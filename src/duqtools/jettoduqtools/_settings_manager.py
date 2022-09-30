@@ -26,16 +26,12 @@ from typing import List
 
 from importlib_resources import files
 
-from duqtools.api import ImasHandle
-
 from .._types import PathLike
+from ..ids import ImasHandle
 from ..schema import JettoField, JettoVar
 from ._jetto_in import JettoIn
 from ._jetto_jset import JettoJset
 from ._settings_manager_schema import JettoConfigModel
-
-CFG_PATH = files('duqtools.data') / 'jintrac_config_vars.yaml'
-CONFIG = JettoConfigModel.parse_file(CFG_PATH)
 
 
 class JettoSettingsManager:
@@ -44,6 +40,8 @@ class JettoSettingsManager:
         self.handlers = {}
 
     def __new__(cls, *args, **kwargs):
+        CFG_PATH = files('duqtools.data') / 'jintrac_config_vars.yaml'
+        CONFIG = JettoConfigModel.parse_file(CFG_PATH)
         for variable in CONFIG:
             cls.add_entry(variable)
         return super().__new__(cls)

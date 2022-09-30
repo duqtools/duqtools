@@ -11,7 +11,7 @@ from typing_extensions import Literal
 from ..ids import ImasHandle
 from ..jettosystem import JettoSystem
 from ..models import WorkDirectory
-from ..operations import add_to_op_queue, op_queue
+from ..operations import add_to_op_queue
 from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
 
@@ -37,16 +37,12 @@ class JettoPythonToolsSystem(JettoSystem):
         'jetto-pythontools', description='Name of the system.')
 
     @staticmethod
-    @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
         from ..jettoduqtools import JettoDuqtoolsSystem
 
         # broken, use our own implementation
-        enabled = op_queue.enabled
-        op_queue.enabled = False
         JettoDuqtoolsSystem.write_batchfile(workspace, run_name, template_drc)
-        op_queue.enabled = enabled
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
@@ -54,12 +50,17 @@ class JettoPythonToolsSystem(JettoSystem):
         jetto_jset = jset.read(source_drc / 'jetto.jset')
         jetto_namelist = namelist.read(source_drc / 'jetto.in')
         jetto_sanco = None
+        jetto_extra = []
         if (source_drc / 'jetto.sin').exists():
             jetto_sanco = namelist.read(source_drc / 'jetto.sin')
+        if (source_drc / 'jetto.ex').exists():
+            jetto_extra.append(str(source_drc / 'jetto.ex'))
+
         jetto_template = template.Template(jetto_jset,
                                            jetto_namelist,
                                            jetto_lookup,
-                                           sanco_namelist=jetto_sanco)
+                                           sanco_namelist=jetto_sanco,
+                                           extra_files=jetto_extra)
         jetto_config = config.RunConfig(jetto_template)
 
         jetto_config.export(target_drc)
@@ -107,6 +108,11 @@ class JettoPythonToolsSystem(JettoSystem):
 
         jetto_config = config.RunConfig(jetto_template)
 
-        jetto_config[key] = value
+        if key == 't_start':
+            jetto_config.start_time = value
+        elif key == 't_end':
+            jetto_config.end_time = value
+        else:
+            jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
