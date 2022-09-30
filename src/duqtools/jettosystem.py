@@ -1,4 +1,5 @@
 import logging
+import stat
 import subprocess as sp
 from typing import Any, List, Sequence
 
@@ -63,6 +64,10 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
     def submit_array_slurm(jobs: Sequence[Job]):
         for job in jobs:
+            job.submit_script.chmod(job.submit_script.stat().st_mode
+                                    | stat.S_IXUSR)
+            (job.dir / 'rjettov').chmod((job.dir / 'rjettov').stat().st_mode
+                                        | stat.S_IXUSR)
             job.lockfile.touch()
 
         # Get the first jobs submission script as a template
@@ -73,14 +78,25 @@ class JettoSystem(AbstractSystem):
         # Append our own options, later options have precedence
         template.append('#SBATCH -o duqtools_slurm_array.out\n')
         template.append('#SBATCH -e duqtools_slurm_array.err\n')
+        template.append('#SBATCH --array=0-' + str(len(jobs) - 1) + '\n')
         template.append('#SBATCH -J duqtools_array\n')
 
         scripts = [str(job.submit_script) for job in jobs]
         script_str = 'scripts=(' + ' '.join(scripts) + ')\n'
         template.append(script_str)
 
-        template.append('${scripts[$SLURM_ARRAY_TASK_ID]}\n')
+        template.append('echo executing ${scripts[$SLURM_ARRAY_TASK_ID]}\n')
+        template.append('${scripts[$SLURM_ARRAY_TASK_ID]} || true\n')
 
         logger.info('writing duqtools_slurm_array.sh file')
         with open('duqtools_slurm_array.sh', 'w') as f:
             f.write(''.join(template))
+
+        cmd: List[Any] = ['sbatch', 'duqtools_slurm_array.sh']
+
+        logger.info(f'Submitting script via: {cmd}')
+
+        ret = sp.run(cmd, check=True, capture_output=True)
+        logger.info('submission returned: ' + str(ret.stdout))
+        with open(job.lockfile, 'wb') as f:
+            f.write(ret.stdout)

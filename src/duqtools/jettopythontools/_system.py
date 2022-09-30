@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from pathlib import Path
 
 from importlib_resources import files
@@ -66,6 +67,14 @@ class JettoPythonToolsSystem(JettoSystem):
         jetto_config.export(target_drc)
         lookup.to_file(jetto_lookup, target_drc /
                        'lookup.json')  # TODO, this should be copied as well
+
+        for filename in (
+                'rjettov',
+                'utils_jetto',
+        ):
+            src = source_drc / filename
+            dst = target_drc / filename
+            shutil.copyfile(src, dst)
 
     @staticmethod
     def imas_from_path(template_drc: Path):

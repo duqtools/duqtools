@@ -161,10 +161,16 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
             continue
         job_queue.append(job)
 
-    if array and Path('duqtools_slurm_array.sh').exists() and not force:
-        logger.warning(
-            'duqtools_slurm_array.sh exists, not submitting, use ---force to overwrite'
-        )
+    if array and Path('./duqtools_slurm_array.sh').exists() and not force:
+        op_queue.add(
+            action=lambda: None,
+            description=click.style('Not Creating Array', fg='red', bold=True),
+            extra_description='(reason: duqtools_slurm_array.sh exists)')
+        op_queue.add(action=lambda: None,
+                     description=click.style('Not Submitting Array',
+                                             fg='red',
+                                             bold=True),
+                     extra_description='use --force to override')
         return
 
     submitter = job_scheduler if schedule else job_submitter

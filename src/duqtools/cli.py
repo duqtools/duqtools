@@ -138,8 +138,14 @@ def common_options(func):
     return func
 
 
+def cli():
+    from duqtools import fix_dependencies
+    fix_dependencies()
+    _cli()
+
+
 @click.group()
-def cli(**kwargs):
+def _cli(**kwargs):
     """For more information, check out the documentation:
 
     https://duqtools.readthedocs.io
@@ -147,7 +153,7 @@ def cli(**kwargs):
     pass
 
 
-@cli.command('init')
+@_cli.command('init')
 @click.option('--full',
               is_flag=True,
               help='Create a config file with all possible config values.')
@@ -163,7 +169,7 @@ def cli_init(**kwargs):
             exit(e)
 
 
-@cli.command('create')
+@_cli.command('create')
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
@@ -175,7 +181,7 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
-@cli.command('submit')
+@_cli.command('submit')
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
@@ -204,7 +210,7 @@ def cli_submit(**kwargs):
         submit(**kwargs)
 
 
-@cli.command('status')
+@_cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 @common_options
@@ -214,7 +220,7 @@ def cli_status(**kwargs):
     status(**kwargs)
 
 
-@cli.command('plot')
+@_cli.command('plot')
 @click.option('-x',
               'x_path',
               default='profiles_1d/*/grid/rho_tor_norm',
@@ -257,7 +263,7 @@ def cli_plot(**kwargs):
         plot(**kwargs)
 
 
-@cli.command('clean')
+@_cli.command('clean')
 @click.option('--out', is_flag=True, help='Remove output data.')
 @click.option('--force',
               is_flag=True,
@@ -270,7 +276,7 @@ def cli_clean(**kwargs):
         cleanup(**kwargs)
 
 
-@cli.command('go')
+@_cli.command('go')
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
 @common_options
 def cli_go(**kwargs):
@@ -294,7 +300,7 @@ def cli_go(**kwargs):
     dash(**kwargs)
 
 
-@cli.command('dash')
+@_cli.command('dash')
 @common_options
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
@@ -302,7 +308,7 @@ def cli_dash(**kwargs):
     dash(**kwargs)
 
 
-@cli.command('merge')
+@_cli.command('merge')
 @common_options
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""

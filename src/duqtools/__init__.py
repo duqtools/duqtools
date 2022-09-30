@@ -1,8 +1,11 @@
 # https://setuptools.pypa.io/en/latest/pkg_resources.html#workingset-objects
-import __main__
+def fix_dependencies():
+    import __main__
+    __main__.__requires__ = ['jetto_tools>=1.8.6']
+    import pkg_resources
 
-__main__.__requires__ = ['jetto_tools>=1.8.6']
-import pkg_resources
+
+fix_dependencies()
 
 __author__ = 'Carbon Collective'
 __email__ = 's.smeets@esciencecenter.nl'
