@@ -1,23 +1,21 @@
 import logging
+import shutil
 from pathlib import Path
 
-from .config import Config
+from importlib_resources import files
+
 from .operations import op_queue
-from .schema import BaseModel, OperationDim
 
 logger = logging.getLogger(__name__)
 
 
-def init(*, config: str, full: bool, force: bool, **kwargs):
+def init(*, config: str, force: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
     ----------
     config : str
         Filename of the config.
-    full : bool
-        Make a config with all the default values
-        (otherwise just selected important ones)
     force : bool
         Overwrite config if it already exists.
     **kwargs
@@ -28,18 +26,7 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
     RuntimeError
         When the config already exists.
     """
-    cfg = object.__new__(Config)
-    BaseModel.__init__(cfg)
-
-    cfg.create.dimensions = [
-        OperationDim(variable='t_i_average'),
-        OperationDim(variable='zeff'),
-        OperationDim(variable='major_radius',
-                     values=[296, 297],
-                     operator='copyto')
-    ]
-
-    logger.debug(cfg)
+    src = files('duqtools.data') / 'duqtools.yaml'
 
     config_filepath = Path(config)
 
@@ -48,19 +35,12 @@ def init(*, config: str, full: bool, force: bool, **kwargs):
             f'Refusing to overwrite existing CONFIG, {config_filepath}, '
             'use --force if you really want to')
 
-    logger.debug('Creating default cfg.yaml')
+    logger.debug('Copying default config from %s to %s', src, config_filepath)
 
-    if full:
-        cfg_yaml = cfg.yaml()
-    else:
-        cfg_yaml = cfg.yaml(
-            include={
-                'workspace': True,
-                'variables': True,
-                'create': {'dimensions', 'sampler', 'template', 'data'},
-                'quiet': False,
-            })
-
-    op_queue.add(action=lambda: open(config_filepath, 'w').write(cfg_yaml),
-                 description='Writing out',
-                 extra_description=f'{config_filepath} config file')
+    op_queue.add(action=shutil.copy,
+                 kwargs={
+                     'src': src,
+                     'dst': config_filepath,
+                 },
+                 description='Copying config to',
+                 extra_description=f'{config_filepath}')

@@ -51,7 +51,7 @@ def test_clean_database(cmdline_workdir):
 
 def test_init(cmdline_workdir):
     with work_directory(cmdline_workdir):
-        cli_init(['--full', '--dry-run'], standalone_mode=False)
+        cli_init(['--dry-run'], standalone_mode=False)
         assert (not Path('./duqtools.yaml').exists())
 
 
