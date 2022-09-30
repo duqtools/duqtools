@@ -1,5 +1,3 @@
-from getpass import getuser
-
 from pydantic import DirectoryPath, Field
 
 from ._basemodel import BaseModel
@@ -14,11 +12,10 @@ class WorkDirectoryModel(BaseModel):
     a subdirectory of the given root directory. All subdirectories are
     calculated as relative to the root directory.
 
-    For example, for `rjettov`, the root directory is set to
+    For example, for `rjettov`, the root directory must be set to
     `/pfs/work/$USER/jetto/runs/`. Any UQ runs must therefore be
     a subdirectory.
     """
 
     root: DirectoryPath = Field(
-        f'/pfs/work/{getuser()}/jetto/runs/',
         description='The directory from which experiments have to be run.')

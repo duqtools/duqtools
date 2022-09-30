@@ -6,9 +6,13 @@ from ..schema.cli import ConfigModel
 class Config(ConfigModel):
     """Config class containing all configs, can be used with:
 
-    from duqtools.config import cfg; cfg.<variable you want>
-    """
+        from duqtools.config import cfg
+        cfg.<variable you want>
 
+    To update the config:
+
+        cfg.parse_file('duqtools.yaml')
+    """
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -18,4 +22,4 @@ class Config(ConfigModel):
         return Config._instance
 
 
-cfg = Config()
+cfg = Config.construct()
