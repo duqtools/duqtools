@@ -34,4 +34,4 @@ Suggestions, improvements, and edits are most welcome.
 
 ## Development
 
-Check out our [Contributing Guidelines](CONTRIBUTING.md#Getting-started-with-develoment) to get started with development.
+Check out our [Contributing Guidelines](CONTRIBUTING.md#Getting-started-with-development) to get started with development.
