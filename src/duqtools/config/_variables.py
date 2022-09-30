@@ -62,7 +62,7 @@ class VariableConfigLoader:
     def _get_path_from_config_home(self):
         config_home = os.environ.get('XDG_CONFIG_HOME', USER_CONFIG_HOME)
 
-        test_path = config_home / DUQTOOLS_DIR / VAR_FILENAME
+        test_path = Path(config_home) / DUQTOOLS_DIR / VAR_FILENAME
         if test_path.exists():
             return test_path
 
