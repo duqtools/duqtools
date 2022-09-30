@@ -1,8 +1,9 @@
 import logging
 from time import sleep
 
+from jetto_tools import config, template
+
 from .config import cfg
-from .jettoduqtools import JettoSettingsManager
 from .models import Job, WorkDirectory
 
 logger = logging.getLogger(__name__)
@@ -124,10 +125,11 @@ class Monitor():
             debug('%s does not exist, but the job is running', infile)
             return
 
-        jsetmanager = JettoSettingsManager.from_directory(job.dir)
+        jetto_template = template.from_directory(job.dir)
+        jetto_config = config.RunConfig(jetto_template)
 
-        self.start = jsetmanager.tstart
-        self.end = jsetmanager.tend
+        self.start = jetto_config.start_time
+        self.end = jetto_config.end_time
         self.time = self.start
 
         self.finished = False

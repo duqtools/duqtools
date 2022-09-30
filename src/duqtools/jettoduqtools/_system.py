@@ -8,12 +8,10 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from ..jettosystem import JettoSystem
-from ..operations import add_to_op_queue, op_queue
+from ..operations import add_to_op_queue
 from ..schema import JettoVar
-from ._imas_functions import imas_from_jset_input
 from ._jetto_jset import JettoJset
 from ._llcmd import write_batchfile as jetto_write_batchfile
-from ._settings_manager import JettoSettingsManager
 
 logger = logging.getLogger(__name__)
 
@@ -43,36 +41,25 @@ class JettoDuqtoolsSystem(JettoSystem):
         return jetto_write_batchfile(workspace, run_name, jset)
 
     @staticmethod
-    @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(source_drc: Path, target_drc: Path):
         from ..jettopythontools import JettoPythonToolsSystem
-        enabled = op_queue.enabled
-        op_queue.enabled = False
         JettoPythonToolsSystem.copy_from_template(source_drc, target_drc)
-        op_queue.enabled = enabled
 
     @staticmethod
     def imas_from_path(template_drc: Path):
-
-        jetto_settings = JettoSettingsManager.from_directory(template_drc)
-        source = imas_from_jset_input(jetto_settings)
-        return source
+        from ..jettopythontools import JettoPythonToolsSystem
+        return JettoPythonToolsSystem.imas_from_path(template_drc)
 
     @staticmethod
-    @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-        jetto_settings = JettoSettingsManager.from_directory(run)
-        jetto_settings_copy = jetto_settings.set_imas_locations(inp=inp,
-                                                                out=out)
-        jetto_settings_copy.to_directory(run)
+        from ..jettopythontools import JettoPythonToolsSystem
+        return JettoPythonToolsSystem.update_imas_locations(run, inp, out)
 
     @staticmethod
     def set_jetto_variable(run: Path,
                            key: str,
                            value,
                            lookup: JettoVar = None):
-        jetto_settings = JettoSettingsManager.from_directory(run)
-        if lookup:
-            jetto_settings.add_entry(lookup)
-        jetto_settings[key] = value
-        jetto_settings.to_directory(run)
+        from ..jettopythontools import JettoPythonToolsSystem
+        return JettoPythonToolsSystem.set_jetto_variable(
+            run, key, value, lookup)
