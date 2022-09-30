@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from importlib_resources import files
 from jetto_tools import config
 from jetto_tools import job as jetto_job
 from jetto_tools import jset, lookup, namelist, template
@@ -17,8 +18,8 @@ from ._jettovar_to_json import jettovar_to_json
 
 logger = logging.getLogger(__name__)
 
-jetto_lookup = lookup.from_file(
-    Path(__file__).resolve().parent / 'lookup.json')
+lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
+jetto_lookup = lookup.from_file(lookup_file)
 
 
 class JettoPythonToolsSystem(AbstractSystem):

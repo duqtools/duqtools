@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
+from duqtools.config import var_lookup
+
 from ..schema import IDSVariableModel
 from ._copy import add_provenance_info
 
@@ -297,14 +299,14 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        variables: Sequence[IDSVariableModel],
+        variables: Sequence[Union[str, IDSVariableModel]],
         **kwargs,
     ) -> xr.Dataset:
         """Return dataset for given variables.
 
         Parameters
         ----------
-        variables : Dict[str, IDSVariableModel]
+        variables : Sequence[Union[str, IDSVariableModel]]
             Dictionary of data variables
 
         Returns
@@ -317,6 +319,13 @@ class IDSMapping(Mapping):
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
         for var in variables:
+            if isinstance(var, str):
+                var = var_lookup[var]
+
+            if not isinstance(var, IDSVariableModel):
+                raise ValueError(
+                    f'Cannot extract variable of type: {type(var)}')
+
             parts = var.path.split('/*/')
 
             if len(parts) == 1:

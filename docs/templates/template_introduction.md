@@ -27,39 +27,6 @@ workspace:
   root: /pfs/work/username/jetto/runs/
 system: jetto
 quiet: false
-variables:
-- name: rho_tor_norm
-  ids: core_profiles
-  path: profiles_1d/*/grid/rho_tor_norm
-  dims: [time, x]
-  type: IDS-variable
-- name: t_i_average
-  ids: core_profiles
-  path: profiles_1d/*/t_i_average
-  dims: [time, x]
-  type: IDS-variable
-- name: zeff
-  ids: core_profiles
-  path: profiles_1d/*/zeff
-  dims: [time, x]
-  type: IDS-variable
-- name: time
-  ids: core_profiles
-  path: time
-  dims: [time]
-  type: IDS-variable
-- name: major_radius
-  type: jetto-variable
-  lookup:
-    name: major_radius
-    doc: Reference major radius (R0)
-    type: float
-    keys:
-    - field: EquilEscoRefPanel.refMajorRadius
-      file: jetto.jset
-    - field: RMJ
-      file: jetto.in
-      section: NLIST1
 create:
   template: /pfs/work/username/jetto/runs/duqtools_template
   data:
@@ -151,6 +118,16 @@ system: jetto
 
 ## Specifying Variables
 
+To access different variables, duqtools must know how to navigate the IMAS specification. The variable lookup table maps variable names, and specifies their dimensions. The lookup file is stored in yaml format, typicall with the name `variables.yaml`. Duqtools includes a default [variables.yaml](https://github.com/CarbonCollective/fusion-dUQtools/blob/main/src/duqtools/data/variables.yaml), but you can also define your own.
+
+Duqtools looks for the `variables.yaml` file in the following locations, in this order:
+
+1. Via environment variable `$DUQTOOLS_VARIABLES`
+2. If not defined, look for `$XDG_CONFIG_HOME/duqtools/variables.yaml`
+3. If `$XDG_CONFIG_HOME` is not defined, look for `$HOME/.config/duqtools/variables.yaml`
+4. If not defined, fall back to the included [variables.yaml](https://github.com/CarbonCollective/fusion-dUQtools/blob/main/src/duqtools/data/variables.yaml), which contains a sensible list of defaults.
+
+
 ### IDS variables
 
 {{ schema_IDSVariableModel['description'] }}
@@ -172,7 +149,7 @@ system: jetto
 
 Example:
 
-```yaml title="duqtools.yaml"
+```yaml title="variables.yaml"
 variables:
 - name: rho_tor_norm
   ids: core_profiles

@@ -5,7 +5,6 @@ To generate the docs:
 
     python gendocs.py
 """
-
 import sys
 from pathlib import Path
 

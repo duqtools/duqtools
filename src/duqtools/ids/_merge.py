@@ -2,7 +2,7 @@ from typing import Dict, Sequence
 
 import xarray as xr
 
-from ..config import cfg
+from ..config import var_lookup
 from ..operations import add_to_op_queue
 from ..schema import IDSVariableModel
 from ._handle import ImasHandle
@@ -34,12 +34,9 @@ def merge_data(
     grid_var: str,
     data_vars: Sequence[str],
 ):
-
-    time_var = cfg.variables.to_variable_dict()[time_var]
-    grid_var = cfg.variables.to_variable_dict()[grid_var]
-    data_vars = [
-        cfg.variables.to_variable_dict()[data_var] for data_var in data_vars
-    ]
+    time_var = var_lookup[time_var]
+    grid_var = var_lookup[grid_var]
+    data_vars = [var_lookup[data_var] for data_var in data_vars]
 
     raise_if_ids_inconsistent(time_var, grid_var, *data_vars)
 

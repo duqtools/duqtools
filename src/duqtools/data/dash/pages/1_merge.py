@@ -4,31 +4,15 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from duqtools.api import Variable
-from duqtools.ids import ImasHandle
-from duqtools.ids import merge_data as _merge_data
+from duqtools.ids import ImasHandle, merge_data
 from duqtools.utils import read_imas_handles_from_file
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from _shared import default_workdir, get_options, get_variables  # noqa
+from _shared import get_var_options  # noqa
+from _shared import default_workdir, get_ids_options, get_variables  # noqa
 
 st.markdown('# Merge IMAS data')
-
-
-def merge_data(*, source_data, target, time_var, grid_var, data_vars):
-    time_var = Variable(**time_var)
-    grid_var = Variable(**grid_var)
-    data_vars = tuple((Variable(**data_var) for data_var in data_vars))
-
-    _merge_data(
-        source_data=handles,
-        target=target,
-        time_var=time_var,
-        grid_var=grid_var,
-        data_vars=data_vars,
-    )
-
 
 with st.sidebar:
     st.header('Input data')
@@ -49,16 +33,18 @@ with st.expander('Click to show runs'):
     st.table(df)
 
 with st.sidebar:
-    ids = st.selectbox('Select IDS', ('core_profiles', ), index=0)
+    ids_options = get_ids_options()
 
-    options = get_options(a_run=df.iloc[0], ids=ids)
+    ids = st.selectbox('Select IDS', ids_options, index=0)
 
-    default_x_key = options.index('grid/rho_tor_norm')
+    var_options = get_var_options(ids=ids)
+
+    default_x_key = var_options.index('rho_tor_norm')
     default_y_val = 't_i_average'
 
-    x_key = st.selectbox('Select x', options, index=default_x_key)
+    x_key = st.selectbox('Select x', var_options, index=default_x_key)
 
-    y_keys = st.multiselect('Select y', options, default=default_y_val)
+    y_keys = st.multiselect('Select y', var_options, default=default_y_val)
 
 variables = get_variables(ids=ids, x_key=x_key, y_keys=y_keys)
 
