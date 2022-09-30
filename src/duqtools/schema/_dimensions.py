@@ -36,8 +36,7 @@ class OperatorMixin(BaseModel):
 
 
 class DimMixin(BaseModel):
-    values: Union[List[float], ARange, LinSpace] = Field([1.1, 1.2, 1.3],
-                                                         description=f("""
+    values: Union[List[float], ARange, LinSpace] = Field(description=f("""
             Values to use with operator on field to create sampling
             space."""))
 

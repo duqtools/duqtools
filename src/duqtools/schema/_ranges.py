@@ -9,9 +9,9 @@ class LinSpace(BaseModel):
 
     See the implementation of [numpy.linspace][] for more details.
     """
-    start: float = Field(None, description='Start value of the sequence.')
-    stop: float = Field(None, description='End value of the sequence.')
-    num: int = Field(None, description='Number of samples to generate.')
+    start: float = Field(description='Start value of the sequence.')
+    stop: float = Field(description='End value of the sequence.')
+    num: int = Field(description='Number of samples to generate.')
 
     @property
     def values(self):
@@ -29,10 +29,10 @@ class ARange(BaseModel):
     """
 
     start: float = Field(
-        None, description='Start of the interval. Includes this value.')
+        description='Start of the interval. Includes this value.')
     stop: float = Field(
-        None, description='End of the interval. Excludes this interval.')
-    step: float = Field(None, description='Spacing between values.')
+        description='End of the interval. Excludes this interval.')
+    step: float = Field(description='Spacing between values.')
 
     @property
     def values(self):

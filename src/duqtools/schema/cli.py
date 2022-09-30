@@ -28,7 +28,7 @@ class CreateConfigModel(BaseModel):
         """))
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default=LHSSampler(),
+                   CartesianProduct] = Field(default=CartesianProduct(),
                                              discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
