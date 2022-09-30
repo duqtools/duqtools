@@ -93,7 +93,7 @@ class JettoSystem(AbstractSystem):
             f.write(''.join(template))
 
         submit_cmd = cfg.submit.submit_command.split()
-        cmd: List[Any] = [submit_cmd, 'duqtools_slurm_array.sh']
+        cmd: List[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
 
