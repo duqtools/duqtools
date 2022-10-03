@@ -129,17 +129,15 @@ def common_options(func):
     the execution of the actual function, otherwise options will be
     missing
     """
+    wrapper = click.pass_context(parse_common_options(func))
 
-    @functools.wraps(func)
-    def wrapped(func):
-        func = click.pass_context(parse_common_options(func))
+    for option in (logfile_option, debug_option, config_option, quiet_option,
+                   dry_run_option, yes_option):
+        wrapper = option(wrapper)
 
-        for option in (logfile_option, debug_option, config_option,
-                       quiet_option, dry_run_option, yes_option):
-            func = option(func)
-        return func
+    functools.update_wrapper(wrapper, func)
 
-    return wrapped
+    return wrapper
 
 
 def cli_entry():

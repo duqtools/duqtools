@@ -35,7 +35,7 @@ def system(request):
 @pytest.fixture(scope='session')
 def cmdline_workdir(tmp_path_factory, system):
     # Create working directory for cmdline tests, and set up input files
-    workdir = tmp_path_factory.mktemp('test_cmdline_{system}')
+    workdir = tmp_path_factory.mktemp(f'test_cmdline_{system}')
     shutil.copytree(Path.cwd() / 'example' / 'template_model',
                     workdir / 'template_model')
 
