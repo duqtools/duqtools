@@ -1,3 +1,4 @@
+import functools
 import logging
 from datetime import datetime
 from sys import exit, stderr, stdout
@@ -129,23 +130,26 @@ def common_options(func):
     missing
     """
 
-    func = click.pass_context(parse_common_options(func))
+    @functools.wraps(func)
+    def wrapped(func):
+        func = click.pass_context(parse_common_options(func))
 
-    for wrapper in (logfile_option, debug_option, config_option, quiet_option,
-                    dry_run_option, yes_option):
-        func = wrapper(func)
+        for option in (logfile_option, debug_option, config_option,
+                       quiet_option, dry_run_option, yes_option):
+            func = option(func)
+        return func
 
-    return func
+    return wrapped
 
 
-def cli():
+def cli_entry():
     from duqtools import fix_dependencies
     fix_dependencies()
-    _cli()
+    cli()
 
 
 @click.group()
-def _cli(**kwargs):
+def cli(**kwargs):
     """For more information, check out the documentation:
 
     https://duqtools.readthedocs.io
@@ -153,7 +157,7 @@ def _cli(**kwargs):
     pass
 
 
-@_cli.command('init')
+@cli.command('init')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
 @common_options
 def cli_init(**kwargs):
@@ -166,7 +170,7 @@ def cli_init(**kwargs):
             exit(e)
 
 
-@_cli.command('create')
+@cli.command('create')
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
@@ -178,7 +182,7 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
-@_cli.command('submit')
+@cli.command('submit')
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
@@ -207,7 +211,7 @@ def cli_submit(**kwargs):
         submit(**kwargs)
 
 
-@_cli.command('status')
+@cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 @common_options
@@ -217,7 +221,7 @@ def cli_status(**kwargs):
     status(**kwargs)
 
 
-@_cli.command('plot')
+@cli.command('plot')
 @click.option('-x',
               'x_path',
               default='profiles_1d/*/grid/rho_tor_norm',
@@ -260,7 +264,7 @@ def cli_plot(**kwargs):
         plot(**kwargs)
 
 
-@_cli.command('clean')
+@cli.command('clean')
 @click.option('--out', is_flag=True, help='Remove output data.')
 @click.option('--force',
               is_flag=True,
@@ -273,7 +277,7 @@ def cli_clean(**kwargs):
         cleanup(**kwargs)
 
 
-@_cli.command('go')
+@cli.command('go')
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
 @common_options
 def cli_go(**kwargs):
@@ -297,7 +301,7 @@ def cli_go(**kwargs):
     dash(**kwargs)
 
 
-@_cli.command('dash')
+@cli.command('dash')
 @common_options
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
@@ -305,7 +309,7 @@ def cli_dash(**kwargs):
     dash(**kwargs)
 
 
-@_cli.command('merge')
+@cli.command('merge')
 @common_options
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
