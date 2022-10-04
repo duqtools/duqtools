@@ -316,5 +316,13 @@ def cli_merge(**kwargs):
         merge(**kwargs)
 
 
+@cli.command('list-variables')
+@config_option
+def cli_list_variables(**kwargs):
+    """List available variables."""
+    from .list_variables import list_variables
+    list_variables(**kwargs)
+
+
 if __name__ == '__main__':
     cli()
