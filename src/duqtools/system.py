@@ -2,8 +2,7 @@ from pathlib import Path
 
 from .config import cfg
 from .ids import ImasHandle
-from .jettoduqtools import JettoDuqtoolsSystem
-from .jettopythontools import JettoPythonToolsSystem
+from .jettosystem import JettoDuqtoolsSystem, JettoPythonToolsSystem
 from .models import AbstractSystem, Job, WorkDirectory
 from .schema import JettoVar
 
