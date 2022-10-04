@@ -8,6 +8,11 @@
   path: profiles_1d/*/t_i_average
   dims: [time, x]
   type: IDS-variable
+- name: t_e_average
+  ids: core_profiles
+  path: profiles_1d/*/t_e_average
+  dims: [time, x]
+  type: IDS-variable
 - name: zeff
   ids: core_profiles
   path: profiles_1d/*/zeff
