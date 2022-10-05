@@ -11,6 +11,7 @@ from ._imas import ImasBaseModel
 from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
+from .variables import VariableConfigModel
 from .workdir import WorkDirectoryModel
 
 
@@ -204,6 +205,9 @@ class ConfigModel(BaseModel):
         description='Configuration for the merge subcommand')
 
     workspace: WorkDirectoryModel
+
+    extra_variables: Optional[VariableConfigModel] = Field(
+        description='Specify extra variables for this run.')
 
     system: Literal['jetto', 'dummy', 'jetto-pythontools',
                     'jetto-duqtools'] = Field(
