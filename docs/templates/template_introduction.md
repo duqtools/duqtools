@@ -11,12 +11,12 @@ To help initialize a starting config to modify, you can run [`duqtools init`](/c
 
 Check out the different subpages of this section that explain the different parts of the config.
 
-- [create](/config/create)
-- [submit](/config/submit)
-- [status](/config/status)
-- [workspace](/config/introduction/#workspace)
-- [system](/config/introduction/#defining-the-system)
-- [variables](/config/introduction/#specifying-variables)
+- [create](config/create)
+- [submit](config/submit)
+- [status](config/status)
+- [workspace](#workspace)
+- [system](#defining-the-system)
+- [variables](#extra-variables)
 
 ### Example config file
 
@@ -64,17 +64,9 @@ system: jetto
 
 {{ schema_DummySystem['description'] }}
 
-## Specifying Variables
+## Extra variables
 
-To access different variables, duqtools must know how to navigate the IMAS specification. The variable lookup table maps variable names, and specifies their dimensions. The lookup file is stored in yaml format, typicall with the name `variables.yaml`. Duqtools includes a default [variables.yaml](https://github.com/CarbonCollective/fusion-dUQtools/blob/main/src/duqtools/data/variables.yaml), but you can also define your own.
-
-Duqtools looks for the `variables.yaml` file in the following locations, in this order:
-
-1. Via environment variable `$DUQTOOLS_VARIABLES`
-2. If not defined, look for `$XDG_CONFIG_HOME/duqtools/variables.yaml`
-3. If `$XDG_CONFIG_HOME` is not defined, look for `$HOME/.config/duqtools/variables.yaml`
-4. If not defined, fall back to the included [variables.yaml](https://github.com/CarbonCollective/fusion-dUQtools/blob/main/src/duqtools/data/variables.yaml), which contains a sensible list of defaults.
-
+Duqtools comes with a list of default [variables](variables/). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
 
 ### IDS variables
 
@@ -94,11 +86,10 @@ Duqtools looks for the `variables.yaml` file in the following locations, in this
 : {{ prop['description'] }}
 {% endfor %}
 
-
 Example:
 
 ```yaml title="variables.yaml"
-variables:
+extra_variables:
 - name: rho_tor_norm
   ids: core_profiles
   path: profiles_1d/*/grid/rho_tor_norm
@@ -108,16 +99,6 @@ variables:
   ids: core_profiles
   path: profiles_1d/*/t_i_average
   dims: [time, x]
-  type: IDS-variable
-- name: zeff
-  ids: core_profiles
-  path: profiles_1d/*/zeff
-  dims: [time, x]
-  type: IDS-variable
-- name: time
-  ids: core_profiles
-  path: time
-  dims: [time]
   type: IDS-variable
 - name: major_radius
   type: jetto-variable

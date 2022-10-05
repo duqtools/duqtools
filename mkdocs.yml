@@ -1,4 +1,7 @@
 site_name: dUQtools
+site_url: https://duqtools.readthedocs.io
+repo_url: https://github.com/CarbonCollective/fusion-dUQtools
+repo_name: GitHub
 
 nav:
   - Home: index.md
@@ -11,6 +14,7 @@ nav:
     - config/merge.md
   - Dashboard: dash.md
   - Visualization: visualization.md
+  - Variables: variables.md
   - Python API:
     - Public API: api.md
     - Operations: operations.md
@@ -84,10 +88,12 @@ plugins:
 - gen-files:
     scripts:
       - docs/gendocs.py
+      - docs/genvariables.py
 - mkdocs-jupyter:
     include_source: True
     ignore:
       - gendocs.py
+      - genvariables.py
 
 watch:
   - src/duqtools

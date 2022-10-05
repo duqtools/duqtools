@@ -319,7 +319,11 @@ def cli_merge(**kwargs):
 @cli.command('list-variables')
 @config_option
 def cli_list_variables(**kwargs):
-    """List available variables."""
+    """List available variables.
+
+    Picks up variables from `duqtools.yaml` if it exists in the local
+    directory.
+    """
     from .list_variables import list_variables
     list_variables(**kwargs)
 
