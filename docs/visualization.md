@@ -6,7 +6,7 @@ To run the command:
 
 `duqtools plot`
 
-Check out [the command-line interface](/command-line-interface/#plot) for more info on how to use this command.
+Check out [the command-line interface](/command-line-interface#plot) for more info on how to use this command.
 
 This page shows some examples on how to use the plotting tool.
 

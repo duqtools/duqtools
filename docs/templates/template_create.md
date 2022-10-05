@@ -6,7 +6,7 @@ To run the command:
 
 `duqtools create`
 
-Check out [the command-line interface](/command-line-interface/#create) for more info on how to use this command.
+Check out [the command-line interface](/command-line-interface#create) for more info on how to use this command.
 
 
 ## The `create` config
@@ -159,7 +159,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
 To specify variables so that they can be re-used, you can use the `variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name :zeff` in `variables.yaml`.
 
-For more info, see [here](/config/introduction/#specifying-variables).
+For more info, see [here](/config/introduction#specifying-variables).
 
 ### Value ranges
 

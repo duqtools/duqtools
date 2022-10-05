@@ -6,7 +6,7 @@ To run the command:
 
 `duqtools status`
 
-Check out [the command-line interface](/command-line-interface/#status) for more info on how to use this command.
+Check out [the command-line interface](/command-line-interface#status) for more info on how to use this command.
 
 
 ## The `status` config

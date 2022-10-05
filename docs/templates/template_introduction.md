@@ -1,19 +1,19 @@
 # The `duqtools` config file
 
-UQ run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the -c/--config option (see `duqtools help` or the [cli](/command-line-interface/)).
+UQ run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the -c/--config option (see `duqtools help` or the [cli](/command-line-interface)).
 
 As a minimum, this configuration file must define the root workspace and the system to use (see below). All other settings are (in principle) optional.
 
 
 ## Starting from scratch
 
-To help initialize a starting config to modify, you can run [`duqtools init`](/command-line-interface/#init).
+To help initialize a starting config to modify, you can run [`duqtools init`](/command-line-interface#init).
 
 Check out the different subpages of this section that explain the different parts of the config.
 
-- [create](config/create)
-- [submit](config/submit)
-- [status](config/status)
+- [create](../create)
+- [submit](../submit)
+- [status](../status)
 - [workspace](#workspace)
 - [system](#defining-the-system)
 - [variables](#extra-variables)
@@ -66,7 +66,7 @@ system: jetto
 
 ## Extra variables
 
-Duqtools comes with a list of default [variables](variables/). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
+Duqtools comes with a list of default [variables](variables). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
 
 ### IDS variables
 
