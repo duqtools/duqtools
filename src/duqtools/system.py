@@ -1,8 +1,9 @@
 from pathlib import Path
+from warnings import warn
 
 from .config import cfg
 from .ids import ImasHandle
-from .jettosystem import JettoDuqtoolsSystem, JettoPythonToolsSystem
+from .jetto import JettoSystem
 from .models import AbstractSystem, Job, WorkDirectory
 from .schema import JettoVar
 
@@ -46,10 +47,12 @@ def get_system():
     Get the system to do operations with TODO make it a variable, not a
     function
     """
-    if (cfg.system in ['jetto', 'jetto-duqtools']):
-        return JettoDuqtoolsSystem
-    elif (cfg.system in ['jetto-pythontools']):
-        return JettoPythonToolsSystem
+    if (cfg.system in ['jetto-pythontools', 'jetto-duqtools']):
+        warn(f"{cfg.system} system deprecated, please use 'jetto'",
+             DeprecationWarning)
+
+    if (cfg.system in ['jetto', 'jetto-duqtools', 'jetto-pythontools']):
+        return JettoSystem
     elif (cfg.system == 'dummy'):
         return DummySystem
     else:

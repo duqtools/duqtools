@@ -9,17 +9,14 @@ from importlib_resources import files
 from jetto_tools import config
 from jetto_tools import job as jetto_job
 from jetto_tools import jset, lookup, namelist, template
-from pydantic import Field
-from typing_extensions import Literal
 
-from .config import cfg
-from .ids import ImasHandle
-from .jettoduqtools._jetto_jset import JettoJset
-from .jettoduqtools._llcmd import write_batchfile as jetto_write_batchfile
-from .jettopythontools._jettovar_to_json import jettovar_to_json
-from .models import AbstractSystem, Job, WorkDirectory
-from .operations import add_to_op_queue
-from .schema import JettoVar
+from ..config import cfg
+from ..ids import ImasHandle
+from ..models import AbstractSystem, Job, WorkDirectory
+from ..operations import add_to_op_queue
+from ..schema import JettoVar
+from ._jettovar_to_json import jettovar_to_json
+from ._llcmd import write_batchfile as jetto_write_batchfile
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +30,9 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
-        jset = JettoJset.from_directory(template_drc)
+        jetto_jset = jset.read(template_drc / 'jetto.jset')
 
-        return jetto_write_batchfile(workspace, run_name, jset)
+        return jetto_write_batchfile(workspace, run_name, jetto_jset)
 
     @staticmethod
     def submit_job(job: Job):
@@ -203,32 +200,3 @@ class JettoSystem(AbstractSystem):
             jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
-
-
-class JettoDuqtoolsSystem(JettoSystem):
-    """This system implements a wrapper around JETTO, which is part of the
-    JINTRAC modelling framework for integrated simulation of Tokamaks.
-
-    For more information:
-
-    - G. Cenacchi, A. Taroni, JETTO: A free-boundary plasma transport code,
-        JET-IR (1988)
-    - M. Romanelli  2014, Plasma and Fusion research 9, 3403023-3403023
-    """
-    name: Literal['jetto'] = Field('jetto', description='Name of the system.')
-
-
-class JettoPythonToolsSystem(JettoSystem):
-    """This system implements a wrapper around jettopythontools, which is a
-    wrapper around jetto, which is part of the JINTRAC modelling framework for
-    integrated simulation of Tokamaks.
-
-    For more information:
-
-    - G. Cenacchi, A. Taroni, JETTO: A free-boundary plasma transport code,
-        JET-IR (1988)
-    - M. Romanelli  2014, Plasma and Fusion research 9, 3403023-3403023
-    - https://pypi.org/project/jetto-tools/
-    """
-    name: Literal['jetto-pythontools'] = Field(
-        'jetto-pythontools', description='Name of the system.')
