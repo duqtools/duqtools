@@ -30,7 +30,7 @@ merge:
     shot: 94785
   plan:
   - data_variables:
-    - t_i_average
+    - t_i_ave
     - zeff
     grid_variable: rho_tor_norm
     time_variable: time
@@ -99,7 +99,7 @@ plan:
 - grid_variable: rho_tor_norm
   variables:
   - time
-  - t_i_average
+  - t_i_ave
   - zeff
 ```
 

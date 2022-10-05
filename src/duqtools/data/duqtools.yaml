@@ -12,7 +12,7 @@ create:
   - operator: multiply
     scale_to_error: false
     values: [1.1, 1.2, 1.3]
-    variable: t_i_average
+    variable: t_i_ave
   - operator: multiply
     scale_to_error: false
     values: [1.1, 1.2, 1.3]
@@ -37,7 +37,7 @@ merge:
     shot: 94785
   plan:
   - data_variables:
-    - t_i_average
+    - t_i_ave
     - zeff
     grid_variable: rho_tor_norm
     time_variable: time

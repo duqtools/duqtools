@@ -31,7 +31,7 @@ create:
   - operator: multiply
     scale_to_error: false
     values: [1.1, 1.2, 1.3]
-    variable: t_i_average
+    variable: t_i_ave
   - operator: multiply
     scale_to_error: false
     values: [1.1, 1.2, 1.3]
@@ -135,15 +135,15 @@ values: [0.01, 0.02, 0.03]
 will generate 3 entries, `zeff += 0.01`, `zeff += 0.02`, and `zeff += 0.03`.
 
 ```yaml title="duqtools.yaml"
-variable: t_i_average
+variable: t_i_ave
 operator: multiply
 values: [1.1, 1.2, 1.3]
 ```
 
-will generate another 3 entries, `t_i_average *= 1.1`, `t_i_average *= 1.2`, and `t_i_average *= 1.3`.
+will generate another 3 entries, `t_i_ave *= 1.1`, `t_i_ave *= 1.2`, and `t_i_ave *= 1.3`.
 
 With these 2 entries, the parameter hypercube would consist of 9 entries total (3 for `zeff`
-times 3 for `t_i_average`).
+times 3 for `t_i_ave`).
 With the default `sampler: latin-hypercube`, this means 9 new data files will be written.
 
 !!! note
@@ -152,7 +152,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
 !!! note
 
-    If you want to copy all time ranges, you can use `path: profiles_1d/*/t_i_average`. The `*` substring will
+    If you want to copy all time ranges, you can use `path: profiles_1d/*/t_i_ave`. The `*` substring will
     duqtools to apply the operation to all available time slices.
 
 ### Variables
@@ -179,7 +179,7 @@ There are two ways to specify ranges in *duqtools*.
 This example generates a range from 0.7 to 1.3 with 10 steps:
 
 ```yaml title="duqtools.yaml"
-variable: t_i_average
+variable: t_i_ave
 operator: multiply
 values:
   start: 0.7
@@ -199,7 +199,7 @@ values:
 This example generates a range from 0.7 to 1.3 with steps of 0.1:
 
 ```yaml title="duqtools.yaml"
-variable: t_i_average
+variable: t_i_ave
 operator: multiply
 values:
   start: 0.7
@@ -220,10 +220,10 @@ values: [-2, -1, 0, 1, 2]
 scale_to_error: True
 ```
 
-The following example takes `t_i_average`, and generates a range from $-3\sigma$ to $+3\sigma$ with 10 equivalent steps:
+The following example takes `t_i_ave`, and generates a range from $-3\sigma$ to $+3\sigma$ with 10 equivalent steps:
 
 ```yaml title="duqtools.yaml"
-variable: t_i_average
+variable: t_i_ave
 operator: add
 values:
   start: -3

@@ -99,7 +99,7 @@ def test_plot(cmdline_workdir):
             '-x',
             'profiles_1d/*/grid/rho_tor_norm',
             '-y',
-            'profiles_1d/*/t_i_average',
+            'profiles_1d/*/t_i_ave',
             '--imas',
             'g2aho/jet/94875/1',
         ],

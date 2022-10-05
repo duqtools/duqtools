@@ -96,7 +96,7 @@ def test_example_plot(cmdline_workdir):
         pytest.xfail('Imas needed for plotting Imas data')
 
     cmd = ('duqtools plot -c config.yaml -m g2vazizi/test/94875/8000'
-           ' -y profiles_1d/*/t_i_average --yes').split()
+           ' -y profiles_1d/*/t_i_ave --yes').split()
 
     with work_directory(cmdline_workdir):
         result = subprocess.run(cmd)

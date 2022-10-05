@@ -14,9 +14,9 @@ variables:
     ids: core_profiles
     path: profiles_1d/*/zeff
     dims: [time,x]
-  - name: t_i_average
+  - name: t_i_ave
     ids: core_profiles
-    path: profiles_1d/*/t_i_average
+    path: profiles_1d/*/t_i_ave
     dims: [time,x]
   - name: rho_tor_norm
     ids: core_profiles

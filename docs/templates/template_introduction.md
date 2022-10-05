@@ -95,9 +95,9 @@ extra_variables:
   path: profiles_1d/*/grid/rho_tor_norm
   dims: [time, x]
   type: IDS-variable
-- name: t_i_average
+- name: t_i_ave
   ids: core_profiles
-  path: profiles_1d/*/t_i_average
+  path: profiles_1d/*/t_i_ave
   dims: [time, x]
   type: IDS-variable
 - name: major_radius

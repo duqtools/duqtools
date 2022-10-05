@@ -3,7 +3,7 @@ create:
   - variable: major_radius
     operator: copyto
     values: [295,297]
-  - variable: t_i_average
+  - variable: t_i_ave
     operator: multiply
     values: [1.1, 1.2, 1.3]
   - - variable: t_end
