@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 from importlib_resources import files
 
 from ..schema.variables import VariableConfigModel
+
+logger = logging.getLogger(__name__)
 
 VAR_ENV = 'DUQTOOLS_VARDEF'
 USER_CONFIG_HOME = Path.home() / '.config'
@@ -17,18 +20,19 @@ VAR_FILENAME = 'variables.yaml'
 class VariableConfigLoader:
 
     def __init__(self):
-        config_file = self.get_config_file()
+        path = self.get_config_path()
 
-        if not config_file.exists():
-            raise IOError(f'{config_file} does not exist!')
+        if not path.exists():
+            raise IOError(f'{path} does not exist!')
 
-        self.config_file = config_file
+        self.path = path
 
     def load(self):
         """Load the variables config."""
-        return VariableConfigModel.parse_file(self.config_file)
+        logger.debug(f'Loading variables from: {self.path}')
+        return VariableConfigModel.parse_file(self.path)
 
-    def get_config_file(self) -> Path:
+    def get_config_path(self) -> Path:
         """Try to get the config file with variable definitions.
 
         Search order:
