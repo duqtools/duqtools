@@ -3,13 +3,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import jetto_tools
+
 if TYPE_CHECKING:
     from duqtools.models import WorkDirectory
 
-    from ._jetto_jset import JettoJset
 
-
-def write_batchfile(workspace: WorkDirectory, run_name: str, jset: JettoJset):
+def write_batchfile(workspace: WorkDirectory, run_name: str,
+                    jset: jetto_tools.jset.JSET):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
@@ -17,7 +18,6 @@ def write_batchfile(workspace: WorkDirectory, run_name: str, jset: JettoJset):
     target_drc : Path
         Directory to place batch file into.
     """
-    settings = jset.settings
     run_drc = workspace.cwd / run_name
     llcmd_path = run_drc / '.llcmd'
 
@@ -25,11 +25,11 @@ def write_batchfile(workspace: WorkDirectory, run_name: str, jset: JettoJset):
     rjettov_path = full_path / 'rjettov'
     rel_path = workspace.subdir / run_name
 
-    build_name = settings['JobProcessingPanel.name']
-    build_user_name = settings['JobProcessingPanel.userid']
-    machine_number = settings['JobProcessingPanel.machineNumber']
-    num_proc = settings['JobProcessingPanel.numProcessors']
-    wall_time = settings['JobProcessingPanel.wallTime']
+    build_name = jset['JobProcessingPanel.name']
+    build_user_name = jset['JobProcessingPanel.userid']
+    machine_number = jset['JobProcessingPanel.machineNumber']
+    num_proc = jset['JobProcessingPanel.numProcessors']
+    wall_time = jset['JobProcessingPanel.wallTime']
 
     with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
