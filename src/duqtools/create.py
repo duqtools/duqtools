@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
+import click
 import pandas as pd
 
 from .apply_model import apply_model
@@ -18,17 +19,21 @@ logger = logging.getLogger(__name__)
 RUN_PREFIX = 'run_'
 
 
-def fail_if_locations_exist(locations: Iterable[ImasHandle]):
+def any_locations_exist(locations: Iterable[ImasHandle]):
     """Check IDS coordinates and raise if any exist."""
     any_exists = False
     for location in locations:
         if location.exists():
             logger.info('Target %s already exists', location)
+            op_queue.add(action=lambda: None,
+                         description=click.style('Not creating IDS',
+                                                 fg='red',
+                                                 bold=True),
+                         extra_description=f'IDS entry {location} exists')
             any_exists = True
     if any_exists:
-        raise IOError(
-            'Found existing target location(s), use `duqtools clean` to '
-            'remove or `--force` to override.')
+        return True
+    return False
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
@@ -85,20 +90,53 @@ def create(*, force, **kwargs):
     matrix = tuple(model.expand() for model in dimensions)
     combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
+    # Safety checks
+
+    targets_exist = False
     if not force:
         if workspace.runs_yaml.exists():
-            raise IOError(
-                'Directory is not empty, use `duqtools clean` to clear or '
-                '`--force` to override.')
+            op_queue.add(action=lambda: None,
+                         description=click.style('Not creating runs.yaml',
+                                                 fg='red',
+                                                 bold=True),
+                         extra_description=f'{workspace.runs_yaml} exists')
+            targets_exist = True
 
         locations = (ImasHandle(db=options.data.imasdb,
                                 shot=source.shot,
                                 run=options.data.run_in_start_at + i)
                      for i in range(len(combinations)))
 
-        fail_if_locations_exist(locations)
+        if any_locations_exist(locations):
+            targets_exist = True
 
     runs = []
+
+    if not force:
+        for i in range(len(combinations)):
+            run_name = f'{RUN_PREFIX}{i:04d}'
+            run_drc = workspace.cwd / run_name
+
+            if run_drc.exists:
+                op_queue.add(action=lambda: None,
+                             description=click.style('Not creating directory',
+                                                     fg='red',
+                                                     bold=True),
+                             extra_description=f'Directory {run_drc} exists')
+                targets_exist = True
+
+# do one final check if we will not overwrite existing files
+    if targets_exist and not force:
+        op_queue.add(action=lambda: None,
+                     description=click.style('Not creating runs',
+                                             fg='red',
+                                             bold=True),
+                     extra_description='some targets already exist, '
+                     'use --force to override')
+        return
+
+
+# end safety checks
 
     for i, combination in enumerate(combinations):
         run_name = f'{RUN_PREFIX}{i:04d}'
