@@ -6,7 +6,7 @@ To get started:
 
     duqtools --help
 
-For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](config/introduction.md).
+For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](../config/introduction).
 
 ::: mkdocs-click
     :module: duqtools.cli
