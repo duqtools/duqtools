@@ -10,8 +10,7 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-from duqtools.jettoduqtools import JettoDuqtoolsSystem
-from duqtools.jettopythontools import JettoPythonToolsSystem
+from duqtools.jetto import JettoSystem
 from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
                              ImasBaseModel, JettoVariableModel, LinSpace,
                              OperationDim)
@@ -38,8 +37,7 @@ objects = {
     IDSOperationDim,
     IDSVariableModel,
     ImasBaseModel,
-    JettoDuqtoolsSystem,
-    JettoPythonToolsSystem,
+    JettoSystem,
     JettoVariableModel,
     LinSpace,
     MergeConfigModel,
