@@ -10,7 +10,7 @@
   type: IDS-variable
 - name: t_i_ave
   ids: core_profiles
-  path: profiles_1d/*/t_i_ave
+  path: profiles_1d/*/t_i_average
   dims: [time, x]
   type: IDS-variable
 - name: t_e_ave
