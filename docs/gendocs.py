@@ -12,8 +12,9 @@ import mkdocs_gen_files
 
 from duqtools.jetto import JettoSystem
 from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
-                             ImasBaseModel, JettoVariableModel, LinSpace,
-                             OperationDim)
+                             ImasBaseModel, JettoVar, JettoVariableModel,
+                             LinSpace, OperationDim)
+from duqtools.schema._jetto import JsetField, NamelistField
 from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
                                  MergeConfigModel, MergeStep,
                                  StatusConfigModel, SubmitConfigModel)
@@ -39,6 +40,9 @@ objects = {
     ImasBaseModel,
     JettoSystem,
     JettoVariableModel,
+    JettoVar,
+    JsetField,
+    NamelistField,
     LinSpace,
     MergeConfigModel,
     MergeStep,

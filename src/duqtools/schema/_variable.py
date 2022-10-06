@@ -12,14 +12,14 @@ class JettoVariableModel(BaseModel):
     can be defined as a JettoVar under the lookup key."""
 
     type: str = Field('jetto-variable',
-                      description='discriminator for the variable type')
+                      description='Discriminator for the variable type.')
 
     name: str = Field(description=f("""
-        Name of the variable
-        Used for the lookup table to find actual fields
+        Name of the variable.
+        Used for the lookup table to find actual fields.
         """))
     lookup: Optional[JettoVar] = Field(description=f("""
-    description of the fields that have to be updated for a Jetto Variable
+    Description of the fields that have to be updated for a Jetto Variable
     """))
 
 
