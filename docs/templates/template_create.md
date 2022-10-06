@@ -6,7 +6,7 @@ To run the command:
 
 `duqtools create`
 
-Check out [the command-line interface](/command-line-interface#create) for more info on how to use this command.
+Check out [the command-line interface](command-line-interface.md#create) for more info on how to use this command.
 
 
 ## The `create` config
