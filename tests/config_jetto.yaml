@@ -20,6 +20,12 @@ create:
     run_in_start_at: 7010
     run_out_start_at: 7010
   template: ./template_model
+extra_variables:
+  - name: my_extra_var
+    ids: core_profiles
+    path: profiles_1d/*/t_i_average
+    dims: [time, x]
+    type: IDS-variable
 submit:
   submit_command: "true"
 workspace:
