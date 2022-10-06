@@ -10,14 +10,16 @@ from ._description_helpers import formatter as f
 
 
 class JsetField(BaseModel):
-    file: Literal['jetto.jset'] = 'jetto.jset'
-    field: str
+    file: Literal['jetto.jset'] = Field('jetto.jset',
+                                        description='Name of the file.')
+    field: str = Field(description='Field name.')
 
 
 class NamelistField(BaseModel):
-    file: Literal['jetto.in'] = 'jetto.in'
-    field: str
-    section: str
+    file: Literal['jetto.in'] = Field('jetto.in',
+                                      description='Name of the file.')
+    field: str = Field(description='Field name.')
+    section: str = Field(description='Section in the config.')
 
     @validator('section')
     def section_lower(cls, v):
@@ -29,11 +31,13 @@ JettoField = Annotated[Union[JsetField, NamelistField],
 
 
 class JettoVar(BaseModel):
-    doc: str
-    name: str
-    type: Literal['str', 'int', 'float']
+    """These describe the jetto variables."""
+    doc: str = Field(description='Docstring for the variable.')
+    name: str = Field(description='Name of the variable.')
+    type: Literal['str', 'int', 'float'] = Field(
+        description=f('Type of the variable (str, int, float)'))
     keys: List[JettoField] = Field(description=f(
-        """keys to update when this jetto variable is requested"""))
+        'Jetto keys to update when this jetto variable is requested'))
 
     def get_type(self):
         return {

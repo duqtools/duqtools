@@ -6,7 +6,7 @@ To run the command:
 
 `duqtools plot`
 
-Check out [the command-line interface](/command-line-interface#plot) for more info on how to use this command.
+Check out [the command-line interface](../command-line-interface#plot) for more info on how to use this command.
 
 This page shows some examples on how to use the plotting tool.
 
@@ -68,7 +68,7 @@ duqtools plot \
 
 ## From a CSV file
 
-Data can also be specified using a CSV file. Check the [dashboard](dash/#from-a-csv-file) documentation for more info on how to construct this file.
+Data can also be specified using a CSV file. Check the [dashboard](../dash#from-a-csv-file) documentation for more info on how to construct this file.
 
 ```bash
 duqtools plot \
