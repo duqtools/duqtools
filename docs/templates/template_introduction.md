@@ -62,7 +62,7 @@ system: jetto
 
 ## Extra variables
 
-Duqtools comes with a list of default [variables](variables). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
+Duqtools comes with a list of default [variables](../variables.md). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
 
 ### IDS variables
 
