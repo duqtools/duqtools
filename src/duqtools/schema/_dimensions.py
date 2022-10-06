@@ -93,7 +93,7 @@ class IDSPathMixin(BaseModel):
             IDS variable for the data to modify.
             The time slice can be denoted with '*', this will match all
             time slices in the IDS. Alternatively, you can specify the time
-            slice directly, i.e. `profiles_1d/0/t_i_average` to only
+            slice directly, i.e. `profiles_1d/0/t_i_ave` to only
             match and update the 0-th time slice.
             """))
 

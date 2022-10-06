@@ -35,8 +35,8 @@ class IDSVariableModel(BaseModel):
     `[x, y]`.
 
     The IDS path may contain indices. You can point to a single index, by simply giving the
-    complete path (i.e. `profiles_1d/0/t_i_average` for the 0th time slice).
-    To retrieve all time slices, you can use `profiles_1d/*/t_i_average`.
+    complete path (i.e. `profiles_1d/0/t_i_ave` for the 0th time slice).
+    To retrieve all time slices, you can use `profiles_1d/*/t_i_ave`.
     """
     type: str = Field('IDS-variable',
                       description='discriminator for the variable type')

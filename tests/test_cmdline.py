@@ -1,8 +1,9 @@
 import os
 import shutil
-import subprocess
+import subprocess as sp
 from pathlib import Path
 
+import click
 import pytest
 from pytest_dependency import depends
 
@@ -51,7 +52,7 @@ def test_example_create(cmdline_workdir):
     cmd = 'duqtools create -c config.yaml --force --yes'.split()
 
     with work_directory(cmdline_workdir):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
 
 
@@ -62,7 +63,7 @@ def test_example_submit(cmdline_workdir, system, request):
     cmd = 'duqtools submit -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
 
 
@@ -73,7 +74,7 @@ def test_example_submit_array(cmdline_workdir, system, request):
     cmd = 'duqtools submit --array -c config.yaml --yes --force'.split()
 
     with work_directory(cmdline_workdir):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
         assert (Path('duqtools_slurm_array.sh').exists())
 
@@ -85,7 +86,7 @@ def test_example_status(cmdline_workdir, system, request):
     cmd = 'duqtools status -c config.yaml --yes'.split()
 
     with work_directory(cmdline_workdir):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
 
 
@@ -96,10 +97,10 @@ def test_example_plot(cmdline_workdir):
         pytest.xfail('Imas needed for plotting Imas data')
 
     cmd = ('duqtools plot -c config.yaml -m g2vazizi/test/94875/8000'
-           ' -y profiles_1d/*/t_i_average --yes').split()
+           ' -y profiles_1d/*/t_i_ave --yes').split()
 
     with work_directory(cmdline_workdir):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
         assert (Path('./chart_0.html').exists())
 
@@ -114,5 +115,22 @@ def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):
     cmd = 'duqtools create -c config.yaml --force --yes'.split()
 
     with work_directory(tmp_path / 'run'):
-        result = subprocess.run(cmd)
+        result = sp.run(cmd)
         assert (result.returncode == 0)
+
+
+def test_list_variables(cmdline_workdir):
+    cmd = ('duqtools list-variables -c config.yaml').split()
+
+    with work_directory(cmdline_workdir):
+        result = sp.run(cmd, capture_output=True)
+        assert (result.returncode == 0)
+
+    out = click.unstyle(result.stdout.decode())
+    err = click.unstyle(result.stderr.decode())
+
+    assert err == ''
+    assert 'IDS-variable' in out
+    assert 'jetto-variable' in out
+    assert '*my_extra_var' in out
+    assert 'rho_tor_norm' in out

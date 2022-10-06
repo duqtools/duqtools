@@ -6,9 +6,9 @@ from duqtools.plot import create_chart
 from duqtools.schema import IDSVariableModel
 
 y_var = IDSVariableModel(type='IDS-variable',
-                         name='t_i_average',
+                         name='t_i_ave',
                          ids='core_profiles',
-                         path='profiles_1d/*/t_i_average',
+                         path='profiles_1d/*/t_i_ave',
                          dims=['time', 'x'])
 x_var = IDSVariableModel(type='IDS-variable',
                          name='rho_tor_norm',
@@ -31,7 +31,7 @@ dataset = xr.Dataset.from_dict({
             'data': [[[0.005, 0.015, 0.025, 0.035, 0.045],
                       [0.005, 0.015, 0.025, 0.035, 0.045]]]
         },
-        't_i_average': {
+        't_i_ave': {
             'dims': ('run', 'time', 'x'),
             'attrs': {},
             'data': [[[11225, 11218, 11205, 11184, 11156],

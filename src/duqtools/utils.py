@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable, List
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -84,3 +85,28 @@ def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
         raise ValueError(f'Cannot open file: {inp}')
 
     return handles
+
+
+def groupby(iterable: Iterable,
+            keyfunc: Callable) -> Dict[Hashable, List[Any]]:
+    """Group iterable by key function.
+    The items are grouped by the value that is returned by the `keyfunc`
+    Parameters
+    ----------
+    iterable : list, tuple or iterable
+        List of items to group
+    keyfunc : callable
+        Used to determine the group of each item. These become the keys
+        of the returned dictionary
+
+    Returns
+    -------
+    grouped : dict
+        Returns a dictionary with the grouped values.
+    """
+    grouped = defaultdict(list)
+    for item in iterable:
+        key = keyfunc(item)
+        grouped[key].append(item)
+
+    return grouped

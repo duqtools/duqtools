@@ -3,7 +3,7 @@ create:
   - variable: major_radius
     operator: copyto
     values: [295,297]
-  - variable: t_i_average
+  - variable: t_i_ave
     operator: multiply
     values: [1.1, 1.2, 1.3]
   - - variable: t_end
@@ -20,6 +20,12 @@ create:
     run_in_start_at: 7010
     run_out_start_at: 7010
   template: ./template_model
+extra_variables:
+  - name: my_extra_var
+    ids: core_profiles
+    path: profiles_1d/*/t_i_average
+    dims: [time, x]
+    type: IDS-variable
 submit:
   submit_command: "true"
 workspace:

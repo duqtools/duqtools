@@ -9,6 +9,6 @@ create:
     - variable: zeff
       operator: add
       values: [1,]
-    - variable: t_i_average
+    - variable: t_i_ave
       operator: multiply
       values: [1.1,]

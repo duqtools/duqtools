@@ -36,7 +36,7 @@ with st.sidebar:
     var_options = get_var_options(ids=ids)
 
     default_x_key = var_options.index('rho_tor_norm')
-    default_y_val = 't_i_average'
+    default_y_val = 't_i_ave'
 
     x_key = st.selectbox('Select x', var_options, index=default_x_key)
 
