@@ -159,7 +159,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.
 
-For more info about variables, see [here](../introduction#specifying-variables).
+For more info about variables, see [here](../introduction#extra-variables).
 
 ### Value ranges
 
