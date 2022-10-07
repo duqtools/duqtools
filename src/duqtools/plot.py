@@ -66,7 +66,7 @@ def create_chart(n, x_var, y_var, dataset, extensions):
         outfile = Path(f'chart_{n}.{extension}')
         click.secho(f'    file:///{outfile.absolute()}', bold=True)
 
-        op_queue.add(chart.save,
+        op_queue.add(action=chart.save,
                      args=(outfile, ),
                      kwargs={'scale_factor': 2.0},
                      description='Saving chart',

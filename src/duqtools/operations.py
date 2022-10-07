@@ -97,18 +97,17 @@ class Operations(deque):
             Operations._instance = super().__new__(cls)
         return Operations._instance
 
-    def add(self, *args, **kwargs) -> None:
+    def add(self, **kwargs) -> None:
         """convenience Operation wrapper around put.
 
         ```python
         from duqtools.operations import add_to_op_queue.
 
-        op_queue.add(print, args=('Hello World,),
+        op_queue.add(action=print, args=('Hello World,),
                 description="Function that prints hello world")
         ```
         """
-
-        self.append(Operation(*args, **kwargs))
+        self.append(Operation(**kwargs))
 
     def put(self, item: Operation) -> None:
         """synonym for append."""
@@ -207,9 +206,9 @@ def confirm_operations(func):
 
     @confirm_operations
     def complicated_stuff()
-        op_queue.add(print, args=('Hello World,),
+        op_queue.add(action=print, args=('Hello World,),
                 description="Function that prints hello world")
-        op_queue.add(print, args=('Hello World again,),
+        op_queue.add(action=print, args=('Hello World again,),
                 description="Function that prints hello world, again")
     ```
     """
