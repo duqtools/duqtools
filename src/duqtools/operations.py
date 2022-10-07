@@ -5,10 +5,10 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 
 import click
-from pydantic import Field
+from pydantic import Field, validator
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -31,44 +31,15 @@ class Operation(BaseModel):
     action: Callable = Field(
         description='a function which can be executed when we '
         'decide to apply this operation')
-    args: tuple = Field((),
-                        description='positional arguments that have to be '
-                        'passed to the action')
-    kwargs: dict = Field(None,
-                         description='keyword arguments that will be '
-                         'passed to the action')
-
-    def __init__(self,
-                 action,
-                 description,
-                 extra_description: Optional[str] = None,
-                 *args,
-                 **kwargs):
-        """__init__.
-
-        Parameters
-        ----------
-        description: str
-            description of the operation to be done
-        extra_description: Optional[str]
-            extra description, (not colorized)
-        action: Callable
-            function to be eventually evaluated
-        *args: tuple
-            positional arguments to action
-        **kwargs: dict
-            keyword arguments to action
-        """
-
-        if extra_description:
-            description = click.style(description,
-                                      fg='green') + ' : ' + extra_description
-        super().__init__(action=action,
-                         description=description,
-                         *args,
-                         **kwargs)
-        if not self.kwargs:
-            self.kwargs = {}
+    extra_description: Optional[str] = Field(description='Extra description')
+    args: Optional[Sequence] = Field(
+        None,
+        description='positional arguments that have to be '
+        'passed to the action')
+    kwargs: Optional[dict] = Field(
+        None,
+        description='keyword arguments that will be '
+        'passed to the action')
 
     def __call__(self) -> Operation:
         """Execute the action with the args and kwargs.
@@ -78,9 +49,30 @@ class Operation(BaseModel):
         Operation
             The operation that was executed
         """
-        logger.debug(self.description)
-        self.action(*self.args, **self.kwargs)
+        logger.debug(self.long_description)
+        self.action(*self.args, **self.kwargs)  # type: ignore
         return self
+
+    @property
+    def long_description(self):
+        description = click.style(self.description, fg='green')
+
+        if self.extra_description is not None:
+            description = f'{description} : {self.extra_description}'
+
+        return description
+
+    @validator('args', always=True)
+    def validate_args(cls, v):
+        if v is None:
+            v = ()
+        return v
+
+    @validator('kwargs', always=True)
+    def validate_kwargs(cls, v):
+        if v is None:
+            v = {}
+        return v
 
 
 class Operations(deque):
@@ -105,18 +97,17 @@ class Operations(deque):
             Operations._instance = super().__new__(cls)
         return Operations._instance
 
-    def add(self, *args, **kwargs) -> None:
+    def add(self, **kwargs) -> None:
         """convenience Operation wrapper around put.
 
         ```python
         from duqtools.operations import add_to_op_queue.
 
-        op_queue.add(print, args=('Hello World,),
+        op_queue.add(action=print, args=('Hello World,),
                 description="Function that prints hello world")
         ```
         """
-
-        self.append(Operation(*args, **kwargs))
+        self.append(Operation(**kwargs))
 
     def put(self, item: Operation) -> None:
         """synonym for append."""
@@ -179,7 +170,7 @@ class Operations(deque):
         duqlog_screen.info(click.style('========================', fg='red'))
         for op in self:
             if not op.quiet:
-                duqlog_screen.info('- ' + op.description)
+                duqlog_screen.info('- ' + op.long_description)
 
         if self.dry_run:
             duqlog_screen.info('Dry run enabled, not applying op_queue')
@@ -215,9 +206,9 @@ def confirm_operations(func):
 
     @confirm_operations
     def complicated_stuff()
-        op_queue.add(print, args=('Hello World,),
+        op_queue.add(action=print, args=('Hello World,),
                 description="Function that prints hello world")
-        op_queue.add(print, args=('Hello World again,),
+        op_queue.add(action=print, args=('Hello World again,),
                 description="Function that prints hello world, again")
     ```
     """

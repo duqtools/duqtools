@@ -42,7 +42,6 @@ class WorkDirectory(WorkDirectoryModel):
         runs_yaml = self.runs_yaml
 
         if not runs_yaml.exists():
-            raise IOError(
-                f'Cannot find {runs_yaml}, therefore cannot show the status')
+            raise IOError(f'Cannot find {runs_yaml}.')
 
         return Runs.parse_file(runs_yaml)
