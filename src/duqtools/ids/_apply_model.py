@@ -41,6 +41,10 @@ def _apply_ids(model: IDSOperation, *,
 
     data_map = ids_mapping.findall(model.variable.path)
 
+    if len(data_map) == 0:
+        raise ValueError(
+            f'{model.variable.path} not found in IDS, cannot adjust value')
+
     for path, data in data_map.items():
         if model.scale_to_error:
             sigma_key = path + model._upper_suffix

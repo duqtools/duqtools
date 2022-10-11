@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from ._handle import ImasHandle
 
-INDEX_STR = '$index'
+INDEX_STR = '*'
 
 
 def insert_re_caret_dollar(string: str) -> str:
