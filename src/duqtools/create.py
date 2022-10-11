@@ -117,7 +117,7 @@ def create(*, force, **kwargs):
             run_name = f'{RUN_PREFIX}{i:04d}'
             run_drc = workspace.cwd / run_name
 
-            if run_drc.exists:
+            if run_drc.exists():
                 op_queue.add(action=lambda: None,
                              description=click.style('Not creating directory',
                                                      fg='red',
