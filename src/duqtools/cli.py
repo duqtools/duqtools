@@ -296,7 +296,11 @@ def cli_go(**kwargs):
     with op_queue_context():
         create(**kwargs)
     with op_queue_context():
-        submit(**kwargs)
+        submit(max_jobs=None,
+               array=True,
+               schedule=None,
+               resubmit=tuple(),
+               **kwargs)
 
     skwargs = kwargs.copy()
     skwargs['detailed'] = True
