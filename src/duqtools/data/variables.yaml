@@ -13,9 +13,9 @@
   path: profiles_1d/*/t_i_average
   dims: [time, x]
   type: IDS-variable
-- name: t_e_ave
+- name: t_e
   ids: core_profiles
-  path: profiles_1d/*/t_e_average
+  path: profiles_1d/*/electrons/temperature
   dims: [time, x]
   type: IDS-variable
 - name: zeff
