@@ -1,6 +1,7 @@
 """Function to create llcmd file."""
 from __future__ import annotations
 
+import stat
 from typing import TYPE_CHECKING
 
 import jetto_tools
@@ -46,3 +47,5 @@ def write_batchfile(workspace: WorkDirectory, run_name: str,
 cd {full_path}
 {rjettov_path} -S -I -p -xmpi -x64 {rel_path} \
 {build_name} {build_user_name}""")
+
+    llcmd_path.chmod(llcmd_path.stat().st_mode | stat.S_IXUSR)
