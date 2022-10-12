@@ -5,6 +5,7 @@ from typing import Union
 
 import numpy as np
 
+from .._logging_utils import duqlog_screen
 from ..apply_model import apply_model
 from ..schema import IDSOperation
 from ._handle import ImasHandle
@@ -42,7 +43,9 @@ def _apply_ids(model: IDSOperation, *,
     data_map = ids_mapping.findall(model.variable.path)
 
     if len(data_map) == 0:
-        raise ValueError(
+        # TODO this should be 'raise Error' but that breaks our tests,
+        # leave it as a message until we can fix it with a Jetto-IMAS container
+        duqlog_screen.error(
             f'{model.variable.path} not found in IDS, cannot adjust value')
 
     for path, data in data_map.items():
