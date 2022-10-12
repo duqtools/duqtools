@@ -1,4 +1,5 @@
 import logging
+import subprocess as sp
 from time import sleep
 
 from jetto_tools import config, template
@@ -152,14 +153,18 @@ class Monitor():
             f'{self.job.dir.name:8s}, status: {status:12s}')
         self.pbar.refresh()
 
-    def get_lines(self):
-        if not self.outfile:
-            of = self.job.out_file
-            if not of.exists():
-                debug('%s does not exists, but the job is running', of)
-                return []
-            self.output_file = open(of, 'r')
-        return self.output_file.readlines()
+    def get_steptime(self):
+        if not self.job.out_file.exists():
+            debug(
+                f'{self.job.out_file} does not exists, but the job is running')
+            return None
+
+        of = self.job.out_file
+        cmd = ['tac', of, '|', 'grep', '-m', '1', '^STEP']
+        ret = sp.run(cmd, check=True, capture_output=True)
+        if len(ret.stdout) > 0:
+            return float(ret.stdout.split('=')[2].lstrip(' ').split(' ')[0])
+        return None
 
     def update(self):
         self.set_status()
@@ -172,12 +177,9 @@ class Monitor():
             if not self.job.is_running:
                 return
 
-        lines = self.get_lines()
-        for i in range(len(lines) - 1, 0, -1):
-            if lines[i].startswith(' STEP'):
-                self.time = float(
-                    lines[i].split('=')[2].lstrip(' ').split(' ')[0])
-                break
+        steptime = self.get_steptime()
+        if steptime:
+            self.time = steptime
 
         self.pbar.n = int(100 * (self.time - self.start) /
                           (self.end - self.start))
