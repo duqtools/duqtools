@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, Sequence
+from typing import Deque, Sequence, Tuple
 
 import click
 
@@ -127,7 +127,7 @@ def lockfile_ok(job, *, force):
 
 
 def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
-           **kwargs):
+           resubmit: Tuple[str], **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -149,7 +149,12 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
     workspace = WorkDirectory.parse_obj(cfg.workspace)
     runs = workspace.runs
 
-    jobs = [Job(run.dirname) for run in runs]
+    if len(resubmit) > 0:
+        force = True
+        jobs = [Job(Path(run)) for run in resubmit]
+    else:
+        jobs = [Job(run.dirname) for run in runs]
+
     debug('Case directories: %s', jobs)
 
     job_queue: Deque[Job] = deque()

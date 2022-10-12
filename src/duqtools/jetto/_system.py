@@ -30,6 +30,7 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
     def write_batchfile(workspace: WorkDirectory, run_name: str,
                         template_drc: Path):
+
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return jetto_write_batchfile(workspace, run_name, jetto_jset)
@@ -82,10 +83,6 @@ class JettoSystem(AbstractSystem):
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
     def submit_array_slurm(jobs: Sequence[Job]):
         for job in jobs:
-            job.submit_script.chmod(job.submit_script.stat().st_mode
-                                    | stat.S_IXUSR)
-            (job.dir / 'rjettov').chmod((job.dir / 'rjettov').stat().st_mode
-                                        | stat.S_IXUSR)
             job.lockfile.touch()
 
         # Get the first jobs submission script as a template
@@ -150,6 +147,7 @@ class JettoSystem(AbstractSystem):
             src = source_drc / filename
             dst = target_drc / filename
             shutil.copyfile(src, dst)
+            dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
     @staticmethod
     def imas_from_path(template_drc: Path):

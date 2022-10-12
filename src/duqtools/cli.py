@@ -1,6 +1,7 @@
 import functools
 import logging
 from datetime import datetime
+from pathlib import Path
 from sys import exit, stderr, stdout
 
 import click
@@ -193,6 +194,12 @@ def cli_create(**kwargs):
               type=int,
               help='Maximum number of jobs to submit.')
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
+@click.option('-r',
+              '--resubmit',
+              multiple=True,
+              default=tuple(),
+              type=Path,
+              help='Case to re-submit, can be specified multiple times')
 @common_options
 def cli_submit(**kwargs):
     """Submit the UQ runs.
@@ -289,7 +296,11 @@ def cli_go(**kwargs):
     with op_queue_context():
         create(**kwargs)
     with op_queue_context():
-        submit(**kwargs)
+        submit(max_jobs=None,
+               array=True,
+               schedule=None,
+               resubmit=tuple(),
+               **kwargs)
 
     skwargs = kwargs.copy()
     skwargs['detailed'] = True
