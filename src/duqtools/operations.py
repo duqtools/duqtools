@@ -120,7 +120,7 @@ class Operations(deque):
                 f'Appended {item.description} to the operations queue')
             super().append(item)
         else:
-            duqlog_screen.info('- ' + item.description)
+            duqlog_screen.info('- ' + item.long_description)
             item()
 
     def apply(self) -> Operation:
@@ -146,8 +146,8 @@ class Operations(deque):
                     while len(self) != 0:
                         op = self.popleft()
                         if not op.quiet:
-                            dbar.set_description(op.description)
-                        logger.info(op.description)
+                            dbar.set_description(op.long_description)
+                        logger.info(op.long_description)
                         pbar.update()
                         op()
         else:
