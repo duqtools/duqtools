@@ -68,6 +68,17 @@ def test_example_submit(cmdline_workdir, system, request):
 
 
 @pytest.mark.dependency()
+def test_example_resubmit(cmdline_workdir, system, request):
+    depends(request, [f'test_example_submit[{system}]'])
+
+    cmd = 'duqtools submit -c config.yaml --resubmit run_0000 --yes'.split()
+
+    with work_directory(cmdline_workdir):
+        result = sp.run(cmd)
+        assert (result.returncode == 0)
+
+
+@pytest.mark.dependency()
 def test_example_submit_array(cmdline_workdir, system, request):
     depends(request, [f'test_example_submit[{system}]'])
 
