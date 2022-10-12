@@ -160,8 +160,8 @@ class Monitor():
             return None
 
         of = self.job.out_file
-        cmd = ['tac', of, '|', 'grep', '-m', '1', '^STEP']
-        ret = sp.run(cmd, check=True, capture_output=True)
+        cmd = f'tac {of} | grep -m 1 ^\\s*STEP'
+        ret = sp.run(cmd, shell=True, capture_output=True)
         if len(ret.stdout) > 0:
             return float(ret.stdout.split('=')[2].lstrip(' ').split(' ')[0])
         return None
