@@ -56,6 +56,6 @@ class WorkDirectory(WorkDirectoryModel):
             raise IOError(f'Cannot find {runs_yaml}.')
 
         with open(runs_yaml, 'r') as f:
-            runs = yaml.load(f)
+            runs = yaml.load(f, Loader=yaml.Loader)
 
         return Runs.construct(runs)
