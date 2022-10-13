@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+from pathlib import Path
 
 import click
 
@@ -32,9 +33,9 @@ def cleanup(out, force, **kwargs):
     """
     try:
         workspace = WorkDirectory.parse_obj(cfg.workspace)
-        runs = workspace.runs
+        runs = workspace.construct_runs
     except OSError:
-        runs = tuple()
+        runs = ()
     else:
         if workspace.runs_yaml.exists and not force:
             if workspace.runs_yaml_old.exists():
@@ -56,12 +57,13 @@ def cleanup(out, force, **kwargs):
                                                  bold=True),
                          extra_description=f'{data_out}')
 
-        op_queue.add(
-            action=shutil.rmtree,
-            args=(run.dirname, ),
-            description='Removing run dir',
-            extra_description=f'{run.dirname}',
-        )
+        if (Path(run.dirname).exists()):
+            op_queue.add(
+                action=shutil.rmtree,
+                args=(run.dirname, ),
+                description='Removing run dir',
+                extra_description=f'{run.dirname}',
+            )
 
     op_queue.add(
         action=shutil.move,

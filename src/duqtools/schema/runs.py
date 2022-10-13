@@ -25,3 +25,9 @@ class Runs(BaseModel):
 
     def __getitem__(self, index: int):
         return self.__root__[index]
+
+    def construct(run_list: List[dict]):
+        __root__ = []
+        for run in run_list:
+            __root__.append(Run.construct(**run))
+        return __root__
