@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List
 
+import yaml
 from pydantic import validator
 
 from ..schema.runs import Run, Runs
@@ -45,3 +46,16 @@ class WorkDirectory(WorkDirectoryModel):
             raise IOError(f'Cannot find {runs_yaml}.')
 
         return Runs.parse_file(runs_yaml)
+
+    @property
+    def construct_runs(self) -> List[Run]:
+        """Get list, but don't validate its validity."""
+        runs_yaml = self.runs_yaml
+
+        if not runs_yaml.exists():
+            raise IOError(f'Cannot find {runs_yaml}.')
+
+        with open(runs_yaml, 'r') as f:
+            runs = yaml.load(f, Loader=yaml.Loader)
+
+        return Runs.construct(runs)
