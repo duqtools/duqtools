@@ -228,26 +228,35 @@ def cli_status(**kwargs):
 
 @cli.command('plot')
 @click.option('-x',
-              'x_path',
-              default='profiles_1d/*/grid/rho_tor_norm',
+              'grid_var',
+              default='rho_tor_norm',
               type=str,
-              help='IDS of the x value')
+              help='Name of the x (grid) variable')
 @click.option('-y',
-              'y_paths',
+              'data_vars',
               type=str,
-              help='IDS of the y value',
+              help='Name of the y (data) variable(s)',
               multiple=True)
+@click.option('-t',
+              'time_var',
+              type=str,
+              help='Name of the time variable',
+              default='time')
 @click.option('-m',
               '--imas',
               'imas_paths',
               type=str,
               help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
               multiple=True)
-@click.option('-d',
-              '--ids',
-              type=str,
-              default='core_profiles',
-              help='Which IDS to grab data from')
+@click.option('-u', '--user', 'user', type=str, help='IMAS user.')
+@click.option('-d', '--db', 'db', type=str, help='IMAS database.')
+@click.option('-s', '--shot', 'shot', type=int, help='IMAS shot.')
+@click.option('-r',
+              '--runs',
+              'runs',
+              type=int,
+              multiple=True,
+              help='IMAS run (multiple runs can be specified)')
 @click.option('-i',
               '--input',
               'input_files',
@@ -261,12 +270,19 @@ def cli_status(**kwargs):
               help='Output format (json, html, png, svg, pdf), default: html.',
               default=('html', ),
               multiple=True)
-@common_options
 def cli_plot(**kwargs):
-    """Plot some IDS data."""
+    """Plot some IDS data.
+
+    \b
+    Examples:
+    - duqtools plot -x rho_tor_norm -y t_i_ave -y zeff -i data.csv
+    - duqtools plot -y t_i_ave -y zeff -m jet/91234/5
+    - duqtools plot -y zeff -u user -d jet -s 91234 -r 5 -r 6 -r 7
+    - duqtools plot -y zeff -m user/91234/5 -i data.csv
+    - duqtools plot -y zeff -m user/91234/5 -o json
+    """
     from .plot import plot
-    with op_queue_context():
-        plot(**kwargs)
+    plot(**kwargs)
 
 
 @cli.command('clean')
