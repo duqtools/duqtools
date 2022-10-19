@@ -65,5 +65,14 @@
     "jset_id": "JobProcessingPanel.runDirNumber",
     "type": "str",
     "dimension": "scalar"
+  },
+  "kwmain": {
+    "jset_id": null,
+    "nml_id": {
+      "namelist": "NLIST2",
+      "field": "KWMAIN"
+    },
+    "type": "str",
+    "dimension": "scalar"
   }
 }
