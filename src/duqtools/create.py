@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Iterable
+from typing import Sequence
 
 import pandas as pd
 
@@ -10,7 +10,7 @@ from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models import WorkDirectory
 from .operations import add_to_op_queue, op_queue
-from .schema.runs import Runs
+from .schema.runs import Run, Runs
 from .system import get_system
 
 logger = logging.getLogger(__name__)
@@ -18,19 +18,36 @@ logger = logging.getLogger(__name__)
 RUN_PREFIX = 'run_'
 
 
-def any_locations_exist(locations: Iterable[ImasHandle]):
+def any_data_locations_exist(models: Sequence[ImasHandle]):
     """Check IDS coordinates and raise if any exist."""
     any_exists = False
-    for location in locations:
-        if location.exists():
-            logger.info('Target %s already exists', location)
+
+    for model in models:
+        if model.data_in.exists():
+            logger.info('Target %s already exists', model.data_in)
             op_queue.add_no_op(
                 description='Not creating IDS',
-                extra_description=f'IDS entry {location} exists')
+                extra_description=f'IDS entry {model.data_in} exists')
             any_exists = True
-    if any_exists:
-        return True
-    return False
+
+    return any_exists
+
+
+def any_run_dirs_exist(models: Sequence[Run], *, workspace):
+    any_exists = False
+
+    for model in models:
+        run_drc = workspace.cwd / model.dirname
+
+        if run_drc.exists():
+            op_queue.add_no_op(
+                description='Not creating directory',
+                extra_description=f'Directory {run_drc} exists',
+            )
+
+        any_exists = True
+
+    return any_exists
 
 
 @add_to_op_queue('Setting inital condition of', '{target_in}', quiet=True)
@@ -54,6 +71,34 @@ def write_runs_csv(runs, fname: str = 'data.csv'):
     df.to_csv(fname)
 
 
+def create_run(model: Run, *, template_drc: Path, source: ImasHandle,
+               workspace: WorkDirectory, force: bool):
+    """Take a run model and create it."""
+    system = get_system()
+
+    run_drc = workspace.cwd / model.dirname
+
+    op_queue.add(action=run_drc.mkdir,
+                 kwargs={
+                     'parents': True,
+                     'exist_ok': force
+                 },
+                 description='Creating run',
+                 extra_description=f'{run_drc}')
+
+    source.copy_data_to(model.data_in)
+
+    system.copy_from_template(template_drc, run_drc)
+
+    apply_combination(model.data_in, run_drc, model.operations)
+
+    system.write_batchfile(workspace, model.dirname, template_drc)
+
+    system.update_imas_locations(run=run_drc,
+                                 inp=model.data_in,
+                                 out=model.data_out)
+
+
 def create(*, force, **kwargs):
     """Create input for jetto and IDS data structures.
 
@@ -61,8 +106,6 @@ def create(*, force, **kwargs):
     ----------
     force : bool
         Override protection if data and directories already exist.
-    recreate_runs : list[str]
-        Skip reading duqtools.yaml and re-create these runs
 
     **kwargs
         Unused.
@@ -90,41 +133,43 @@ def create(*, force, **kwargs):
     matrix = tuple(model.expand() for model in dimensions)
     combinations = matrix_sampler(*matrix, **dict(options.sampler))
 
+    runs = []
+
+    # Create run models
+
+    for i, operations in enumerate(combinations):
+        dirname = f'{RUN_PREFIX}{i:04d}'
+
+        data_in = ImasHandle(db=options.data.imasdb,
+                             shot=source.shot,
+                             run=options.data.run_in_start_at + i)
+        data_out = ImasHandle(db=options.data.imasdb,
+                              shot=source.shot,
+                              run=options.data.run_out_start_at + i)
+
+        model = Run(dirname=dirname,
+                    data_in=data_in,
+                    data_out=data_out,
+                    operations=operations)
+        runs.append(model)
+
     # Safety checks
 
     targets_exist = False
-    if not force:
-        if workspace.runs_yaml.exists():
-            op_queue.add_no_op(
-                description='Not creating runs.yaml',
-                extra_description=f'{workspace.runs_yaml} exists')
-            targets_exist = True
 
-        locations = (ImasHandle(db=options.data.imasdb,
-                                shot=source.shot,
-                                run=options.data.run_in_start_at + i)
-                     for i in range(len(combinations)))
+    if not force and workspace.runs_yaml.exists():
+        op_queue.add_no_op(description='Not creating runs.yaml',
+                           extra_description=f'{workspace.runs_yaml} exists')
 
-        if any_locations_exist(locations):
-            targets_exist = True
+        targets_exist = True
 
-    runs = []
+    if not force and any_data_locations_exist(runs):
+        targets_exist = True
 
-    if not force:
-        for i in range(len(combinations)):
-            run_name = f'{RUN_PREFIX}{i:04d}'
-            run_drc = workspace.cwd / run_name
+    if not force and any_run_dirs_exist(runs, workspace=workspace):
+        targets_exist = True
 
-            if run_drc.exists():
-                op_queue.add_no_op(
-                    description='Not creating directory',
-                    extra_description=f'Directory {run_drc} exists',
-                )
-                targets_exist = True
-
-    # Do one final check if we will not overwrite existing files
-
-    if targets_exist and not force:
+    if not force and targets_exist:
         op_queue.add_no_op(description='Not creating runs',
                            extra_description='some targets already exist, '
                            'use --force to override')
@@ -132,46 +177,14 @@ def create(*, force, **kwargs):
 
     # End safety checks
 
-    for i, combination in enumerate(combinations):
-        run_name = f'{RUN_PREFIX}{i:04d}'
-        run_drc = workspace.cwd / run_name
-
-        op_queue.add(action=run_drc.mkdir,
-                     kwargs={
-                         'parents': True,
-                         'exist_ok': force
-                     },
-                     description='Creating run',
-                     extra_description=f'{run_drc}')
-
-        target_in = ImasHandle(db=options.data.imasdb,
-                               shot=source.shot,
-                               run=options.data.run_in_start_at + i)
-        target_out = ImasHandle(db=options.data.imasdb,
-                                shot=source.shot,
-                                run=options.data.run_out_start_at + i)
-
-        source.copy_data_to(target_in)
-
-        system.copy_from_template(template_drc, run_drc)
-
-        apply_combination(target_in, run_drc, combination)
-
-        system.write_batchfile(workspace, run_name, template_drc)
-
-        system.update_imas_locations(run=run_drc,
-                                     inp=target_in,
-                                     out=target_out)
-
-        runs.append({
-            'dirname': run_name,
-            'data_in': target_in,
-            'data_out': target_out,
-            'operations': combination
-        })
-
     write_runs_file(runs, workspace)
     write_runs_csv(runs)
+
+    for model in runs:
+        create_run(model,
+                   source=source,
+                   template_drc=template_drc,
+                   force=force)
 
 
 def recreate(*, force, runs, **kwargs):
@@ -196,38 +209,9 @@ def recreate(*, force, runs, **kwargs):
 
     for run in runs:
         model = run_dict[run]
-        i = int(run.strip(RUN_PREFIX))
 
-        target_in = model.data_in
-        target_out = model.data_out
-        combination = model.operations
-        run_name = model.dirname
-
-        run_drc = workspace.cwd / run_name
-
-        op_queue.add(action=run_drc.mkdir,
-                     kwargs={
-                         'parents': True,
-                         'exist_ok': force
-                     },
-                     description='Creating run',
-                     extra_description=f'{run_drc}')
-
-        target_in = ImasHandle(db=options.data.imasdb,
-                               shot=source.shot,
-                               run=options.data.run_in_start_at + i)
-        target_out = ImasHandle(db=options.data.imasdb,
-                                shot=source.shot,
-                                run=options.data.run_out_start_at + i)
-
-        source.copy_data_to(target_in)
-
-        system.copy_from_template(template_drc, run_drc)
-
-        apply_combination(target_in, run_drc, combination)
-
-        system.write_batchfile(workspace, run_name, template_drc)
-
-        system.update_imas_locations(run=run_drc,
-                                     inp=target_in,
-                                     out=target_out)
+        create_run(model,
+                   source=source,
+                   template_drc=template_drc,
+                   workspace=workspace,
+                   force=force)
