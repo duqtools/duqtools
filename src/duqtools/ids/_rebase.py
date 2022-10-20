@@ -57,7 +57,8 @@ def standardize_grid(ds: xr.Dataset,
         New dataset with `new_dim` as a coordinate dimension.
     """
     if isinstance(new_dim_data, int):
-        new_dim_data = ds.isel(**{group: new_dim_data})[new_dim].data
+        new_dim_data = ds.isel(  # type: ignore
+            **{group: new_dim_data})[new_dim].data  # type:ignore
 
     gb = ds.groupby(group)
 

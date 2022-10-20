@@ -5,6 +5,7 @@ from time import sleep
 from jetto_tools import config, template
 
 from .config import cfg
+from .jetto._system import jetto_lookup
 from .models import Job, WorkDirectory
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,10 @@ info, debug = logger.info, logger.debug
 stream = logging.StreamHandler()
 stream.setFormatter(logging.Formatter('%(message)s'))
 logger.addHandler(stream)
+
+
+class StatusError(Exception):
+    ...
 
 
 class Status():
@@ -119,21 +124,36 @@ class Monitor():
         self.job = job
         self.outfile = None
 
-        self.set_status()
+        jetto_template = template.from_directory(job.dir)
+        jetto_template.lookup.update(jetto_lookup)
+        jetto_config = config.RunConfig(jetto_template)
+
+        self.check_kwmain_flag(jetto_config)
 
         infile = job.in_file
         if not infile.exists():
             debug('%s does not exist, but the job is running', infile)
             return
 
-        jetto_template = template.from_directory(job.dir)
-        jetto_config = config.RunConfig(jetto_template)
-
         self.start = jetto_config.start_time
         self.end = jetto_config.end_time
         self.time = self.start
 
         self.finished = False
+
+        self.set_status()
+
+    def check_kwmain_flag(self, jetto_config):
+        """Check for NLIST2/KWMAIN in jetto.jset. If this flag is not set, the
+        output in `job.out_file` does not contain the output that is grepped
+        for the progress.
+
+        More info: https://github.com/CarbonCollective/fusion-dUQtools/issues/337
+        """
+        msg = ('Cannot show detailed status, `nlist2.KWMAIN` flag'
+               ' is not set to 1 in `{self.job.status_file}`')
+        if jetto_config['kwmain'] != 1:
+            raise StatusError(msg)
 
     def set_status(self):
         if not self.job.has_status:

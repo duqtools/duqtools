@@ -336,6 +336,6 @@ class IDSMapping(Mapping):
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 
-        ds = xr.Dataset(data_vars=xr_data_vars)
+        ds = xr.Dataset(data_vars=xr_data_vars)  # type: ignore
 
         return ds
