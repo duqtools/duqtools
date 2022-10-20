@@ -15,7 +15,7 @@ stream.setFormatter(logging.Formatter('%(message)s'))
 logger.addHandler(stream)
 
 
-class StatusError(BaseException):
+class StatusError(Exception):
     ...
 
 
@@ -128,7 +128,7 @@ class Monitor():
         jetto_template.lookup.update(jetto_lookup)
         jetto_config = config.RunConfig(jetto_template)
 
-        self.check_kwmain_flag(jetto_config, job)
+        self.check_kwmain_flag(jetto_config)
 
         infile = job.in_file
         if not infile.exists():
