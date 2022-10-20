@@ -61,6 +61,9 @@ def create(*, force, **kwargs):
     ----------
     force : bool
         Override protection if data and directories already exist.
+    recreate_runs : list[str]
+        Skip reading duqtools.yaml and re-create these runs
+
     **kwargs
         Unused.
     """
@@ -169,3 +172,62 @@ def create(*, force, **kwargs):
 
     write_runs_file(runs, workspace)
     write_runs_csv(runs)
+
+
+def recreate(*, force, runs, **kwargs):
+    options = cfg.create
+
+    template_drc = options.template
+
+    workspace = WorkDirectory.parse_obj(cfg.workspace)
+
+    run_dict = {str(run.dirname): run for run in workspace.runs}
+
+    for run in runs:
+        if run not in run_dict:
+            raise ValueError(f'`{run}` not in `runs.yaml`.')
+
+    system = get_system()
+
+    if not options.template_data:
+        source = system.imas_from_path(template_drc)
+    else:
+        source = ImasHandle.parse_obj(options.template_data)
+
+    for run in runs:
+        model = run_dict[run]
+        i = int(run.strip(RUN_PREFIX))
+
+        target_in = model.data_in
+        target_out = model.data_out
+        combination = model.operations
+        run_name = model.dirname
+
+        run_drc = workspace.cwd / run_name
+
+        op_queue.add(action=run_drc.mkdir,
+                     kwargs={
+                         'parents': True,
+                         'exist_ok': force
+                     },
+                     description='Creating run',
+                     extra_description=f'{run_drc}')
+
+        target_in = ImasHandle(db=options.data.imasdb,
+                               shot=source.shot,
+                               run=options.data.run_in_start_at + i)
+        target_out = ImasHandle(db=options.data.imasdb,
+                                shot=source.shot,
+                                run=options.data.run_out_start_at + i)
+
+        source.copy_data_to(target_in)
+
+        system.copy_from_template(template_drc, run_drc)
+
+        apply_combination(target_in, run_drc, combination)
+
+        system.write_batchfile(workspace, run_name, template_drc)
+
+        system.update_imas_locations(run=run_drc,
+                                     inp=target_in,
+                                     out=target_out)
