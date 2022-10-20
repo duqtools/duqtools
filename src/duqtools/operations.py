@@ -16,6 +16,18 @@ from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
 
+OP_STYLE = {'fg': 'green'}
+
+NO_OP_STYLE = {
+    'fg': 'red',
+    'bold': True,
+}
+
+HEADER_STYLE = {
+    'fg': 'red',
+    'bold': True,
+}
+
 
 class Operation(BaseModel):
     """Operation, simple class which has a callable action.
@@ -28,7 +40,7 @@ class Operation(BaseModel):
                         description='print out this operation to the screen')
     description: str = Field(
         description='description of the operation to be done')
-    action: Callable = Field(
+    action: Optional[Callable] = Field(
         description='a function which can be executed when we '
         'decide to apply this operation')
     extra_description: Optional[str] = Field(description='Extra description')
@@ -49,13 +61,16 @@ class Operation(BaseModel):
         Operation
             The operation that was executed
         """
-        logger.debug(self.long_description)
-        self.action(*self.args, **self.kwargs)  # type: ignore
+        if self.action:
+            logger.debug(self.long_description)
+            self.action(*self.args, **self.kwargs)  # type: ignore
         return self
 
     @property
     def long_description(self):
-        description = click.style(self.description, fg='green')
+        style = NO_OP_STYLE if self.action is None else OP_STYLE
+
+        description = click.style(self.description, **style)
 
         if self.extra_description is not None:
             description = f'{description} : {self.extra_description}'
@@ -98,7 +113,7 @@ class Operations(deque):
         return Operations._instance
 
     def add(self, **kwargs) -> None:
-        """convenience Operation wrapper around put.
+        """Convenience Operation wrapper around .append().
 
         ```python
         from duqtools.operations import add_to_op_queue.
@@ -109,11 +124,17 @@ class Operations(deque):
         """
         self.append(Operation(**kwargs))
 
-    def put(self, item: Operation) -> None:
+    def add_no_op(self, description: str, extra_description: str = None):
+        """Adds a line to specify an action will not be undertaken."""
+        self.add(action=None,
+                 description=description,
+                 extra_description=extra_description)
+
+    def put(self, item: Operation):
         """synonym for append."""
         self.append(item)
 
-    def append(self, item: Operation) -> None:  # type: ignore
+    def append(self, item: Operation):  # type: ignore
         """Restrict our diet to Operation objects only."""
         if self.enabled:
             logger.debug(
@@ -136,8 +157,7 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        duqlog_screen.info(
-            click.style('Applying Operations', fg='red', bold=True))
+        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))
         if not cfg.quiet:
             with tqdm(total=len(self), position=1) as pbar:
                 pbar.set_description('Applying operations')
@@ -166,8 +186,9 @@ class Operations(deque):
         # To print the descriptions we need to get them
         duqlog_screen.info('')
         duqlog_screen.info(
-            click.style('Operations in the Queue:', fg='red', bold=True))
-        duqlog_screen.info(click.style('========================', fg='red'))
+            click.style('Operations in the Queue:', **HEADER_STYLE))
+        duqlog_screen.info(
+            click.style('========================', **HEADER_STYLE))
         for op in self:
             if not op.quiet:
                 duqlog_screen.info('- ' + op.long_description)
@@ -189,9 +210,7 @@ class Operations(deque):
         if len(self) != 0:
             duqlog_screen.warning(
                 click.style((f'There are still {len(self)} operations '
-                             'in the queue at program exit!'),
-                            fg='red',
-                            bold=True))
+                             'in the queue at program exit!'), **HEADER_STYLE))
 
 
 op_queue = Operations()

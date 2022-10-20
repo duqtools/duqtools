@@ -5,8 +5,6 @@ import os
 import shutil
 from pathlib import Path
 
-import click
-
 from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
@@ -51,11 +49,8 @@ def cleanup(out, force, **kwargs):
         if out:
             data_out.delete()
         else:
-            op_queue.add(action=lambda: None,
-                         description=click.style('NOT Removing',
-                                                 fg='red',
-                                                 bold=True),
-                         extra_description=f'{data_out}')
+            op_queue.add_no_op(description='NOT Removing',
+                               extra_description=f'{data_out}')
 
         if (Path(run.dirname).exists()):
             op_queue.add(

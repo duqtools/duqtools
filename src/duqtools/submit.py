@@ -5,8 +5,6 @@ from itertools import cycle
 from pathlib import Path
 from typing import Deque, Sequence, Tuple
 
-import click
-
 from ._logging_utils import duqlog_screen
 from .config import cfg
 from .models import Job, WorkDirectory
@@ -103,11 +101,9 @@ def status_file_ok(job, *, force):
         with open(status_file, 'r') as f:
             info('Status of %s: %s. To rerun enable the --force flag',
                  status_file, f.read())
-        op_queue.add(action=lambda: None,
-                     description=click.style('Not Submitting',
-                                             fg='red',
-                                             bold=True),
-                     extra_description=f'{job} (reason: status file exists)')
+        op_queue.add_no_op(
+            description='Not Submitting',
+            extra_description=f'{job} (reason: status file exists)')
         return False
 
     return True
@@ -116,11 +112,9 @@ def status_file_ok(job, *, force):
 def lockfile_ok(job, *, force):
     lockfile = job.lockfile
     if lockfile.exists() and not force:
-        op_queue.add(action=lambda: None,
-                     description=click.style('Not Submitting',
-                                             fg='red',
-                                             bold=True),
-                     extra_description=f'{job} (reason: {lockfile} exists)')
+        op_queue.add_no_op(
+            description='Not Submitting',
+            extra_description=f'{job} (reason: {lockfile} exists)')
         return False
 
     return True
@@ -167,15 +161,11 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
         job_queue.append(job)
 
     if array and Path('./duqtools_slurm_array.sh').exists() and not force:
-        op_queue.add(
-            action=lambda: None,
-            description=click.style('Not Creating Array', fg='red', bold=True),
+        op_queue.add_no_op(
+            description='Not Creating Array',
             extra_description='(reason: duqtools_slurm_array.sh exists)')
-        op_queue.add(action=lambda: None,
-                     description=click.style('Not Submitting Array',
-                                             fg='red',
-                                             bold=True),
-                     extra_description='use --force to override')
+        op_queue.add_no_op(description='Not Submitting Array',
+                           extra_description='use --force to override')
         return
 
     submitter = job_scheduler if schedule else job_submitter

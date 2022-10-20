@@ -118,22 +118,34 @@ class JettoSystem(AbstractSystem):
             f.write(ret.stdout)
 
     @staticmethod
+    def _apply_patches_to_template(jetto_template: template.Template):
+        """Apply settings that are necessary for duqtools to function."""
+        # Force output of IDS data
+        # https://github.com/CarbonCollective/fusion-dUQtools/issues/343
+        jetto_template.jset._settings['JobProcessingPanel.selIdsRunid'] = False
+
+    @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(source_drc: Path, target_drc: Path):
         jetto_jset = jset.read(source_drc / 'jetto.jset')
         jetto_namelist = namelist.read(source_drc / 'jetto.in')
+
         jetto_sanco = None
-        jetto_extra = []
         if (source_drc / 'jetto.sin').exists():
             jetto_sanco = namelist.read(source_drc / 'jetto.sin')
-        if (source_drc / 'jetto.ex').exists():
-            jetto_extra.append(str(source_drc / 'jetto.ex'))
 
-        jetto_template = template.Template(jetto_jset,
-                                           jetto_namelist,
-                                           jetto_lookup,
+        jetto_extra = []
+        if (source_drc / 'jetto.ex').exists():
+            jetto_extra = [str(source_drc / 'jetto.ex')]
+
+        jetto_template = template.Template(jset=jetto_jset,
+                                           namelist=jetto_namelist,
+                                           lookup=jetto_lookup,
                                            sanco_namelist=jetto_sanco,
                                            extra_files=jetto_extra)
+
+        JettoSystem._apply_patches_to_template(jetto_template)
+
         jetto_config = config.RunConfig(jetto_template)
 
         jetto_config.export(target_drc)

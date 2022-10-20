@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-import click
 import pandas as pd
 
 from .apply_model import apply_model
@@ -25,11 +24,9 @@ def any_locations_exist(locations: Iterable[ImasHandle]):
     for location in locations:
         if location.exists():
             logger.info('Target %s already exists', location)
-            op_queue.add(action=lambda: None,
-                         description=click.style('Not creating IDS',
-                                                 fg='red',
-                                                 bold=True),
-                         extra_description=f'IDS entry {location} exists')
+            op_queue.add_no_op(
+                description='Not creating IDS',
+                extra_description=f'IDS entry {location} exists')
             any_exists = True
     if any_exists:
         return True
@@ -95,11 +92,9 @@ def create(*, force, **kwargs):
     targets_exist = False
     if not force:
         if workspace.runs_yaml.exists():
-            op_queue.add(action=lambda: None,
-                         description=click.style('Not creating runs.yaml',
-                                                 fg='red',
-                                                 bold=True),
-                         extra_description=f'{workspace.runs_yaml} exists')
+            op_queue.add_no_op(
+                description='Not creating runs.yaml',
+                extra_description=f'{workspace.runs_yaml} exists')
             targets_exist = True
 
         locations = (ImasHandle(db=options.data.imasdb,
@@ -118,25 +113,21 @@ def create(*, force, **kwargs):
             run_drc = workspace.cwd / run_name
 
             if run_drc.exists():
-                op_queue.add(action=lambda: None,
-                             description=click.style('Not creating directory',
-                                                     fg='red',
-                                                     bold=True),
-                             extra_description=f'Directory {run_drc} exists')
+                op_queue.add_no_op(
+                    description='Not creating directory',
+                    extra_description=f'Directory {run_drc} exists',
+                )
                 targets_exist = True
 
-# do one final check if we will not overwrite existing files
+    # Do one final check if we will not overwrite existing files
+
     if targets_exist and not force:
-        op_queue.add(action=lambda: None,
-                     description=click.style('Not creating runs',
-                                             fg='red',
-                                             bold=True),
-                     extra_description='some targets already exist, '
-                     'use --force to override')
+        op_queue.add_no_op(description='Not creating runs',
+                           extra_description='some targets already exist, '
+                           'use --force to override')
         return
 
-
-# end safety checks
+    # End safety checks
 
     for i, combination in enumerate(combinations):
         run_name = f'{RUN_PREFIX}{i:04d}'
