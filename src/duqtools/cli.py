@@ -302,8 +302,9 @@ def cli_clean(**kwargs):
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
 @common_options
 def cli_go(**kwargs):
-    """Run create - submit - status - dash in succession, very useful for
-    existing tested and working pipelines
+    """Run create, submit, status, dash in succession.
+
+    Useful for existing tested and working pipelines.
     """
     from .create import create
     from .dash import dash
@@ -324,6 +325,13 @@ def cli_go(**kwargs):
     status(**skwargs)
 
     dash(**kwargs)
+
+
+@cli.command('yolo')
+@click.pass_context
+def cli_yolo(ctx, **kwargs):
+    """Live on the edge, run `duqtools go --force --yes --quiet`."""
+    ctx.invoke(cli_go, force=True, quiet=True, yes=True)
 
 
 @cli.command('dash')
