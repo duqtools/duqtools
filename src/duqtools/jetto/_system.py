@@ -121,7 +121,7 @@ class JettoSystem(AbstractSystem):
     def _apply_patches_to_template(jetto_template: template.Template):
         """Apply settings that are necessary for duqtools to function."""
         # Force output of IDS data
-        # https://github.com/CarbonCollective/fusion-dUQtools/issues/343
+        # https://github.com/duqtools/duqtools/issues/343
         jetto_template.jset._settings['JobProcessingPanel.selIdsRunid'] = False
 
     @staticmethod

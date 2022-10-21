@@ -1,6 +1,6 @@
 site_name: dUQtools
 site_url: https://duqtools.readthedocs.io
-repo_url: https://github.com/CarbonCollective/fusion-dUQtools
+repo_url: https://github.com/duqtools/duqtools
 repo_name: GitHub
 
 nav:
@@ -25,8 +25,8 @@ nav:
     - examples/xarray-ions.ipynb
   - Contributing: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
-  - 🔗 Source code: https://github.com/CarbonCollective/fusion-dUQtools
-  - 🔗 Issues: https://github.com/CarbonCollective/fusion-dUQtools/issues
+  - 🔗 Source code: https://github.com/duqtools/duqtools
+  - 🔗 Issues: https://github.com/duqtools/duqtools/issues
 
 
 theme:
