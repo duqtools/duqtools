@@ -1,10 +1,10 @@
 | Source | Badges |
 | --- | --- |
 | ReadTheDocs |[![Documentation Status](https://readthedocs.org/projects/duqtools/badge/?version=latest)](https://duqtools.readthedocs.io/en/latest/?badge=latest) |
-| Github | [![Tests](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml/badge.svg)](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/test.yaml) |
+| Github | [![Tests](https://github.com/duqtools/duqtools/actions/workflows/test.yaml/badge.svg)](https://github.com/duqtools/duqtools/actions/workflows/test.yaml) |
 | PyPI | [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/duqtools)](https://pypi.org/project/duqtools/) [![PyPI](https://img.shields.io/pypi/v/duqtools.svg?style=flat)](https://pypi.org/project/duqtools/) |
-| SonarCloud | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=CarbonCollective_fusion-dUQtools&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=CarbonCollective_fusion-dUQtools) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=CarbonCollective_fusion-dUQtools&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=CarbonCollective_fusion-dUQtools) |
-| CodeCov.io | [![codecov](https://codecov.io/gh/CarbonCollective/fusion-dUQtools/branch/main/graph/badge.svg?token=TE9SBYJY8L)](https://codecov.io/gh/CarbonCollective/fusion-dUQtools)
+| SonarCloud | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) |
+| CodeCov.io | [![codecov](https://codecov.io/gh/duqtools/duqtools/branch/main/graph/badge.svg?token=TE9SBYJY8L)](https://codecov.io/gh/duqtools/duqtools)
 
 # Duqtools
 
@@ -27,7 +27,7 @@ To install:
 pip install duqtools
 ```
 
-The source code is available from [Github](https://github.com/CarbonCollective/fusion-dUQtools).
+The source code is available from [Github](https://github.com/duqtools/duqtools).
 
 Suggestions, improvements, and edits are most welcome.
 

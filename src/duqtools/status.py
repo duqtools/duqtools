@@ -148,7 +148,7 @@ class Monitor():
         output in `job.out_file` does not contain the output that is grepped
         for the progress.
 
-        More info: https://github.com/CarbonCollective/fusion-dUQtools/issues/337
+        More info: https://github.com/duqtools/duqtools/issues/337
         """
         msg = ('Cannot show detailed status, `nlist2.KWMAIN` flag'
                ' is not set to 1 in `{self.job.status_file}`')

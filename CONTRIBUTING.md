@@ -38,7 +38,7 @@ One of the code owners will review your code and request changes if needed. Once
 Clone the repository into the `duqtools` directory:
 
 ```console
-git clone https://github.com/CarbonCollective/fusion-dUQtools.git duqtools
+git clone https://github.com/duqtools/duqtools
 ```
 
 Install using `virtualenv`:
@@ -86,4 +86,4 @@ The versioning scheme we use is [SemVer](http://semver.org/).
 bumpversion minor
 ```
 
-2. Make a new [release](https://github.com/CarbonCollective/fusion-dUQtools/releases). The [upload to pypi](https://github.com/CarbonCollective/fusion-dUQtools/actions/workflows/publish.yaml) is triggered when a release is published.
+2. Make a new [release](https://github.com/duqtools/duqtools/releases). The [upload to pypi](https://github.com/duqtools/duqtools/actions/workflows/publish.yaml) is triggered when a release is published.

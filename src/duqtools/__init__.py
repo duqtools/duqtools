@@ -16,7 +16,7 @@ import warnings
 
 logging.basicConfig(level=logging.INFO)
 
-# https://github.com/CarbonCollective/fusion-dUQtools/issues/264
+# https://github.com/duqtools/duqtools/issues/264
 warnings.filterwarnings(
     'ignore',
     'Explicit custom root behavior not yet implemented for pydantic_yaml')

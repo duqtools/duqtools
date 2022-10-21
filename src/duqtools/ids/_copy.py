@@ -64,7 +64,7 @@ def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
             entry.code.version = 'unknown'
 
         # The repository, always set to duqtools
-        entry.code.repository = 'https://github.com/CarbonCollective/fusion-dUQtools/'
+        entry.code.repository = 'https://github.com/duqtools/duqtools/'
 
         entry.put(db_entry=data_entry_target)
 

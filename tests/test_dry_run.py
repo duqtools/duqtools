@@ -88,7 +88,7 @@ def test_submit(cmdline_workdir):
 
 
 @pytest.mark.xfail(
-    reason='https://github.com/CarbonCollective/fusion-dUQtools/issues/257')
+    reason='https://github.com/duqtools/duqtools/issues/257')
 @pytest.mark.dependency(depends=['test_real_create'])
 def test_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
