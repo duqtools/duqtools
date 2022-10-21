@@ -9,6 +9,7 @@ from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
 from .operations import op_queue
+from .schema.runs import Run
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,17 @@ def remove_files(*filenames: str):
             os.unlink(filename)
         except FileNotFoundError:
             pass
+
+
+def remove_run(model: Run):
+    """Remove run directory if it exists."""
+    if Path(model.dirname).exists():
+        op_queue.add(
+            action=shutil.rmtree,
+            args=(model.dirname, ),
+            description='Removing run dir',
+            extra_description=f'{model.dirname}',
+        )
 
 
 def cleanup(out, force, **kwargs):
@@ -52,13 +64,7 @@ def cleanup(out, force, **kwargs):
             op_queue.add_no_op(description='NOT Removing',
                                extra_description=f'{data_out}')
 
-        if (Path(run.dirname).exists()):
-            op_queue.add(
-                action=shutil.rmtree,
-                args=(run.dirname, ),
-                description='Removing run dir',
-                extra_description=f'{run.dirname}',
-            )
+        remove_run(run)
 
     op_queue.add(
         action=shutil.move,

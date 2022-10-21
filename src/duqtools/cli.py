@@ -183,9 +183,6 @@ def cli_create(**kwargs):
 
 @cli.command('recreate')
 @click.argument('runs', nargs=-1)
-@click.option('--force',
-              is_flag=True,
-              help='Overwrite existing run directories and IDS data.')
 @common_options
 def cli_recreate(**kwargs):
     """Read `runs.yaml` and re-create the given runs.

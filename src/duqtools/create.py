@@ -5,6 +5,7 @@ from typing import List, Sequence
 import pandas as pd
 
 from .apply_model import apply_model
+from .cleanup import remove_run
 from .config import cfg
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
@@ -202,29 +203,24 @@ def create(*, force, **kwargs):
         run_creator.create_run(model, force=force)
 
 
-def recreate(*, runs, force, **kwargs):
+def recreate(*, runs, **kwargs):
     run_creator = RunCreator()
 
     run_dict = {str(run.dirname): run for run in run_creator.workspace.runs}
 
+    run_models = []
     for run in runs:
         if run not in run_dict:
             raise ValueError(f'`{run}` not in `runs.yaml`.')
 
-    run_models = [run_dict[run] for run in runs]
+        model = run_dict[run]
+        model.data_in = ImasHandle.parse_obj(model.data_in)
+        model.data_out = ImasHandle.parse_obj(model.data_out)
 
-    # convert ImasBaseModel to ImasHandle in run_models
+        model.data_in.delete()
+        remove_run(model)
 
-    if not force:
-
-        target_exists = any([
-            run_creator.data_locations_exist(run_models),
-            run_creator.run_dirs_exist(run_models),
-        ])
-
-        if target_exists:
-            run_creator.warn_no_create_runs()
-            return
+        run_models.append(model)
 
     for model in run_models:
-        run_creator.create_run(model, force=force)
+        run_creator.create_run(model)
