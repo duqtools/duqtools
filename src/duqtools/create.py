@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Sequence
+from typing import Any, List, Sequence
 
 import pandas as pd
 
@@ -23,8 +23,8 @@ class CreateError(Exception):
     ...
 
 
-class RunCreator:
-    """Docstring for RunCreator."""
+class CreateManager:
+    """Docstring for CreateManager."""
 
     def __init__(self):
         self.options = cfg.create
@@ -48,18 +48,20 @@ class RunCreator:
 
         return source
 
-    def generate_combinations(self):
+    def generate_ops_list(self) -> List[Any]:
+        """Generate set of operations for a run."""
         dimensions = self.options.dimensions
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
         matrix = tuple(model.expand() for model in dimensions)
-        combinations = matrix_sampler(*matrix, **dict(self.options.sampler))
+        ops_list = matrix_sampler(*matrix, **dict(self.options.sampler))
 
-        return combinations
+        return ops_list
 
-    def combinations2runs(self, combinations) -> List[Run]:
-        runs = []
+    def make_run_models(self, ops_list: Sequence[Any]) -> List[Run]:
+        """Take list of operations and create run models."""
+        run_models = []
 
-        for i, operations in enumerate(combinations):
+        for i, operations in enumerate(ops_list):
             dirname = f'{RUN_PREFIX}{i:04d}'
 
             data_in = ImasHandle(db=self.options.data.imasdb,
@@ -73,9 +75,9 @@ class RunCreator:
                         data_in=data_in,
                         data_out=data_out,
                         operations=operations)
-            runs.append(model)
+            run_models.append(model)
 
-        return runs
+        return run_models
 
     def runs_yaml_exists(self) -> bool:
         """Check if runs.yaml exists."""
@@ -124,9 +126,9 @@ class RunCreator:
                            'use --force to override')
 
     @add_to_op_queue('Setting inital condition of', '{data_in}', quiet=True)
-    def apply_combination(self, data_in: ImasHandle, run_dir: Path,
-                          combination):
-        for model in combination:
+    def apply_operations(self, data_in: ImasHandle, run_dir: Path,
+                         operations: List[Any]):
+        for model in operations:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 
     @add_to_op_queue('Writing runs', '{self.workspace.runs_yaml}', quiet=True)
@@ -136,8 +138,8 @@ class RunCreator:
             runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
-    def write_runs_csv(self, runs, fname: str = 'data.csv'):
-        run_map = {run['dirname']: run['data_out'].dict() for run in runs}
+    def write_runs_csv(self, runs: Sequence[Run], fname: str = 'data.csv'):
+        run_map = {run.dirname: run.data_out.dict() for run in runs}
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
 
@@ -157,7 +159,7 @@ class RunCreator:
 
         self.system.copy_from_template(self.template_drc, run_drc)
 
-        self.apply_combination(model.data_in, run_drc, model.operations)
+        self.apply_operations(model.data_in, run_drc, model.operations)
 
         self.system.write_batchfile(self.workspace, model.dirname,
                                     self.template_drc)
@@ -178,35 +180,44 @@ def create(*, force, **kwargs):
     **kwargs
         Unused.
     """
-    run_creator = RunCreator()
+    create_mgr = CreateManager()
 
-    combinations = run_creator.generate_combinations()
+    ops_list = create_mgr.generate_ops_list()
 
-    runs = run_creator.combinations2runs(combinations)
+    runs = create_mgr.make_run_models(ops_list)
 
     if not force:
 
         target_exists = any([
-            run_creator.runs_yaml_exists(),
-            run_creator.data_locations_exist(runs),
-            run_creator.run_dirs_exist(runs),
+            create_mgr.runs_yaml_exists(),
+            create_mgr.data_locations_exist(runs),
+            create_mgr.run_dirs_exist(runs),
         ])
 
         if target_exists:
-            run_creator.warn_no_create_runs()
+            create_mgr.warn_no_create_runs()
             return
 
-    run_creator.write_runs_file(runs)
-    run_creator.write_runs_csv(runs)
+    create_mgr.write_runs_file(runs)
+    create_mgr.write_runs_csv(runs)
 
     for model in runs:
-        run_creator.create_run(model, force=force)
+        create_mgr.create_run(model, force=force)
 
 
 def recreate(*, runs, **kwargs):
-    run_creator = RunCreator()
+    """Create input for jetto and IDS data structures.
 
-    run_dict = {str(run.dirname): run for run in run_creator.workspace.runs}
+    Parameters
+    ----------
+    runs : Sequence[str]
+        Run names to recreate.
+    **kwargs
+        Unused.
+    """
+    create_mgr = CreateManager()
+
+    run_dict = {str(run.dirname): run for run in create_mgr.workspace.runs}
 
     run_models = []
     for run in runs:
@@ -223,4 +234,4 @@ def recreate(*, runs, **kwargs):
         run_models.append(model)
 
     for model in run_models:
-        run_creator.create_run(model)
+        create_mgr.create_run(model)
