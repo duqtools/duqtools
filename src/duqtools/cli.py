@@ -181,6 +181,21 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
+@cli.command('recreate')
+@click.argument('runs', nargs=-1)
+@common_options
+def cli_recreate(**kwargs):
+    """Read `runs.yaml` and re-create the given runs.
+
+    Example:
+    \b
+    - duqtools recreate run_0003 run_0004 --force
+    """
+    from .create import recreate
+    with op_queue_context():
+        recreate(**kwargs)
+
+
 @cli.command('submit')
 @click.option('--force',
               is_flag=True,

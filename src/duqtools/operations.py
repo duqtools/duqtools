@@ -197,11 +197,17 @@ class Operations(deque):
             duqlog_screen.info('Dry run enabled, not applying op_queue')
             return False
 
+        # Do not confirm if all actions are no-op
+        if all(op.action is None for op in self):
+            duqlog_screen.info('\nNo actions to execute.')
+            return False
+
         ans = self.yes or click.confirm(
-            'Do you want to apply all these operations?', default=False)
+            '\nDo you want to apply all these operations?', default=False)
 
         if ans:
             self.apply_all()
+
         return ans
 
     def check_unconfirmed_operations(self):
