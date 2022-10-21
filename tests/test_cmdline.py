@@ -57,6 +57,15 @@ def test_example_create(cmdline_workdir):
 
 
 @pytest.mark.dependency()
+def test_example_recreate(cmdline_workdir):
+    cmd = 'duqtools recreate run_0000 -c config.yaml --yes'.split()
+
+    with work_directory(cmdline_workdir):
+        result = sp.run(cmd)
+        assert (result.returncode == 0)
+
+
+@pytest.mark.dependency()
 def test_example_submit(cmdline_workdir, system, request):
     depends(request, [f'test_example_create[{system}]'])
 
