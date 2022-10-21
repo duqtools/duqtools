@@ -129,7 +129,7 @@ class RunCreator:
         for model in combination:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 
-    @add_to_op_queue('Writing runs', '{workspace.runs_yaml}', quiet=True)
+    @add_to_op_queue('Writing runs', '{self.workspace.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
         runs = Runs.parse_obj(runs)
         with open(self.workspace.runs_yaml, 'w') as f:
