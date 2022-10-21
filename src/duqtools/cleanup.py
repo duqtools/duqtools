@@ -43,7 +43,7 @@ def cleanup(out, force, **kwargs):
     """
     try:
         workspace = WorkDirectory.parse_obj(cfg.workspace)
-        runs = workspace.construct_runs
+        runs = workspace.runs
     except OSError:
         runs = ()
     else:

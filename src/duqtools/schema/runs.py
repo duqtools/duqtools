@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import List, Union
 
-from pydantic import DirectoryPath, Field
+from pydantic import Field
 
 from ._basemodel import BaseModel
 from ._dimensions import IDSOperation, JettoOperation
@@ -10,7 +11,7 @@ from ._imas import ImasBaseModel
 
 
 class Run(BaseModel):
-    dirname: DirectoryPath = Field(description='Directory of run')
+    dirname: Path = Field(description='Directory of run')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
     operations: List[Union[IDSOperation, JettoOperation,
