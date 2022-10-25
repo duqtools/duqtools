@@ -1,9 +1,7 @@
 import shutil
-from pathlib import Path
 
 import pytest
-
-TEST_DATA = Path.cwd() / 'tests' / 'test_data'
+from pytest import TEST_DATA
 
 
 def test_settings_manager(tmp_path):

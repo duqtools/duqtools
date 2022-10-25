@@ -5,14 +5,13 @@ from pathlib import Path
 
 import click
 import pytest
+from pytest import TEST_DATA
 from pytest_dependency import depends
 
 from duqtools.utils import work_directory
 
 config_file_name = 'config_jetto.yaml'
 systems = ['jetto-duqtools', 'jetto-pythontools']
-
-TEST_DATA = Path.cwd() / 'tests' / 'test_data'
 
 
 @pytest.fixture(scope='session', autouse=True)

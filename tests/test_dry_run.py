@@ -3,12 +3,12 @@ import shutil
 from pathlib import Path
 
 import pytest
+from pytest import TEST_DATA
 
 from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
 config_file = 'config_jetto.yaml'
-TEST_DATA = Path.cwd() / 'tests' / 'test_data'
 
 
 @pytest.fixture(scope='session', autouse=True)
