@@ -21,7 +21,8 @@ PREFIX0 = 'profiles_1d/0'
 @st.experimental_memo
 def get_ids_options():
     options = tuple(
-        set(v.ids for v in var_lookup.values() if (v.type == 'IDS-variable')))
+        {v.ids
+         for v in var_lookup.values() if (v.type == 'IDS-variable')})
     return options
 
 

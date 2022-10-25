@@ -31,7 +31,7 @@ def _apply_ids(model: IDSOperation, *,
     None
     """
     target_in = None
-    if type(ids_mapping) == ImasHandle:
+    if isinstance(ids_mapping, ImasHandle):
         target_in = ids_mapping
         ids_mapping = ids_mapping.get(model.variable.ids)
 

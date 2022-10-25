@@ -7,9 +7,9 @@ def jettovar_to_json(variable: JettoVar):
     jsetfields = []
     nmlfields = []
     for field in variable.keys:
-        if type(field) == JsetField:
+        if isinstance(field, JsetField):
             jsetfields.append(field)
-        elif type(field) == NamelistField:
+        elif isinstance(field, NamelistField):
             nmlfields.append(field)
         else:
             raise NotImplementedError(f'unknown Jetto field type {field}')

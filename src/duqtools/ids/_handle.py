@@ -107,7 +107,7 @@ class ImasHandle(ImasBaseModel):
         try:
             copy_ids_entry(self, destination)
         except Exception as err:
-            raise IOError(f'Failed to copy {self}') from err
+            raise OSError(f'Failed to copy {self}') from err
 
     @add_to_op_queue('Removing ids', '{self}')
     def delete(self):
@@ -203,11 +203,11 @@ class ImasHandle(ImasBaseModel):
             if cpcode == 0:
                 logger.debug('Data entry created: %s', self)
             else:
-                raise IOError(
+                raise OSError(
                     f'Cannot create data entry: {self}. '
                     f'Create a new db first using `imasdb {self.db}`')
         else:
-            raise IOError(f'Data entry does not exist: {self}')
+            raise OSError(f'Data entry does not exist: {self}')
 
         try:
             yield entry

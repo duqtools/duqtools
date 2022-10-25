@@ -39,7 +39,7 @@ def cmdline_workdir(tmp_path_factory, system):
     workdir = tmp_path_factory.mktemp(f'test_cmdline_{system}')
     shutil.copytree(TEST_DATA / 'template_model', workdir / 'template_model')
 
-    with open(TEST_DATA / config_file_name, 'r') as fi:
+    with open(TEST_DATA / config_file_name) as fi:
         with open(workdir / 'config.yaml', 'w') as fo:
             fo.write(fi.read())
             fo.write(f'\nsystem: {system}')
