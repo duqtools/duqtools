@@ -1,9 +1,0 @@
-create: null
-status:
-  msg_completed: 'Status : Completed successfully'
-  msg_failed: 'Status : Failed'
-  msg_running: 'Status : Running'
-  status_file: jetto.status
-submit:
-  submit_script_name: .llcmd
-workspace: ./workspace

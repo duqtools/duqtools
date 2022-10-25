@@ -10,8 +10,9 @@ from pytest_dependency import depends
 from duqtools.utils import work_directory
 
 config_file_name = 'config_jetto.yaml'
-var_file_name = 'variables_jetto.yaml'
 systems = ['jetto-duqtools', 'jetto-pythontools']
+
+TEST_DATA = Path.cwd() / 'tests' / 'test_data'
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -37,10 +38,9 @@ def system(request):
 def cmdline_workdir(tmp_path_factory, system):
     # Create working directory for cmdline tests, and set up input files
     workdir = tmp_path_factory.mktemp(f'test_cmdline_{system}')
-    shutil.copytree(Path.cwd() / 'example' / 'template_model',
-                    workdir / 'template_model')
+    shutil.copytree(TEST_DATA / 'template_model', workdir / 'template_model')
 
-    with open(Path.cwd() / 'tests' / config_file_name, 'r') as fi:
+    with open(TEST_DATA / config_file_name, 'r') as fi:
         with open(workdir / 'config.yaml', 'w') as fo:
             fo.write(fi.read())
             fo.write(f'\nsystem: {system}')

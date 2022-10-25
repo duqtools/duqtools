@@ -8,6 +8,7 @@ from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
 from duqtools.utils import work_directory
 
 config_file = 'config_jetto.yaml'
+TEST_DATA = Path.cwd() / 'tests' / 'test_data'
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -29,8 +30,8 @@ def cmdline_workdir(tmp_path_factory, request):
     # Create working directory for cmdline tests, and set up input files
     workdir = tmp_path_factory.mktemp('test_cmdline')
     (workdir / Path('workspace')).mkdir()
-    shutil.copy(Path.cwd() / 'tests' / config_file, workdir / 'config.yaml')
-    shutil.copytree(Path.cwd() / 'example' / 'template_model',
+    shutil.copy(TEST_DATA / config_file, workdir / 'config.yaml')
+    shutil.copytree(TEST_DATA / 'template_model',
                     workdir / Path('template_model'))
     return workdir
 
@@ -87,8 +88,7 @@ def test_submit(cmdline_workdir):
         assert (not Path('./run_0002/duqtools.lock').exists())
 
 
-@pytest.mark.xfail(
-    reason='https://github.com/duqtools/duqtools/issues/257')
+@pytest.mark.xfail(reason='https://github.com/duqtools/duqtools/issues/257')
 @pytest.mark.dependency(depends=['test_real_create'])
 def test_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
