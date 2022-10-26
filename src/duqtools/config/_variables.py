@@ -3,9 +3,11 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from typing import Sequence, Union
 
 from importlib_resources import files
 
+from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
 
 logger = logging.getLogger(__name__)
@@ -72,6 +74,22 @@ class VariableConfigLoader:
 
     def _get_path_fallback(self):
         return files('duqtools.data') / VAR_FILENAME
+
+
+def lookup_vars(variables: Sequence[Union[str, IDSVariableModel]]):
+    """Helper function to look up a bunch of variables.
+
+    If str, look up the variable from the `var_lookup` Else check if the
+    variable is an `IDSVariableModel`
+    """
+    var_models = []
+    for var in variables:
+        if isinstance(var, str):
+            var = var_lookup[var]
+        if not isinstance(var, IDSVariableModel):
+            raise ValueError(f'Cannot lookup variable with type {type(var)}')
+        var_models.append(var)
+    return var_models
 
 
 variable_config = VariableConfigLoader().load()
