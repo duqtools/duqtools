@@ -23,7 +23,7 @@ class VariableConfigLoader:
         path = self.get_config_path()
 
         if not path.exists():
-            raise IOError(f'{path} does not exist!')
+            raise OSError(f'{path} does not exist!')
 
         self.path = path
 
@@ -56,7 +56,7 @@ class VariableConfigLoader:
         if env:
             test_path = Path(env)
             if not test_path.exists():
-                raise IOError(
+                raise OSError(
                     f'{test_path} defined by ${VAR_ENV} does not exist!')
             return test_path
 

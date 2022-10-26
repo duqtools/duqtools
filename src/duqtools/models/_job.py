@@ -32,7 +32,7 @@ class Job:
 
     def status_file_contains(self, msg) -> bool:
         sf = self.status_file
-        with open(sf, 'r') as f:
+        with open(sf) as f:
             content = f.read()
             debug('Checking if content of %s file: %s contains %s', sf,
                   content, msg)

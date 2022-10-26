@@ -13,7 +13,7 @@ class WorkDirectory(WorkDirectoryModel):
     def cwd(self):
         cwd = Path.cwd()
         if not cwd.relative_to(self.root):
-            raise IOError(
+            raise OSError(
                 f'Work directory must be a subdirectory of {self.root}')
         return cwd
 
@@ -42,6 +42,6 @@ class WorkDirectory(WorkDirectoryModel):
         runs_yaml = self.runs_yaml
 
         if not runs_yaml.exists():
-            raise IOError(f'Cannot find {runs_yaml}.')
+            raise OSError(f'Cannot find {runs_yaml}.')
 
         return Runs.parse_file(runs_yaml)

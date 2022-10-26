@@ -87,7 +87,7 @@ class JettoSystem(AbstractSystem):
 
         # Get the first jobs submission script as a template
         template = []
-        for line in open(jobs[0].submit_script, 'r').readlines():
+        for line in open(jobs[0].submit_script).readlines():
             if line.startswith('#SBATCH') or line.startswith('#!'):
                 template.append(line)
         # Append our own options, later options have precedence

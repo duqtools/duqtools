@@ -98,7 +98,7 @@ def status_file_ok(job, *, force):
     if job.has_status and not force:
         if not status_file.is_file():
             logger.warning('Status file %s is not a file', status_file)
-        with open(status_file, 'r') as f:
+        with open(status_file) as f:
             info('Status of %s: %s. To rerun enable the --force flag',
                  status_file, f.read())
         op_queue.add_no_op(
