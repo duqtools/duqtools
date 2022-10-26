@@ -4,7 +4,7 @@ import logging
 import re
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Sequence, Union
+from typing import TYPE_CHECKING, Sequence, Union
 
 from ..config import lookup_vars
 from ..operations import add_to_op_queue
@@ -12,6 +12,9 @@ from ..schema import IDSVariableModel, ImasBaseModel
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
+
+if TYPE_CHECKING:
+    import xarray as xr
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +167,9 @@ class ImasHandle(ImasBaseModel):
         raw_data = self.get_raw_data(ids)
         return IDSMapping(raw_data, **kwargs)
 
-    def get_variables(self, variables: Sequence[Union[str, IDSVariableModel]]):
+    def get_variables(
+            self, variables: Sequence[Union[str,
+                                            IDSVariableModel]]) -> xr.Dataset:
         """Get variables from data set.
 
         This function looks up the data location from the
