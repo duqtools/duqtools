@@ -6,6 +6,21 @@ import pandas as pd
 import xarray as xr
 
 
+def _standardize_data(source: Union[pd.DataFrame, xr.Dataset]) -> pd.DataFrame:
+    """Convert Dataset to Dataframe and add required columns for plotting."""
+    if isinstance(source, xr.Dataset):
+        source = source.to_dataframe().reset_index()
+
+    if 'run' not in source:
+        source['run'] = 0
+
+    if 'slider' not in source:
+        _, idx = np.unique(source['time'], return_inverse=True)
+        source['slider'] = idx
+
+    return source
+
+
 def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
                    y: str) -> alt.Chart:
     """Generate an altair line chart from a dataframe.
@@ -24,12 +39,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
     alt.Chart
         Return an altair chart.
     """
-    if isinstance(source, xr.Dataset):
-        source = source.to_dataframe().reset_index()
-
-    if 'slider' not in source:
-        _, idx = np.unique(source['time'], return_inverse=True)
-        source['slider'] = idx
+    source = _standardize_data(source)
 
     max_y = source[y].max()
     max_slider = source['slider'].max()
@@ -91,12 +101,7 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
     alt.Chart
         Return an altair chart.
     """
-    if isinstance(source, xr.Dataset):
-        source = source.to_dataframe().reset_index()
-
-    if 'slider' not in source:
-        _, idx = np.unique(source['time'], return_inverse=True)
-        source['slider'] = idx
+    source = _standardize_data(source)
 
     max_y = source[y].max()
     max_slider = source['slider'].max()

@@ -1,8 +1,8 @@
 from duqtools.ids._location import ImasHandle
 
-source = ImasHandle(db='jet', shot=92432, user='g2aho', run=1)
+source = ImasHandle(db='jet', shot=94875, user='g2ssmee', run=8000)
 
-target = ImasHandle(db=source.db, shot=source.shot, run=1001)
+target = ImasHandle(db=source.db, shot=source.shot, run=8888)
 
 source.copy_data_to(target)
 
