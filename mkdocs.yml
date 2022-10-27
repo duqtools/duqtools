@@ -24,7 +24,9 @@ nav:
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
   - Scripts:
-    - scripts/modify_data.md
+    - scripts/modify_imas_data.md
+    - scripts/plot_with_altair.md
+    - scripts/plot_with_matplotlib.md
   - Contributing: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
   - 🔗 Source code: https://github.com/duqtools/duqtools
