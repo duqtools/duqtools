@@ -23,6 +23,8 @@ nav:
     - examples/xarray.ipynb
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
+  - Scripts:
+    - scripts/modify_data.md
   - Contributing: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
   - 🔗 Source code: https://github.com/duqtools/duqtools
