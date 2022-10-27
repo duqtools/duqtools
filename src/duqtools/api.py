@@ -4,6 +4,7 @@ Functions:
 
 - [rebase_on_grid][duqtools.api.rebase_on_grid]
 - [rebase_on_time][duqtools.api.rebase_on_time]
+- [standardize_datasets][duqtools.api.standardize_datasets]
 
 Data classes:
 
@@ -18,12 +19,14 @@ Plotting:
 """
 
 from ._plot_utils import alt_errorband_chart, alt_line_chart
-from .ids import IDSMapping, ImasHandle, rebase_on_grid, rebase_on_time
+from .ids import (IDSMapping, ImasHandle, rebase_on_grid, rebase_on_time,
+                  standardize_datasets)
 from .schema import IDSVariableModel as Variable
 
 __all__ = [
     'rebase_on_grid',
     'rebase_on_time',
+    'standardize_datasets',
     'ImasHandle',
     'IDSMapping',
     'Variable',
