@@ -18,7 +18,7 @@ nav:
   - Python API:
     - Public API: api.md
     - Operations: operations.md
-  - Examples:
+  - Notebooks:
     - examples/imas_handles.ipynb
     - examples/xarray.ipynb
     - examples/xarray-2D.ipynb
