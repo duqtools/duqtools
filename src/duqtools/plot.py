@@ -43,8 +43,7 @@ def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
 
     datasets = []
     for handle in handles.values():
-        data_map = handle.get(grid_var.ids)
-        ds = data_map.to_xarray(variables=variables)
+        ds = handle.get_variables(variables=variables)
         datasets.append(ds)
 
     dataset = xr.concat(datasets, 'run')

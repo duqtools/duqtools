@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
 
 import numpy as np
 
-from duqtools.config import var_lookup
+from duqtools.config import lookup_vars
 
 from ..schema import IDSVariableModel
 from ._copy import add_provenance_info
@@ -318,14 +318,9 @@ class IDSMapping(Mapping):
 
         xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
 
+        variables = lookup_vars(variables)
+
         for var in variables:
-            if isinstance(var, str):
-                var = var_lookup[var]
-
-            if not isinstance(var, IDSVariableModel):
-                raise ValueError(
-                    f'Cannot extract variable of type: {type(var)}')
-
             parts = var.path.split('/*/')
 
             if len(parts) == 1:

@@ -53,9 +53,7 @@ def _get_dataset(handles, *, ids, time_var, grid_var, data_vars):
     for name, handle in handles.items():
         handle = ImasHandle(**handle)
 
-        data_map = handle.get(ids)
-
-        ds = data_map.to_xarray(variables=variables)
+        ds = handle.get_variables(variables=variables)
 
         ds = standardize_grid(
             ds,

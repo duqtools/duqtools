@@ -58,8 +58,7 @@ def merge_data(
 
     datasets = []
     for run, handle in source_data.items():
-        data = handle.get(ids, exclude_empty=True)
-        ds = data.to_xarray(variables=variables)
+        ds = handle.get_variables(variables=variables)
 
         ds = standardize_grid(
             ds,
