@@ -27,6 +27,11 @@ def raise_if_ids_inconsistent(*variables: IDSVariableModel):
 
 
 @add_to_op_queue('Merge', '{target}')
+def queue_merge_data(*args, **kwargs):
+    """Queued version of `merge_data()`."""
+    return merge_data(*args, **kwargs)
+
+
 def merge_data(
     source_data: Dict[str, ImasHandle],
     target: ImasHandle,

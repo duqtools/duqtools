@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from .config import cfg
-from .ids import ImasHandle, merge_data
+from .ids import ImasHandle, queue_merge_data
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
@@ -23,8 +23,8 @@ def merge(**kwargs):
 
         template.copy_data_to(target)
 
-        merge_data(source_data=handles,
-                   target=target,
-                   time_var=step.time_variable,
-                   grid_var=step.grid_variable,
-                   data_vars=step.data_variables)
+        queue_merge_data(source_data=handles,
+                         target=target,
+                         time_var=step.time_variable,
+                         grid_var=step.grid_variable,
+                         data_vars=step.data_variables)
