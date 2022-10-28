@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Sequence, Union
+from typing import List, Sequence, Union
 
 from importlib_resources import files
 
@@ -76,7 +76,9 @@ class VariableConfigLoader:
         return files('duqtools.data') / VAR_FILENAME
 
 
-def lookup_vars(variables: Sequence[Union[str, IDSVariableModel]]):
+def lookup_vars(
+    variables: Sequence[Union[str,
+                              IDSVariableModel]]) -> List[IDSVariableModel]:
     """Helper function to look up a bunch of variables.
 
     If str, look up the variable from the `var_lookup` Else check if the

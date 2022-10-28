@@ -19,6 +19,10 @@ if TYPE_CHECKING:
 INDEX_STR = '*'
 
 
+class EmptyVarError(Exception):
+    ...
+
+
 def insert_re_caret_dollar(string: str) -> str:
     """Insert regex start (^) / end ($) of line matching characters."""
     if not string.startswith('^'):
@@ -35,19 +39,23 @@ def replace_index_str(string: str) -> str:
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids, exclude_empty: bool = True):
-        """__init__
+    def __init__(self, ids):
+        """Map the IMASDB object.
+
+        Empty arrays are excluded from the mapping.
+        You can still get/set these keys directly,
+        but `key in map` returns `False` if `map['key']` is an empty array.
 
         Parameters
         ----------
         ids :
             IMAS DB entry for the IDS.
+
+        Attributes
+        ----------
         exclude_empty : bool
-            Hide empty arrays from mapping. You can still get/set these keys directly,
-            but `key in map` returns `False` if `map['key']` is an empty array.
         """
         self._ids = ids
-        self.exclude_empty = exclude_empty
 
         # All available data fields are stored in this set.
         self._keys: Set[str] = set()
@@ -216,7 +224,7 @@ class IDSMapping(Mapping):
         if not isinstance(val, (np.ndarray, np.generic)):
             return
 
-        if self.exclude_empty and val.size == 0:
+        if val.size == 0:
             return
 
         # We made it here, the value can be stored
@@ -300,6 +308,7 @@ class IDSMapping(Mapping):
     def to_xarray(
         self,
         variables: Sequence[Union[str, IDSVariableModel]],
+        empty_var_ok: bool = False,
         **kwargs,
     ) -> xr.Dataset:
         """Return dataset for given variables.
@@ -308,15 +317,25 @@ class IDSMapping(Mapping):
         ----------
         variables : Sequence[Union[str, IDSVariableModel]]
             Dictionary of data variables
+        empty_var_ok : bool
+            If True, silently skip data that are missing from the mapping.
+            If False (default), raise an error when data that are missing
+            from the dataset are requested.
 
         Returns
         -------
         ds : xr.Dataset
             Return query as Dataset
         """
+
+        def _contains_empty(arr):
+            if isinstance(arr, list):
+                return any(_contains_empty(sub_arr) for sub_arr in arr)
+            return arr.size == 0
+
         import xarray as xr
 
-        xr_data_vars: Dict[str, Tuple[List[str], np.array]] = {}
+        xr_data_vars: Dict[str, Tuple[List[str], np.ndarray]] = {}
 
         variables = lookup_vars(variables)
 
@@ -328,6 +347,13 @@ class IDSMapping(Mapping):
                 continue
 
             arr = self._fill_array_from_parts(*parts)
+
+            if _contains_empty(arr):
+                if empty_var_ok:
+                    continue
+                else:
+                    raise EmptyVarError(
+                        f'Variable {var.name!r} contains empty data.')
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 

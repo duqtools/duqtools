@@ -150,26 +150,26 @@ class ImasHandle(ImasBaseModel):
 
         return data
 
-    def get(self, ids: str = 'core_profiles', **kwargs) -> IDSMapping:
+    def get(self, ids: str = 'core_profiles') -> IDSMapping:
         """Map the data to a dict-like structure.
 
         Parameters
         ----------
         ids : str, optional
             Name of profiles to open
-        **kwargs
-            These parameters are passed to initialize `IDSMapping`.
 
         Returns
         -------
         IDSMapping
         """
         raw_data = self.get_raw_data(ids)
-        return IDSMapping(raw_data, **kwargs)
+        return IDSMapping(raw_data)
 
     def get_variables(
-            self, variables: Sequence[Union[str,
-                                            IDSVariableModel]]) -> xr.Dataset:
+        self,
+        variables: Sequence[Union[str, IDSVariableModel]],
+        **kwargs,
+    ) -> xr.Dataset:
         """Get variables from data set.
 
         This function looks up the data location from the
@@ -184,6 +184,8 @@ class ImasHandle(ImasBaseModel):
         -------
         ds : xarray
             The data in `xarray` format.
+        **kwargs
+            These keyword arguments are passed to `IDSMapping.to_xarray()`
 
         Raises
         ------
@@ -200,9 +202,9 @@ class ImasHandle(ImasBaseModel):
 
         ids = var_models[0].ids
 
-        data_map = self.get(ids, exclude_empty=True)
+        data_map = self.get(ids)
 
-        ds = data_map.to_xarray(variables=var_models)
+        ds = data_map.to_xarray(variables=var_models, **kwargs)
 
         return ds
 
