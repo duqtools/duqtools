@@ -343,3 +343,31 @@ def test_2d_ion(sample_data, expected_dataset_2d_ion):
 
     dataset = sample_data.to_xarray(variables=variables)
     xr.testing.assert_equal(dataset, expected_dataset_2d_ion)
+
+
+def test_empty_var_ok(sample_data):
+    from duqtools.ids._mapping import EmptyVarError
+
+    EmptyVar = Variable(ids='core_profiles',
+                        path='profiles_1d/*/empty',
+                        dims=('time', 'x'),
+                        name='empty')
+
+    with pytest.raises(EmptyVarError):
+        sample_data.to_xarray(variables=(EmptyVar, ), empty_var_ok=False)
+
+    dataset = sample_data.to_xarray(variables=(EmptyVar, ), empty_var_ok=True)
+
+    empty = {'coords': {}, 'attrs': {}, 'dims': {}, 'data_vars': {}}
+    assert dataset.to_dict() == empty
+
+
+def test_raise_on_non_existant(sample_data):
+    NonExistantVar = Variable(ids='core_profiles',
+                              path='profiles_1d/*/does/not/exist',
+                              dims=('time', 'x'),
+                              name='does-not-exist')
+
+    with pytest.raises(KeyError):
+        sample_data.to_xarray(variables=(NonExistantVar, ), skip_empty=True)
+        sample_data.to_xarray(variables=(NonExistantVar, ), skip_empty=False)

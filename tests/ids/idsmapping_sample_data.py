@@ -9,18 +9,21 @@ class profile_t0:
     grid = np.arange(10.0) * 1
     variable = grid**2
     val = 1
+    empty = np.array([])
 
 
 class profile_t1:
     grid = np.arange(10.0) * 2
     variable = grid**2
     val = 2
+    empty = np.array([])
 
 
 class profile_t2:
     grid = np.arange(10.0) * 3
     variable = grid**2
     val = 3
+    empty = np.array([])
 
 
 class nested_profile_t0:
