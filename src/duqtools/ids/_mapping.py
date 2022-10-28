@@ -301,11 +301,6 @@ class IDSMapping(Mapping):
             else:
                 sub_arr = self[path]
 
-            # This check must come after`self[path]`
-            #  which raises KeyError for non-existant paths
-            if path not in self:
-                raise EmptyVarError(f'IDS Path has no data: {path}')
-
             arr.append(sub_arr)
 
         return arr
@@ -313,7 +308,7 @@ class IDSMapping(Mapping):
     def to_xarray(
         self,
         variables: Sequence[Union[str, IDSVariableModel]],
-        empty_var_ok: bool = True,
+        empty_var_ok: bool = False,
         **kwargs,
     ) -> xr.Dataset:
         """Return dataset for given variables.
@@ -332,6 +327,12 @@ class IDSMapping(Mapping):
         ds : xr.Dataset
             Return query as Dataset
         """
+
+        def _contains_empty(arr):
+            if isinstance(arr, list):
+                return any(_contains_empty(sub_arr) for sub_arr in arr)
+            return arr.size == 0
+
         import xarray as xr
 
         xr_data_vars: Dict[str, Tuple[List[str], np.ndarray]] = {}
@@ -345,12 +346,14 @@ class IDSMapping(Mapping):
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            try:
-                arr = self._fill_array_from_parts(*parts)
-            except EmptyVarError:
+            arr = self._fill_array_from_parts(*parts)
+
+            if _contains_empty(arr):
                 if empty_var_ok:
                     continue
-                raise
+                else:
+                    raise EmptyVarError(
+                        f'Variable {var.name!r} contains empty data.')
 
             xr_data_vars[var.name] = ([*var.dims], arr)
 
