@@ -331,7 +331,13 @@ class IDSMapping(Mapping):
         def _contains_empty(arr):
             if isinstance(arr, list):
                 return any(_contains_empty(sub_arr) for sub_arr in arr)
-            return arr.size == 0
+            elif isinstance(arr, np.ndarray):
+                return arr.size == 0
+            elif isinstance(arr(float, int)):
+                return False
+            else:
+                raise ValueError(
+                    f"Don't know how to deal with: {var.name}: {arr}")
 
         import xarray as xr
 
