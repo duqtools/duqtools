@@ -4,9 +4,15 @@ Welcome! *Duqtools* is an open-source project that aims to work with a wide rang
 
 We have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
+## Questions, feedback, bugs
+
+Use the search function to see if someone else already ran accross the same issue. Feel free to open a new [issue here](https://github.com/duqtools/duqtools/issues) to ask a question, suggest improvements/new features, or report any bugs that you ran into.
+
 ## Submitting changes
 
-When contributing to this repository, please first discuss the change you wish to make via an issue with the owners of this repository before making a change.
+Even better than a good bug report is a fix for the bug or the implementation of a new feature. We welcome any contributions that help improve the code.
+
+When contributing to this repository, please first discuss the change you wish to make via an [issue](https://github.com/duqtools/duqtools/issues) with the owners of this repository before making a change.
 
 Contributions can come in the form of:
 
@@ -69,12 +75,17 @@ pytest
 
 ### Building the documentation
 
-The documentation uses the [mkdocs](https://www.mkdocs.org/). To build the docs for yourself:
+The documentation is written in [markdown](https://www.markdownguide.org/basic-syntax/), and uses [mkdocs](https://www.mkdocs.org/) to generate the pages.
+
+To build the documentation for yourself:
 
 ```console
 pip install -e .[docs]
 mkdocs serve
 ```
+
+You can find the documentation source in the [docs](https://github.com/duqtools/duqtools/tree/main/docs) directory.
+If you are adding new pages, make sure to update the listing in the [`mkdocs.yml`](https://github.com/duqtools/duqtools/blob/main/mkdocs.yml) under the `nav` entry.
 
 ### Making a release
 
