@@ -13,7 +13,7 @@
 Features:
 
 - Set up 100s of simulation runs from a single template
-- Launch stardard sets of sensitivy tests with minimal programming
+- Launch standard sets of sensitivity tests with minimal programming
 - Batch job submission and status tracking
 - Supports the Standardized Interface Data Structures (IDSs) data directory
 - Compare and visualize 100s of simulations in one overview
