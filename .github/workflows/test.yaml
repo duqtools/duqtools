@@ -50,10 +50,16 @@ jobs:
       - name: Test with pytest
         run: python -m pytest
 
-      - name: upload code coverage to codecov.io
-        if: always() || failure()
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # optional, but more stable
-          files: ./coverage.xml
-          fail_ci_if_error: true # optional (default = false)
+        # - name: upload code coverage to codecov.io
+        #   if: always() || failure()
+        #   uses: codecov/codecov-action@v3
+        #   with:
+        #     token: ${{ secrets.CODECOV_TOKEN }} # optional, but more stable
+        #     files: ./coverage.xml
+        #     fail_ci_if_error: true # optional (default = false)
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
