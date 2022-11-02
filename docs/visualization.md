@@ -20,7 +20,7 @@ The following command will plot `grid/rho_tor_norm` against `t_i_averge`. The pl
 duqtools plot -x grid/rho_tor_norm -y t_i_ave --imas g2ssmee/jet/94875/8000
 ```
 
-The tool use [altair](https://altair-viz.github.io/) to render the visualization, which in is based on on [Vega](http://vega.github.io/vega) and [Vega-Lite](http://vega.github.io/vega-lite). This means the plot is stored as an html file (`chart_x.html`).
+The tool use [altair](https://altair-viz.github.io/) to render the visualization, which in is based on on [Vega](https://vega.github.io/vega) and [Vega-Lite](https://vega.github.io/vega-lite). This means the plot is stored as an html file (`chart_x.html`).
 
 Multiple data sets can be plotted by repeating the IMAS path.
 
