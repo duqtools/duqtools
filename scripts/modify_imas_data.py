@@ -1,4 +1,4 @@
-from duqtools.ids._location import ImasHandle
+from duqtools.api import ImasHandle
 
 source = ImasHandle(db='jet', shot=94875, user='g2ssmee', run=8000)
 
