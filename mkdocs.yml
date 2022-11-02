@@ -7,7 +7,7 @@ nav:
   - Home: index.md
   - Usage: command-line-interface.md
   - Configuration:
-    - Getting Started: config/introduction.md
+    - Getting Started: config/index.md
     - config/create.md
     - config/submit.md
     - config/status.md
@@ -16,14 +16,16 @@ nav:
   - Visualization: visualization.md
   - Variables: variables.md
   - Python API:
-    - Public API: api.md
-    - Operations: operations.md
+    - Public API: api/index.md
+    - Operations: api/operations.md
   - Notebooks:
+    - Overview: examples/index.md
     - examples/imas_handles.ipynb
     - examples/xarray.ipynb
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
   - Scripts:
+    - Overview: scripts/index.md
     - scripts/modify_imas_data.md
     - scripts/plot_with_altair.md
     - scripts/plot_with_matplotlib.md

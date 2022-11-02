@@ -57,7 +57,7 @@ schemas = {
     for obj in objects
 }
 
-for page in 'introduction', 'status', 'submit', 'create', 'merge':
+for page in 'index', 'status', 'submit', 'create', 'merge':
     template = get_template(f'template_{page}.md')
 
     rendered = template.render(**schemas)
