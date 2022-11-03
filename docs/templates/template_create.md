@@ -102,7 +102,7 @@ sampler:
   method: cartesian-product
 ```
 
-For smarter sampling, use one of the other methods: [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling), [`sobol`](en.wikipedia.org/wiki/Sobol_sequence), or [`halton`](en.wikipedia.org/wiki/Halton_sequence).
+For smarter sampling, use one of the other methods: [`latin-hypercube`](https://en.wikipedia.org/wiki/Latin_hypercube_sampling), [`sobol`](https://en.wikipedia.org/wiki/Sobol_sequence), or [`halton`](https://en.wikipedia.org/wiki/Halton_sequence).
 `n_samples` gives the number of samples to extract. For example:
 
 ```yaml title="duqtools.yaml"
@@ -159,7 +159,7 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.
 
-For more info about variables, see [here](../introduction#extra-variables).
+For more info about variables, see [here](../index#extra-variables).
 
 ### Value ranges
 

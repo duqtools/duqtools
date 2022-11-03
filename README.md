@@ -3,8 +3,7 @@
 | ReadTheDocs |[![Documentation Status](https://readthedocs.org/projects/duqtools/badge/?version=latest)](https://duqtools.readthedocs.io/en/latest/?badge=latest) |
 | Github | [![Tests](https://github.com/duqtools/duqtools/actions/workflows/test.yaml/badge.svg)](https://github.com/duqtools/duqtools/actions/workflows/test.yaml) |
 | PyPI | [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/duqtools)](https://pypi.org/project/duqtools/) [![PyPI](https://img.shields.io/pypi/v/duqtools.svg?style=flat)](https://pypi.org/project/duqtools/) |
-| SonarCloud | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) |
-| CodeCov.io | [![codecov](https://codecov.io/gh/duqtools/duqtools/branch/main/graph/badge.svg?token=TE9SBYJY8L)](https://codecov.io/gh/duqtools/duqtools)
+| SonarCloud | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=duqtools_duqtools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=duqtools_duqtools)|
 
 # Duqtools
 
@@ -13,7 +12,7 @@
 Features:
 
 - Set up 100s of simulation runs from a single template
-- Launch stardard sets of sensitivy tests with minimal programming
+- Launch standard sets of sensitivity tests with minimal programming
 - Batch job submission and status tracking
 - Supports the Standardized Interface Data Structures (IDSs) data directory
 - Compare and visualize 100s of simulations in one overview

@@ -2,17 +2,17 @@
 def fix_dependencies():
     import __main__
     __main__.__requires__ = ['jetto_tools>=1.8.6']
-    import pkg_resources
+    import pkg_resources  # noqa
 
 
 fix_dependencies()
 
 __author__ = 'Carbon Collective'
 __email__ = 's.smeets@esciencecenter.nl'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
-import logging
-import warnings
+import logging  # noqa
+import warnings  # noqa
 
 logging.basicConfig(level=logging.INFO)
 
