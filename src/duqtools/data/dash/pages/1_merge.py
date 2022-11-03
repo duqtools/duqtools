@@ -1,4 +1,5 @@
 import sys
+from getpass import getuser
 from pathlib import Path
 
 import pandas as pd
@@ -93,7 +94,7 @@ with st.form('merge_form'):
     target = {
         'user':
         cols[0].text_input('User',
-                           value=a_run.user,
+                           value=getuser(),
                            key='user_target',
                            disabled=True),
         'db':
