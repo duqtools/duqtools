@@ -8,6 +8,7 @@ To run the command:
 
 Check out [the command-line interface](../command-line-interface.md#clean) for more info on how to use this command.
 
+<script id="asciicast-c38VezQBpzKnU5r4zpn51A9G1" src="https://asciinema.org/a/c38VezQBpzKnU5r4zpn51A9G1.js" async></script>
 
 ## The `submit` config
 
