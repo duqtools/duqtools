@@ -8,6 +8,7 @@ To run the command:
 
 Check out [the command-line interface](../command-line-interface.md#status) for more info on how to use this command.
 
+<script id="asciicast-7XzFEahphaZdewNw7LBE2IuZc" src="https://asciinema.org/a/7XzFEahphaZdewNw7LBE2IuZc.js" async></script>
 
 ## The `status` config
 
