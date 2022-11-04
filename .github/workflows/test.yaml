@@ -23,12 +23,10 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest']
-        python-version: ['3.7']
+        python-version: ['3.7', '3.8', '3.9', '3.8', '3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -52,13 +50,26 @@ jobs:
       - name: Test with pytest
         run: python -m pytest
 
-        # - name: upload code coverage to codecov.io
-        #   if: always() || failure()
-        #   uses: codecov/codecov-action@v3
-        #   with:
-        #     token: ${{ secrets.CODECOV_TOKEN }} # optional, but more stable
-        #     files: ./coverage.xml
-        #     fail_ci_if_error: true # optional (default = false)
+      - uses: actions/cache@v3
+        with:
+          path: coverage.xml
+          key: ${{ github.sha }}-coverage
+
+
+  sonar:
+    name: SonarCloud Upload
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - uses: actions/cache@v3
+        with:
+          path: coverage.xml
+          key: ${{ github.sha }}-coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
