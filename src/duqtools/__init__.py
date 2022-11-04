@@ -9,7 +9,7 @@ fix_dependencies()
 
 __author__ = 'Carbon Collective'
 __email__ = 's.smeets@esciencecenter.nl'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 import logging  # noqa
 import warnings  # noqa
