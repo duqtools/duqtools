@@ -1,9 +1,45 @@
+from itertools import filterfalse, tee
+from typing import Dict, List
+
 import click
 from pydantic import ValidationError
 
 from duqtools.config import cfg, var_lookup
 
 from .utils import groupby
+
+cs = click.style
+
+ST_ITEMS = {'fg': 'green', 'bold': True}
+ST_HEADER = {'fg': 'red', 'bold': True}
+ST_INFO = {'fg': 'white', 'bold': False}
+
+
+def partition(pred, iterable):
+    """Use a predicate to partition entries into false entries and true
+    entries.
+
+    From: https://docs.python.org/3/library/itertools.html
+    """
+    # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
+    t1, t2 = tee(iterable)
+    return filterfalse(pred, t1), filter(pred, t2)
+
+
+def list_group(group: List, extra_variables: Dict):
+    group = sorted(group, key=lambda var: var.name)
+
+    for var in group:
+        star = cs('*', **ST_HEADER) if var.name in extra_variables else ''
+
+        name = cs(f'{var.name}', **ST_ITEMS)
+
+        try:
+            sub = cs(f'({var.path})', **ST_INFO)
+        except AttributeError:
+            sub = cs(f'({var.type})', **ST_INFO)
+
+        print(f'    - {star}{name} {sub}')
 
 
 def list_variables(*, config, **kwargs):
@@ -17,11 +53,6 @@ def list_variables(*, config, **kwargs):
     **kwargs
         Unused.
     """
-    cs = click.style
-    st_items = {'fg': 'green', 'bold': True}
-    st_header = {'fg': 'red', 'bold': True}
-    st_info = {'fg': 'white', 'bold': False}
-
     try:
         cfg.parse_file(config)
     except FileNotFoundError:
@@ -33,19 +64,19 @@ def list_variables(*, config, **kwargs):
         extra_variables = cfg.extra_variables.to_variable_dict(
         ) if cfg.extra_variables else {}
 
-    grouped = groupby(var_lookup.values(), keyfunc=lambda var: var.type)
+    all_variables = var_lookup.values()
 
-    for var_type, group in grouped.items():
-        click.secho(f'\n{var_type}:', **st_header)
+    other_variables, ids_variables = partition(
+        lambda var: var.type == 'IDS-variable', all_variables)
 
-        for var in group:
-            star = cs('*', **st_header) if var.name in extra_variables else ''
+    grouped_ids_vars = groupby(ids_variables, keyfunc=lambda var: var.ids)
 
-            name = cs(f'{var.name}', **st_items)
+    for root_ids, group in grouped_ids_vars.items():
+        click.secho(f'\nIDS-variable - {root_ids}:', **ST_HEADER)
+        list_group(group, extra_variables)
 
-            try:
-                sub = cs(f'({var.ids}/{var.path})', **st_info)
-            except AttributeError:
-                sub = cs(f'({var.type})', **st_info)
+    grouped_other_vars = groupby(other_variables, keyfunc=lambda var: var.type)
 
-            print(f'    - {star}{name} {sub}')
+    for var_type, group in grouped_other_vars.items():
+        click.secho(f'\n{var_type}:', **ST_HEADER)
+        list_group(group, extra_variables)
