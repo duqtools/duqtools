@@ -16,7 +16,20 @@ Two types of variables can be defined.
 
 The default duqtools variables are listed below.
 
-{% for name, var_group in var_groups.items() %}
+{% for name, var_group in ids_vars.items() %}
+### IDS: {{ name }}
+
+{% for var in var_group %}
+
+#### {{ var.name }}
+```yaml
+{{ var.yaml() }}
+```
+{% endfor %}
+{% endfor %}
+
+
+{% for name, var_group in other_vars.items() %}
 ### {{ name }}s
 
 {% for var in var_group %}

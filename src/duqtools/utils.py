@@ -3,8 +3,10 @@ from __future__ import annotations
 import os
 from collections import defaultdict
 from contextlib import contextmanager
+from itertools import filterfalse, tee
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable, List
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable,
+                    List, Tuple)
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -89,8 +91,9 @@ def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
 
 def groupby(iterable: Iterable,
             keyfunc: Callable) -> Dict[Hashable, List[Any]]:
-    """Group iterable by key function.
-    The items are grouped by the value that is returned by the `keyfunc`
+    """Group iterable by key function. The items are grouped by the value that
+    is returned by the `keyfunc`
+
     Parameters
     ----------
     iterable : list, tuple or iterable
@@ -110,3 +113,28 @@ def groupby(iterable: Iterable,
         grouped[key].append(item)
 
     return grouped
+
+
+def partition(pred: Callable, iterable: Iterable) -> Tuple[Iterable, Iterable]:
+    """Use a predicate to partition entries into false entries and true
+    entries.
+
+    partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
+
+    From: https://docs.python.org/3/library/itertools.html
+
+    Parameters
+    ----------
+    pred : Callable
+        Filter function called on every entry in the iterable to determine
+        whether to put it in the false or true bin
+    iterable : Iterable
+        List of items to partition
+
+    Returns
+    -------
+    Tuple[Iterable, Iterable]
+        Two sequences with false and true entries, respectively.
+    """
+    t1, t2 = tee(iterable)
+    return filterfalse(pred, t1), filter(pred, t2)
