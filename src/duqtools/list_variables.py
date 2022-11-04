@@ -1,4 +1,3 @@
-from itertools import filterfalse, tee
 from typing import Dict, List
 
 import click
@@ -6,24 +5,13 @@ from pydantic import ValidationError
 
 from duqtools.config import cfg, var_lookup
 
-from .utils import groupby
+from .utils import groupby, partition
 
 cs = click.style
 
 ST_ITEMS = {'fg': 'green', 'bold': True}
 ST_HEADER = {'fg': 'red', 'bold': True}
 ST_INFO = {'fg': 'white', 'bold': False}
-
-
-def partition(pred, iterable):
-    """Use a predicate to partition entries into false entries and true
-    entries.
-
-    From: https://docs.python.org/3/library/itertools.html
-    """
-    # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
-    t1, t2 = tee(iterable)
-    return filterfalse(pred, t1), filter(pred, t2)
 
 
 def list_group(group: List, extra_variables: Dict):

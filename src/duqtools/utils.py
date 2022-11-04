@@ -3,8 +3,10 @@ from __future__ import annotations
 import os
 from collections import defaultdict
 from contextlib import contextmanager
+from itertools import filterfalse, tee
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable, List
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable,
+                    List, Tuple)
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -110,3 +112,14 @@ def groupby(iterable: Iterable,
         grouped[key].append(item)
 
     return grouped
+
+
+def partition(pred: Callable, iterable: Iterable) -> Tuple[Iterable, Iterable]:
+    """Use a predicate to partition entries into false entries and true
+    entries.
+
+    From: https://docs.python.org/3/library/itertools.html
+    """
+    # partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
+    t1, t2 = tee(iterable)
+    return filterfalse(pred, t1), filter(pred, t2)
