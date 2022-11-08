@@ -93,7 +93,7 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            if ImasHandle(**model.data_in.dict()).exists():
+            if ImasHandle.parse_obj(model.data_in).exists():
                 logger.info('Target %s already exists', model.data_in)
                 op_queue.add_no_op(
                     description='Not creating IDS',
