@@ -56,10 +56,10 @@ def cleanup(out, force, **kwargs):
         data_in = ImasHandle.parse_obj(run.data_in)
         data_out = ImasHandle.parse_obj(run.data_out)
 
-        data_in.queue_delete()
+        data_in.delete()
 
         if out:
-            data_out.queue_delete()
+            data_out.delete()
         else:
             op_queue.add_no_op(description='NOT Removing',
                                extra_description=f'{data_out}')
