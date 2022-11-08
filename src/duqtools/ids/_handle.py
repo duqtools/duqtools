@@ -115,10 +115,6 @@ class ImasHandle(ImasBaseModel):
             raise OSError(f'Failed to copy {self}') from err
 
     @add_to_op_queue('Removing ids', '{self}')
-    def queue_delete(self):
-        """Queued version of `ImasHandle.delete()`."""
-        return self.delete()
-
     def delete(self):
         """Remove data from entry."""
         # ERASE_PULSE operation is yet supported by IMAS as of June 2022

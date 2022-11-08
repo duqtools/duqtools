@@ -93,7 +93,7 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            if model.data_in.exists():
+            if ImasHandle(**model.data_in.dict()).exists():
                 logger.info('Target %s already exists', model.data_in)
                 op_queue.add_no_op(
                     description='Not creating IDS',
@@ -228,7 +228,7 @@ def recreate(*, runs, **kwargs):
         model.data_in = ImasHandle.parse_obj(model.data_in)
         model.data_out = ImasHandle.parse_obj(model.data_out)
 
-        model.data_in.queue_delete()
+        model.data_in.delete()
         remove_run(model)
 
         run_models.append(model)
