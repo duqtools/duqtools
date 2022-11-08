@@ -212,10 +212,10 @@ values:
 
 From the data model convention, only the upper error node (`_error_upper`) should be filled in case of symmetrical error bars. If the lower error node (`_error_lower`) is also filled, *duqtools* will scale to the upper error for values larger than 0, and to the lower error for values smaller than 0.
 
-The following example takes `electrons/temperature`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
+The following example takes `t_e`, and generates a range from $-2\sigma$ to $+2\sigma$ with defined steps:
 
 ```yaml title="duqtools.yaml"
-variable: electrons/temperature
+variable: t_e
 operator: add
 values: [-2, -1, 0, 1, 2]
 scale_to_error: True
