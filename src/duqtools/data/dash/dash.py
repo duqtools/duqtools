@@ -64,7 +64,7 @@ for y_key in y_keys:
 
     st.altair_chart(chart, use_container_width=True)
 
-    if st.button('Save this chart'):
+    if st.button('Save this chart', key=f'download_{x_key}-{y_key}'):
         fname = f'chart_{x_key}-{y_key}.html'
         chart.save(fname)
-        st.write(f'✔️ Wrote chart to "{fname}"')
+        st.success(f'✔️ Wrote chart to "{fname}"')
