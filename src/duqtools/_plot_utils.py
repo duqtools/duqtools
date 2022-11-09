@@ -55,7 +55,11 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
 
     chart = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
-        y=alt.Y(f'{y}:Q', scale=alt.Scale(domain=(0, max_y))),
+        y=alt.Y(
+            f'{y}:Q',
+            scale=alt.Scale(domain=(0, max_y)),
+            axis=alt.Axis(format='.4~g'),
+        ),
         color=alt.Color('run:N'),
         tooltip='run',
     ).add_selection(select_step).transform_filter(select_step).interactive()
@@ -114,7 +118,11 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
 
     line = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
-        y=alt.Y(f'mean({y}):Q', scale=alt.Scale(domain=(0, max_y))),
+        y=alt.Y(
+            f'mean({y}):Q',
+            scale=alt.Scale(domain=(0, max_y)),
+            axis=alt.Axis(format='.4~g'),
+        ),
         color=alt.Color('tstep:N'),
     ).add_selection(select_step).transform_filter(select_step).interactive()
 
