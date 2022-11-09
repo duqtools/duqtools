@@ -63,3 +63,8 @@ for y_key in y_keys:
         chart = alt_line_chart(source, x=x_key, y=y_key)
 
     st.altair_chart(chart, use_container_width=True)
+
+    if st.button('Save this chart'):
+        fname = f'chart_{x_key}-{y_key}.html'
+        chart.save(fname)
+        st.write(f'✔️ Wrote chart to "{fname}"')
