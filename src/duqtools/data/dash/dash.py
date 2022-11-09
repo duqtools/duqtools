@@ -31,7 +31,13 @@ with st.expander('Click to show runs'):
 with st.sidebar:
     ids_options = get_ids_options()
 
-    ids = st.selectbox('Select IDS', ids_options, index=0)
+    default_ids = ids_options.index('core_profiles')
+
+    ids = st.selectbox('Select IDS', ids_options, index=default_ids)
+
+    if ids != 'core_profiles':
+        st.error('IDS other than "core_profiles" currently not supported.')
+        st.stop()
 
     var_options = get_var_options(ids=ids)
 
@@ -63,3 +69,8 @@ for y_key in y_keys:
         chart = alt_line_chart(source, x=x_key, y=y_key)
 
     st.altair_chart(chart, use_container_width=True)
+
+    if st.button('Save this chart', key=f'download_{x_key}-{y_key}'):
+        fname = f'chart_{x_key}-{y_key}.html'
+        chart.save(fname)
+        st.success(f'✔️ Wrote chart to "{fname}"')
