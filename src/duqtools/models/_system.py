@@ -4,13 +4,14 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from pydantic import DirectoryPath
+
 from ..schema import BaseModel, ImasBaseModel, JettoVar
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ._job import Job
-    from .workdir import WorkDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
-    def write_batchfile(workspace: WorkDirectory, run_name: str,
+    def write_batchfile(run_location: DirectoryPath, run_name: str,
                         template_drc: Path):
         pass
 

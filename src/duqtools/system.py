@@ -1,10 +1,12 @@
 from pathlib import Path
 from warnings import warn
 
+from pydantic import DirectoryPath
+
 from .config import cfg
 from .ids import ImasHandle
 from .jetto import JettoSystem
-from .models import AbstractSystem, Job, WorkDirectory
+from .models import AbstractSystem, Job
 from .schema import JettoVar
 
 
@@ -16,7 +18,7 @@ class DummySystem(AbstractSystem):
     """
 
     @staticmethod
-    def write_batchfile(workspace: WorkDirectory, run_name: str,
+    def write_batchfile(run_location: DirectoryPath, run_name: str,
                         template_drc: Path):
         pass
 

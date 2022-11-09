@@ -32,13 +32,27 @@ jetto_lookup = lookup.from_file(lookup_file)
 class JettoSystem(AbstractSystem):
 
     @staticmethod
+    def get_runs_dir():
+        path = WorkDirectory.jruns_path()
+        runs_dir = cfg.create.runs_dir
+        if not runs_dir:
+            count = 0
+            while True:
+                runs_dir = path / f'duqtools_experiment_{count:04d}'
+                if not runs_dir.exists():
+                    break
+                count = count + 1
+        else:
+            runs_dir = path / runs_dir
+        return runs_dir
+
+    @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
-    def write_batchfile(workspace: WorkDirectory, run_name: str,
-                        template_drc: Path):
+    def write_batchfile(runs_dir: Path, run_name: str, template_drc: Path):
 
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
-        return jetto_write_batchfile(workspace, run_name, jetto_jset)
+        jetto_write_batchfile(runs_dir, run_name, jetto_jset)
 
     @staticmethod
     def submit_job(job: Job):

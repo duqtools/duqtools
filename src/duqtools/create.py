@@ -34,8 +34,9 @@ class CreateManager:
             raise CreateError('No create options specified in config.')
 
         self.template_drc = self.options.template
-        self.workspace = WorkDirectory.parse_obj(cfg.workspace)
+        self.workdir = WorkDirectory()
         self.system = get_system()
+        self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
 
     def _get_source_handle(self) -> ImasHandle:
@@ -81,10 +82,10 @@ class CreateManager:
 
     def runs_yaml_exists(self) -> bool:
         """Check if runs.yaml exists."""
-        if self.workspace.runs_yaml.exists():
+        if self.workdir.runs_yaml.exists():
             op_queue.add_no_op(
                 description='Not creating runs.yaml',
-                extra_description=f'{self.workspace.runs_yaml} exists')
+                extra_description=f'{self.workdir.runs_yaml} exists')
             return True
         return False
 
@@ -107,7 +108,7 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            run_drc = self.workspace.cwd / model.dirname
+            run_drc = self.runs_dir / model.dirname
 
             if run_drc.exists():
                 op_queue.add_no_op(
@@ -131,10 +132,10 @@ class CreateManager:
         for model in operations:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 
-    @add_to_op_queue('Writing runs', '{self.workspace.runs_yaml}', quiet=True)
+    @add_to_op_queue('Writing runs', '{self.workdir.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
         runs = Runs.parse_obj(runs)
-        with open(self.workspace.runs_yaml, 'w') as f:
+        with open(self.workdir.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
@@ -145,7 +146,7 @@ class CreateManager:
 
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
-        run_drc = self.workspace.cwd / model.dirname
+        run_drc = self.runs_dir / model.dirname
 
         op_queue.add(action=run_drc.mkdir,
                      kwargs={
@@ -161,7 +162,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, run_drc, model.operations)
 
-        self.system.write_batchfile(self.workspace, model.dirname,
+        self.system.write_batchfile(self.runs_dir, model.dirname,
                                     self.template_drc)
 
         self.system.update_imas_locations(run=run_drc,

@@ -2,15 +2,14 @@
 from __future__ import annotations
 
 import stat
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import jetto_tools
 
-if TYPE_CHECKING:
-    from duqtools.models import WorkDirectory
+from ..models import WorkDirectory
 
 
-def write_batchfile(workspace: WorkDirectory, run_name: str,
+def write_batchfile(runs_dir: Path, run_name: str,
                     jset: jetto_tools.jset.JSET):
     """Write batchfile (`.llcmd`) to start jetto.
 
@@ -19,12 +18,11 @@ def write_batchfile(workspace: WorkDirectory, run_name: str,
     target_drc : Path
         Directory to place batch file into.
     """
-    run_drc = workspace.cwd / run_name
-    llcmd_path = run_drc / '.llcmd'
+    full_path = runs_dir / run_name
+    llcmd_path = full_path / '.llcmd'
 
-    full_path = workspace.cwd / run_name
     rjettov_path = full_path / 'rjettov'
-    rel_path = workspace.subdir / run_name
+    rel_path = full_path.relative_to(WorkDirectory.jruns_path())
 
     build_name = jset['JobProcessingPanel.name']
     build_user_name = jset['JobProcessingPanel.userid']

@@ -1,40 +1,23 @@
+from os import getenv
 from pathlib import Path
 from typing import List
 
-from pydantic import validator
-
+from ..config import cfg
+from ..schema import BaseModel
 from ..schema.runs import Run, Runs
-from ..schema.workdir import WorkDirectoryModel
 
 
-class WorkDirectory(WorkDirectoryModel):
-
-    @property
-    def cwd(self):
-        cwd = Path.cwd()
-        if not cwd.relative_to(self.root):
-            raise OSError(
-                f'Work directory must be a subdirectory of {self.root}')
-        return cwd
-
-    @property
-    def subdir(self):
-        """Get subdirectory relative to root."""
-        return self.cwd.relative_to(self.root)
-
-    @validator('root')
-    def resolve_root(cls, v):
-        return v.resolve()
+class WorkDirectory(BaseModel):
 
     @property
     def runs_yaml(self):
         """Location of runs.yaml."""
-        return self.cwd / 'runs.yaml'
+        return Path.cwd() / 'runs.yaml'
 
     @property
     def runs_yaml_old(self):
         """Location of runs.yaml.old."""
-        return self.cwd / 'runs.yaml.old'
+        return Path.cwd() / 'runs.yaml.old'
 
     @property
     def runs(self) -> List[Run]:
@@ -45,3 +28,19 @@ class WorkDirectory(WorkDirectoryModel):
             raise OSError(f'Cannot find {runs_yaml}.')
 
         return Runs.parse_file(runs_yaml)
+
+    @staticmethod
+    def jruns_path() -> Path:
+        create = cfg.create
+        if not create:
+            raise OSError('create key not present in duqtools.yaml')
+
+        if create.jruns:
+            path: Path = create.jruns
+        else:
+            jruns = getenv('JRUNS')
+            if jruns:
+                path = Path(jruns)
+            else:
+                path = Path('./')
+        return path
