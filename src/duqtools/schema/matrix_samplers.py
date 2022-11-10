@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import sys
+
 from pydantic import Field
-from typing_extensions import Literal
 
 from ._basemodel import BaseModel
+
+if sys.version_info <= (3, 7):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
 
 
 class LHSSampler(BaseModel):

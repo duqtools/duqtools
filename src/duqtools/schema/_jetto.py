@@ -1,12 +1,22 @@
 from __future__ import annotations
 
+import sys
 from typing import List, Union
 
 from pydantic import Field, validator
-from typing_extensions import Annotated, Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
+
+if sys.version_info <= (3, 7):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
+
+if sys.version_info <= (3, 8):
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 
 class JsetField(BaseModel):
