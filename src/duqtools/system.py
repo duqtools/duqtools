@@ -18,6 +18,10 @@ class DummySystem(AbstractSystem):
     """
 
     @staticmethod
+    def get_runs_dir() -> Path:
+        return Path('./')
+
+    @staticmethod
     def write_batchfile(run_location: DirectoryPath, run_name: str,
                         template_drc: Path):
         pass

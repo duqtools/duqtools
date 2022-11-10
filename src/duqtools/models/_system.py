@@ -20,6 +20,11 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
+    def get_runs_dir() -> Path:
+        pass
+
+    @staticmethod
+    @abstractmethod
     def write_batchfile(run_location: DirectoryPath, run_name: str,
                         template_drc: Path):
         pass

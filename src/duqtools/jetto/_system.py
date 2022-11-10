@@ -32,9 +32,10 @@ jetto_lookup = lookup.from_file(lookup_file)
 class JettoSystem(AbstractSystem):
 
     @staticmethod
-    def get_runs_dir():
+    def get_runs_dir() -> Path:
         path = WorkDirectory.jruns_path()
-        runs_dir = cfg.create.runs_dir
+        if cfg.create:  # Make mypy happy, create is Optional[]
+            runs_dir = cfg.create.runs_dir
         if not runs_dir:
             count = 0
             while True:
