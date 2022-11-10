@@ -63,7 +63,7 @@ class CreateManager:
         run_models = []
 
         for i, operations in enumerate(ops_list):
-            dirname = f'{RUN_PREFIX}{i:04d}'
+            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
 
             data_in = ImasHandle(db=self.options.data.imasdb,
                                  shot=self.source.shot,
@@ -73,6 +73,7 @@ class CreateManager:
                                   run=self.options.data.run_out_start_at + i)
 
             model = Run(dirname=dirname,
+                        shortname=dirname.name,
                         data_in=data_in,
                         data_out=data_out,
                         operations=operations)
@@ -108,12 +109,10 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            run_drc = self.runs_dir / model.dirname
-
-            if run_drc.exists():
+            if model.dirname.exists():
                 op_queue.add_no_op(
                     description='Not creating directory',
-                    extra_description=f'Directory {run_drc} exists',
+                    extra_description=f'Directory {model.dirname} exists',
                 )
 
                 any_exists = True
@@ -146,26 +145,24 @@ class CreateManager:
 
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
-        run_drc = self.runs_dir / model.dirname
 
-        op_queue.add(action=run_drc.mkdir,
+        op_queue.add(action=model.dirname.mkdir,
                      kwargs={
                          'parents': True,
                          'exist_ok': force
                      },
                      description='Creating run',
-                     extra_description=f'{run_drc}')
+                     extra_description=f'{model.dirname}')
 
         self.source.copy_data_to(model.data_in)
 
-        self.system.copy_from_template(self.template_drc, run_drc)
+        self.system.copy_from_template(self.template_drc, model.dirname)
 
-        self.apply_operations(model.data_in, run_drc, model.operations)
+        self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(self.runs_dir, model.dirname,
-                                    self.template_drc)
+        self.system.write_batchfile(model.dirname, self.template_drc)
 
-        self.system.update_imas_locations(run=run_drc,
+        self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
                                           out=model.data_out)
 
@@ -218,7 +215,7 @@ def recreate(*, runs, **kwargs):
     """
     create_mgr = CreateManager()
 
-    run_dict = {str(run.dirname): run for run in create_mgr.workspace.runs}
+    run_dict = {run.shortname: run for run in create_mgr.workdir.runs}
 
     run_models = []
     for run in runs:

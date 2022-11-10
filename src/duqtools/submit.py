@@ -121,7 +121,7 @@ def lockfile_ok(job, *, force):
 
 
 def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
-           resubmit: Tuple[str], **kwargs):
+           resubmit: Tuple[Path], **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -140,12 +140,19 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
 
     debug('Submit config: %s', cfg.submit)
 
-    workspace = WorkDirectory.parse_obj(cfg.workspace)
+    workspace = WorkDirectory()
     runs = workspace.runs
+    run_dict = {run.shortname: run for run in WorkDirectory().runs}
 
     if len(resubmit) > 0:
+        jobs = []
         force = True
-        jobs = [Job(Path(run)) for run in resubmit]
+        for run in resubmit:
+            if run in run_dict:
+                jobs.append(Job(run_dict[run].dirname))
+            else:
+                jobs.append(Job(Path(run)))
+
     else:
         jobs = [Job(run.dirname) for run in runs]
 

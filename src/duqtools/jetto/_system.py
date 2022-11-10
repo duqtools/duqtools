@@ -47,12 +47,12 @@ class JettoSystem(AbstractSystem):
         return runs_dir
 
     @staticmethod
-    @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
-    def write_batchfile(runs_dir: Path, run_name: str, template_drc: Path):
+    @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
+    def write_batchfile(run_dir: Path, template_drc: Path):
 
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
-        jetto_write_batchfile(runs_dir, run_name, jetto_jset)
+        jetto_write_batchfile(run_dir, jetto_jset)
 
     @staticmethod
     def submit_job(job: Job):
