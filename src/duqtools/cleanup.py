@@ -5,7 +5,6 @@ import os
 import shutil
 from pathlib import Path
 
-from .config import cfg
 from .ids import ImasHandle
 from .models import WorkDirectory
 from .operations import op_queue
@@ -42,7 +41,7 @@ def cleanup(out, force, **kwargs):
         Remove output IDS.
     """
     try:
-        workspace = WorkDirectory.parse_obj(cfg.workspace)
+        workspace = WorkDirectory()
         runs = workspace.runs
     except OSError:
         runs = ()

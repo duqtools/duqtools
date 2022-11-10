@@ -1,4 +1,6 @@
 create:
+  jruns: "./"
+  runs_dir: ""
   dimensions:
   - variable: major_radius
     operator: copyto

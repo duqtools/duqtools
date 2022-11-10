@@ -32,8 +32,7 @@ class Status():
     def __init__(self):
         debug('Submit config: %s', cfg.submit)
 
-        workspace = WorkDirectory.parse_obj(cfg.workspace)
-        runs = workspace.runs
+        runs = WorkDirectory().runs
 
         self.jobs = [Job(run.dirname) for run in runs]
         debug('Case directories: %s', self.jobs)
