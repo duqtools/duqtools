@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .operations import op_queue
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files

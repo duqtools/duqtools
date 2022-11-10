@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files

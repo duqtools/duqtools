@@ -18,7 +18,7 @@ from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
 from ._llcmd import write_batchfile as jetto_write_batchfile
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
