@@ -8,12 +8,12 @@ from pydantic import Field, validator
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 
-if sys.version_info <= (3, 7):
+if sys.version_info < (3, 8):
     from typing_extensions import Literal
 else:
     from typing import Literal
 
-if sys.version_info <= (3, 8):
+if sys.version_info < (3, 9):
     from typing_extensions import Annotated
 else:
     from typing import Annotated

@@ -41,7 +41,7 @@ def test_halton():
     ret = halton(i, j, k, n_samples=4, seed=123)
 
     import sys
-    if sys.version_info <= (3, 7):
+    if sys.version_info < (3, 8):
         assert ret == [('a', 'c', 'i'), ('b', 'e', 'f'), ('a', 'd', 'h'),
                        ('b', 'c', 'h')]
     else:

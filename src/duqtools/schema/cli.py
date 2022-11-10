@@ -14,7 +14,7 @@ from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
 from .variables import VariableConfigModel
 from .workdir import WorkDirectoryModel
 
-if sys.version_info <= (3, 7):
+if sys.version_info < (3, 8):
     from typing_extensions import Literal
 else:
     from typing import Literal
