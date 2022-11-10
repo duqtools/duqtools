@@ -4,7 +4,7 @@ import stat
 import subprocess as sp
 import sys
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, List, Optional, Sequence
 
 from jetto_tools import config
 from jetto_tools import job as jetto_job
@@ -198,7 +198,7 @@ class JettoSystem(AbstractSystem):
     def set_jetto_variable(run: Path,
                            key: str,
                            value,
-                           variable: JettoVar = None):
+                           variable: Optional[JettoVar] = None):
         jetto_template = template.from_directory(run)
 
         if variable:

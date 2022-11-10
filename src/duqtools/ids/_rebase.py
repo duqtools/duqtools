@@ -1,5 +1,5 @@
 import logging
-from typing import List, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 import xarray as xr
@@ -28,7 +28,7 @@ def standardize_grid(ds: xr.Dataset,
                      *,
                      new_dim: str,
                      old_dim: str,
-                     group: str = None,
+                     group: Optional[str] = None,
                      new_dim_data: Union[np.ndarray, int] = 0) -> xr.Dataset:
     """Standardize the grid within a dataset.
 
