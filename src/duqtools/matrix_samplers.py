@@ -1,4 +1,5 @@
 import itertools
+from typing import Optional
 
 import numpy as np
 from scipy.stats import qmc
@@ -38,7 +39,10 @@ def _sampler(func, *iterables, n_samples: int, **kwargs):
     return samples
 
 
-def latin_hypercube(*iterables, n_samples: int, seed: int = None, **kwargs):
+def latin_hypercube(*iterables,
+                    n_samples: int,
+                    seed: Optional[int] = None,
+                    **kwargs):
     """Sample input iterables using Latin hypercube sampling (LHS).
 
     Uses `scipy.stats.qmc.LatinHyperCube`.
@@ -63,7 +67,7 @@ def latin_hypercube(*iterables, n_samples: int, seed: int = None, **kwargs):
                     seed=seed)
 
 
-def sobol(*iterables, n_samples: int, seed: int = None, **kwargs):
+def sobol(*iterables, n_samples: int, seed: Optional[int] = None, **kwargs):
     """Sample input iterables using the Sobol sampling method for generating
     low discrepancy sequences.
 
@@ -88,7 +92,7 @@ def sobol(*iterables, n_samples: int, seed: int = None, **kwargs):
     return _sampler(qmc.Sobol, *iterables, n_samples=n_samples, seed=seed)
 
 
-def halton(*iterables, n_samples: int, seed: int = None, **kwargs):
+def halton(*iterables, n_samples: int, seed: Optional[int] = None, **kwargs):
     """Sample input iterables using the Halton sampling method.
 
     Uses `scipy.stats.qmc.Halton`.

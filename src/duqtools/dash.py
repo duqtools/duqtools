@@ -2,7 +2,10 @@ import logging
 import sys
 from pathlib import Path
 
-from importlib_resources import files
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 logger = logging.getLogger(__name__)
 

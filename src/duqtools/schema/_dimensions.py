@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import sys
 from typing import List, Tuple, Union
 
 from pydantic import Field, validator
-from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel, JettoVariableModel
+
+if sys.version_info < (3, 8):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
 
 
 class OperatorMixin(BaseModel):

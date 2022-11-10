@@ -1,10 +1,14 @@
 import logging
 import shutil
+import sys
 from pathlib import Path
 
-from importlib_resources import files
-
 from .operations import op_queue
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 logger = logging.getLogger(__name__)
 

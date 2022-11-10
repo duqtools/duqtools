@@ -2,10 +2,10 @@ import logging
 import shutil
 import stat
 import subprocess as sp
+import sys
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, List, Optional, Sequence
 
-from importlib_resources import files
 from jetto_tools import config
 from jetto_tools import job as jetto_job
 from jetto_tools import jset, lookup, namelist, template
@@ -17,6 +17,11 @@ from ..operations import add_to_op_queue
 from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
 from ._llcmd import write_batchfile as jetto_write_batchfile
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +198,7 @@ class JettoSystem(AbstractSystem):
     def set_jetto_variable(run: Path,
                            key: str,
                            value,
-                           variable: JettoVar = None):
+                           variable: Optional[JettoVar] = None):
         jetto_template = template.from_directory(run)
 
         if variable:

@@ -124,7 +124,9 @@ class Operations(deque):
         """
         self.append(Operation(**kwargs))
 
-    def add_no_op(self, description: str, extra_description: str = None):
+    def add_no_op(self,
+                  description: str,
+                  extra_description: Optional[str] = None):
         """Adds a line to specify an action will not be undertaken."""
         self.add(action=None,
                  description=description,

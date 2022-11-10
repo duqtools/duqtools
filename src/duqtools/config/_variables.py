@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import List, Sequence, Union
 
-from importlib_resources import files
-
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 logger = logging.getLogger(__name__)
 

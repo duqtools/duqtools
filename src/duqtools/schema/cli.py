@@ -1,8 +1,8 @@
+import sys
 from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import DirectoryPath, Field
-from typing_extensions import Literal
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -13,6 +13,11 @@ from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .variables import VariableConfigModel
 from .workdir import WorkDirectoryModel
+
+if sys.version_info < (3, 8):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
 
 
 class CreateConfigModel(BaseModel):
