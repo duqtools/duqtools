@@ -8,7 +8,7 @@ from .utils import read_imas_handles_from_file
 logger = logging.getLogger(__name__)
 
 
-def duqduqtools(*, template_file, input_file, runs_dir, **kwargs):
+def setup(*, template_file, input_file, runs_dir, **kwargs):
     runs_dir = Path(runs_dir)
     cwd = Path.cwd()
 
