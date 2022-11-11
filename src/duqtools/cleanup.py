@@ -46,7 +46,7 @@ def cleanup(out, force, **kwargs):
     except OSError:
         runs = ()
     else:
-        if workspace.runs_yaml.exists and not force:
+        if workspace.runs_yaml.exists() and not force:
             if workspace.runs_yaml_old.exists():
                 raise OSError(
                     '`runs.yaml.old` exists, use --force to overwrite anyway')
