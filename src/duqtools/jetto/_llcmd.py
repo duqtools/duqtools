@@ -20,7 +20,7 @@ def write_batchfile(run_dir: Path, jset: jetto_tools.jset.JSET):
     llcmd_path = run_dir / '.llcmd'
 
     rjettov_path = run_dir / 'rjettov'
-    rel_path = run_dir.relative_to(Locations().jruns_path)
+    rel_path = run_dir.relative_to(Locations().jruns_path.resolve())
 
     build_name = jset['JobProcessingPanel.name']
     build_user_name = jset['JobProcessingPanel.userid']
