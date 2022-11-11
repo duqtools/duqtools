@@ -12,7 +12,7 @@ from ._imas import ImasBaseModel
 
 class Run(BaseModel):
     dirname: Path = Field(description='Directory of run')
-    shortname: Path = Field(description='Short name (dirname.name)')
+    shortname: Path = Field(description='Short name (`dirname.name`)')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
     operations: List[Union[IDSOperation, JettoOperation,
