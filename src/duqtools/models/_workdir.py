@@ -31,16 +31,18 @@ class WorkDirectory(BaseModel):
 
     @staticmethod
     def jruns_path() -> Path:
-        create = cfg.create
-        if not create:
-            raise OSError('create key not present in duqtools.yaml')
+        """return the Path specified in the create->jpath config variable, or,
+        if that is empty, the JPATH environment variable, or, if JPATH does not
+        exists, return the current directory `./`.
 
-        if create.jruns:
-            path: Path = create.jruns
+        Returns
+        -------
+        Path
+        """
+
+        if cfg.create.jruns:  # type: ignore
+            return cfg.create.jruns  # type: ignore
+        elif getenv('JRUNS'):
+            return Path(getenv('JRUNS'))  # type: ignore
         else:
-            jruns = getenv('JRUNS')
-            if jruns:
-                path = Path(jruns)
-            else:
-                path = Path('./')
-        return path
+            return Path()

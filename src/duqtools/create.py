@@ -160,7 +160,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname, self.template_drc)
+        self.system.write_batchfile(model.dirname)
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
@@ -203,12 +203,12 @@ def create(*, force, **kwargs):
         create_mgr.create_run(model, force=force)
 
 
-def recreate(*, runs, **kwargs):
+def recreate(*, runs: Sequence[Path], **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
-    runs : Sequence[str]
+    runs : Sequence[Path]
         Run names to recreate.
     **kwargs
         Unused.

@@ -75,6 +75,9 @@ class CreateConfigModel(BaseModel):
     run for the jetto system. Because the jettos system works with relative
     directories from some root directory.
 
+    If this variable is not specified, duqtools will look for the `JPATH` environment
+    variable, and set it to that. If that fails, jruns is set to the current directory './'
+
     In this way, duqtools can ensure that the current work directory is
     a subdirectory of the given root directory. All subdirectories are
     calculated as relative to the root directory.
@@ -83,7 +86,6 @@ class CreateConfigModel(BaseModel):
     `/pfs/work/$USER/jetto/runs/`. Any UQ runs must therefore be
     a subdirectory.
 
-    If omitted, duqtools tries to find the workspace according to the environment variables
     """))
 
     runs_dir: Optional[Path] = Field(description=f(

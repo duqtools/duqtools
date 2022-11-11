@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, Sequence, Tuple
+from typing import Deque, List, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -120,8 +120,31 @@ def lockfile_ok(job, *, force):
     return True
 
 
+def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> List[Job]:
+    """get_resubmit_jobs.
+
+    Parameters
+    ----------
+    resubmit_names : Sequence[Path]
+        The names (short or full path) of the jobs that need to be resubmitted
+
+    Returns
+    -------
+    List[Job]
+    """
+    jobs: List[Job] = []
+    run_dict = {run.shortname: run for run in WorkDirectory().runs}
+    for name in resubmit_names:
+        if name in run_dict:  # check for shortname
+            jobs.append(Job(run_dict[name].dirname))
+        else:
+            # It's not a short name, use the argument as the full path to the job
+            jobs.append(Job(Path(name)))
+    return jobs
+
+
 def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
-           resubmit: Tuple[Path], **kwargs):
+           resubmit: Sequence[Path], **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -134,27 +157,23 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
+    array : bool
+        Submit the jobs as a single array
+    resubmit : Sequence[Path]
+        If any jobs need to be resubmitted, this is has a nonzero length, and
+        contains a Sequence of Paths which either are the full Path to the run
+        that needs to be resubmitted, or the shortname
     """
     if not cfg.submit:
         raise Exception('submit field required in config file')
 
     debug('Submit config: %s', cfg.submit)
 
-    workspace = WorkDirectory()
-    runs = workspace.runs
-    run_dict = {run.shortname: run for run in WorkDirectory().runs}
-
     if len(resubmit) > 0:
-        jobs = []
+        jobs = get_resubmit_jobs(resubmit)
         force = True
-        for run in resubmit:
-            if run in run_dict:
-                jobs.append(Job(run_dict[run].dirname))
-            else:
-                jobs.append(Job(Path(run)))
-
     else:
-        jobs = [Job(run.dirname) for run in runs]
+        jobs = [Job(run.dirname) for run in WorkDirectory().runs]
 
     debug('Case directories: %s', jobs)
 

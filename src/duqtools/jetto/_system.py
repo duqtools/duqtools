@@ -34,8 +34,7 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     def get_runs_dir() -> Path:
         path = WorkDirectory.jruns_path()
-        if cfg.create:  # Make mypy happy, create is Optional[]
-            runs_dir = cfg.create.runs_dir
+        runs_dir = cfg.create.runs_dir  # type: ignore
         if not runs_dir:
             count = 0
             while True:
@@ -49,9 +48,9 @@ class JettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
-    def write_batchfile(run_dir: Path, template_drc: Path):
+    def write_batchfile(run_dir: Path):
 
-        jetto_jset = jset.read(template_drc / 'jetto.jset')
+        jetto_jset = jset.read(run_dir / 'jetto.jset')
 
         jetto_write_batchfile(run_dir, jetto_jset)
 
@@ -182,7 +181,7 @@ class JettoSystem(AbstractSystem):
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
     @staticmethod
-    def imas_from_path(template_drc: Path):
+    def imas_from_path(template_drc: Path) -> ImasHandle:
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return ImasHandle(

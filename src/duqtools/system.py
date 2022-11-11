@@ -1,13 +1,10 @@
 from pathlib import Path
 from warnings import warn
 
-from pydantic import DirectoryPath
-
 from .config import cfg
 from .ids import ImasHandle
 from .jetto import JettoSystem
 from .models import AbstractSystem, Job
-from .schema import JettoVar
 
 
 class DummySystem(AbstractSystem):
@@ -22,8 +19,7 @@ class DummySystem(AbstractSystem):
         return Path()
 
     @staticmethod
-    def write_batchfile(run_location: DirectoryPath, run_name: str,
-                        template_drc: Path):
+    def write_batchfile(run_dir: Path):
         pass
 
     @staticmethod
@@ -40,10 +36,6 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def update_imas_locations(run: Path, inp, out):
-        pass
-
-    @staticmethod
-    def set_jetto_variable(run: Path, key: str, value, variable: JettoVar):
         pass
 
 
