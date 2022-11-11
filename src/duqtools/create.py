@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Any, List, Sequence
 
@@ -136,11 +137,27 @@ class CreateManager:
         with open(self.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
 
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            with open(self.runs_dir / 'runs_yaml', 'w') as f:
+                runs.yaml(stream=f)
+
     @add_to_op_queue('Writing csv', quiet=True)
     def write_runs_csv(self, runs: Sequence[Run], fname: str = 'data.csv'):
         run_map = {run.dirname: run.data_out.dict() for run in runs}
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
+
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            df.to_csv(self.runs_dir / fname)
+
+    @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
+    def write_duqtools_file(self, config):
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            shutil.copyfile(Path.cwd() / config,
+                            self.runs_dir / 'duqtools.yaml')
 
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
@@ -166,13 +183,15 @@ class CreateManager:
                                           out=model.data_out)
 
 
-def create(*, force, **kwargs):
+def create(*, force, config, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
     force : bool
         Override protection if data and directories already exist.
+    config : Path
+        Config file location
 
     **kwargs
         Unused.
@@ -195,11 +214,12 @@ def create(*, force, **kwargs):
             create_mgr.warn_no_create_runs()
             return
 
-    create_mgr.write_runs_file(runs)
-    create_mgr.write_runs_csv(runs)
-
     for model in runs:
         create_mgr.create_run(model, force=force)
+
+    create_mgr.write_runs_file(runs)
+    create_mgr.write_runs_csv(runs)
+    create_mgr.write_duqtools_file(config)
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):
