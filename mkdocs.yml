@@ -15,6 +15,7 @@ nav:
   - Dashboard: dash.md
   - Visualization: visualization.md
   - Variables: variables.md
+  - Large scale validation: large_scale_validation.md
   - Python API:
     - Public API: api/index.md
     - Operations: api/operations.md
