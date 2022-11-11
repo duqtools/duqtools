@@ -72,7 +72,7 @@ class CreateConfigModel(BaseModel):
 
     jruns: Optional[DirectoryPath] = Field(description=f(
         """Jruns defines the the root directory where all simulations are
-    run for the jetto system. Because the  jettos system works with relative
+    run for the jetto system. Because the jettos system works with relative
     directories from some root directory.
 
     In this way, duqtools can ensure that the current work directory is
