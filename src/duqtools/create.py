@@ -139,7 +139,7 @@ class CreateManager:
 
         if Path.cwd().resolve() != self.runs_dir.resolve(
         ):  # Only if it is a different directory
-            with open(self.runs_dir / 'runs_yaml', 'w') as f:
+            with open(self.runs_dir / 'runs.yaml', 'w') as f:
                 runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
