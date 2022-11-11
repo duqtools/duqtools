@@ -32,8 +32,8 @@ def write_batchfile(run_dir: Path, jset: jetto_tools.jset.JSET):
         f.write(f"""#!/bin/sh
 #SBATCH -J duqtools.jetto.{run_dir.name}
 #SBATCH -i /dev/null
-#SBATCH -o {run_dir}/ll.out
-#SBATCH -e {run_dir}/ll.err
+#SBATCH -o {run_dir / 'll.out'}
+#SBATCH -e {run_dir / 'll.err'}
 #SBATCH -p {machine_number}
 
 #SBATCH -N 1
