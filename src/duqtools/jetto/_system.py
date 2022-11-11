@@ -36,15 +36,19 @@ class JettoSystem(AbstractSystem):
         path = WorkDirectory.jruns_path()
         runs_dir = cfg.create.runs_dir  # type: ignore
         if not runs_dir:
-            count = 0
-            while True:
-                runs_dir = path / f'duqtools_experiment_{count:04d}'
-                if not runs_dir.exists():
-                    break
-                count = count + 1
-        else:
-            runs_dir = path / runs_dir
-        return runs_dir
+            abs_cwd = str(Path.cwd().resolve())
+            abs_jruns = str(path.resolve())
+            if abs_cwd.startswith(
+                    abs_jruns):  # jruns is parent dir of current dir
+                runs_dir = Path()
+            else:  # jruns is somewhere else
+                count = 0
+                while True:  # find the next free folder
+                    runs_dir = f'duqtools_experiment_{count:04d}'
+                    if not (path / runs_dir).exists():
+                        break
+                    count = count + 1
+        return path / runs_dir
 
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
