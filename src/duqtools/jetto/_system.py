@@ -12,7 +12,7 @@ from jetto_tools import jset, lookup, namelist, template
 
 from ..config import cfg
 from ..ids import ImasHandle
-from ..models import AbstractSystem, Job, WorkDirectory
+from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
 from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
@@ -33,7 +33,7 @@ class JettoSystem(AbstractSystem):
 
     @staticmethod
     def get_runs_dir() -> Path:
-        path = WorkDirectory.jruns_path()
+        path = Locations().jruns_path
         runs_dir = cfg.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())

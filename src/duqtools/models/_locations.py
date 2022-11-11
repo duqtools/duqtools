@@ -3,11 +3,10 @@ from pathlib import Path
 from typing import List
 
 from ..config import cfg
-from ..schema import BaseModel
 from ..schema.runs import Run, Runs
 
 
-class WorkDirectory(BaseModel):
+class Locations():
 
     @property
     def runs_yaml(self):
@@ -29,8 +28,8 @@ class WorkDirectory(BaseModel):
 
         return Runs.parse_file(runs_yaml)
 
-    @staticmethod
-    def jruns_path() -> Path:
+    @property
+    def jruns_path(self) -> Path:
         """return the Path specified in the create->jpath config variable, or,
         if that is empty, the JPATH environment variable, or, if JPATH does not
         exists, return the current directory `./`.

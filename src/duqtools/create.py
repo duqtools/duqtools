@@ -9,7 +9,7 @@ from .cleanup import remove_run
 from .config import cfg
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
-from .models import WorkDirectory
+from .models import Locations
 from .operations import add_to_op_queue, op_queue
 from .schema.runs import Run, Runs
 from .system import get_system
@@ -34,10 +34,10 @@ class CreateManager:
             raise CreateError('No create options specified in config.')
 
         self.template_drc = self.options.template
-        self.workdir = WorkDirectory()
         self.system = get_system()
         self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
+        self.runs_yaml = Locations().runs_yaml
 
     def _get_source_handle(self) -> ImasHandle:
         if not self.options.template_data:
@@ -83,10 +83,9 @@ class CreateManager:
 
     def runs_yaml_exists(self) -> bool:
         """Check if runs.yaml exists."""
-        if self.workdir.runs_yaml.exists():
-            op_queue.add_no_op(
-                description='Not creating runs.yaml',
-                extra_description=f'{self.workdir.runs_yaml} exists')
+        if self.runs_yaml.exists():
+            op_queue.add_no_op(description='Not creating runs.yaml',
+                               extra_description=f'{self.runs_yaml} exists')
             return True
         return False
 
@@ -131,10 +130,10 @@ class CreateManager:
         for model in operations:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 
-    @add_to_op_queue('Writing runs', '{self.workdir.runs_yaml}', quiet=True)
+    @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
         runs = Runs.parse_obj(runs)
-        with open(self.workdir.runs_yaml, 'w') as f:
+        with open(self.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
@@ -215,7 +214,7 @@ def recreate(*, runs: Sequence[Path], **kwargs):
     """
     create_mgr = CreateManager()
 
-    run_dict = {run.shortname: run for run in create_mgr.workdir.runs}
+    run_dict = {run.shortname: run for run in Locations().runs}
 
     run_models = []
     for run in runs:

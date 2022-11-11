@@ -6,7 +6,7 @@ from jetto_tools import config, template
 
 from .config import cfg
 from .jetto._system import jetto_lookup
-from .models import Job, WorkDirectory
+from .models import Job, Locations
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -32,7 +32,7 @@ class Status():
     def __init__(self):
         debug('Submit config: %s', cfg.submit)
 
-        runs = WorkDirectory().runs
+        runs = Locations().runs
 
         self.jobs = [Job(run.dirname) for run in runs]
         debug('Case directories: %s', self.jobs)

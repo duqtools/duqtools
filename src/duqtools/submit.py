@@ -7,7 +7,7 @@ from typing import Deque, List, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
-from .models import Job, WorkDirectory
+from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
 
@@ -133,7 +133,7 @@ def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> List[Job]:
     List[Job]
     """
     jobs: List[Job] = []
-    run_dict = {run.shortname: run for run in WorkDirectory().runs}
+    run_dict = {run.shortname: run for run in Locations().runs}
     for name in resubmit_names:
         if name in run_dict:  # check for shortname
             jobs.append(Job(run_dict[name].dirname))
@@ -173,7 +173,7 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
         jobs = get_resubmit_jobs(resubmit)
         force = True
     else:
-        jobs = [Job(run.dirname) for run in WorkDirectory().runs]
+        jobs = [Job(run.dirname) for run in Locations().runs]
 
     debug('Case directories: %s', jobs)
 

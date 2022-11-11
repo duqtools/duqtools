@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 
 from .ids import ImasHandle
-from .models import WorkDirectory
+from .models import Locations
 from .operations import op_queue
 from .schema.runs import Run
 
@@ -41,13 +41,12 @@ def cleanup(out, force, **kwargs):
         Remove output IDS.
     """
     try:
-        workspace = WorkDirectory()
-        runs = workspace.runs
+        runs = Locations().runs
     except OSError:
         runs = ()
     else:
-        if workspace.runs_yaml.exists() and not force:
-            if workspace.runs_yaml_old.exists():
+        if Locations().runs_yaml.exists() and not force:
+            if Locations().runs_yaml_old.exists():
                 raise OSError(
                     '`runs.yaml.old` exists, use --force to overwrite anyway')
 
@@ -67,9 +66,9 @@ def cleanup(out, force, **kwargs):
 
     op_queue.add(
         action=shutil.move,
-        args=(workspace.runs_yaml, workspace.runs_yaml_old),
+        args=(Locations().runs_yaml, Locations().runs_yaml_old),
         description='Moving runs.yaml',
-        extra_description=f'{workspace.runs_yaml_old}',
+        extra_description=f'{Locations().runs_yaml_old}',
     )
 
     op_queue.add(
