@@ -38,8 +38,8 @@ class JettoSystem(AbstractSystem):
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
             abs_jruns = str(path.resolve())
-            if abs_cwd.startswith(
-                    abs_jruns):  # jruns is parent dir of current dir
+            # Check if jruns is parent dir of current dir
+            if abs_cwd.startswith(abs_jruns):
                 runs_dir = Path()
             else:  # jruns is somewhere else
                 count = 0
