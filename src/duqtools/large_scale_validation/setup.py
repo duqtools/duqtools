@@ -26,7 +26,7 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
             RUNS_DIR=runs_dir / name,
         )
 
-        Config.parse_raw(cfg)
+        Config.parse_raw(cfg)  # make sure config is valid
 
         out_drc = cwd / name
         out_drc.mkdir(exist_ok=False)

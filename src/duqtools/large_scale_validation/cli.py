@@ -2,6 +2,8 @@ import logging
 
 import click
 
+from ..operations import op_queue_context
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -64,11 +66,13 @@ def cli_setup(**kwargs):
 def cli_create(**kwargs):
     """Create data sets for large scale validation."""
     from .create import create
-    create(**kwargs)
+    with op_queue_context():
+        create(**kwargs)
 
 
 @cli.command('merge')
 def cli_merge(**kwargs):
     """Merge large scale validation data."""
     from .merge import merge
-    merge(**kwargs)
+    with op_queue_context():
+        merge(**kwargs)
