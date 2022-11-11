@@ -73,7 +73,7 @@ class CreateManager:
                                   shot=self.source.shot,
                                   run=self.options.data.run_out_start_at + i)
 
-            model = Run(dirname=dirname,
+            model = Run(dirname=dirname.resolve(),
                         shortname=dirname.name,
                         data_in=data_in,
                         data_out=data_out,
