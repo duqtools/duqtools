@@ -378,5 +378,40 @@ def cli_list_variables(**kwargs):
     list_variables(**kwargs)
 
 
+@cli.command('duqtools')
+@click.option(
+    '-i',
+    '--input',
+    'input_file',
+    type=click.Path(exists=True),
+    help='Input file, i.e. `data.csv` or `runs.yaml`',
+)
+@click.option(
+    '-t',
+    '--template',
+    'template_file',
+    type=click.Path(exists=True),
+    help='Template duqtools.yaml',
+    default='duqtools.template.yaml',
+)
+@click.option(
+    '-r',
+    '--runs',
+    'runs_dir',
+    type=click.Path(),
+    help='Output directory for created runs',
+    default='duqduqtools',
+)
+def cli_duqduqtools(**kwargs):
+    """Large scale validation using duqtools."""
+    click.secho(
+        'Note: This tool is a work in progress and not ready to be used.',
+        bold=True,
+        bg='red',
+        fg='white')
+    from .duqduqtools import duqduqtools
+    duqduqtools(**kwargs)
+
+
 if __name__ == '__main__':
     cli()
