@@ -75,7 +75,7 @@ class CreateConfigModel(BaseModel):
     run for the jetto system. Because the jettos system works with relative
     directories from some root directory.
 
-    If this variable is not specified, duqtools will look for the `JPATH` environment
+    If this variable is not specified, duqtools will look for the `$JRUNS` environment
     variable, and set it to that. If that fails, jruns is set to the current directory './'
 
     In this way, duqtools can ensure that the current work directory is
