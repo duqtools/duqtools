@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 from string import Template
 
-from .config import Config
-from .utils import read_imas_handles_from_file
+from ..config import Config
+from ..utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 def setup(*, template_file, input_file, runs_dir, **kwargs):
     runs_dir = Path(runs_dir)
     cwd = Path.cwd()
+
+    if not input_file:
+        raise IOError('Input file not defined.')
 
     handles = read_imas_handles_from_file(input_file)
 

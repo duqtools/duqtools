@@ -12,4 +12,4 @@ def create(**kwargs):
     for config_file in config_files:
         cfg.parse_file(config_file)
 
-        duqtools_create()
+        duqtools_create(force=True, config=config_file)
