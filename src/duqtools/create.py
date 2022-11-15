@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Any, List, Sequence
 
@@ -9,7 +10,7 @@ from .cleanup import remove_run
 from .config import cfg
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
-from .models import WorkDirectory
+from .models import Locations
 from .operations import add_to_op_queue, op_queue
 from .schema.runs import Run, Runs
 from .system import get_system
@@ -34,9 +35,10 @@ class CreateManager:
             raise CreateError('No create options specified in config.')
 
         self.template_drc = self.options.template
-        self.workspace = WorkDirectory.parse_obj(cfg.workspace)
         self.system = get_system()
+        self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
+        self.runs_yaml = Locations().runs_yaml
 
     def _get_source_handle(self) -> ImasHandle:
         if not self.options.template_data:
@@ -62,7 +64,7 @@ class CreateManager:
         run_models = []
 
         for i, operations in enumerate(ops_list):
-            dirname = f'{RUN_PREFIX}{i:04d}'
+            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
 
             data_in = ImasHandle(db=self.options.data.imasdb,
                                  shot=self.source.shot,
@@ -71,7 +73,8 @@ class CreateManager:
                                   shot=self.source.shot,
                                   run=self.options.data.run_out_start_at + i)
 
-            model = Run(dirname=dirname,
+            model = Run(dirname=dirname.resolve(),
+                        shortname=dirname.name,
                         data_in=data_in,
                         data_out=data_out,
                         operations=operations)
@@ -81,10 +84,9 @@ class CreateManager:
 
     def runs_yaml_exists(self) -> bool:
         """Check if runs.yaml exists."""
-        if self.workspace.runs_yaml.exists():
-            op_queue.add_no_op(
-                description='Not creating runs.yaml',
-                extra_description=f'{self.workspace.runs_yaml} exists')
+        if self.runs_yaml.exists():
+            op_queue.add_no_op(description='Not creating runs.yaml',
+                               extra_description=f'{self.runs_yaml} exists')
             return True
         return False
 
@@ -107,12 +109,10 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            run_drc = self.workspace.cwd / model.dirname
-
-            if run_drc.exists():
+            if model.dirname.exists():
                 op_queue.add_no_op(
                     description='Not creating directory',
-                    extra_description=f'Directory {run_drc} exists',
+                    extra_description=f'Directory {model.dirname} exists',
                 )
 
                 any_exists = True
@@ -131,11 +131,16 @@ class CreateManager:
         for model in operations:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 
-    @add_to_op_queue('Writing runs', '{self.workspace.runs_yaml}', quiet=True)
+    @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
         runs = Runs.parse_obj(runs)
-        with open(self.workspace.runs_yaml, 'w') as f:
+        with open(self.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
+
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            with open(self.runs_dir / 'runs.yaml', 'w') as f:
+                runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
     def write_runs_csv(self, runs: Sequence[Run], fname: str = 'data.csv'):
@@ -143,39 +148,50 @@ class CreateManager:
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
 
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            df.to_csv(self.runs_dir / fname)
+
+    @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
+    def write_duqtools_file(self, config):
+        if Path.cwd().resolve() != self.runs_dir.resolve(
+        ):  # Only if it is a different directory
+            shutil.copyfile(Path.cwd() / config,
+                            self.runs_dir / 'duqtools.yaml')
+
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
-        run_drc = self.workspace.cwd / model.dirname
 
-        op_queue.add(action=run_drc.mkdir,
+        op_queue.add(action=model.dirname.mkdir,
                      kwargs={
                          'parents': True,
                          'exist_ok': force
                      },
                      description='Creating run',
-                     extra_description=f'{run_drc}')
+                     extra_description=f'{model.dirname}')
 
         self.source.copy_data_to(model.data_in)
 
-        self.system.copy_from_template(self.template_drc, run_drc)
+        self.system.copy_from_template(self.template_drc, model.dirname)
 
-        self.apply_operations(model.data_in, run_drc, model.operations)
+        self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(self.workspace, model.dirname,
-                                    self.template_drc)
+        self.system.write_batchfile(model.dirname)
 
-        self.system.update_imas_locations(run=run_drc,
+        self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
                                           out=model.data_out)
 
 
-def create(*, force, **kwargs):
+def create(*, force, config, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
     force : bool
         Override protection if data and directories already exist.
+    config : Path
+        Config file location
 
     **kwargs
         Unused.
@@ -198,26 +214,27 @@ def create(*, force, **kwargs):
             create_mgr.warn_no_create_runs()
             return
 
-    create_mgr.write_runs_file(runs)
-    create_mgr.write_runs_csv(runs)
-
     for model in runs:
         create_mgr.create_run(model, force=force)
 
+    create_mgr.write_runs_file(runs)
+    create_mgr.write_runs_csv(runs)
+    create_mgr.write_duqtools_file(config)
 
-def recreate(*, runs, **kwargs):
+
+def recreate(*, runs: Sequence[Path], **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
-    runs : Sequence[str]
+    runs : Sequence[Path]
         Run names to recreate.
     **kwargs
         Unused.
     """
     create_mgr = CreateManager()
 
-    run_dict = {str(run.dirname): run for run in create_mgr.workspace.runs}
+    run_dict = {run.shortname: run for run in Locations().runs}
 
     run_models = []
     for run in runs:

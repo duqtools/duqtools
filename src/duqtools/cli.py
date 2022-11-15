@@ -182,7 +182,7 @@ def cli_create(**kwargs):
 
 
 @cli.command('recreate')
-@click.argument('runs', nargs=-1)
+@click.argument('runs', type=Path, nargs=-1)
 @common_options
 def cli_recreate(**kwargs):
     """Read `runs.yaml` and re-create the given runs.

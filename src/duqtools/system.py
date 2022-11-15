@@ -4,8 +4,7 @@ from warnings import warn
 from .config import cfg
 from .ids import ImasHandle
 from .jetto import JettoSystem
-from .models import AbstractSystem, Job, WorkDirectory
-from .schema import JettoVar
+from .models import AbstractSystem, Job
 
 
 class DummySystem(AbstractSystem):
@@ -16,8 +15,11 @@ class DummySystem(AbstractSystem):
     """
 
     @staticmethod
-    def write_batchfile(workspace: WorkDirectory, run_name: str,
-                        template_drc: Path):
+    def get_runs_dir() -> Path:
+        return Path()
+
+    @staticmethod
+    def write_batchfile(run_dir: Path):
         pass
 
     @staticmethod
@@ -34,10 +36,6 @@ class DummySystem(AbstractSystem):
 
     @staticmethod
     def update_imas_locations(run: Path, inp, out):
-        pass
-
-    @staticmethod
-    def set_jetto_variable(run: Path, key: str, value, variable: JettoVar):
         pass
 
 
