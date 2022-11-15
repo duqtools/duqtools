@@ -12,7 +12,7 @@ from jetto_tools import jset, lookup, namelist, template
 
 from ..config import cfg
 from ..ids import ImasHandle
-from ..models import AbstractSystem, Job, WorkDirectory
+from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
 from ..schema import JettoVar
 from ._jettovar_to_json import jettovar_to_json
@@ -32,13 +32,31 @@ jetto_lookup = lookup.from_file(lookup_file)
 class JettoSystem(AbstractSystem):
 
     @staticmethod
-    @add_to_op_queue('Writing new batchfile', '{run_name}', quiet=True)
-    def write_batchfile(workspace: WorkDirectory, run_name: str,
-                        template_drc: Path):
+    def get_runs_dir() -> Path:
+        path = Locations().jruns_path
+        runs_dir = cfg.create.runs_dir  # type: ignore
+        if not runs_dir:
+            abs_cwd = str(Path.cwd().resolve())
+            abs_jruns = str(path.resolve())
+            # Check if jruns is parent dir of current dir
+            if abs_cwd.startswith(abs_jruns):
+                runs_dir = Path()
+            else:  # jruns is somewhere else
+                count = 0
+                while True:  # find the next free folder
+                    runs_dir = f'duqtools_experiment_{count:04d}'
+                    if not (path / runs_dir).exists():
+                        break
+                    count = count + 1
+        return path / runs_dir
 
-        jetto_jset = jset.read(template_drc / 'jetto.jset')
+    @staticmethod
+    @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
+    def write_batchfile(run_dir: Path):
 
-        return jetto_write_batchfile(workspace, run_name, jetto_jset)
+        jetto_jset = jset.read(run_dir / 'jetto.jset')
+
+        jetto_write_batchfile(run_dir, jetto_jset)
 
     @staticmethod
     def submit_job(job: Job):
@@ -167,7 +185,7 @@ class JettoSystem(AbstractSystem):
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
     @staticmethod
-    def imas_from_path(template_drc: Path):
+    def imas_from_path(template_drc: Path) -> ImasHandle:
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return ImasHandle(

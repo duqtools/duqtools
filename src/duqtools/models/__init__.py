@@ -1,9 +1,9 @@
 from ._job import Job
+from ._locations import Locations
 from ._system import AbstractSystem
-from ._workdir import WorkDirectory
 
 __all__ = [
-    'WorkDirectory',
+    'Locations',
     'AbstractSystem',
     'Job',
 ]

@@ -1,9 +1,7 @@
-workspace:
-  root: /pfs/work/$USER/jetto/runs/
 system: jetto
 quiet: false
 create:
-  template: /pfs/work/$USER/jetto/runs/duqtools_template
+  template: ./template #TODO edit to directory where initial run is stored
   data:
     imasdb: test
     run_in_start_at: 7000

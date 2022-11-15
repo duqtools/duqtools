@@ -2,16 +2,14 @@
 from __future__ import annotations
 
 import stat
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import jetto_tools
 
-if TYPE_CHECKING:
-    from duqtools.models import WorkDirectory
+from ..models import Locations
 
 
-def write_batchfile(workspace: WorkDirectory, run_name: str,
-                    jset: jetto_tools.jset.JSET):
+def write_batchfile(run_dir: Path, jset: jetto_tools.jset.JSET):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
@@ -19,12 +17,10 @@ def write_batchfile(workspace: WorkDirectory, run_name: str,
     target_drc : Path
         Directory to place batch file into.
     """
-    run_drc = workspace.cwd / run_name
-    llcmd_path = run_drc / '.llcmd'
+    llcmd_path = run_dir / '.llcmd'
 
-    full_path = workspace.cwd / run_name
-    rjettov_path = full_path / 'rjettov'
-    rel_path = workspace.subdir / run_name
+    rjettov_path = run_dir / 'rjettov'
+    rel_path = run_dir.relative_to(Locations().jruns_path.resolve())
 
     build_name = jset['JobProcessingPanel.name']
     build_user_name = jset['JobProcessingPanel.userid']
@@ -34,17 +30,17 @@ def write_batchfile(workspace: WorkDirectory, run_name: str,
 
     with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
-#SBATCH -J duqtools.jetto.{run_name}
+#SBATCH -J duqtools.jetto.{run_dir.name}
 #SBATCH -i /dev/null
-#SBATCH -o {full_path}/ll.out
-#SBATCH -e {full_path}/ll.err
+#SBATCH -o {run_dir / 'll.out'}
+#SBATCH -e {run_dir / 'll.err'}
 #SBATCH -p {machine_number}
 
 #SBATCH -N 1
 #SBATCH -n {num_proc}
 #SBATCH -t {wall_time}:00:00
 
-cd {full_path}
+cd {run_dir}
 {rjettov_path} -S -I -p -xmpi -x64 {rel_path} \
 {build_name} {build_user_name}""")
 
