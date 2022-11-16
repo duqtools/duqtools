@@ -32,7 +32,7 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
         Config.parse_raw(cfg)  # make sure config is valid
 
         out_drc = cwd / name
-        out_drc.mkdir(exist_ok=False)
+        out_drc.mkdir(exist_ok=False, parents=True)
 
         with open(out_drc / 'duqtools.yaml', 'w') as f:
             f.write(cfg)

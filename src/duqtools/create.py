@@ -137,8 +137,8 @@ class CreateManager:
         with open(self.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
 
-        if Path.cwd().resolve() != self.runs_dir.resolve(
-        ):  # Only if it is a different directory
+        # Only if it is a different directory
+        if Path.cwd().resolve() != self.runs_dir.resolve():
             with open(self.runs_dir / 'runs.yaml', 'w') as f:
                 runs.yaml(stream=f)
 
@@ -148,14 +148,14 @@ class CreateManager:
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
 
-        if Path.cwd().resolve() != self.runs_dir.resolve(
-        ):  # Only if it is a different directory
+        # Only if it is a different directory
+        if Path.cwd().resolve() != self.runs_dir.resolve():
             df.to_csv(self.runs_dir / fname)
 
     @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
-    def write_duqtools_file(self, config):
-        if Path.cwd().resolve() != self.runs_dir.resolve(
-        ):  # Only if it is a different directory
+    def copy_config(self, config):
+        # Only if it is a different directory
+        if Path.cwd().resolve() != self.runs_dir.resolve():
             shutil.copyfile(Path.cwd() / config,
                             self.runs_dir / 'duqtools.yaml')
 
@@ -219,7 +219,7 @@ def create(*, force, config, **kwargs):
 
     create_mgr.write_runs_file(runs)
     create_mgr.write_runs_csv(runs)
-    create_mgr.write_duqtools_file(config)
+    create_mgr.copy_config(config)
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):

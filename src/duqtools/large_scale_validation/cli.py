@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from ..cli import common_options, debug_option, logfile_option
 from ..operations import op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ def cli(**kwargs):
     'input_file',
     type=click.Path(exists=True),
     help='Input file, i.e. `data.csv` or `runs.yaml`',
+    default='data.csv',
 )
 @click.option(
     '-t',
@@ -63,6 +65,10 @@ def cli_setup(**kwargs):
 
 
 @cli.command('create')
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite existing run directories and IDS data.')
+@common_options(logfile_option, debug_option)
 def cli_create(**kwargs):
     """Create data sets for large scale validation."""
     from .create import create
