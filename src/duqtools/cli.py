@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from sys import exit, stderr, stdout
+from typing import Callable
 
 import click
 from pydantic import ValidationError
@@ -37,6 +38,7 @@ def quiet_option(f):
 
 
 def debug_option(f):
+    """Must be added together with `logfile_option`."""
     return click.option('--debug',
                         is_flag=True,
                         help='Enable debug print statements.')(f)
@@ -55,6 +57,7 @@ def yes_option(f):
 
 
 def logfile_option(f):
+    """Must be added together with `debug_option`."""
     return click.option('--logfile',
                         '-l',
                         is_flag=False,
@@ -64,26 +67,36 @@ def logfile_option(f):
                         ' will send it there respectively.')(f)
 
 
-def parse_common_options(func):
-    """With this function it becomes possible to parse the options in user
-    defined order."""
+all_options = (logfile_option, debug_option, config_option, quiet_option,
+               dry_run_option, yes_option)
 
-    def parse_options(ctx, *, logfile, debug, quiet, dry_run, config, yes,
-                      **kwargs):
-        # Config option
-        if ctx.command.name != 'init':
-            try:
-                cfg.parse_file(config)
-            except ValidationError as e:
-                exit(e)
 
-        # Debug option
-        if debug:
-            level = logging.DEBUG
-        else:
-            level = logging.INFO
+class OptionParser:
 
-        # Logfile option
+    def wrap(self, func: Callable):
+        """With this wrapper it becomes possible to parse common options in
+        user defined order."""
+
+        def callback(**kwargs):
+            for parse in (
+                    self.parse_config,
+                    self.parse_logfile,
+                    self.parse_yes,
+                    self.parse_dry_run,
+                    self.parse_quiet,
+            ):
+                try:
+                    parse(**kwargs)
+                except TypeError:
+                    # Skip when option has not been set
+                    pass
+            func(**kwargs)
+
+        return callback
+
+    def parse_logfile(self, *, logfile, debug, **kwargs):
+        level = logging.DEBUG if debug else logging.INFO
+
         streams = {'stdout': stdout, 'stderr': stderr}
         logging.getLogger().handlers = []
 
@@ -105,40 +118,43 @@ def parse_common_options(func):
         logger.info('------------------------------------------------')
         logger.info('')
 
-        # Yes option
-        op_queue.yes = yes
-
-        # Dry run option
-        op_queue.dry_run = dry_run
-
-        # Quiet option
+    def parse_quiet(self, *, quiet, **kwargs):
         if quiet:
             duqlog_screen.handlers = []  # remove output methods
             cfg.quiet = True
 
-    def callback(ctx, **kwargs):
-        parse_options(ctx, **kwargs)
-        func(**kwargs)
+    def parse_dry_run(self, *, dry_run, **kwargs):
+        op_queue.dry_run = dry_run
 
-    return callback
+    def parse_config(self, *, config, **kwargs):
+        try:
+            cfg.parse_file(config)
+        except ValidationError as e:
+            exit(e)
+
+    def parse_yes(self, *, yes, **kwargs):
+        op_queue.yes = yes
 
 
-def common_options(func):
+def common_options(*options):
     """common_options.
 
     IMPORTANT: This must be the last click option specified before
     the execution of the actual function, otherwise options will be
     missing
     """
-    wrapper = click.pass_context(parse_common_options(func))
 
-    for option in (logfile_option, debug_option, config_option, quiet_option,
-                   dry_run_option, yes_option):
-        wrapper = option(wrapper)
+    def decorator(func):
+        wrapper = OptionParser().wrap(func)
 
-    functools.update_wrapper(wrapper, func)
+        for option in options:
+            wrapper = option(wrapper)
 
-    return wrapper
+        functools.update_wrapper(wrapper, func)
+
+        return wrapper
+
+    return decorator
 
 
 def cli_entry():
@@ -157,8 +173,14 @@ def cli(**kwargs):
 
 
 @cli.command('init')
+@click.option('-o',
+              '--out',
+              'out_file',
+              help='Path to write config to (default=duqtools.yaml).',
+              default='duqtools.yaml')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
-@common_options
+@common_options(logfile_option, debug_option, quiet_option, dry_run_option,
+                yes_option)
 def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
@@ -173,7 +195,7 @@ def cli_init(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
-@common_options
+@common_options(*all_options)
 def cli_create(**kwargs):
     """Create the UQ run files."""
     from .create import create
@@ -183,7 +205,7 @@ def cli_create(**kwargs):
 
 @cli.command('recreate')
 @click.argument('runs', type=Path, nargs=-1)
-@common_options
+@common_options(*all_options)
 def cli_recreate(**kwargs):
     """Read `runs.yaml` and re-create the given runs.
 
@@ -215,7 +237,7 @@ def cli_recreate(**kwargs):
               default=tuple(),
               type=Path,
               help='Case to re-submit, can be specified multiple times')
-@common_options
+@common_options(*all_options)
 def cli_submit(**kwargs):
     """Submit the UQ runs.
 
@@ -234,7 +256,7 @@ def cli_submit(**kwargs):
 @cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
-@common_options
+@common_options(*all_options)
 def cli_status(**kwargs):
     """Print the status of the UQ runs."""
     from .status import status
@@ -305,7 +327,7 @@ def cli_plot(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite backup file if necessary.')
-@common_options
+@common_options(*all_options)
 def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup
@@ -315,7 +337,7 @@ def cli_clean(**kwargs):
 
 @cli.command('go')
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
-@common_options
+@common_options(*all_options)
 def cli_go(**kwargs):
     """Run create, submit, status, dash in succession.
 
@@ -350,7 +372,7 @@ def cli_yolo(ctx, **kwargs):
 
 
 @cli.command('dash')
-@common_options
+@common_options(*all_options)
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
     from .dash import dash
@@ -358,7 +380,7 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge')
-@common_options
+@common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
     from .merge import merge

@@ -13,12 +13,12 @@ else:
 logger = logging.getLogger(__name__)
 
 
-def init(*, config: str, force: bool, **kwargs):
+def init(*, out_file: str, force: bool, **kwargs):
     """Initialize a brand new config file with all the default values.
 
     Parameters
     ----------
-    config : str
+    out : str
         Filename of the config.
     force : bool
         Overwrite config if it already exists.
@@ -32,7 +32,7 @@ def init(*, config: str, force: bool, **kwargs):
     """
     src = files('duqtools.data') / 'duqtools.yaml'
 
-    config_filepath = Path(config)
+    config_filepath = Path(out_file)
 
     if config_filepath.exists() and not force:
         raise RuntimeError(
