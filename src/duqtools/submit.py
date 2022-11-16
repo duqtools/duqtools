@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, List, Sequence
+from typing import Deque, List, Optional, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -13,6 +13,10 @@ from .system import get_system
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
+
+
+class SubmitError(Exception):
+    ...
 
 
 def Spinner(frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'):
@@ -143,8 +147,13 @@ def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> List[Job]:
     return jobs
 
 
-def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
-           resubmit: Sequence[Path], **kwargs):
+def submit(*,
+           force: bool,
+           max_jobs: int,
+           schedule: bool,
+           array: bool,
+           resubmit: Optional[Sequence[Path]] = None,
+           **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
 
@@ -165,11 +174,11 @@ def submit(*, force: bool, max_jobs: int, schedule: bool, array: bool,
         that needs to be resubmitted, or the shortname
     """
     if not cfg.submit:
-        raise Exception('submit field required in config file')
+        raise SubmitError('Submit field required in config file')
 
     debug('Submit config: %s', cfg.submit)
 
-    if len(resubmit) > 0:
+    if resubmit:
         jobs = get_resubmit_jobs(resubmit)
         force = True
     else:

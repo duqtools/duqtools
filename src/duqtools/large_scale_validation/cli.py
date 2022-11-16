@@ -76,6 +76,26 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
+@cli.command('submit')
+@click.option('--force',
+              is_flag=True,
+              help='Re-submit running or completed jobs.')
+@click.option(
+    '--schedule',
+    is_flag=True,
+    help='Schedule and submit jobs automatically. `max_jobs` must be defined.')
+@click.option('-j',
+              '--max_jobs',
+              type=int,
+              help='Maximum number of jobs to submit.')
+@common_options(logfile_option, debug_option)
+def cli_submit(**kwargs):
+    """submit large scale validation data."""
+    from .submit import submit
+    with op_queue_context():
+        submit(**kwargs)
+
+
 @cli.command('merge')
 def cli_merge(**kwargs):
     """Merge large scale validation data."""
