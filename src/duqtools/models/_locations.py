@@ -1,22 +1,33 @@
 from os import getenv
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from ..config import cfg
 from ..schema.runs import Run, Runs
 
 
-class Locations():
+class Locations:
+    """Class that knows about locations within a duqtools config directory.
+
+    Defaults to local working directory, but can be initialized with a
+    known config directory.
+    """
+
+    def __init__(self, parent_dir: Optional[Path] = None):
+        if not parent_dir:
+            parent_dir = Path.cwd()
+
+        self.parent_dir = parent_dir
 
     @property
     def runs_yaml(self):
         """Location of runs.yaml."""
-        return Path.cwd() / 'runs.yaml'
+        return self.parent_dir / 'runs.yaml'
 
     @property
     def runs_yaml_old(self):
         """Location of runs.yaml.old."""
-        return Path.cwd() / 'runs.yaml.old'
+        return self.parent_dir / 'runs.yaml.old'
 
     @property
     def runs(self) -> List[Run]:
@@ -31,8 +42,8 @@ class Locations():
     @property
     def jruns_path(self) -> Path:
         """return the Path specified in the create->jruns config variable, or,
-        if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS` does not
-        exists, return the current directory `./`.
+        if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS`
+        does not exists, return the current directory `./`.
 
         Returns
         -------
