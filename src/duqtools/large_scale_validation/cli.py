@@ -90,10 +90,21 @@ def cli_create(**kwargs):
               help='Maximum number of jobs to submit.')
 @common_options(logfile_option, debug_option)
 def cli_submit(**kwargs):
-    """submit large scale validation data."""
+    """Submit large scale validation runs."""
     from .submit import submit
     with op_queue_context():
         submit(**kwargs)
+
+
+@cli.command('status')
+@click.option('--detailed', is_flag=True, help='Detailed info on progress')
+@click.option('--progress', is_flag=True, help='Fancy progress bar')
+@common_options(logfile_option, debug_option)
+def cli_status(**kwargs):
+    """Check status large scale validation runs."""
+    from .status import status
+    with op_queue_context():
+        status(**kwargs)
 
 
 @cli.command('merge')
