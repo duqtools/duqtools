@@ -47,6 +47,25 @@ create:
 ```
 
 
+## Jetto output directory
+
+If you do not specify anything, the jetto output location depends on the location of `duqtools.yaml`:
+
+1. If `duqtools.yaml` is **outside** `$JRUNS`: `$JRUNS/duqtools_experiment_xxx`
+2. If `duqtools.yaml` is **inside** `$JRUNS`: Parent directory of `duqtools.yaml`
+
+You can override the `$JRUNS` directory by setting the `jruns` variable. This must be a directory that `rjettov` can write to.
+
+```yaml title="duqtools.yaml"
+jruns: /pfs/work/username/jetto/runs/
+```
+
+You can modify the duqtools output directory via `runs_dir`:
+
+```yaml title="duqtools.yaml"
+runs_dir: my_experiment
+```
+
 ## Specify the template data
 
 By default the template IMAS data to modify is extracted from the path specified in the `template` field.
