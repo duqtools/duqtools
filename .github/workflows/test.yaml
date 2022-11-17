@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - main
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
+    # types:
+    #   - opened
+    #   - reopened
+    #   - synchronize
+    #   - ready_for_review
   push:
     branches:
       - main
@@ -48,31 +48,52 @@ jobs:
           python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
-        run: python -m pytest
+        run: coverage run -m pytest
 
-      - uses: actions/cache@v3
+      - name: "Upload coverage data"
+        uses: actions/upload-artifact@v3
         with:
-          path: coverage.xml
-          key: ${{ github.sha }}-coverage
+          name: covdata
+          path: .coverage.*
 
-
-  sonar:
-    name: SonarCloud Upload
-    runs-on: ubuntu-latest
+  coverage:
+    name: coverage
     needs: test
-    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: "Check out the repo"
+        uses: "actions/checkout@v2"
 
-      - uses: actions/cache@v3
+      - name: "Set up Python"
+        uses: "actions/setup-python@v4"
         with:
-          path: coverage.xml
-          key: ${{ github.sha }}-coverage
+          python-version: "3.10"
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: "Install dependencies"
+        run: |
+          python -m pip install coverage
+
+      - name: "Download coverage data"
+        uses: actions/download-artifact@v3
+        with:
+          name: covdata
+
+      - name: "Combine"
+        run: |
+          coverage combine
+          coverage report json
+          export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          echo "total=$TOTAL" >> $GITHUB_ENV
+          echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
+
+      - name: "Make badge"
+        uses: schneegans/dynamic-badges-action@v1.4.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: 33a1377f899ec2bd73a98f0f620febeb
+          filename: covbadge.json
+          label: Coverage
+          message: ${{ env.total }}%
+          minColorRange: 50
+          maxColorRange: 90
+          valColorRange: ${{ env.total }}
