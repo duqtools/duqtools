@@ -48,7 +48,7 @@ jobs:
           python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
-        run: coverage run -m pytest
+        run: coverage run -p -m pytest
 
       - name: "Upload coverage data"
         uses: actions/upload-artifact@v3
@@ -84,7 +84,8 @@ jobs:
           coverage json
           export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
           echo "total=$TOTAL" >> $GITHUB_ENV
-          echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
+          echo "### Total coverage: ${TOTAL}%\n" >> $GITHUB_STEP_SUMMARY
+          coverage report >> $GITHUB_STEP_SUMMARY
 
       - name: "Make badge"
         uses: schneegans/dynamic-badges-action@v1.4.0
