@@ -73,6 +73,15 @@ Duqtools uses [pytest](https://docs.pytest.org/en/7.1.x/) to run the tests. You 
 pytest
 ```
 
+To check coverage:
+
+```console
+coverage -m run pytest
+coverage report  # terminal
+coverage html    # html report
+```
+
+
 ### Building the documentation
 
 The documentation is written in [markdown](https://www.markdownguide.org/basic-syntax/), and uses [mkdocs](https://www.mkdocs.org/) to generate the pages.
