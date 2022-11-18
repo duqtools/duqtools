@@ -90,7 +90,7 @@ jobs:
           echo $'\n```' >> $GITHUB_STEP_SUMMARY
 
       - name: "Make badge"
-        if: ${{ github.ref == 'refs/heads/main' }}
+        # if: ${{ github.ref == 'refs/heads/main' }}
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
