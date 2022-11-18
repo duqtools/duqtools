@@ -71,12 +71,12 @@ class CreateConfigModel(BaseModel):
         """))
 
     jruns: Optional[DirectoryPath] = Field(description=f(
-        """Jruns defines the the root directory where all simulations are
+        """`jruns` defines the the root directory where all simulations are
     run for the jetto system. Because the jettos system works with relative
     directories from some root directory.
 
     If this variable is not specified, duqtools will look for the `$JRUNS` environment
-    variable, and set it to that. If that fails, jruns is set to the current directory './'
+    variable, and set it to that. If that fails, `jruns` is set to the current directory `./`
 
     In this way, duqtools can ensure that the current work directory is
     a subdirectory of the given root directory. All subdirectories are
@@ -92,8 +92,8 @@ class CreateConfigModel(BaseModel):
         """Relative location from the workspace, which specifies the folder where to
     store all the created runs.
 
-    This defaults to `workspace`/duqtools_experiment_xxxx
-    where x is a not yet existing integer"""))
+    This defaults to `workspace/duqtools_experiment_x`
+    where `x` is a not yet existing integer."""))
 
 
 class SubmitConfigModel(BaseModel):

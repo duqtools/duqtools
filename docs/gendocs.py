@@ -19,7 +19,6 @@ from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
                                  MergeConfigModel, MergeStep,
                                  StatusConfigModel, SubmitConfigModel)
 from duqtools.schema.data_location import DataLocation
-from duqtools.schema.workdir import WorkDirectoryModel
 from duqtools.system import DummySystem
 
 this_dir = Path(__file__).parent
@@ -49,7 +48,6 @@ objects = {
     OperationDim,
     StatusConfigModel,
     SubmitConfigModel,
-    WorkDirectoryModel,
 }
 
 schemas = {
