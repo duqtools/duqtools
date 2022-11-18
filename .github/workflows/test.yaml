@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - main
-    # types:
-    #   - opened
-    #   - reopened
-    #   - synchronize
-    #   - ready_for_review
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   push:
     branches:
       - main
@@ -18,7 +18,7 @@ jobs:
   test:
     name: ${{ matrix.os }}, ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
-    # if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
@@ -90,7 +90,7 @@ jobs:
           echo $'\n```' >> $GITHUB_STEP_SUMMARY
 
       - name: "Make badge"
-        # if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
