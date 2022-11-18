@@ -101,3 +101,19 @@ jobs:
           minColorRange: 50
           maxColorRange: 90
           valColorRange: ${{ env.total }}
+
+  sonar:
+    name: SonarCloud Upload
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
