@@ -1,7 +1,9 @@
 # Dissemination
 
 On this page we try to keep track of where, when and with which
-material we have presented or published about duqtools.
+material we have presented or published about duqtools. All
+materials are hosted on a different github repository:
+[duqtools-dissemination](https://github.com/duqtools/duqtools_dissemination).
 
 
 | Date | Type | Material | Description |
