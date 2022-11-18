@@ -30,6 +30,7 @@ nav:
     - scripts/plot_with_altair.md
     - scripts/plot_with_matplotlib.md
   - Contributing: CONTRIBUTING.md
+  - Dissemination: dissemination.md
   - Code of Conduct: CODE_OF_CONDUCT.md
   - 🔗 Source code: https://github.com/duqtools/duqtools
   - 🔗 Issues: https://github.com/duqtools/duqtools/issues
