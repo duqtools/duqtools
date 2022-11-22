@@ -1,6 +1,7 @@
 import logging
 import subprocess as sp
 from time import sleep
+from typing import Sequence
 
 from jetto_tools import config, template
 
@@ -29,15 +30,12 @@ class Status():
     jobs_running: list
     jobs_unknown: list
 
-    def __init__(self):
-        debug('Submit config: %s', cfg.submit)
+    def __init__(self, jobs=Sequence[Job]):
+        self.jobs = jobs
 
-        runs = Locations().runs
-
-        self.jobs = [Job(run.dirname) for run in runs]
         debug('Case directories: %s', self.jobs)
 
-        debug('Total number of directories: %i', len(self.jobs))
+        debug('Total number of jobs: %i', len(self.jobs))
 
     def update_status(self):
 
@@ -215,8 +213,12 @@ def status(*, progress: bool, detailed: bool, **kwargs):
     detailed : bool
         Show detailed progress for every job.
     """
+    debug('Submit config: %s', cfg.submit)
 
-    tracker = Status()
+    runs = Locations().runs
+    jobs = [Job(run.dirname) for run in runs]
+
+    tracker = Status(jobs)
 
     if detailed:
         tracker.detailed_status()
