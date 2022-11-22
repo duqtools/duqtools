@@ -12,6 +12,7 @@ from ..schema import IDSVariableModel, ImasBaseModel
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
+from ._rebase import squash_placeholders
 
 if TYPE_CHECKING:
     import xarray as xr
@@ -167,6 +168,7 @@ class ImasHandle(ImasBaseModel):
     def get_variables(
         self,
         variables: Sequence[Union[str, IDSVariableModel]],
+        squash: bool = True,
         **kwargs,
     ) -> xr.Dataset:
         """Get variables from data set.
@@ -178,6 +180,8 @@ class ImasHandle(ImasBaseModel):
         ----------
         variables : Sequence[Union[str, IDSVariableModel]]
             Variable names of the data to load.
+        squash : bool
+            Squash placeholder variables
 
         Returns
         -------
@@ -204,6 +208,8 @@ class ImasHandle(ImasBaseModel):
         data_map = self.get(ids)
 
         ds = data_map.to_xarray(variables=var_models, **kwargs)
+
+        ds = squash_placeholders(ds)
 
         return ds
 

@@ -24,6 +24,42 @@ def standardize_time(ds: xr.Dataset, *, start: int = 0) -> None:
     ds['time'] = ds['time'] - ds['time'][0] + start
 
 
+def squash_placeholders(ds: xr.Dataset) -> xr.Dataset:
+    """Squash placeholder variables. Data are grouped along the first dimension
+    (usually time).
+
+    If the data contains dimensions with a `$`-prefix,
+    these are all interpolated to the first array of that type.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        xarray Dataset
+
+    Returns
+    -------
+    ds : xr.Dataset
+        xarray Dataset
+    """
+    prefix = '$'
+
+    dimensions = tuple(str(dim) for dim in ds.dims)
+
+    placeholder_vars = [dim for dim in dimensions if dim.startswith(prefix)]
+
+    for var in placeholder_vars:
+        new_dim = var.lstrip(prefix)
+
+        var_index = dimensions.index(var)
+        group_dims = dimensions[:var_index]
+
+        groupby = group_dims[0]
+
+        ds = standardize_grid(ds, new_dim=new_dim, old_dim=var, group=groupby)
+
+    return ds
+
+
 def standardize_grid(ds: xr.Dataset,
                      *,
                      new_dim: str,
