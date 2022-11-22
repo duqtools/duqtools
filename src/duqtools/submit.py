@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, List, Optional, Sequence
+from typing import Deque, List, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -152,7 +152,7 @@ def submit(*,
            max_jobs: int,
            schedule: bool,
            array: bool,
-           resubmit: Optional[Sequence[Path]] = None,
+           resubmit: Sequence[Path] = (),
            **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
