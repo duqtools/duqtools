@@ -118,7 +118,11 @@ def rebase_on_time(ds: xr.Dataset,
     xr.Dataset
         Rebased dataset
     """
-    return rebase_on_grid(ds, coord_dim=time_dim, new_coords=new_coords)
+    if len(ds[time_dim]) < 2:
+        # nothing to rebase with only 1 timestep
+        return ds
+    else:
+        return rebase_on_grid(ds, coord_dim=time_dim, new_coords=new_coords)
 
 
 def standardize_datasets(
