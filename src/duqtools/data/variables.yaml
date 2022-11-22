@@ -126,12 +126,12 @@
 - name: energy_i_src
   ids: core_sources
   path: source/0/profiles_1d/*/ion/*/energy
-  dims: [time_src, ion_src, $rho_tor_norm]
+  dims: [time_src, ion_src, $rho_tor_norm_src]
   type: IDS-variable
 - name: particles_i_src
   ids: core_sources
   path: source/0/profiles_1d/*/ion/*/particles
-  dims: [time_src, ion_src, $rho_tor_norm]
+  dims: [time_src, ion_src, $rho_tor_norm_src]
   type: IDS-variable
 - name: energy_i_tot_src
   ids: core_sources
