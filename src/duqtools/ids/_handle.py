@@ -209,7 +209,8 @@ class ImasHandle(ImasBaseModel):
 
         ds = data_map.to_xarray(variables=var_models, **kwargs)
 
-        ds = squash_placeholders(ds)
+        if squash:
+            ds = squash_placeholders(ds)
 
         return ds
 
