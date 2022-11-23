@@ -34,7 +34,7 @@ def insert_re_caret_dollar(string: str) -> str:
 
 def replace_index_str(string: str) -> str:
     """Replaces template string with regex digit matching."""
-    return string.replace(INDEX_STR, r'(?P<idx>\d+)')
+    return string.replace(INDEX_STR, r'(\d+)')
 
 
 class IDSMapping(Mapping):

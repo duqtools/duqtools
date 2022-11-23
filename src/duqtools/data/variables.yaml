@@ -60,11 +60,11 @@
   path: profiles_1d/*/ion/*/pressure
   dims: [time, ion, $rho_tor_norm]
   type: IDS-variable
-- name: n_n
-  ids: core_profiles
-  path: profiles_1d/*/neutral/*/density
-  dims: [time, neutral, $rho_tor_norm]
-  type: IDS-variable
+#- name: n_n
+#  ids: core_profiles
+#  path: profiles_1d/*/neutral/*/density
+#  dims: [time, neutral, $rho_tor_norm]
+#  type: IDS-variable
 - name: j_tot
   ids: core_profiles
   path: profiles_1d/*/j_total
