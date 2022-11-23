@@ -6,17 +6,7 @@ from ..config import var_lookup
 from ..operations import add_to_op_queue
 from ..schema import IDSVariableModel
 from ._handle import ImasHandle
-from ._rebase import rebase_on_time, standardize_grid
-
-
-def _get_placeholder_dim(grid_var: IDSVariableModel,
-                         time_var: IDSVariableModel) -> str:
-    dims = [dim for dim in grid_var.dims if dim != time_var.name]
-
-    if len(dims) != 1:
-        raise ValueError('Number of non-time dimensions must be 1.')
-
-    return dims[0]
+from ._rebase import rebase_on_grid, rebase_on_time
 
 
 def raise_if_ids_inconsistent(*variables: IDSVariableModel):
@@ -47,7 +37,6 @@ def merge_data(
 
     TIME_DIM = time_var.name
     GRID_DIM = grid_var.name
-    PLACEHOLDER_DIM = _get_placeholder_dim(grid_var, time_var)
     RUN_DIM = 'run'
     ids = grid_var.ids
 
@@ -55,25 +44,18 @@ def merge_data(
 
     target_data_map = target.get(ids)
 
-    # pick first time step as basis
-    GRID_DIM = grid_var.name
-
     grid_dim_data = target_data_map.get_at_index(grid_var, 0)
     time_dim_data = target_data_map[time_var.path]
 
     datasets = []
     for run, handle in source_data.items():
         ds = handle.get_variables(variables=variables)
-
-        ds = standardize_grid(
-            ds,
-            new_dim=GRID_DIM,
-            old_dim=PLACEHOLDER_DIM,
-            new_dim_data=grid_dim_data,
-            group=TIME_DIM,
-        )
-
         datasets.append(ds)
+
+    datasets = [
+        rebase_on_grid(ds, coord_dim=GRID_DIM, new_coords=grid_dim_data)
+        for ds in datasets
+    ]
 
     datasets = [
         rebase_on_time(ds, time_dim=TIME_DIM, new_coords=time_dim_data)
