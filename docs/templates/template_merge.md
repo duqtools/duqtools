@@ -69,15 +69,6 @@ output:
     Although the user can be specified for the output location, it is best left blank. In this case, the current user is filled in automatically and you will not run into issues with write permissions.
 
 
-## Merge plan
-
-{{ schema_MergeStep['description'] }}
-
-{% for name, prop in schema_MergeStep['properties'].items() %}
-`{{ name }}`
-: {{ prop['description'] }}
-{% endfor %}
-
 For example:
 
 ```yaml title="duqtools.yaml"
@@ -95,10 +86,7 @@ output:
 For example:
 
 ```yaml title="duqtools.yaml"
-plan:
-- grid_variable: rho_tor_norm
-  variables:
-  - time
+variables:
   - t_i_ave
   - zeff
 ```
