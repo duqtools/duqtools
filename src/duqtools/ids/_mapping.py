@@ -386,10 +386,9 @@ class IDSMapping(Mapping):
             self._write_back(data[index], path, *remaining)
 
     def write_back(self, variable: str, data: xr.DataArray) -> None:
-        """write_back data, give the data, and the variable path, with.
-
-        * denoting the dimensions, and it will write it to the correct
-        locations
+        """write_back data, give the data, and the variable path, where `*`
+        denotes the dimensions. This function will figure out how to write it
+        back to the IDS.
 
         Parameters
         ----------
