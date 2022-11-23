@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Sequence, Union
+from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
 import xarray as xr
@@ -22,6 +22,42 @@ def standardize_time(ds: xr.Dataset, *, start: int = 0) -> None:
     """
 
     ds['time'] = ds['time'] - ds['time'][0] + start
+
+
+def squash_placeholders(ds: xr.Dataset) -> xr.Dataset:
+    """Squash placeholder variables. Data are grouped along the first dimension
+    (usually time).
+
+    If the data contains dimensions with a `$`-prefix,
+    these are all interpolated to the first array of that type.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        xarray Dataset
+
+    Returns
+    -------
+    ds : xr.Dataset
+        xarray Dataset
+    """
+    prefix = '$'
+
+    dimensions = tuple(str(dim) for dim in ds.dims)
+
+    placeholder_vars = [dim for dim in dimensions if dim.startswith(prefix)]
+
+    for var in placeholder_vars:
+        new_dim = var.lstrip(prefix)
+
+        var_index = dimensions.index(var)
+        group_dims = dimensions[:var_index]
+
+        groupby = group_dims[0]
+
+        ds = standardize_grid(ds, new_dim=new_dim, old_dim=var, group=groupby)
+
+    return ds
 
 
 def standardize_grid(ds: xr.Dataset,
@@ -125,15 +161,13 @@ def rebase_on_time(ds: xr.Dataset,
         return rebase_on_grid(ds, coord_dim=time_dim, new_coords=new_coords)
 
 
-def standardize_datasets(
+def standardize_grid_and_time(
     datasets: Sequence[xr.Dataset],
     *,
     grid_var: str = 'rho_tor_norm',
-    grid_placeholder: str = 'x',
     time_var: str = 'time',
-    reference_grid_idx: int = 0,
     reference_dataset: int = 0,
-) -> List[xr.Dataset]:
+) -> Tuple[xr.Dataset, ...]:
     """Standardize list of datasets by applying standard rebase operations.
 
     Applies, in sequence:
@@ -147,16 +181,8 @@ def standardize_datasets(
         List of source datasets
     grid_var : str, optional
         Name of the grid dimension (i.e. grid variable)
-    grid_placeholder : str, optional
-        Name of the placeholder for the grid dimension
     time_var : str, optional
         Name of the time dimension (i.e. time variable)
-    reference_grid_idx : int, optional
-        For each dataset, the data of the grid with this index along the time dimension
-        will be used as the new coordinate for the grid dimension. Data variables will
-        be rebased onto these coordinates if necessary.
-
-        Maps to `new_dim_data` in `standardize_grid`.
     reference_dataset : int, optional
         The dataset with this index will be used as the reference for rebasing.
         The grid and time coordinates of the other datasets will be rebased
@@ -164,31 +190,19 @@ def standardize_datasets(
 
     Returns
     -------
-    List[xr.Dataset]
-        List of output datasets
+    Tuple[xr.Dataset]
+        Tuple of output datasets
     """
-    datasets = [
-        standardize_grid(
-            ds,
-            new_dim=grid_var,
-            old_dim=grid_placeholder,
-            new_dim_data=reference_grid_idx,
-            group=time_var,
-        ) for ds in datasets
-    ]
-
     reference_grid = datasets[reference_dataset][grid_var].data
 
-    datasets = [
+    datasets = tuple(
         rebase_on_grid(ds, coord_dim=grid_var, new_coords=reference_grid)
-        for ds in datasets
-    ]
+        for ds in datasets)
 
     reference_time = datasets[reference_dataset][time_var].data
 
-    datasets = [
+    datasets = tuple(
         rebase_on_time(ds, time_dim=time_var, new_coords=reference_time)
-        for ds in datasets
-    ]
+        for ds in datasets)
 
     return datasets
