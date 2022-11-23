@@ -39,7 +39,7 @@ def replace_index_str(string: str) -> str:
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids):
+    def __init__(self, ids: ImasHandle):
         """Map the IMASDB object.
 
         Empty arrays are excluded from the mapping.
@@ -330,10 +330,12 @@ class IDSMapping(Mapping):
 
         def _contains_empty(arr):
             if isinstance(arr, list):
+                if len(arr) == 0:
+                    return True
                 return any(_contains_empty(sub_arr) for sub_arr in arr)
             elif isinstance(arr, np.ndarray):
                 return arr.size == 0
-            elif isinstance(arr(float, int)):
+            elif isinstance(arr, (float, int)):
                 return False
             else:
                 raise ValueError(
@@ -360,9 +362,45 @@ class IDSMapping(Mapping):
                 else:
                     raise EmptyVarError(
                         f'Variable {var.name!r} contains empty data.')
-
             xr_data_vars[var.name] = ([*var.dims], arr)
 
         ds = xr.Dataset(data_vars=xr_data_vars)  # type: ignore
 
         return ds
+
+    def _write_back(self, data, *parts: str) -> None:
+        """_write_back.
+
+        inner function that determines the path and writes back the data
+        """
+        if len(parts) < 2:
+            # Write back
+            path, = parts
+            self[path] = data
+            return
+
+        root, sub, *remaining = parts
+        nodes = self[root]
+        for index in range(len(nodes)):
+            path = f'{root}/{index}/{sub}'
+            self._write_back(data[index], path, *remaining)
+
+    def write_back(self, variable: str, data: xr.DataArray) -> None:
+        """write_back data, give the data, and the variable path, with.
+
+        * denoting the dimensions, and it will write it to the correct
+        locations
+
+        Parameters
+        ----------
+        variable : str
+            variable
+        data : xr.DataArray
+            data
+
+        Returns
+        -------
+        None
+        """
+        parts = variable.split('/*/')
+        self._write_back(data.data, *parts)
