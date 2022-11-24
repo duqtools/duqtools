@@ -28,7 +28,7 @@ def merge(**kwargs):
 
     template.copy_data_to(target)
 
-    if kwargs['all']:
+    if merge_all:
         _, variables = partition(lambda var: var.type == 'IDS-variable',
                                  var_lookup.values())
         variables = list(variables)
