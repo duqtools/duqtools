@@ -380,7 +380,7 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge')
-@click.option('--all', is_flag=True, help='Try to merge all known variables.')
+@click.option('--all', 'merge_all', is_flag=True, help='Try to merge all known variables.')
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
