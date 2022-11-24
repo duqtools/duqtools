@@ -4,7 +4,6 @@ from pathlib import Path
 import mkdocs_gen_files
 
 from duqtools.config import var_lookup
-from duqtools.utils import groupby, partition
 
 this_dir = Path(__file__).parent
 
@@ -14,13 +13,10 @@ from templates import get_template  # noqa
 
 template = get_template('template_variables.md')
 
-all_variables = var_lookup.values()
+grouped_ids_vars = var_lookup.groupby_ids()
 
-other_variables, ids_variables = partition(
-    lambda var: var.type == 'IDS-variable', all_variables)
-
-grouped_ids_vars = groupby(ids_variables, keyfunc=lambda var: var.ids)
-grouped_other_vars = groupby(other_variables, keyfunc=lambda var: var.type)
+grouped_other_vars = var_lookup.groupby_type()
+grouped_other_vars.pop('IDS-variable')
 
 
 def sort_var_groups_in_dict(dct):
