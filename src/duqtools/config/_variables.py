@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import logging
+import operator
 import os
 import sys
+from collections import UserDict
 from pathlib import Path
-from typing import List, Sequence, Union
+from typing import Dict, Hashable, List, Sequence, Union
 
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
+from ..utils import groupby
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -21,6 +24,39 @@ USER_CONFIG_HOME = Path.home() / '.config'
 LOCAL_DIR = Path('.').absolute()
 DUQTOOLS_DIR = 'duqtools'
 VAR_FILENAME = 'variables.yaml'
+
+
+class VarLookup(UserDict):
+    """Variable lookup table.
+
+    Subclasses `UserDict` to embed some commonly used operations, like
+    grouping and filtering.
+    """
+    _ids_variable_key = 'IDS-variable'
+
+    def __getitem__(self, key: str) -> IDSVariableModel:
+        if key.startswith('$'):
+            return self.data[key[1:]]
+        return self.data[key]
+
+    def filter_type(self, type: str, *, invert: bool = False) -> VarLookup:
+        cmp = operator.ne if invert else operator.eq
+        return VarLookup({k: v for k, v in self.items() if cmp(v.type, type)})
+
+    def groupby_type(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        grouped_ids_vars = groupby(self.values(), keyfunc=lambda var: var.type)
+        return grouped_ids_vars
+
+    def filter_ids(self, ids: str) -> VarLookup:
+        ids_vars = self.filter_type(self._ids_variable_key)
+
+        return VarLookup({k: v for k, v in ids_vars.items() if v.ids == ids})
+
+    def groupby_ids(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        ids_vars = self.filter_type(self._ids_variable_key).values()
+
+        grouped_ids_vars = groupby(ids_vars, keyfunc=lambda var: var.ids)
+        return grouped_ids_vars
 
 
 class VariableConfigLoader:
@@ -85,8 +121,8 @@ def lookup_vars(
                               IDSVariableModel]]) -> List[IDSVariableModel]:
     """Helper function to look up a bunch of variables.
 
-    If str, look up the variable from the `var_lookup` Else check if the
-    variable is an `IDSVariableModel`
+    If str, look up the variable from the `var_lookup`. Else, check if
+    the variable is an `IDSVariableModel`.
     """
     var_models = []
     for var in variables:
@@ -99,4 +135,4 @@ def lookup_vars(
 
 
 variable_config = VariableConfigLoader().load()
-var_lookup = variable_config.to_variable_dict()
+var_lookup = VarLookup(variable_config.to_variable_dict())
