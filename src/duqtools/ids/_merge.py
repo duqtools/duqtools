@@ -14,7 +14,7 @@ from ._rebase import rebase_all_coords, squash_placeholders
 def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
-    _variables: List[IDSVariableModel],
+    variables: List[IDSVariableModel],
 ):
     """merge_data merges the data from the handles to the target, only merges
     over the listed variables, coordination variables are never overwritten,
@@ -31,7 +31,7 @@ def merge_data(
     """
 
     # make sure we do not mess up input arguments
-    variables = _variables.copy()
+    variables = variables.copy()
 
     # Sometimes, dimensions are not yet included,
     # We can safely include them into the variables manually, as they are

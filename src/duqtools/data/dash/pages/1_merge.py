@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from duqtools.config import var_lookup
 from duqtools.ids import ImasHandle, merge_data
 from duqtools.utils import read_imas_handles_from_file
 
@@ -110,9 +111,13 @@ with st.form('merge_form'):
     submitted = st.form_submit_button('Save')
 
     if submitted:
+        merge_vars = [var_lookup[key] for key in y_keys]
+
         template.copy_data_to(target)
 
-        merge_data(source_data=handles, target=target, **variables)
+        merge_data(handles=handles.values(),
+                   target=target,
+                   variables=merge_vars)
 
         st.success('Success!')
         st.balloons()
