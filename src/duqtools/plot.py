@@ -16,7 +16,7 @@ info, debug = logger.info, logger.debug
 
 
 def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
-         input_files, extensions, **kwargs):
+         input_files, extensions, errorbars, **kwargs):
 
     handle_lst = []
 
@@ -36,10 +36,16 @@ def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    grid_var = var_lookup[grid_var]
-    data_vars = [var_lookup[y_var] for y_var in data_vars]
+    grid_ids_var = var_lookup[grid_var]
+    data_ids_vars = [var_lookup[y_var] for y_var in data_vars]
 
-    variables = [grid_var] + data_vars
+    variables = [grid_ids_var] + data_ids_vars
+    if errorbars:
+        error_ids_vars = [y_var.copy() for y_var in data_ids_vars]
+        for y_var in error_ids_vars:
+            y_var.path = y_var.path + '_error_upper'
+            y_var.name = y_var.name + '_error_upper'
+        variables = variables + error_ids_vars
 
     datasets = []
     for handle in handles.values():
@@ -52,9 +58,9 @@ def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
     click.echo('')
 
     for n, y_var in enumerate(data_vars):
-        click.secho(f'  {grid_var.name} vs. {y_var.name}:\n', fg='green')
+        click.secho(f'  {grid_var} vs. {y_var}:\n', fg='green')
 
-        chart = alt_line_chart(dataset, x=grid_var.name, y=y_var.name)
+        chart = alt_line_chart(dataset, x=grid_var, y=y_var, std=errorbars)
 
         for extension in extensions:
 
