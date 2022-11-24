@@ -26,9 +26,6 @@ def merge(**kwargs):
                  description='Merging template',
                  extra_description=f'{template}')
 
-    debug('Merge input: %s', template)
-    debug('Merge output: %s', target)
-
     template.copy_data_to(target)
 
     if kwargs['all']:

@@ -10,7 +10,7 @@ from ._handle import ImasHandle
 from ._rebase import rebase_all_coords, squash_placeholders
 
 
-@add_to_op_queue('Merge', '{target}')
+@add_to_op_queue('Merging to', '{target}')
 def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
@@ -74,7 +74,7 @@ def merge_data(
 
         # Now we have to get the stddeviations
         mean_data = ids_data.mean(dim='handle')
-        std_data = ids_data.std(dim='handle')
+        std_data = ids_data.std(dim='handle', skipna=True)
 
         # Then, write it back to target
         for name in ids_data.data_vars.keys():
