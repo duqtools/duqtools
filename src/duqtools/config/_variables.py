@@ -40,19 +40,23 @@ class VarLookup(UserDict):
         return self.data[key]
 
     def filter_type(self, type: str, *, invert: bool = False) -> VarLookup:
+        """Filter all entries of given type."""
         cmp = operator.ne if invert else operator.eq
         return VarLookup({k: v for k, v in self.items() if cmp(v.type, type)})
 
     def groupby_type(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        """Group entries by type."""
         grouped_ids_vars = groupby(self.values(), keyfunc=lambda var: var.type)
         return grouped_ids_vars
 
     def filter_ids(self, ids: str) -> VarLookup:
+        """Filter all entries of given IDS."""
         ids_vars = self.filter_type(self._ids_variable_key)
 
         return VarLookup({k: v for k, v in ids_vars.items() if v.ids == ids})
 
     def groupby_ids(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        """Group entries by IDS."""
         ids_vars = self.filter_type(self._ids_variable_key).values()
 
         grouped_ids_vars = groupby(ids_vars, keyfunc=lambda var: var.ids)
