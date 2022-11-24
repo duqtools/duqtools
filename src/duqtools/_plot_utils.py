@@ -53,7 +53,6 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
         max_y = source[y + '_upper'].max()
     max_slider = source['slider'].max()
     if std:
-        # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
         band = alt.Chart(source).mark_area(opacity=0.3).encode(
             x=f'{x}:Q',
             y=alt.Y(f'{y}_upper:Q', title=y),
