@@ -59,7 +59,7 @@ def merge_data(
         target_data = squash_placeholders(target_data)
 
         ids_data = [
-            handle.get_variables(ids_name, empty_var_ok=True)  # type: ignore
+            handle.get_variables(variables, empty_var_ok=True)  # type: ignore
             for handle in handles
         ]
 

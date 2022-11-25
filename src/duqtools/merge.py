@@ -30,7 +30,7 @@ def merge(*, merge_all: bool, **kwargs):
 
     if merge_all:
         variables = [
-            var for var in var_lookup.values() if var.type == 'IDS-variables'
+            var for var in var_lookup.values() if var.type == 'IDS-variable'
         ]
         op_queue.add(action=lambda: None,
                      description='Merging all known variables')
