@@ -35,20 +35,13 @@ with st.expander('Click to show runs'):
     st.table(df)
 
 with st.sidebar:
-    ids_options = get_ids_options()
+    ids_variables = var_lookup.filter_type('IDS-variable')
 
-    ids = st.selectbox('Select IDS', ids_options, index=0)
+    var_names = st.multiselect('Select variable',
+                               tuple(ids_variables),
+                               default=None)
 
-    var_options = get_var_options(ids=ids)
-
-    default_x_key = var_options.index('rho_tor_norm')
-    default_y_val = 't_i_ave'
-
-    x_key = st.selectbox('Select x', var_options, index=default_x_key)
-
-    y_keys = st.multiselect('Select y', var_options, default=default_y_val)
-
-variables = get_variables(ids=ids, x_key=x_key, y_keys=y_keys)
+    merge_all = st.checkbox('Merge all', help=('Try to merge all variables.'))
 
 with st.form('merge_form'):
 
@@ -111,13 +104,16 @@ with st.form('merge_form'):
     submitted = st.form_submit_button('Save')
 
     if submitted:
-        merge_vars = [var_lookup[key] for key in y_keys]
+        if merge_all:
+            variables = tuple(var_lookup.filter_type('IDS-variable').values())
+        else:
+            variables = tuple(var_lookup[name] for name in var_names)
 
         template.copy_data_to(target)
 
         merge_data(handles=handles.values(),
                    target=target,
-                   variables=merge_vars)
+                   variables=variables)
 
         st.success('Success!')
         st.balloons()
