@@ -33,12 +33,9 @@ merge:
     db: jet
     run: 9999
     shot: 94785
-  plan:
-  - data_variables:
+  variables:
     - t_i_ave
     - zeff
-    grid_variable: rho_tor_norm
-    time_variable: time
 status:
   in_file: jetto.in
   msg_completed: 'Status : Completed successfully'

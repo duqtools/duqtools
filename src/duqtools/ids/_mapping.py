@@ -34,12 +34,12 @@ def insert_re_caret_dollar(string: str) -> str:
 
 def replace_index_str(string: str) -> str:
     """Replaces template string with regex digit matching."""
-    return string.replace(INDEX_STR, r'(?P<idx>\d+)')
+    return string.replace(INDEX_STR, r'(\d+)')
 
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids):
+    def __init__(self, ids: ImasHandle):
         """Map the IMASDB object.
 
         Empty arrays are excluded from the mapping.
@@ -288,7 +288,7 @@ class IDSMapping(Mapping):
 
         return new
 
-    def _fill_array_from_parts(self, *parts: str):
+    def _read_array_from_parts(self, *parts: str):
         arr = []
         root, sub, *remaining = parts
         nodes = self[root]
@@ -297,7 +297,7 @@ class IDSMapping(Mapping):
             path = f'{root}/{index}/{sub}'
 
             if remaining:
-                sub_arr = self._fill_array_from_parts(path, *remaining)
+                sub_arr = self._read_array_from_parts(path, *remaining)
             else:
                 sub_arr = self[path]
 
@@ -330,10 +330,12 @@ class IDSMapping(Mapping):
 
         def _contains_empty(arr):
             if isinstance(arr, list):
+                if len(arr) == 0:
+                    return True
                 return any(_contains_empty(sub_arr) for sub_arr in arr)
             elif isinstance(arr, np.ndarray):
                 return arr.size == 0
-            elif isinstance(arr(float, int)):
+            elif isinstance(arr, (float, int)):
                 return False
             else:
                 raise ValueError(
@@ -352,7 +354,7 @@ class IDSMapping(Mapping):
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            arr = self._fill_array_from_parts(*parts)
+            arr = self._read_array_from_parts(*parts)
 
             if _contains_empty(arr):
                 if empty_var_ok:
@@ -360,9 +362,46 @@ class IDSMapping(Mapping):
                 else:
                     raise EmptyVarError(
                         f'Variable {var.name!r} contains empty data.')
-
             xr_data_vars[var.name] = ([*var.dims], arr)
 
         ds = xr.Dataset(data_vars=xr_data_vars)  # type: ignore
 
         return ds
+
+    def _write_array_in_parts(self, data, *parts: str) -> None:
+        """_write_array_in_parts.
+
+        inner function that determines the path and writes back the data
+        """
+        if len(parts) < 2:
+            # Write back
+            path, = parts
+            self[path] = data
+            return
+
+        root, sub, *remaining = parts
+        nodes = self[root]
+        for index in range(len(nodes)):
+            path = f'{root}/{index}/{sub}'
+            self._write_array_in_parts(data[index], path, *remaining)
+
+    def write_array_in_parts(self, variable_path: str,
+                             data: xr.DataArray) -> None:
+        """write_back data, give the data, and the variable path, where `*`
+        denotes the dimensions. This function will figure out how to write it
+        back to the IDS.
+
+        Parameters
+        ----------
+        variable_path : str
+            path of the variable in the IDS, something like 'profiles_1d/*/zeff'
+        data : xr.DataArray
+            data of the variable, in the correct dimensions (every star in the
+            `variable_path` is a dimension in this array)
+
+        Returns
+        -------
+        None
+        """
+        parts = variable_path.split('/*/')
+        self._write_array_in_parts(data.data, *parts)

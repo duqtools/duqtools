@@ -206,3 +206,28 @@ def standardize_grid_and_time(
         for ds in datasets)
 
     return datasets
+
+
+def rebase_all_coords(
+    datasets: Sequence[xr.Dataset],
+    reference_dataset: xr.Dataset,
+) -> Tuple[xr.Dataset, ...]:
+    """Rebase all coords, by applying rebase operations.
+
+    Parameters
+    ----------
+    datasets : Sequence[xr.Dataset]
+        datasets
+    reference_dataset : int
+        reference_dataset
+
+    Returns
+    -------
+    Tuple[xr.Dataset, ...]
+    """
+
+    interp_dict = {name: dim for name, dim in reference_dataset.coords.items()}
+
+    return tuple(
+        ds.interp(coords=interp_dict, kwargs={'fill_value': 'extrapolate'})
+        for ds in datasets)

@@ -1,83 +1,80 @@
-from typing import Dict, Sequence
+from typing import List, Sequence
 
 import xarray as xr
 
 from ..config import var_lookup
 from ..operations import add_to_op_queue
 from ..schema import IDSVariableModel
+from ..utils import groupby
 from ._handle import ImasHandle
-from ._rebase import rebase_on_grid, rebase_on_time
+from ._rebase import rebase_all_coords, squash_placeholders
 
 
-def raise_if_ids_inconsistent(*variables: IDSVariableModel):
-    idss = {var.ids for var in variables}
-    if len(idss) != 1:
-        raise ValueError('Variables must have the same IDS, '
-                         f'got {len(idss)} different values: {idss}')
-
-
-@add_to_op_queue('Merge', '{target}')
-def queue_merge_data(*args, **kwargs):
-    """Queued version of `merge_data()`."""
-    return merge_data(*args, **kwargs)
-
-
+@add_to_op_queue('Merging to', '{target}')
 def merge_data(
-    source_data: Dict[str, ImasHandle],
+    handles: Sequence[ImasHandle],
     target: ImasHandle,
-    time_var: str,
-    grid_var: str,
-    data_vars: Sequence[str],
+    variables: List[IDSVariableModel],
 ):
-    time_var = var_lookup[time_var]
-    grid_var = var_lookup[grid_var]
-    data_vars = [var_lookup[data_var] for data_var in data_vars]
+    """merge_data merges the data from the handles to the target, only merges
+    over the listed variables, coordination variables are never overwritten,
+    and data is rebased according to the target coordination variable.
 
-    raise_if_ids_inconsistent(time_var, grid_var, *data_vars)
+    Parameters
+    ----------
+    handles : Sequence[ImasHandle]
+        handles
+    target : ImasHandle
+        target
+    variables : Sequence[IDSVariableModel]
+        variables
+    """
 
-    TIME_DIM = time_var.name
-    GRID_DIM = grid_var.name
-    RUN_DIM = 'run'
-    ids = grid_var.ids
+    # make sure we do not mess up input arguments
+    variables = variables.copy()
 
-    variables = [time_var, grid_var, *data_vars]
+    # Sometimes, dimensions are not yet included,
+    # We can safely include them into the variables manually, as they are
+    # automatically transformed into coordinates, and therefore not written back
+    variable_dict = {variable.name: variable for variable in variables}
+    for variable in variables:
+        for dim in variable.dims:
+            # TODO time should also be $ prefixed, remove the `or time` when fixed
+            if not (dim.startswith('$') or dim.startswith('time')):
+                continue
+            name = dim.lstrip('$')
+            if name not in variable_dict:
+                variables.append(var_lookup[name])
+                variable_dict[name] = variables[-1]
 
-    target_data_map = target.get(ids)
+    # Get all known variables per ids
+    grouped_ids_vars = groupby(variables, keyfunc=lambda var: var.ids)
 
-    grid_dim_data = target_data_map.get_at_index(grid_var, 0)
-    time_dim_data = target_data_map[time_var.path]
+    for ids_name, variables in grouped_ids_vars.items():
 
-    datasets = []
-    for run, handle in source_data.items():
-        ds = handle.get_variables(variables=variables)
-        datasets.append(ds)
+        # Get all data, and rebase it
+        target_ids = target.get(ids_name)  # type: ignore
+        target_data = target_ids.to_xarray(variables=variables,
+                                           empty_var_ok=True)
+        target_data = squash_placeholders(target_data)
 
-    datasets = [
-        rebase_on_grid(ds, coord_dim=GRID_DIM, new_coords=grid_dim_data)
-        for ds in datasets
-    ]
+        ids_data = [
+            handle.get_variables(variables, empty_var_ok=True)  # type: ignore
+            for handle in handles
+        ]
 
-    datasets = [
-        rebase_on_time(ds, time_dim=TIME_DIM, new_coords=time_dim_data)
-        for ds in datasets
-    ]
+        ids_data = rebase_all_coords(ids_data, target_data)
 
-    run_data = xr.concat(datasets, RUN_DIM)
+        ids_data = xr.concat(ids_data, 'handle')
 
-    means = run_data.mean(dim=RUN_DIM)
-    stdevs = run_data.std(dim=RUN_DIM)
+        # Now we have to get the stddeviations
+        mean_data = ids_data.mean(dim='handle')
+        std_data = ids_data.std(dim='handle', skipna=True)
 
-    for var in data_vars:
-        if var.name not in run_data.data_vars:
-            continue
-
-        for i, time in enumerate(run_data.time):
-            mean = means.isel({TIME_DIM: i})[var.name].data
-            stdev = stdevs.isel({TIME_DIM: i})[var.name].data
-
-            target_data_map.set_at_index(var.path, value=mean, index=i)
-            target_data_map.set_at_index(var.path + '_error_upper',
-                                         value=mean + stdev,
-                                         index=i)
-
-    target_data_map.sync(target)
+        # Then, write it back to target
+        for name in ids_data.data_vars.keys():
+            target_ids.write_array_in_parts(variable_dict[name].path,
+                                            mean_data[name])
+            target_ids.write_array_in_parts(
+                variable_dict[name].path + '_error_upper', std_data[name])
+        target_ids.sync(target)

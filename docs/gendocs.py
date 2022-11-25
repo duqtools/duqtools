@@ -16,8 +16,8 @@ from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
                              LinSpace, OperationDim)
 from duqtools.schema._jetto import JsetField, NamelistField
 from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
-                                 MergeConfigModel, MergeStep,
-                                 StatusConfigModel, SubmitConfigModel)
+                                 MergeConfigModel, StatusConfigModel,
+                                 SubmitConfigModel)
 from duqtools.schema.data_location import DataLocation
 from duqtools.system import DummySystem
 
@@ -44,7 +44,6 @@ objects = {
     NamelistField,
     LinSpace,
     MergeConfigModel,
-    MergeStep,
     OperationDim,
     StatusConfigModel,
     SubmitConfigModel,

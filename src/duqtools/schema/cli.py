@@ -152,48 +152,6 @@ class StatusConfigModel(BaseModel):
             """))
 
 
-class MergeStep(BaseModel):
-    """These parameters describe which paths should be merged.
-
-    Three sets of variables need to be defined:
-    - time_variable: this points to the data for the time coordinate
-    - grid_variable: this points to the data for the grid variable
-    - data_variables: these point to the data to be merged
-
-    Note that all variables must be from the same IDS.
-
-    The grid and data variables must share a common dimension. The grid variable
-    will be used to rebase all data variables to a common grid.
-
-    The time variable will be used to rebase the grid variable and the data variables
-    to a common time coordinate. To denote the time index, use `/*/` in both
-    the grid and data variables.
-
-    Rebasing involves interpolation.
-
-    Note that multiple merge steps can be specified, for example for different
-    IDS.
-    """
-    data_variables: List[str] = Field(description=f("""
-            This is a list of data variables to be merged. This means
-            that the mean and error for these data over all runs are calculated
-            and written back to the ouput data location.
-            The paths should contain `/*/` for the time component or other dimensions.
-            """))
-    grid_variable: str = Field(description=f("""
-            This variable points to the data for the grid coordinate. It must share a common
-            placeholder dimension with the data variables.
-            It will be used to rebase all data variables to same (radial) grid before merging
-            using interpolation.
-            The path should contain '/*/' to denote the time component or other dimension.
-            """))
-    time_variable: str = Field(description=f("""
-            This variable determines the time coordinate to merge on. This ensures
-            that the data from all runs are on the same time coordinates before
-            merging.
-            """))
-
-
 class MergeConfigModel(BaseModel):
     """The options of the `merge` subcommand are stored under the `merge` key
     in the config.
@@ -214,7 +172,11 @@ class MergeConfigModel(BaseModel):
             """))
     output: ImasBaseModel = Field(
         description='Merged data will be written to this IMAS DB entry.')
-    plan: List[MergeStep] = Field(description='List of merging operations.')
+    variables: List[str] = Field(description=f("""
+            This is a list of variables to be merged. This means
+            that the mean and error for these data over all runs are calculated
+            and written back to the ouput data location.
+            """))
 
 
 class ConfigModel(BaseModel):
