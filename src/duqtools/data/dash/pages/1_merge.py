@@ -35,20 +35,21 @@ with st.expander('Click to show runs'):
     st.table(df)
 
 with st.sidebar:
-    ids_options = get_ids_options()
+    ids_variables = var_lookup.filter_type('IDS-variable')
 
-    ids = st.selectbox('Select IDS', ids_options, index=0)
+    st.header('Merging options')
 
-    var_options = get_var_options(ids=ids)
+    merge_all = st.checkbox('Merge all', help=('Try to merge all variables.'))
 
-    default_x_key = var_options.index('rho_tor_norm')
-    default_y_val = 't_i_ave'
+    var_names = st.multiselect('Select variables to merge',
+                               tuple(ids_variables),
+                               default=None,
+                               disabled=merge_all)
 
-    x_key = st.selectbox('Select x', var_options, index=default_x_key)
-
-    y_keys = st.multiselect('Select y', var_options, default=default_y_val)
-
-variables = get_variables(ids=ids, x_key=x_key, y_keys=y_keys)
+if merge_all:
+    variables = tuple(ids_variables.values())
+else:
+    variables = tuple(var_lookup[name] for name in var_names)
 
 with st.form('merge_form'):
 
@@ -111,13 +112,14 @@ with st.form('merge_form'):
     submitted = st.form_submit_button('Save')
 
     if submitted:
-        merge_vars = [var_lookup[key] for key in y_keys]
-
         template.copy_data_to(target)
 
+        bar = st.progress(0.01)
         merge_data(handles=handles.values(),
                    target=target,
-                   variables=merge_vars)
+                   variables=variables,
+                   callback=bar.progress)
+        bar.progress(1.0)
 
         st.success('Success!')
         st.balloons()

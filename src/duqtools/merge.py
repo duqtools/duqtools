@@ -19,26 +19,22 @@ def merge(*, merge_all: bool, **kwargs):
     handles = read_imas_handles_from_file(cfg.merge.data).values()
 
     for handle in handles:
-        op_queue.add(action=lambda: None,
-                     description='Merging source',
-                     extra_description=f'{handle}')
-    op_queue.add(action=lambda: None,
-                 description='Merging template',
-                 extra_description=f'{template}')
+        op_queue.add_no_op(description='Merging source',
+                           extra_description=f'{handle}')
+
+    op_queue.add_no_op(description='Merging template',
+                       extra_description=f'{template}')
 
     template.copy_data_to(target)
 
     if merge_all:
-        variables = [
-            var for var in var_lookup.values() if var.type == 'IDS-variable'
-        ]
-        op_queue.add(action=lambda: None,
-                     description='Merging all known variables')
+        variables = tuple(var_lookup.filter_type('IDS-variable').values())
+
+        op_queue.add_no_op(description='Merging all known variables')
     else:
-        variables = [var_lookup[name] for name in cfg.merge.variables]
+        variables = tuple(var_lookup[name] for name in cfg.merge.variables)
         for variable in variables:
-            op_queue.add(action=lambda: None,
-                         description='Merging variable',
-                         extra_description=f'{variable.name}')
+            op_queue.add_no_op(description='Merging variable',
+                               extra_description=f'{variable.name}')
 
     merge_data(handles, target, variables)
