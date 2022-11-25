@@ -389,8 +389,9 @@ def cli_dash(**kwargs):
               required=True,
               type=str,
               help='IMAS location to use as the template for the target')
-@click.option('-T',
-              '--target',
+@click.option('-o',
+              '--output',
+              'target',
               required=True,
               type=str,
               help='IMAS location to store the result in')
@@ -406,15 +407,16 @@ def cli_dash(**kwargs):
               type=str,
               help='variables to merge to the target',
               multiple=True)
-@click.option(
-    '-r',
-    '--runfile',
-    type=str,
-    help='file containing runs to be merged (can be eg: data.csv, runs.yaml)')
 @click.option('--all',
               'merge_all',
               is_flag=True,
               help='Try to merge all known variables.')
+@click.option('-i',
+              '--input',
+              'input_files',
+              type=str,
+              help='Input file, i.e. `data.csv` or `runs.yaml`',
+              multiple=True)
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation.
@@ -424,7 +426,7 @@ def cli_merge(**kwargs):
     The resulting IDS is saved to your own test database with
     shot number `36982` and run number `9999`
 
-    > duqtools merge -t g2jcitri/aug/36982/8000 -T test/36982/9999 \
+    > duqtools merge -t g2jcitri/aug/36982/8000 -o test/36982/9999 \
             -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e
 
     Note:

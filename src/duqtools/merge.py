@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
+import click
+
 from .config import var_lookup
 from .ids import ImasHandle, merge_data
 from .operations import op_queue
@@ -13,21 +15,22 @@ info, debug = logger.info, logger.debug
 
 
 def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
-          runfile: Optional[str], variables: Optional[List[str]], **kwargs):
+          input_files: List[str], variables: Optional[List[str]], **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.from_string(template)
     target = ImasHandle.from_string(target)
 
     handles = [ImasHandle.from_string(handle) for handle in handles]
-    if runfile:
-        handles = handles + list(read_imas_handles_from_file(runfile).values())
+    for file in input_files:
+        handles = handles + list(read_imas_handles_from_file(file).values())
 
     handles = set(handles)  # Remove duplicate handles
 
     for handle in handles:
-        op_queue.add(action=lambda: None,
-                     description='Source for merge',
-                     extra_description=f'{handle}')
+        op_queue.add_no_op(description=click.style('Source for merge',
+                                                   fg='green',
+                                                   bold=False),
+                           extra_description=f'{handle}')
 
     if merge_all:
         ids_variables = [
@@ -36,22 +39,20 @@ def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
         op_queue.add(action=lambda: None,
                      description='Merging all known variables')
     else:
-        if not variables:
-            op_queue.add_no_op('No variables specified for merge',
-                               'recommend to abort')
-        else:
-            if len(variables) == 0:
-                op_queue.add_no_op('No variables specified for merge',
-                                   'recommend to abort')
+        if not variables or len(variables) == 0:
+            op_queue.add_no_op('No variables specified for merge', 'aborting')
+            return
 
-            ids_variables = [var_lookup[name] for name in variables]
-            for variable in ids_variables:
-                op_queue.add(action=lambda: None,
-                             description='Variable for merge',
-                             extra_description=f'{variable.name}')
+        ids_variables = [var_lookup[name] for name in variables]
+        for variable in ids_variables:
+            op_queue.add_no_op(description=click.style('Variable for merge',
+                                                       fg='green',
+                                                       bold=False),
+                               extra_description=f'{variable.name}')
 
-    op_queue.add(action=lambda: None,
-                 description='Template for merge',
+    op_queue.add(description=click.style('Template for merge',
+                                         fg='green',
+                                         bold=False),
                  extra_description=f'{template}')
     template.copy_data_to(target)
 
