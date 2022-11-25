@@ -5,6 +5,7 @@ import streamlit as st
 from _shared import default_workdir, get_dataset
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
+from duqtools.config import var_lookup
 from duqtools.utils import read_imas_handles_from_file
 
 st.title('Plot IDS')
@@ -28,13 +29,11 @@ with st.expander('Click to show runs'):
     st.table(df)
 
 with st.sidebar:
-    from duqtools.config import var_lookup
-
     ids_variables = var_lookup.filter_type('IDS-variable')
 
     var_names = st.multiselect('Select variable',
                                tuple(ids_variables),
-                               default='t_i_ave')
+                               default=None)
 
     st.header('Plotting options')
 
