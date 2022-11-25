@@ -2,7 +2,7 @@ from typing import List, Sequence
 
 import xarray as xr
 
-from ..config import lookup_vars, var_lookup
+from ..config import var_lookup
 from ..operations import add_to_op_queue
 from ..schema import IDSVariableModel
 from ..utils import groupby
@@ -31,12 +31,12 @@ def merge_data(
     """
     # Add dimensions to variables
     variable_dict = {}
-    
+
     for variable in variables:
         variable_dict[variable.name] = variable
 
         for dim in variable.dims:
-            dim_var = var_lookup[name]
+            dim_var = var_lookup[dim]
             variable_dict.setdefault(dim_var.name, dim_var)
 
     variables = tuple(variable_dict.keys())
@@ -71,5 +71,5 @@ def merge_data(
                                             mean_data[name])
             target_ids.write_array_in_parts(
                 variable_dict[name].path + '_error_upper', std_data[name])
-        
+
         target_ids.sync(target)
