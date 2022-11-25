@@ -264,21 +264,12 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@click.option('-x',
-              'grid_var',
-              default='rho_tor_norm',
+@click.option('-v',
+              '--variables',
+              'var_names',
               type=str,
-              help='Name of the x (grid) variable')
-@click.option('-y',
-              'data_vars',
-              type=str,
-              help='Name of the y (data) variable(s)',
+              help='Name of the variables to plot',
               multiple=True)
-@click.option('-t',
-              'time_var',
-              type=str,
-              help='Name of the time variable',
-              default='time')
 @click.option('-m',
               '--imas',
               'imas_paths',
@@ -316,11 +307,11 @@ def cli_plot(**kwargs):
 
     \b
     Examples:
-    - duqtools plot -x rho_tor_norm -y t_i_ave -y zeff -i data.csv
-    - duqtools plot -y t_i_ave -y zeff -m jet/91234/5
-    - duqtools plot -y zeff -u user -d jet -s 91234 -r 5 -r 6 -r 7
-    - duqtools plot -y zeff -m user/91234/5 -i data.csv
-    - duqtools plot -y zeff -m user/91234/5 -o json
+    - duqtools plot -v t_i_ave -v zeff -i data.csv
+    - duqtools plot -v t_i_ave -v zeff -m jet/91234/5
+    - duqtools plot -v zeff -u user -d jet -s 91234 -r 5 -r 6 -r 7
+    - duqtools plot -v zeff -m user/91234/5 -i data.csv
+    - duqtools plot -v zeff -m user/91234/5 -o json
     """
     from .plot import plot
     plot(**kwargs)
@@ -384,7 +375,10 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge')
-@click.option('--all', 'merge_all', is_flag=True, help='Try to merge all known variables.')
+@click.option('--all',
+              'merge_all',
+              is_flag=True,
+              help='Try to merge all known variables.')
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation."""
