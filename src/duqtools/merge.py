@@ -5,13 +5,13 @@ import logging
 from .config import cfg, var_lookup
 from .ids import ImasHandle, merge_data
 from .operations import op_queue
-from .utils import partition, read_imas_handles_from_file
+from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def merge(**kwargs):
+def merge(*, merge_all: bool, **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.parse_obj(cfg.merge.template)
     target = ImasHandle.parse_obj(cfg.merge.output)
@@ -29,9 +29,9 @@ def merge(**kwargs):
     template.copy_data_to(target)
 
     if merge_all:
-        _, variables = partition(lambda var: var.type == 'IDS-variable',
-                                 var_lookup.values())
-        variables = list(variables)
+        variables = [
+            var for var in var_lookup.values() if var.type == 'IDS-variables'
+        ]
         op_queue.add(action=lambda: None,
                      description='Merging all known variables')
     else:

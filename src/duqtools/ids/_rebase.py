@@ -214,9 +214,6 @@ def rebase_all_coords(
 ) -> Tuple[xr.Dataset, ...]:
     """Rebase all coords, by applying rebase operations.
 
-    Note, does not rebase a dimension with a single value (thats why we use
-    rebase_on_time as a wrapper for rebase_on_grid).
-
     Parameters
     ----------
     datasets : Sequence[xr.Dataset]

@@ -53,20 +53,15 @@ def merge_data(
     for ids_name, variables in grouped_ids_vars.items():
 
         # Get all data, and rebase it
-        idss = [handle.get(ids_name) for handle in handles]  # type: ignore
-
         target_ids = target.get(ids_name)  # type: ignore
         target_data = target_ids.to_xarray(variables=variables,
                                            empty_var_ok=True)
         target_data = squash_placeholders(target_data)
 
         ids_data = [
-            ids.to_xarray(
-                variables=variables,
-                empty_var_ok=True,
-            ) for ids in idss
+            handle.get_variables(ids_name, empty_var_ok=True)  # type: ignore
+            for handle in handles
         ]
-        ids_data = [squash_placeholders(data) for data in ids_data]
 
         ids_data = rebase_all_coords(ids_data, target_data)
 
@@ -78,7 +73,8 @@ def merge_data(
 
         # Then, write it back to target
         for name in ids_data.data_vars.keys():
-            target_ids.write_back(variable_dict[name].path, mean_data[name])
-            target_ids.write_back(variable_dict[name].path + '_error_upper',
-                                  std_data[name])
+            target_ids.write_array_in_parts(variable_dict[name].path,
+                                            mean_data[name])
+            target_ids.write_array_in_parts(
+                variable_dict[name].path + '_error_upper', std_data[name])
         target_ids.sync(target)

@@ -288,7 +288,7 @@ class IDSMapping(Mapping):
 
         return new
 
-    def _fill_array_from_parts(self, *parts: str):
+    def _read_array_from_parts(self, *parts: str):
         arr = []
         root, sub, *remaining = parts
         nodes = self[root]
@@ -297,7 +297,7 @@ class IDSMapping(Mapping):
             path = f'{root}/{index}/{sub}'
 
             if remaining:
-                sub_arr = self._fill_array_from_parts(path, *remaining)
+                sub_arr = self._read_array_from_parts(path, *remaining)
             else:
                 sub_arr = self[path]
 
@@ -354,7 +354,7 @@ class IDSMapping(Mapping):
                 xr_data_vars[var.name] = (var.dims, self[var.path])
                 continue
 
-            arr = self._fill_array_from_parts(*parts)
+            arr = self._read_array_from_parts(*parts)
 
             if _contains_empty(arr):
                 if empty_var_ok:
@@ -368,8 +368,8 @@ class IDSMapping(Mapping):
 
         return ds
 
-    def _write_back(self, data, *parts: str) -> None:
-        """_write_back.
+    def _write_array_in_parts(self, data, *parts: str) -> None:
+        """_write_array_in_parts.
 
         inner function that determines the path and writes back the data
         """
@@ -383,23 +383,25 @@ class IDSMapping(Mapping):
         nodes = self[root]
         for index in range(len(nodes)):
             path = f'{root}/{index}/{sub}'
-            self._write_back(data[index], path, *remaining)
+            self._write_array_in_parts(data[index], path, *remaining)
 
-    def write_back(self, variable: str, data: xr.DataArray) -> None:
+    def write_array_in_parts(self, variable_path: str,
+                             data: xr.DataArray) -> None:
         """write_back data, give the data, and the variable path, where `*`
         denotes the dimensions. This function will figure out how to write it
         back to the IDS.
 
         Parameters
         ----------
-        variable : str
-            variable
+        variable_path : str
+            path of the variable in the IDS, something like 'profiles_1d/*/zeff'
         data : xr.DataArray
-            data
+            data of the variable, in the correct dimensions (every star in the
+            `variable_path` is a dimension in this array)
 
         Returns
         -------
         None
         """
-        parts = variable.split('/*/')
-        self._write_back(data.data, *parts)
+        parts = variable_path.split('/*/')
+        self._write_array_in_parts(data.data, *parts)
