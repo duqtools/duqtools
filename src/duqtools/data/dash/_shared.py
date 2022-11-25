@@ -19,7 +19,7 @@ PREFIX0 = 'profiles_1d/0'
 
 @st.experimental_memo
 def get_ids_options():
-    return tuple(var_lookup.filter_type('IDS-variables').keys())
+    return tuple(var_lookup.filter_type('IDS-variable').keys())
 
 
 @st.experimental_memo
