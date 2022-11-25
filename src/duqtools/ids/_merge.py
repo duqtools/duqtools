@@ -43,7 +43,7 @@ def merge_data(
             if not (dim.startswith('$') or dim.startswith('time')):
                 continue
             name = dim.lstrip('$')
-            if name not in variable_dict.keys():
+            if name not in variable_dict:
                 variables.append(var_lookup[name])
                 variable_dict[name] = variables[-1]
 
