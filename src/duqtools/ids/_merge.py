@@ -15,6 +15,7 @@ def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
     variables: List[IDSVariableModel],
+    callback=None,
 ):
     """merge_data merges the data from the handles to the target, only merges
     over the listed variables, coordination variables are never overwritten,
@@ -48,7 +49,11 @@ def merge_data(
     # Get all known variables per ids
     grouped_ids_vars = groupby(variables, keyfunc=lambda var: var.ids)
 
-    for ids_name, ids_vars in grouped_ids_vars.items():
+    i_tot = len(grouped_ids_vars)
+
+    for i, (ids_name, ids_vars) in enumerate(grouped_ids_vars.items()):
+        if callback:
+            callback(i / i_tot)
 
         # Get all data, and rebase it
         target_ids = target.get(ids_name)  # type: ignore
