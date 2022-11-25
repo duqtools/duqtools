@@ -39,7 +39,7 @@ def merge_data(
             dim_var = var_lookup[dim]
             variable_dict.setdefault(dim_var.name, dim_var)
 
-    variables = tuple(variable_dict.keys())
+    variables = tuple(variable_dict.values())
 
     # Get all known variables per ids
     grouped_ids_vars = groupby(variables, keyfunc=lambda var: var.ids)
