@@ -422,15 +422,15 @@ def cli_merge(**kwargs):
     Example Merging two IDSes. Run number `8000` is the template.
     Only The `t_e` variable is merged.
     The resulting IDS is saved to your own test database with
-    shot number 36982 and run number 9999
+    shot number `36982` and run number `9999`
 
-    > duqtools merge -t g2jcitri/aug/36982/8000 -T test/36982/9999 \\
-            -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e`
+    > duqtools merge -t g2jcitri/aug/36982/8000 -T test/36982/9999 \
+            -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e
 
     Note:
 
     The -t -T and -h options expect an IMAS path formatted as
-    user/db/shot/number
+    `user/db/shot/number`
     """
     from .merge import merge
     with op_queue_context():
