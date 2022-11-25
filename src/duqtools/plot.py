@@ -59,16 +59,16 @@ def plot(*, var_names, imas_paths, user, db, shot, runs, input_files,
 
         dataset = xr.concat(datasets, 'run')
 
-        click.echo('You can now view your plot in your browser:')
-        click.echo('')
-
-        click.secho(f'  {grid_var_norm} vs. {data_var}:\n', fg='green')
-
         chart = alt_line_chart(dataset,
                                x=grid_var_norm,
                                y=data_var,
                                z=time_var,
                                std=errorbars)
+
+        click.echo('You can now view your plot in your browser:')
+        click.echo('')
+
+        click.secho(f'  {grid_var_norm} vs. {data_var}:\n', fg='green')
 
         for extension in extensions:
 
