@@ -6,7 +6,8 @@ import pandas as pd
 import xarray as xr
 
 
-def _standardize_data(source: Union[pd.DataFrame, xr.Dataset]) -> pd.DataFrame:
+def _standardize_data(source: Union[pd.DataFrame, xr.Dataset],
+                      z: str = 'time') -> pd.DataFrame:
     """Convert Dataset to Dataframe and add required columns for plotting."""
     if isinstance(source, xr.Dataset):
         source = source.to_dataframe().reset_index()
@@ -15,7 +16,7 @@ def _standardize_data(source: Union[pd.DataFrame, xr.Dataset]) -> pd.DataFrame:
         source['run'] = 0
 
     if 'slider' not in source:
-        _, idx = np.unique(source['time'], return_inverse=True)
+        _, idx = np.unique(source[z], return_inverse=True)
         source['slider'] = idx
 
     return source
@@ -25,6 +26,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
                    *,
                    x: str,
                    y: str,
+                   z: str = 'time',
                    std: bool = False) -> alt.Chart:
     """Generate an altair line chart from a dataframe.
 
@@ -36,6 +38,9 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
         X-value to plot, corresponds to a column in the source data
     y : str
         Y-value to plot, corresponds to a column in the source data
+    z : str
+        Slider variable (time), corresponds to a column in the source data
+
     std : bool
         Plot the error bound from {x}_error_upper in the plot as well
 
@@ -44,7 +49,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
     alt.Chart
         Return an altair chart.
     """
-    source = _standardize_data(source)
+    source = _standardize_data(source, z=z)
     max_y = source[y].max()
 
     if std:
@@ -79,7 +84,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
                                    min=0,
                                    max=max_slider,
                                    step=1)
-        select_step = alt.selection_single(name='time',
+        select_step = alt.selection_single(name=z,
                                            fields=['slider'],
                                            bind=slider,
                                            init={'slider': 0})
@@ -108,8 +113,11 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
         return line + ref
 
 
-def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
-                        y: str) -> alt.Chart:
+def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
+                        *,
+                        x: str,
+                        y: str,
+                        z: str = 'time') -> alt.Chart:
     """Generate an altair errorband plot from a dataframe.
 
     Parameters
@@ -120,19 +128,21 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
         X-value to plot, corresponds to a column in the source data
     y : str
         Y-value to plot, corresponds to a column in the source data
+    z : str
+        Slider variable (time), corresponds to a column in the source data
 
     Returns
     -------
     alt.Chart
         Return an altair chart.
     """
-    source = _standardize_data(source)
+    source = _standardize_data(source, z=z)
 
     max_y = source[y].max()
     max_slider = source['slider'].max()
 
     slider = alt.binding_range(min=0, max=max_slider, step=1)
-    select_step = alt.selection_single(name='time',
+    select_step = alt.selection_single(name=z,
                                        fields=['slider'],
                                        bind=slider,
                                        init={'slider': 0})

@@ -28,6 +28,7 @@ VAR_FILENAME_GLOB = 'variables*.yaml'
 
 
 class VarLookup(UserDict):
+    _prefix = '$'
     """Variable lookup table.
 
     Subclasses `UserDict` to embed some commonly used operations, like
@@ -36,9 +37,14 @@ class VarLookup(UserDict):
     _ids_variable_key = 'IDS-variable'
 
     def __getitem__(self, key: str) -> IDSVariableModel:
-        if key.startswith('$'):
-            return self.data[key[1:]]
-        return self.data[key]
+        return self.data[self.normalize(key)]
+
+    def normalize(self, *keys: str) -> Union[str, Tuple[str, ...]]:
+        """Normalize variable names (remove `$`)."""
+        keys = tuple(key.lstrip(self._prefix) for key in keys)
+        if len(keys) == 1:
+            return keys[0]
+        return keys
 
     def filter_type(self, type: str, *, invert: bool = False) -> VarLookup:
         """Filter all entries of given type."""
