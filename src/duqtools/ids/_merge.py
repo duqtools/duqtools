@@ -36,8 +36,12 @@ def merge_data(
         variable_dict[variable.name] = variable
 
         for dim in variable.dims:
-            dim_var = var_lookup[dim]
-            variable_dict.setdefault(dim_var.name, dim_var)
+            try:
+                dim_var = var_lookup[dim]
+                variable_dict.setdefault(dim_var.name, dim_var)
+            except KeyError:
+                # skip dimensions without coordinates like `ion`
+                pass
 
     variables = tuple(variable_dict.values())
 
