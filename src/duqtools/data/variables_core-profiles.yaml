@@ -1,0 +1,112 @@
+### Core profiles
+
+- name: rho_tor_norm
+  ids: core_profiles
+  path: profiles_1d/*/grid/rho_tor_norm
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: time
+  ids: core_profiles
+  path: time
+  dims: [time]
+  type: IDS-variable
+- name: t_i_ave
+  ids: core_profiles
+  path: profiles_1d/*/t_i_average
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: zeff
+  ids: core_profiles
+  path: profiles_1d/*/zeff
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: n_e_tot
+  ids: core_profiles
+  path: profiles_1d/*/electrons/density
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: n_e
+  ids: core_profiles
+  path: profiles_1d/*/electrons/density_thermal
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: t_e
+  ids: core_profiles
+  path: profiles_1d/*/electrons/temperature
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: p_e
+  ids: core_profiles
+  path: profiles_1d/*/electrons/pressure
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: n_i_tot
+  ids: core_profiles
+  path: profiles_1d/*/n_i_thermal_total
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: n_i
+  ids: core_profiles
+  path: profiles_1d/*/ion/*/density_thermal
+  dims: [time, ion, $rho_tor_norm]
+  type: IDS-variable
+- name: n_i_tot
+  ids: core_profiles
+  path: profiles_1d/*/ion/*/density
+  dims: [time, ion, $rho_tor_norm]
+  type: IDS-variable
+- name: p_i
+  ids: core_profiles
+  path: profiles_1d/*/ion/*/pressure
+  dims: [time, ion, $rho_tor_norm]
+  type: IDS-variable
+- name: n_n
+  ids: core_profiles
+  path: profiles_1d/*/neutral/*/density
+  dims: [time, neutral, $rho_tor_norm]
+  type: IDS-variable
+- name: j_tot
+  ids: core_profiles
+  path: profiles_1d/*/j_total
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: j_ohm
+  ids: core_profiles
+  path: profiles_1d/*/j_ohmic
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: j_ni
+  ids: core_profiles
+  path: profiles_1d/*/j_non_inductive
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: q
+  ids: core_profiles
+  path: profiles_1d/*/q
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: smag
+  ids: core_profiles
+  path: profiles_1d/*/magnetic_shear
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: e_r
+  ids: core_profiles
+  path: profiles_1d/*/e_field/radial
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: e_par
+  ids: core_profiles
+  path: profiles_1d/*/e_field/parallel
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: omega_tor
+  ids: core_profiles
+  path: profiles_1d/*/rotation_frequency_tor_sonic
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable
+- name: collisionality
+  ids: core_profiles
+  path: profiles_1d/*/electrons/collisionality_norm
+  dims: [time, $rho_tor_norm]
+  type: IDS-variable

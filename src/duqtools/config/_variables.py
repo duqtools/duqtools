@@ -6,7 +6,7 @@ import os
 import sys
 from collections import UserDict
 from pathlib import Path
-from typing import Dict, Hashable, List, Sequence, Union
+from typing import Dict, Hashable, List, Optional, Sequence, Tuple, Union
 
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
@@ -24,6 +24,7 @@ USER_CONFIG_HOME = Path.home() / '.config'
 LOCAL_DIR = Path('.').absolute()
 DUQTOOLS_DIR = 'duqtools'
 VAR_FILENAME = 'variables.yaml'
+VAR_FILENAME_GLOB = 'variables*.yaml'
 
 
 class VarLookup(UserDict):
@@ -66,19 +67,21 @@ class VarLookup(UserDict):
 class VariableConfigLoader:
 
     def __init__(self):
-        path = self.get_config_path()
+        self.paths = self.get_config_path()
 
-        if not path.exists():
-            raise OSError(f'{path} does not exist!')
-
-        self.path = path
-
-    def load(self):
+    def load(self) -> VarLookup:
         """Load the variables config."""
-        logger.debug(f'Loading variables from: {self.path}')
-        return VariableConfigModel.parse_file(self.path)
+        var_lookup = VarLookup()
 
-    def get_config_path(self) -> Path:
+        for path in self.paths:
+            logger.debug(f'Loading variables from: {path}')
+
+            var_config = VariableConfigModel.parse_file(path)
+            var_lookup.update(var_config.to_variable_dict())
+
+        return var_lookup
+
+    def get_config_path(self) -> Tuple[Path, ...]:
         """Try to get the config file with variable definitions.
 
         Search order:
@@ -87,37 +90,47 @@ class VariableConfigLoader:
         3. config home (first $XDG_CONFIG_HOME/duqtools then `$HOME/.config/duqtools`)
         4. fall back to variable definitions in package
         """
-        for path in (
-                self._get_path_from_environment_variable(),
-                self._get_path_from_config_home(),
-                self._get_path_local_directory(),
+        for paths in (
+                self._get_paths_from_environment_variable(),
+                self._get_paths_from_config_home(),
+                self._get_paths_local_directory(),
         ):
-            if path:
-                return path
+            if paths:
+                return paths
 
-        return self._get_path_fallback()
+        return self._get_paths_fallback()
 
-    def _get_path_from_environment_variable(self):
+    def _get_paths_from_environment_variable(
+            self) -> Optional[Tuple[Path, ...]]:
         env = os.environ.get(VAR_ENV)
         if env:
-            test_path = Path(env)
-            if not test_path.exists():
-                raise OSError(
-                    f'{test_path} defined by ${VAR_ENV} does not exist!')
-            return test_path
+            path = Path(env)
+            drc = path.parent
 
-    def _get_path_local_directory(self):
+            if not drc.exists():
+                raise OSError(f'{path} defined by ${VAR_ENV} does not exist!')
+
+            return tuple(drc.glob(path.name))
+
+        return None
+
+    def _get_paths_local_directory(self) -> Optional[Tuple[Path, ...]]:
         return None  # Not implemented
 
-    def _get_path_from_config_home(self):
+    def _get_paths_from_config_home(self) -> Optional[Tuple[Path, ...]]:
         config_home = os.environ.get('XDG_CONFIG_HOME', USER_CONFIG_HOME)
 
-        test_path = Path(config_home) / DUQTOOLS_DIR / VAR_FILENAME
-        if test_path.exists():
-            return test_path
+        drc = Path(config_home) / DUQTOOLS_DIR
+        if drc.exists():
+            return tuple(drc.glob(VAR_FILENAME_GLOB))
 
-    def _get_path_fallback(self):
-        return files('duqtools.data') / VAR_FILENAME
+        return None
+
+    def _get_paths_fallback(self) -> Tuple[Path, ...]:
+        module = files('duqtools.data')
+        assert len(module._paths) == 1
+        drc = module._paths[0]
+        return tuple(drc.glob(VAR_FILENAME_GLOB))
 
 
 def lookup_vars(
@@ -138,5 +151,4 @@ def lookup_vars(
     return var_models
 
 
-variable_config = VariableConfigLoader().load()
-var_lookup = VarLookup(variable_config.to_variable_dict())
+var_lookup = VariableConfigLoader().load()
