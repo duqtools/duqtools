@@ -37,11 +37,19 @@ with st.expander('Click to show runs'):
 with st.sidebar:
     ids_variables = var_lookup.filter_type('IDS-variable')
 
-    var_names = st.multiselect('Select variable',
-                               tuple(ids_variables),
-                               default=None)
+    st.header('Merging options')
 
     merge_all = st.checkbox('Merge all', help=('Try to merge all variables.'))
+
+    var_names = st.multiselect('Select variables to merge',
+                               tuple(ids_variables),
+                               default=None,
+                               disabled=merge_all)
+
+if merge_all:
+    variables = tuple(ids_variables.values())
+else:
+    variables = tuple(var_lookup[name] for name in var_names)
 
 with st.form('merge_form'):
 
@@ -104,16 +112,14 @@ with st.form('merge_form'):
     submitted = st.form_submit_button('Save')
 
     if submitted:
-        if merge_all:
-            variables = tuple(var_lookup.filter_type('IDS-variable').values())
-        else:
-            variables = tuple(var_lookup[name] for name in var_names)
-
         template.copy_data_to(target)
 
+        bar = st.progress(0.01)
         merge_data(handles=handles.values(),
                    target=target,
-                   variables=variables)
+                   variables=variables,
+                   callback=bar.progress)
+        bar.progress(1.0)
 
         st.success('Success!')
         st.balloons()
