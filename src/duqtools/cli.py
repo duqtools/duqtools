@@ -375,13 +375,56 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge')
+@click.option('-t',
+              '--template',
+              required=True,
+              type=str,
+              help='IMAS location to use as the template for the target')
+@click.option('-o',
+              '--output',
+              'target',
+              required=True,
+              type=str,
+              help='IMAS location to store the result in')
+@click.option('-h',
+              '--handle',
+              'handles',
+              type=str,
+              help='handles to merge to the target',
+              multiple=True)
+@click.option('-v',
+              '--variable',
+              'variables',
+              type=str,
+              help='variables to merge to the target',
+              multiple=True)
 @click.option('--all',
               'merge_all',
               is_flag=True,
               help='Try to merge all known variables.')
+@click.option('-i',
+              '--input',
+              'input_files',
+              type=str,
+              help='Input file, i.e. `data.csv` or `runs.yaml`',
+              multiple=True)
 @common_options(*all_options)
 def cli_merge(**kwargs):
-    """Merge data sets with error propagation."""
+    """Merge data sets with error propagation.
+
+    Example Merging two IDSes. Run number `8000` is the template.
+    Only The `t_e` variable is merged.
+    The resulting IDS is saved to your own test database with
+    shot number `36982` and run number `9999`
+
+    > duqtools merge -t g2jcitri/aug/36982/8000 -o test/36982/9999 \
+            -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e
+
+    Note:
+
+    The -t -T and -h options expect an IMAS path formatted as
+    `user/db/shot/number`
+    """
     from .merge import merge
     with op_queue_context():
         merge(**kwargs)

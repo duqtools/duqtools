@@ -16,8 +16,7 @@ from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
                              LinSpace, OperationDim)
 from duqtools.schema._jetto import JsetField, NamelistField
 from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
-                                 MergeConfigModel, StatusConfigModel,
-                                 SubmitConfigModel)
+                                 StatusConfigModel, SubmitConfigModel)
 from duqtools.schema.data_location import DataLocation
 from duqtools.system import DummySystem
 
@@ -43,7 +42,6 @@ objects = {
     JsetField,
     NamelistField,
     LinSpace,
-    MergeConfigModel,
     OperationDim,
     StatusConfigModel,
     SubmitConfigModel,
@@ -54,7 +52,7 @@ schemas = {
     for obj in objects
 }
 
-for page in 'index', 'status', 'submit', 'create', 'merge':
+for page in 'index', 'status', 'submit', 'create':
     template = get_template(f'template_{page}.md')
 
     rendered = template.render(**schemas)
