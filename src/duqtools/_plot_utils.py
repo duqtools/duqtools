@@ -56,7 +56,9 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
         source[y + '_upper'] = source[y] + source[y + '_error_upper']
         source[y + '_lower'] = source[y] - source[y + '_error_upper']
         max_y = source[y + '_upper'].max()
+
     max_slider = source['slider'].max()
+
     if std:
         band = alt.Chart(source).mark_area(opacity=0.3).encode(
             x=f'{x}:Q',

@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
-         input_files, extensions, errorbars, **kwargs):
+def plot(*, var_names, imas_paths, user, db, shot, runs, input_files,
+         extensions, errorbars, **kwargs):
 
     handle_lst = []
 
@@ -36,31 +36,39 @@ def plot(*, time_var, grid_var, data_vars, imas_paths, user, db, shot, runs,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    grid_ids_var = var_lookup[grid_var]
-    data_ids_vars = [var_lookup[y_var] for y_var in data_vars]
+    for variable in (var_lookup[var_name] for var_name in var_names):
+        data_var = variable.name
+        time_var = variable.dims[0]
+        grid_var = variable.dims[1]
 
-    variables = [grid_ids_var] + data_ids_vars
-    if errorbars:
-        error_ids_vars = [y_var.copy() for y_var in data_ids_vars]
-        for y_var in error_ids_vars:
-            y_var.path = y_var.path + '_error_upper'
-            y_var.name = y_var.name + '_error_upper'
-        variables = variables + error_ids_vars
+        grid_var_norm = var_lookup.normalize(grid_var)
 
-    datasets = []
-    for handle in handles.values():
-        ds = handle.get_variables(variables=variables)
-        datasets.append(ds)
+        variables = [data_var, grid_var, time_var]
 
-    dataset = xr.concat(datasets, 'run')
+        if errorbars:
+            data_var_std = variable.copy()
+            data_var_std.path += '_error_upper'
+            data_var_std.name += '_error_upper'
 
-    click.echo('You can now view your plot in your browser:')
-    click.echo('')
+            variables.append(data_var_std)
 
-    for n, y_var in enumerate(data_vars):
-        click.secho(f'  {grid_var} vs. {y_var}:\n', fg='green')
+        datasets = []
+        for handle in handles.values():
+            ds = handle.get_variables(variables=variables)
+            datasets.append(ds)
 
-        chart = alt_line_chart(dataset, x=grid_var, y=y_var, std=errorbars)
+        dataset = xr.concat(datasets, 'run')
+
+        click.echo('You can now view your plot in your browser:')
+        click.echo('')
+
+        click.secho(f'  {grid_var_norm} vs. {data_var}:\n', fg='green')
+
+        chart = alt_line_chart(dataset,
+                               x=grid_var_norm,
+                               y=data_var,
+                               z=time_var,
+                               std=errorbars)
 
         for extension in extensions:
 
