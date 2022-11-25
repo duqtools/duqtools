@@ -152,33 +152,6 @@ class StatusConfigModel(BaseModel):
             """))
 
 
-class MergeConfigModel(BaseModel):
-    """The options of the `merge` subcommand are stored under the `merge` key
-    in the config.
-
-    These keys define the location of the IMAS data, which IDS entries
-    to merge, and where to store the output.
-
-    Before merging, all keys are rebased on (1) the same radial
-    coordinate specified via `base_ids` and (2) the timestamp.
-    """
-    data: Path = Field('runs.yaml',
-                       description=f("""
-            Data file with IMAS handles, such as `data.csv` or `runs.yaml`'
-            """))
-    template: ImasBaseModel = Field(description=f("""
-            This IMAS DB entry will be used as the template.
-            It is copied to the output location.
-            """))
-    output: ImasBaseModel = Field(
-        description='Merged data will be written to this IMAS DB entry.')
-    variables: List[str] = Field(description=f("""
-            This is a list of variables to be merged. This means
-            that the mean and error for these data over all runs are calculated
-            and written back to the ouput data location.
-            """))
-
-
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
     submit: SubmitConfigModel = Field(
@@ -191,9 +164,6 @@ class ConfigModel(BaseModel):
     status: StatusConfigModel = Field(
         StatusConfigModel(),
         description='Configuration for the status subcommand')
-
-    merge: Optional[MergeConfigModel] = Field(
-        description='Configuration for the merge subcommand')
 
     workspace: Optional[str] = Field(description='Old field, currently unused')
 

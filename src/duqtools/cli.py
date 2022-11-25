@@ -384,10 +384,44 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge')
-@click.option('--all', 'merge_all', is_flag=True, help='Try to merge all known variables.')
+@click.option('-t',
+              '--template',
+              required=True,
+              type=str,
+              help='IMAS location to use as the template for the target')
+@click.option('-T',
+              '--target',
+              required=True,
+              type=str,
+              help='IMAS location to store the result in')
+@click.option('-h',
+              '--handle',
+              'handles',
+              type=str,
+              help='handles to merge to the target',
+              multiple=True)
+@click.option('-v',
+              '--variable',
+              'variables',
+              type=str,
+              help='variables to merge to the target',
+              multiple=True)
+@click.option(
+    '-r',
+    '--runfile',
+    type=str,
+    help='file containing runs to be merged (can be eg: data.csv, runs.yaml)')
+@click.option('--all',
+              'merge_all',
+              is_flag=True,
+              help='Try to merge all known variables.')
 @common_options(*all_options)
 def cli_merge(**kwargs):
-    """Merge data sets with error propagation."""
+    """Merge data sets with error propagation.
+
+    The -t -T and -h options expect an IMAS path formatted as
+    <user>/<db>/<shot>/<number>
+    """
     from .merge import merge
     with op_queue_context():
         merge(**kwargs)

@@ -17,3 +17,6 @@ class ImasBaseModel(BaseModel):
     @validator('user', pre=True, always=True)
     def validate_user(cls, v):
         return v or getuser()
+
+    def __hash__(self):  # Needed to compare handles
+        return hash((self.user, self.db, self.shot, self.run))
