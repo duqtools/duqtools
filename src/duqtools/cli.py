@@ -307,6 +307,10 @@ def cli_status(**kwargs):
               help='Output format (json, html, png, svg, pdf), default: html.',
               default=('html', ),
               multiple=True)
+@click.option('-e',
+              '--errorbars',
+              is_flag=True,
+              help='Plot the errorbars (if present)')
 def cli_plot(**kwargs):
     """Plot some IDS data.
 

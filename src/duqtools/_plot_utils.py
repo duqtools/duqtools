@@ -21,8 +21,11 @@ def _standardize_data(source: Union[pd.DataFrame, xr.Dataset]) -> pd.DataFrame:
     return source
 
 
-def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
-                   y: str) -> alt.Chart:
+def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
+                   *,
+                   x: str,
+                   y: str,
+                   std: bool = False) -> alt.Chart:
     """Generate an altair line chart from a dataframe.
 
     Parameters
@@ -33,6 +36,8 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
         X-value to plot, corresponds to a column in the source data
     y : str
         Y-value to plot, corresponds to a column in the source data
+    std : bool
+        Plot the error bound from {x}_error_upper in the plot as well
 
     Returns
     -------
@@ -40,20 +45,22 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
         Return an altair chart.
     """
     source = _standardize_data(source)
-
     max_y = source[y].max()
+
+    if std:
+        source[y + '_upper'] = source[y] + source[y + '_error_upper']
+        source[y + '_lower'] = source[y] - source[y + '_error_upper']
+        max_y = source[y + '_upper'].max()
     max_slider = source['slider'].max()
+    if std:
+        band = alt.Chart(source).mark_area(opacity=0.3).encode(
+            x=f'{x}:Q',
+            y=alt.Y(f'{y}_upper:Q', title=y),
+            y2=alt.Y2(f'{y}_lower:Q', title=y),
+            color=alt.Color('run:N'),
+        )
 
-    slider = alt.binding_range(name='Time index',
-                               min=0,
-                               max=max_slider,
-                               step=1)
-    select_step = alt.selection_single(name='time',
-                                       fields=['slider'],
-                                       bind=slider,
-                                       init={'slider': 0})
-
-    chart = alt.Chart(source).mark_line().encode(
+    line = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
         y=alt.Y(
             f'{y}:Q',
@@ -62,29 +69,43 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
         ),
         color=alt.Color('run:N'),
         tooltip='run',
-    ).add_selection(select_step).transform_filter(select_step).interactive()
-
-    first_run = source.iloc[0].run
-
-    slider = alt.binding_range(name='Reference time index',
-                               min=0,
-                               max=max_slider,
-                               step=1)
-    select_step = alt.selection_single(name='reference',
-                                       fields=['slider'],
-                                       bind=slider,
-                                       init={'slider': 0})
+    )
 
     ref = alt.Chart(source).mark_line(strokeDash=[5, 5]).encode(
-        x=f'{x}:Q',
-        y=f'{y}:Q',
-        color=alt.Color('run:N'),
-        tooltip='run',
-    ).add_selection(select_step).transform_filter(
-        select_step).transform_filter(
-            alt.datum.run == first_run).interactive()
+        x=f'{x}:Q', y=f'{y}:Q', color=alt.Color('run:N'), tooltip='run')
 
-    return chart + ref
+    if max_slider != 0:
+        slider = alt.binding_range(name='Time index',
+                                   min=0,
+                                   max=max_slider,
+                                   step=1)
+        select_step = alt.selection_single(name='time',
+                                           fields=['slider'],
+                                           bind=slider,
+                                           init={'slider': 0})
+        line = line.add_selection(select_step).transform_filter(
+            select_step).interactive()
+        if std:
+            band = band.transform_filter(select_step).interactive()
+
+        first_run = source.iloc[0].run
+        slider = alt.binding_range(name='Reference time index',
+                                   min=0,
+                                   max=max_slider,
+                                   step=1)
+        select_step = alt.selection_single(name='reference',
+                                           fields=['slider'],
+                                           bind=slider,
+                                           init={'slider': 0})
+
+        ref = ref.add_selection(select_step).transform_filter(
+            select_step).transform_filter(
+                alt.datum.run == first_run).interactive()
+
+    if std:
+        return line + ref + band
+    else:
+        return line + ref
 
 
 def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset], *, x: str,
