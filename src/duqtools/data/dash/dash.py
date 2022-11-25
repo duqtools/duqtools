@@ -2,8 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from _shared import (default_workdir, get_dataset, get_ids_options,
-                     get_var_options, get_variables)
+from _shared import default_workdir, get_dataset
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
 from duqtools.utils import read_imas_handles_from_file
@@ -29,24 +28,13 @@ with st.expander('Click to show runs'):
     st.table(df)
 
 with st.sidebar:
-    ids_options = get_ids_options()
+    from duqtools.config import var_lookup
 
-    default_ids = ids_options.index('core_profiles')
+    ids_variables = var_lookup.filter_type('IDS-variable')
 
-    ids = st.selectbox('Select IDS', ids_options, index=default_ids)
-
-    if ids != 'core_profiles':
-        st.error('IDS other than "core_profiles" currently not supported.')
-        st.stop()
-
-    var_options = get_var_options(ids=ids)
-
-    default_x_key = var_options.index('rho_tor_norm')
-    default_y_val = 't_i_ave'
-
-    x_key = st.selectbox('Select x', var_options, index=default_x_key)
-
-    y_keys = st.multiselect('Select y', var_options, default=default_y_val)
+    var_names = st.multiselect('Select variable',
+                               tuple(ids_variables),
+                               default='t_i_ave')
 
     st.header('Plotting options')
 
@@ -57,20 +45,22 @@ with st.sidebar:
             'y-values are interpolated to put them on a common basis for x.'),
     )
 
-variables = get_variables(ids=ids, x_key=x_key, y_keys=y_keys)
-source = get_dataset(handles, ids=ids, **variables)
+for variable in (var_lookup[var_name] for var_name in var_names):
 
-for y_key in y_keys:
-    st.header(f'{x_key} vs. {y_key}')
+    source, time_var, grid_var, data_var = get_dataset(handles, variable)
+
+    st.header(f'{grid_var} vs. {data_var}')
+
+    chart_func = alt_errorband_chart if show_error_bar else alt_line_chart
 
     if show_error_bar:
-        chart = alt_errorband_chart(source, x=x_key, y=y_key)
+        chart = alt_errorband_chart(source, x=grid_var, y=data_var, z=time_var)
     else:
-        chart = alt_line_chart(source, x=x_key, y=y_key)
+        chart = alt_line_chart(source, x=grid_var, y=data_var, z=time_var)
 
     st.altair_chart(chart, use_container_width=True)
 
-    if st.button('Save this chart', key=f'download_{x_key}-{y_key}'):
-        fname = f'chart_{x_key}-{y_key}.html'
+    if st.button('Save this chart', key=f'download_{grid_var}-{data_var}'):
+        fname = f'chart_{grid_var}-{data_var}.html'
         chart.save(fname)
         st.success(f'✔️ Wrote chart to "{fname}"')
