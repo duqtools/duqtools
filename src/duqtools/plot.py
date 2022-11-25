@@ -36,7 +36,8 @@ def plot(*, var_names, imas_paths, user, db, shot, runs, input_files,
     if len(handles) == 0:
         raise SystemExit('No data to show.')
 
-    for variable in (var_lookup[var_name] for var_name in var_names):
+    for n, variable in enumerate(var_lookup[var_name]
+                                 for var_name in var_names):
         data_var = variable.name
         time_var = variable.dims[0]
         grid_var = variable.dims[1]
