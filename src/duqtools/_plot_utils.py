@@ -85,7 +85,8 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
                                            init={'slider': 0})
         line = line.add_selection(select_step).transform_filter(
             select_step).interactive()
-        band = band.transform_filter(select_step).interactive()
+        if std:
+            band = band.transform_filter(select_step).interactive()
 
         first_run = source.iloc[0].run
         slider = alt.binding_range(name='Reference time index',
