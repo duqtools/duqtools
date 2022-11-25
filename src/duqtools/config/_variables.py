@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import logging
+import operator
 import os
 import sys
+from collections import UserDict
 from pathlib import Path
-from typing import List, Sequence, Union
+from typing import Dict, Hashable, List, Optional, Sequence, Tuple, Union
 
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
+from ..utils import groupby
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -21,24 +24,64 @@ USER_CONFIG_HOME = Path.home() / '.config'
 LOCAL_DIR = Path('.').absolute()
 DUQTOOLS_DIR = 'duqtools'
 VAR_FILENAME = 'variables.yaml'
+VAR_FILENAME_GLOB = 'variables*.yaml'
+
+
+class VarLookup(UserDict):
+    """Variable lookup table.
+
+    Subclasses `UserDict` to embed some commonly used operations, like
+    grouping and filtering.
+    """
+    _ids_variable_key = 'IDS-variable'
+
+    def __getitem__(self, key: str) -> IDSVariableModel:
+        if key.startswith('$'):
+            return self.data[key[1:]]
+        return self.data[key]
+
+    def filter_type(self, type: str, *, invert: bool = False) -> VarLookup:
+        """Filter all entries of given type."""
+        cmp = operator.ne if invert else operator.eq
+        return VarLookup({k: v for k, v in self.items() if cmp(v.type, type)})
+
+    def groupby_type(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        """Group entries by type."""
+        grouped_ids_vars = groupby(self.values(), keyfunc=lambda var: var.type)
+        return grouped_ids_vars
+
+    def filter_ids(self, ids: str) -> VarLookup:
+        """Filter all entries of given IDS."""
+        ids_vars = self.filter_type(self._ids_variable_key)
+
+        return VarLookup({k: v for k, v in ids_vars.items() if v.ids == ids})
+
+    def groupby_ids(self) -> Dict[Hashable, List[IDSVariableModel]]:
+        """Group entries by IDS."""
+        ids_vars = self.filter_type(self._ids_variable_key).values()
+
+        grouped_ids_vars = groupby(ids_vars, keyfunc=lambda var: var.ids)
+        return grouped_ids_vars
 
 
 class VariableConfigLoader:
 
     def __init__(self):
-        path = self.get_config_path()
+        self.paths = self.get_config_path()
 
-        if not path.exists():
-            raise OSError(f'{path} does not exist!')
-
-        self.path = path
-
-    def load(self):
+    def load(self) -> VarLookup:
         """Load the variables config."""
-        logger.debug(f'Loading variables from: {self.path}')
-        return VariableConfigModel.parse_file(self.path)
+        var_lookup = VarLookup()
 
-    def get_config_path(self) -> Path:
+        for path in self.paths:
+            logger.debug(f'Loading variables from: {path}')
+
+            var_config = VariableConfigModel.parse_file(path)
+            var_lookup.update(var_config.to_variable_dict())
+
+        return var_lookup
+
+    def get_config_path(self) -> Tuple[Path, ...]:
         """Try to get the config file with variable definitions.
 
         Search order:
@@ -47,37 +90,47 @@ class VariableConfigLoader:
         3. config home (first $XDG_CONFIG_HOME/duqtools then `$HOME/.config/duqtools`)
         4. fall back to variable definitions in package
         """
-        for path in (
-                self._get_path_from_environment_variable(),
-                self._get_path_from_config_home(),
-                self._get_path_local_directory(),
+        for paths in (
+                self._get_paths_from_environment_variable(),
+                self._get_paths_from_config_home(),
+                self._get_paths_local_directory(),
         ):
-            if path:
-                return path
+            if paths:
+                return paths
 
-        return self._get_path_fallback()
+        return self._get_paths_fallback()
 
-    def _get_path_from_environment_variable(self):
+    def _get_paths_from_environment_variable(
+            self) -> Optional[Tuple[Path, ...]]:
         env = os.environ.get(VAR_ENV)
         if env:
-            test_path = Path(env)
-            if not test_path.exists():
-                raise OSError(
-                    f'{test_path} defined by ${VAR_ENV} does not exist!')
-            return test_path
+            path = Path(env)
+            drc = path.parent
 
-    def _get_path_local_directory(self):
+            if not drc.exists():
+                raise OSError(f'{path} defined by ${VAR_ENV} does not exist!')
+
+            return tuple(drc.glob(path.name))
+
+        return None
+
+    def _get_paths_local_directory(self) -> Optional[Tuple[Path, ...]]:
         return None  # Not implemented
 
-    def _get_path_from_config_home(self):
+    def _get_paths_from_config_home(self) -> Optional[Tuple[Path, ...]]:
         config_home = os.environ.get('XDG_CONFIG_HOME', USER_CONFIG_HOME)
 
-        test_path = Path(config_home) / DUQTOOLS_DIR / VAR_FILENAME
-        if test_path.exists():
-            return test_path
+        drc = Path(config_home) / DUQTOOLS_DIR
+        if drc.exists():
+            return tuple(drc.glob(VAR_FILENAME_GLOB))
 
-    def _get_path_fallback(self):
-        return files('duqtools.data') / VAR_FILENAME
+        return None
+
+    def _get_paths_fallback(self) -> Tuple[Path, ...]:
+        module = files('duqtools.data')
+        assert len(module._paths) == 1
+        drc = module._paths[0]
+        return tuple(drc.glob(VAR_FILENAME_GLOB))
 
 
 def lookup_vars(
@@ -85,8 +138,8 @@ def lookup_vars(
                               IDSVariableModel]]) -> List[IDSVariableModel]:
     """Helper function to look up a bunch of variables.
 
-    If str, look up the variable from the `var_lookup` Else check if the
-    variable is an `IDSVariableModel`
+    If str, look up the variable from the `var_lookup`. Else, check if
+    the variable is an `IDSVariableModel`.
     """
     var_models = []
     for var in variables:
@@ -98,5 +151,4 @@ def lookup_vars(
     return var_models
 
 
-variable_config = VariableConfigLoader().load()
-var_lookup = variable_config.to_variable_dict()
+var_lookup = VariableConfigLoader().load()

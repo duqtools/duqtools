@@ -29,37 +29,35 @@ def merge_data(
     variables : Sequence[IDSVariableModel]
         variables
     """
+    # Add dimensions to variables
+    variable_dict = {}
 
-    # make sure we do not mess up input arguments
-    variables = variables.copy()
-
-    # Sometimes, dimensions are not yet included,
-    # We can safely include them into the variables manually, as they are
-    # automatically transformed into coordinates, and therefore not written back
-    variable_dict = {variable.name: variable for variable in variables}
     for variable in variables:
+        variable_dict[variable.name] = variable
+
         for dim in variable.dims:
-            # TODO time should also be $ prefixed, remove the `or time` when fixed
-            if not (dim.startswith('$') or dim.startswith('time')):
-                continue
-            name = dim.lstrip('$')
-            if name not in variable_dict:
-                variables.append(var_lookup[name])
-                variable_dict[name] = variables[-1]
+            try:
+                dim_var = var_lookup[dim]
+                variable_dict.setdefault(dim_var.name, dim_var)
+            except KeyError:
+                # skip dimensions without coordinates like `ion`
+                pass
+
+    variables = tuple(variable_dict.values())
 
     # Get all known variables per ids
     grouped_ids_vars = groupby(variables, keyfunc=lambda var: var.ids)
 
-    for ids_name, variables in grouped_ids_vars.items():
+    for ids_name, ids_vars in grouped_ids_vars.items():
 
         # Get all data, and rebase it
         target_ids = target.get(ids_name)  # type: ignore
-        target_data = target_ids.to_xarray(variables=variables,
+        target_data = target_ids.to_xarray(variables=ids_vars,
                                            empty_var_ok=True)
         target_data = squash_placeholders(target_data)
 
         ids_data = [
-            handle.get_variables(variables, empty_var_ok=True)  # type: ignore
+            handle.get_variables(ids_vars, empty_var_ok=True)  # type: ignore
             for handle in handles
         ]
 
@@ -77,4 +75,5 @@ def merge_data(
                                             mean_data[name])
             target_ids.write_array_in_parts(
                 variable_dict[name].path + '_error_upper', std_data[name])
+
         target_ids.sync(target)
