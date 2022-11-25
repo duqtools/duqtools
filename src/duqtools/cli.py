@@ -430,7 +430,7 @@ def cli_merge(**kwargs):
     Note:
 
     The -t -T and -h options expect an IMAS path formatted as
-    <user>/<db>/<shot>/<number>
+    user/db/shot/number
     """
     from .merge import merge
     with op_queue_context():
