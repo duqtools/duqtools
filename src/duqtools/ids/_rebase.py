@@ -218,7 +218,7 @@ def rebase_all_coords(
     ----------
     datasets : Sequence[xr.Dataset]
         datasets
-    reference_dataset : int
+    reference_dataset : xr.Dataset
         reference_dataset
 
     Returns
