@@ -8,7 +8,7 @@ import xarray as xr
 
 from ._plot_utils import alt_line_chart
 from .config import var_lookup
-from .ids import ImasHandle
+from .ids import ImasHandle, rebase_all_coords
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,7 @@ def plot(*, var_names, imas_paths, user, db, shot, runs, input_files,
             ds = handle.get_variables(variables=variables)
             datasets.append(ds)
 
+        datasets = rebase_all_coords(datasets, datasets[0])
         dataset = xr.concat(datasets, 'run')
 
         chart = alt_line_chart(dataset,
