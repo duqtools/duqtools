@@ -115,12 +115,12 @@ def test_example_plot(cmdline_workdir):
     if imas_mocked:
         pytest.xfail('Imas needed for plotting Imas data')
 
-    cmd = ('duqtools plot -m g2ssmee/jet/94875/8102 -y t_i_ave').split()
+    cmd = ('duqtools plot -h g2ssmee/jet/94875/8102 -v t_i_ave').split()
 
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
         assert (result.returncode == 0)
-        assert (Path('./chart_0.html').exists())
+        assert (Path('./chart_rho_tor_norm-t_i_ave.html').exists())
 
 
 def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):
