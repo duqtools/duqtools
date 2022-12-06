@@ -70,7 +70,7 @@ def plot(*, var_names, imas_paths, input_files, extensions, errorbars,
 
         for extension in extensions:
 
-            outfile = Path(f'chart_{n}.{extension}')
+            outfile = Path(f'chart_{grid_var_norm}-{data_var}.{extension}')
             click.secho(f'    file:///{outfile.absolute()}', bold=True)
 
             chart.save(outfile, scale_factor=2.0)
