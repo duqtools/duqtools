@@ -8,6 +8,7 @@ from typing import Callable
 import click
 from pydantic import ValidationError
 
+from ._click_opt_groups import GroupCmd, GroupOpt
 from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen
 from .config import cfg
 from .operations import op_queue, op_queue_context
@@ -25,7 +26,9 @@ def config_option(f):
     return click.option('-c',
                         '--config',
                         default='duqtools.yaml',
-                        help='Path to config.')(f)
+                        help='Path to config.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def quiet_option(f):
@@ -34,26 +37,34 @@ def quiet_option(f):
                         is_flag=True,
                         default=False,
                         help='Don\'t output anything to the screen'
-                        ' (except mandatory prompts).')(f)
+                        ' (except mandatory prompts).',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def debug_option(f):
     """Must be added together with `logfile_option`."""
     return click.option('--debug',
                         is_flag=True,
-                        help='Enable debug print statements.')(f)
+                        help='Enable debug print statements.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def dry_run_option(f):
     return click.option('--dry-run',
                         is_flag=True,
-                        help='Execute without any side-effects.')(f)
+                        help='Execute without any side-effects.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def yes_option(f):
     return click.option('--yes',
                         is_flag=True,
-                        help='Answer yes to questions automatically.')(f)
+                        help='Answer yes to questions automatically.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def logfile_option(f):
@@ -64,11 +75,40 @@ def logfile_option(f):
                         default='duqtools.log',
                         help='where to send the logfile,'
                         ' the special values stderr/stdout'
-                        ' will send it there respectively.')(f)
+                        ' will send it there respectively.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 all_options = (logfile_option, debug_option, config_option, quiet_option,
                dry_run_option, yes_option)
+
+
+def handles_option(f):
+    return click.option('-h',
+                        '--handle',
+                        'handles',
+                        type=str,
+                        help='IMAS data handles.',
+                        multiple=True)(f)
+
+
+def variables_option(f):
+    return click.option('-v',
+                        '--variable',
+                        'var_names',
+                        type=str,
+                        help='Name of the variables.',
+                        multiple=True)(f)
+
+
+def datafile_option(f):
+    return click.option('-i',
+                        '--input',
+                        'input_files',
+                        type=str,
+                        help='Input file, i.e. `data.csv` or `runs.yaml`',
+                        multiple=True)(f)
 
 
 class OptionParser:
@@ -172,7 +212,7 @@ def cli(**kwargs):
     pass
 
 
-@cli.command('init')
+@cli.command('init', cls=GroupCmd)
 @click.option('-o',
               '--out',
               'out_file',
@@ -191,7 +231,7 @@ def cli_init(**kwargs):
             exit(e)
 
 
-@cli.command('create')
+@cli.command('create', cls=GroupCmd)
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
@@ -203,22 +243,23 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
-@cli.command('recreate')
+@cli.command('recreate', cls=GroupCmd)
 @click.argument('runs', type=Path, nargs=-1)
 @common_options(*all_options)
 def cli_recreate(**kwargs):
     """Read `runs.yaml` and re-create the given runs.
 
-    Example:
     \b
-    - duqtools recreate run_0003 run_0004 --force
+    Example:
+
+    - `duqtools recreate run_0003 run_0004 --force`
     """
     from .create import recreate
     with op_queue_context():
         recreate(**kwargs)
 
 
-@cli.command('submit')
+@cli.command('submit', cls=GroupCmd)
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
@@ -253,7 +294,7 @@ def cli_submit(**kwargs):
         submit(**kwargs)
 
 
-@cli.command('status')
+@cli.command('status', cls=GroupCmd)
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 @common_options(*all_options)
@@ -264,33 +305,8 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@click.option('-v',
-              '--variables',
-              'var_names',
-              type=str,
-              help='Name of the variables to plot',
-              multiple=True)
-@click.option('-m',
-              '--imas',
-              'imas_paths',
-              type=str,
-              help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
-              multiple=True)
-@click.option('-u', '--user', 'user', type=str, help='IMAS user.')
-@click.option('-d', '--db', 'db', type=str, help='IMAS database.')
-@click.option('-s', '--shot', 'shot', type=int, help='IMAS shot.')
-@click.option('-r',
-              '--runs',
-              'runs',
-              type=int,
-              multiple=True,
-              help='IMAS run (multiple runs can be specified)')
-@click.option('-i',
-              '--input',
-              'input_files',
-              type=str,
-              help='Input file, i.e. `data.csv` or `runs.yaml`',
-              multiple=True)
+@handles_option
+@variables_option
 @click.option('-o',
               '--format',
               'extensions',
@@ -302,22 +318,24 @@ def cli_status(**kwargs):
               '--errorbars',
               is_flag=True,
               help='Plot the errorbars (if present)')
+@datafile_option
 def cli_plot(**kwargs):
     """Plot some IDS data.
 
     \b
     Examples:
-    - duqtools plot -v t_i_ave -v zeff -i data.csv
-    - duqtools plot -v t_i_ave -v zeff -m jet/91234/5
-    - duqtools plot -v zeff -u user -d jet -s 91234 -r 5 -r 6 -r 7
-    - duqtools plot -v zeff -m user/91234/5 -i data.csv
-    - duqtools plot -v zeff -m user/91234/5 -o json
+
+    - `duqtools plot -v t_i_ave -v zeff -i data.csv`
+    - `duqtools plot -v t_i_ave -v zeff -h user/jet/91234/5`
+    - `duqtools plot -v zeff -h db/91234/5 -h db/91234/6 -h db/91234/7`
+    - `duqtools plot -v zeff -h db/91234/5 -i data.csv`
+    - `duqtools plot -v zeff -h db/91234/5 -o json`
     """
     from .plot import plot
     plot(**kwargs)
 
 
-@cli.command('clean')
+@cli.command('clean', cls=GroupCmd)
 @click.option('--out', is_flag=True, help='Remove output data.')
 @click.option('--force',
               is_flag=True,
@@ -330,7 +348,7 @@ def cli_clean(**kwargs):
         cleanup(**kwargs)
 
 
-@cli.command('go')
+@cli.command('go', cls=GroupCmd)
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
 @common_options(*all_options)
 def cli_go(**kwargs):
@@ -366,7 +384,7 @@ def cli_yolo(ctx, **kwargs):
     ctx.invoke(cli_go, force=True, quiet=True, yes=True)
 
 
-@cli.command('dash')
+@cli.command('dash', cls=GroupCmd)
 @common_options(*all_options)
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
@@ -374,56 +392,51 @@ def cli_dash(**kwargs):
     dash(**kwargs)
 
 
-@cli.command('merge')
+@cli.command('merge', cls=GroupCmd)
+@handles_option
+@variables_option
 @click.option('-t',
               '--template',
               required=True,
               type=str,
               help='IMAS location to use as the template for the target')
 @click.option('-o',
-              '--output',
+              '--out',
               'target',
               required=True,
               type=str,
               help='IMAS location to store the result in')
-@click.option('-h',
-              '--handle',
-              'handles',
-              type=str,
-              help='handles to merge to the target',
-              multiple=True)
-@click.option('-v',
-              '--variable',
-              'variables',
-              type=str,
-              help='variables to merge to the target',
-              multiple=True)
 @click.option('--all',
               'merge_all',
               is_flag=True,
               help='Try to merge all known variables.')
-@click.option('-i',
-              '--input',
-              'input_files',
-              type=str,
-              help='Input file, i.e. `data.csv` or `runs.yaml`',
-              multiple=True)
+@datafile_option
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation.
 
     Example Merging two IDSes. Run number `8000` is the template.
     Only The `t_e` variable is merged.
+
     The resulting IDS is saved to your own test database with
-    shot number `36982` and run number `9999`
+    shot number `36982` and run number `9999`.
 
-    > duqtools merge -t g2jcitri/aug/36982/8000 -o test/36982/9999 \
-            -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e
+    Example:
 
+    \b
+    ```
+    duqtools merge \\
+        -t g2jcitri/aug/36982/8000 \\
+        -o test/36982/9999 \\
+        -h g2jcitri/aug/36982/8001 \\
+        -h g2jcitri/aug/36982/8000 \\
+        -v t_e
+    ```
+    \f
     Note:
 
-    The -t -T and -h options expect an IMAS path formatted as
-    `user/db/shot/number`
+    The `-t`, `-o` and `-h` options expect an IMAS path formatted as
+    `user/db/shot/number` or `db/shot/number`.
     """
     from .merge import merge
     with op_queue_context():
