@@ -8,6 +8,7 @@ from typing import Callable
 import click
 from pydantic import ValidationError
 
+from ._click_opt_groups import GroupCmd, GroupOpt
 from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen
 from .config import cfg
 from .operations import op_queue, op_queue_context
@@ -25,7 +26,9 @@ def config_option(f):
     return click.option('-c',
                         '--config',
                         default='duqtools.yaml',
-                        help='Path to config.')(f)
+                        help='Path to config.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def quiet_option(f):
@@ -34,26 +37,34 @@ def quiet_option(f):
                         is_flag=True,
                         default=False,
                         help='Don\'t output anything to the screen'
-                        ' (except mandatory prompts).')(f)
+                        ' (except mandatory prompts).',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def debug_option(f):
     """Must be added together with `logfile_option`."""
     return click.option('--debug',
                         is_flag=True,
-                        help='Enable debug print statements.')(f)
+                        help='Enable debug print statements.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def dry_run_option(f):
     return click.option('--dry-run',
                         is_flag=True,
-                        help='Execute without any side-effects.')(f)
+                        help='Execute without any side-effects.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def yes_option(f):
     return click.option('--yes',
                         is_flag=True,
-                        help='Answer yes to questions automatically.')(f)
+                        help='Answer yes to questions automatically.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 def logfile_option(f):
@@ -64,7 +75,9 @@ def logfile_option(f):
                         default='duqtools.log',
                         help='where to send the logfile,'
                         ' the special values stderr/stdout'
-                        ' will send it there respectively.')(f)
+                        ' will send it there respectively.',
+                        cls=GroupOpt,
+                        group='Common options')(f)
 
 
 all_options = (logfile_option, debug_option, config_option, quiet_option,
@@ -172,7 +185,7 @@ def cli(**kwargs):
     pass
 
 
-@cli.command('init')
+@cli.command('init', cls=GroupCmd)
 @click.option('-o',
               '--out',
               'out_file',
@@ -191,7 +204,7 @@ def cli_init(**kwargs):
             exit(e)
 
 
-@cli.command('create')
+@cli.command('create', cls=GroupCmd)
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
@@ -203,7 +216,7 @@ def cli_create(**kwargs):
         create(**kwargs)
 
 
-@cli.command('recreate')
+@cli.command('recreate', cls=GroupCmd)
 @click.argument('runs', type=Path, nargs=-1)
 @common_options(*all_options)
 def cli_recreate(**kwargs):
@@ -218,7 +231,7 @@ def cli_recreate(**kwargs):
         recreate(**kwargs)
 
 
-@cli.command('submit')
+@cli.command('submit', cls=GroupCmd)
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
@@ -253,7 +266,7 @@ def cli_submit(**kwargs):
         submit(**kwargs)
 
 
-@cli.command('status')
+@cli.command('status', cls=GroupCmd)
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 @common_options(*all_options)
@@ -317,7 +330,7 @@ def cli_plot(**kwargs):
     plot(**kwargs)
 
 
-@cli.command('clean')
+@cli.command('clean', cls=GroupCmd)
 @click.option('--out', is_flag=True, help='Remove output data.')
 @click.option('--force',
               is_flag=True,
@@ -330,7 +343,7 @@ def cli_clean(**kwargs):
         cleanup(**kwargs)
 
 
-@cli.command('go')
+@cli.command('go', cls=GroupCmd)
 @click.option('--force', is_flag=True, help='Overwrite files when necessary.')
 @common_options(*all_options)
 def cli_go(**kwargs):
@@ -366,7 +379,7 @@ def cli_yolo(ctx, **kwargs):
     ctx.invoke(cli_go, force=True, quiet=True, yes=True)
 
 
-@cli.command('dash')
+@cli.command('dash', cls=GroupCmd)
 @common_options(*all_options)
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
@@ -374,7 +387,7 @@ def cli_dash(**kwargs):
     dash(**kwargs)
 
 
-@cli.command('merge')
+@cli.command('merge', cls=GroupCmd)
 @click.option('-t',
               '--template',
               required=True,
