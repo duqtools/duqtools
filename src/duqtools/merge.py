@@ -15,7 +15,7 @@ info, debug = logger.info, logger.debug
 
 
 def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
-          input_files: List[str], variables: Optional[List[str]], **kwargs):
+          input_files: List[str], var_names: Optional[List[str]], **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.from_string(template)
     target = ImasHandle.from_string(target)
@@ -38,11 +38,11 @@ def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
         op_queue.add_no_op(description=click.style(
             'Merging all known variables', fg='green', bold=False))
     else:
-        if not variables or len(variables) == 0:
+        if not var_names or len(var_names) == 0:
             op_queue.add_no_op('No variables specified for merge', 'aborting')
             return
 
-        ids_variables = tuple(var_lookup[name] for name in variables)
+        ids_variables = tuple(var_lookup[name] for name in var_names)
         for variable in ids_variables:
             op_queue.add_no_op(description=click.style('Variable for merge',
                                                        fg='green',

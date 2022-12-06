@@ -84,6 +84,33 @@ all_options = (logfile_option, debug_option, config_option, quiet_option,
                dry_run_option, yes_option)
 
 
+def handles_option(f):
+    return click.option('-h',
+                        '--handle',
+                        'handles',
+                        type=str,
+                        help='handles to merge to the target',
+                        multiple=True)(f)
+
+
+def variables_option(f):
+    return click.option('-v',
+                        '--variable',
+                        'var_names',
+                        type=str,
+                        help='Name of the variables.',
+                        multiple=True)(f)
+
+
+def datafile_option(f):
+    return click.option('-i',
+                        '--input',
+                        'input_files',
+                        type=str,
+                        help='Input file, i.e. `data.csv` or `runs.yaml`',
+                        multiple=True)(f)
+
+
 class OptionParser:
 
     def wrap(self, func: Callable):
@@ -277,33 +304,8 @@ def cli_status(**kwargs):
 
 
 @cli.command('plot')
-@click.option('-v',
-              '--variables',
-              'var_names',
-              type=str,
-              help='Name of the variables to plot',
-              multiple=True)
-@click.option('-m',
-              '--imas',
-              'imas_paths',
-              type=str,
-              help='IMAS path formatted as <user>/<db>/<shot>/<number>.',
-              multiple=True)
-@click.option('-u', '--user', 'user', type=str, help='IMAS user.')
-@click.option('-d', '--db', 'db', type=str, help='IMAS database.')
-@click.option('-s', '--shot', 'shot', type=int, help='IMAS shot.')
-@click.option('-r',
-              '--runs',
-              'runs',
-              type=int,
-              multiple=True,
-              help='IMAS run (multiple runs can be specified)')
-@click.option('-i',
-              '--input',
-              'input_files',
-              type=str,
-              help='Input file, i.e. `data.csv` or `runs.yaml`',
-              multiple=True)
+@handles_option
+@variables_option
 @click.option('-o',
               '--format',
               'extensions',
@@ -315,16 +317,17 @@ def cli_status(**kwargs):
               '--errorbars',
               is_flag=True,
               help='Plot the errorbars (if present)')
+@datafile_option
 def cli_plot(**kwargs):
     """Plot some IDS data.
 
     \b
     Examples:
     - duqtools plot -v t_i_ave -v zeff -i data.csv
-    - duqtools plot -v t_i_ave -v zeff -m jet/91234/5
-    - duqtools plot -v zeff -u user -d jet -s 91234 -r 5 -r 6 -r 7
-    - duqtools plot -v zeff -m user/91234/5 -i data.csv
-    - duqtools plot -v zeff -m user/91234/5 -o json
+    - duqtools plot -v t_i_ave -v zeff -h user/jet/91234/5
+    - duqtools plot -v zeff -h db/91234/5 -h db/91234/6 -h db/91234/7
+    - duqtools plot -v zeff -h db/91234/5 -i data.csv
+    - duqtools plot -v zeff -h db/91234/5 -o json
     """
     from .plot import plot
     plot(**kwargs)
@@ -388,39 +391,24 @@ def cli_dash(**kwargs):
 
 
 @cli.command('merge', cls=GroupCmd)
+@handles_option
+@variables_option
 @click.option('-t',
               '--template',
               required=True,
               type=str,
               help='IMAS location to use as the template for the target')
 @click.option('-o',
-              '--output',
+              '--out',
               'target',
               required=True,
               type=str,
               help='IMAS location to store the result in')
-@click.option('-h',
-              '--handle',
-              'handles',
-              type=str,
-              help='handles to merge to the target',
-              multiple=True)
-@click.option('-v',
-              '--variable',
-              'variables',
-              type=str,
-              help='variables to merge to the target',
-              multiple=True)
 @click.option('--all',
               'merge_all',
               is_flag=True,
               help='Try to merge all known variables.')
-@click.option('-i',
-              '--input',
-              'input_files',
-              type=str,
-              help='Input file, i.e. `data.csv` or `runs.yaml`',
-              multiple=True)
+@datafile_option
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation.

@@ -15,18 +15,14 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def plot(*, var_names, imas_paths, user, db, shot, runs, input_files,
-         extensions, errorbars, **kwargs):
+def plot(*, var_names, imas_paths, input_files, extensions, errorbars,
+         **kwargs):
 
     handle_lst = []
 
     for n, imas_path in enumerate(imas_paths):
         handle = ImasHandle.from_string(imas_path)
         handle_lst.append(handle)
-
-    if db and shot and runs:
-        for run in runs:
-            handle_lst.append(ImasHandle(user=user, db=db, shot=shot, run=run))
 
     handles = {n: handle for n, handle in enumerate(handle_lst)}
 
