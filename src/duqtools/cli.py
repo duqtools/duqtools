@@ -249,9 +249,10 @@ def cli_create(**kwargs):
 def cli_recreate(**kwargs):
     """Read `runs.yaml` and re-create the given runs.
 
-    Example:
     \b
-    - duqtools recreate run_0003 run_0004 --force
+    Example:
+
+    - `duqtools recreate run_0003 run_0004 --force`
     """
     from .create import recreate
     with op_queue_context():
@@ -323,11 +324,12 @@ def cli_plot(**kwargs):
 
     \b
     Examples:
-    - duqtools plot -v t_i_ave -v zeff -i data.csv
-    - duqtools plot -v t_i_ave -v zeff -h user/jet/91234/5
-    - duqtools plot -v zeff -h db/91234/5 -h db/91234/6 -h db/91234/7
-    - duqtools plot -v zeff -h db/91234/5 -i data.csv
-    - duqtools plot -v zeff -h db/91234/5 -o json
+
+    - `duqtools plot -v t_i_ave -v zeff -i data.csv`
+    - `duqtools plot -v t_i_ave -v zeff -h user/jet/91234/5`
+    - `duqtools plot -v zeff -h db/91234/5 -h db/91234/6 -h db/91234/7`
+    - `duqtools plot -v zeff -h db/91234/5 -i data.csv`
+    - `duqtools plot -v zeff -h db/91234/5 -o json`
     """
     from .plot import plot
     plot(**kwargs)
@@ -415,16 +417,26 @@ def cli_merge(**kwargs):
 
     Example Merging two IDSes. Run number `8000` is the template.
     Only The `t_e` variable is merged.
+
     The resulting IDS is saved to your own test database with
-    shot number `36982` and run number `9999`
+    shot number `36982` and run number `9999`.
 
-    > duqtools merge -t g2jcitri/aug/36982/8000 -o test/36982/9999 \
-            -h g2jcitri/aug/36982/8001 -h g2jcitri/aug/36982/8000 -v t_e
+    Example:
 
+    \b
+    ```
+    duqtools merge \\
+        -t g2jcitri/aug/36982/8000 \\
+        -o test/36982/9999 \\
+        -h g2jcitri/aug/36982/8001 \\
+        -h g2jcitri/aug/36982/8000 \\
+        -v t_e
+    ```
+    \f
     Note:
 
-    The -t -T and -h options expect an IMAS path formatted as
-    `user/db/shot/number`
+    The `-t`, `-o` and `-h` options expect an IMAS path formatted as
+    `user/db/shot/number` or `db/shot/number`.
     """
     from .merge import merge
     with op_queue_context():
