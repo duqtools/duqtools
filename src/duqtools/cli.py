@@ -89,7 +89,7 @@ def handles_option(f):
                         '--handle',
                         'handles',
                         type=str,
-                        help='handles to merge to the target',
+                        help='IMAS data handles.',
                         multiple=True)(f)
 
 
