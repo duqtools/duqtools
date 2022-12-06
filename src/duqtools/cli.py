@@ -411,6 +411,9 @@ def cli_dash(**kwargs):
               is_flag=True,
               help='Try to merge all known variables.')
 @datafile_option
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite existing output dataset.')
 @common_options(*all_options)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation.

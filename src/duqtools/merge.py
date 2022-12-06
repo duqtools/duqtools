@@ -15,7 +15,8 @@ info, debug = logger.info, logger.debug
 
 
 def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
-          input_files: List[str], var_names: Optional[List[str]], **kwargs):
+          input_files: List[str], var_names: Optional[List[str]], force: bool,
+          **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.from_string(template)
     target = ImasHandle.from_string(target)
@@ -53,6 +54,13 @@ def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
                                          fg='green',
                                          bold=False),
                  extra_description=f'{template}')
+
+    if target.exists() and not force:
+        op_queue.add_no_op(description='Abort merge',
+                           extra_description=f'{target} already exists, '
+                           'use --force to overwrite')
+        return
+
     template.copy_data_to(target)
 
     merge_data(handles, target, ids_variables)
