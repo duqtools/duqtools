@@ -47,6 +47,9 @@ def _patch_str_repr(obj: object):
 
 class ImasHandle(ImasBaseModel):
 
+    def __str__(self):
+        return f'{self.user}/{self.db}/{self.shot}/{self.run}'
+
     @classmethod
     def from_string(cls, string: str) -> ImasHandle:
         """Return location from formatted string.
