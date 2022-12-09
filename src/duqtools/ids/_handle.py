@@ -19,8 +19,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-PATH_TEMPLATE = ('/afs/eufus.eu/user/g/{user}/public/imasdb/{db}'
-                 '/3/0/ids_{shot}{run:04d}{suffix}')
+PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public', 'imasdb',
+                                                '{db}', '3', '0',
+                                                'ids_{shot}{run:04d}{suffix}'))
+
 SUFFIXES = (
     '.datafile',
     '.characteristics',
