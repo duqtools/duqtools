@@ -32,14 +32,20 @@ jobs:
         python-version: ['3.9']
 
     steps:
-      - name: Python info
+      - name: Python and Environment info
         run: |
           which python
           python --version
+          pwd
+          ls -alh
 
       - name: Create virtual environment
         run: |
           python -m venv .imasenv
+          # Save environment for next steps
+          #. .imasenv/bin/activate
+          #echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+          #echo "PATH=${PATH}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
