@@ -25,6 +25,7 @@ jobs:
       credentials:
         password: ${{ secrets.GITLAB_PSNC_TOKEN }}
         username: ${{ secrets.GITLAB_PSNC_USERNAME }}
+        options: --user root # only way to install tkinter, can be removed if jetto-tools fixed
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +42,10 @@ jobs:
           pwd
           ls -alh
 
+      - name: Install tkinter # remove if jetto-tools fixed
+        run: |
+          yum install -y python39-tkinter
+
       - name: Create virtual environment
         run: |
           python -m venv .imasenv
@@ -50,7 +55,9 @@ jobs:
           echo "PATH=${PATH}" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: python -m pip install -e .[develop,dash]
+        run: |
+          python -m pip install wheel
+          python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
         run: coverage run -p -m pytest

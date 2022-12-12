@@ -24,7 +24,6 @@ jobs:
       matrix:
         os: ['ubuntu-latest']
         python-version: ['3.7', '3.8', '3.9', '3.10']
-        options: --user root # only way to install tkinter, can be removed if jetto-tools fixed
 
     steps:
       - uses: actions/checkout@v3
@@ -46,8 +45,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          yum install python39.tkinter # remove if jetto-tools fixed
-          python -m pip install wheel
           python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
