@@ -48,7 +48,7 @@ jobs:
 
       - name: Create virtual environment
         run: |
-          python -m venv .imasenv
+          python3 -m venv .imasenv
           # Save environment for next steps
           . .imasenv/bin/activate
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
