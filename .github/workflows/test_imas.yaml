@@ -53,6 +53,9 @@ jobs:
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
           echo "PATH=${PATH}" >> $GITHUB_ENV
 
+      - name: Test if imas is really available
+        run: python -m imas
+
       - name: Install dependencies
         run: |
           python -m pip install wheel
