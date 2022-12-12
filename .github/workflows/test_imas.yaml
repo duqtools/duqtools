@@ -36,9 +36,16 @@ jobs:
           which python
           python --version
 
-      - name: Install dependencies
+      - name: Create virtual environment
         run: |
-          python -m pip install -e .[develop,dash]
+          python -m venv .imasenv
+          . .imasenv/bin/activate
+          # Save environment for next steps
+          echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+          echo "PATH=${PATH}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
         run: coverage run -p -m pytest
