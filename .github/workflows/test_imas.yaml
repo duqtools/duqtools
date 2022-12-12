@@ -60,11 +60,11 @@ jobs:
 
       - name: Test if IMAS is really available
         run: |
-          module load IMAS
+          . /docker-entrypoint.sh
           python -m imas
 
 
       - name: Test with pytest
         run: |
-          module load IMAS
+          . /docker-entrypoint.sh
           coverage run -p -m pytest
