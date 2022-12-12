@@ -32,6 +32,8 @@ jobs:
         python-version: ['3.9']
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Python and Environment info
         run: |
           which python
@@ -43,16 +45,12 @@ jobs:
         run: |
           python -m venv .imasenv
           # Save environment for next steps
-          #. .imasenv/bin/activate
-          #echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
-          #echo "PATH=${PATH}" >> $GITHUB_ENV
+          . .imasenv/bin/activate
+          echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+          echo "PATH=${PATH}" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: |
-          . .imasenv/bin/activate
-          python -m pip install -e .[develop,dash]
+        run: python -m pip install -e .[develop,dash]
 
       - name: Test with pytest
-        run: |
-          . .imasenv/bin/activate
-          coverage run -p -m pytest
+        run: coverage run -p -m pytest
