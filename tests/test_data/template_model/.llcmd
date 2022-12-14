@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH -J jetto.template_model
+#SBATCH -J jetto.runaug_ecrh.case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs
 #SBATCH -i /dev/null
 #SBATCH -o ll.out
 #SBATCH -e ll.err
@@ -9,9 +9,8 @@
 
 
 #SBATCH -N 1
-#SBATCH -n 2
-#SBATCH -t 24:0:00
+#SBATCH -n 16
+#SBATCH -t 48:0:00
 
-cd /pfs/work/g2ssmee/jetto/runs/template_model
-/pfs/work/g2ssmee/jetto/runs/template_model/rjettov -S -I -p -xmpi -x64 template_model v210921_gateway_imas g2fkoech
-
+cd /pfs/work/g2jcitri/jetto/runs/runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs
+/pfs/work/g2jcitri/jetto/runs/runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs/rjettov -S -I -p -xmpi -x64 runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs v210921_gateway_v9 g2fkoech
