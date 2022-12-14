@@ -27,7 +27,7 @@ def plot(*, var_names, handles, input_files, extensions, errorbars, **kwargs):
     for input_file in input_files:
         handles.update(read_imas_handles_from_file(input_file))
 
-    if len(handles) == 0:
+    if len(handles) == 0 or len(var_names) == 0:
         raise SystemExit('No data to show.')
 
     for n, variable in enumerate(var_lookup[var_name]
