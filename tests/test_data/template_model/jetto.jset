@@ -8619,7 +8619,7 @@ SetUpPanel.exFileSource                                     : Private
 SetUpPanel.idsIMASDBMachine                                 : aug
 SetUpPanel.idsIMASDBRunid                                   : 167
 SetUpPanel.idsIMASDBShot                                    : 36982
-SetUpPanel.idsIMASDBUser                                    : g2jcitri
+SetUpPanel.idsIMASDBUser                                    : public
 SetUpPanel.idsSliceUpdateDt                                 : 0.1
 SetUpPanel.machine                                          : aug
 SetUpPanel.maxTimeStep                                      : 1.0E-03

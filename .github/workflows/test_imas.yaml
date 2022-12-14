@@ -34,6 +34,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.SSH_KEY_CONTAINERIZED_RUNS_REPO }}
+          repository: duqtools/containerized_runs
+          path: containerized_runs
+
+      - name: Put the IMAS db in the right location
+        run: |
+          mkdir /opt/imas/shared
+          ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/
+
       - name: Python and Environment info
         run: |
           which python
