@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import Field
 
 from ._basemodel import BaseModel
@@ -25,6 +27,10 @@ class DataLocation(BaseModel):
     Note that these sequences may overlap with existing data sets. Duqtools
     will stop if it detects that data will be overwritten.
     """
+
+    user: Optional[str] = Field(
+        description='Username for the IMAS database to use,'
+        ' defaults to current user')
 
     imasdb: str = Field(description='IMAS database or machine name.')
 
