@@ -56,26 +56,35 @@ jobs:
         run: |
           yum install -y python39-tkinter
 
-      - name: Create virtual environment
+      - uses: actions/cache@v3
+        with:
+          path: .imasenv
+          key: ${{ hashFiles('setup.cfg') }}
+
+      - name: Create venv and setup duqtools
         run: |
-          python3 -m venv .imasenv
-          # Save environment for next steps
+          if ! test -d ".imasenv"; then
+            python3 -m venv .imasenv
+            python -m pip install wheel
+            python -m pip install -e .[develop,dash]
+          fi
+
           . .imasenv/bin/activate
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
           echo "PATH=${PATH}" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: |
-          python -m pip install wheel
-          python -m pip install -e .[develop,dash]
 
       - name: Test if IMAS is really available
         run: |
           . /docker-entrypoint.sh
           python -m imas
 
-
       - name: Test with pytest
         run: |
           . /docker-entrypoint.sh
           coverage run -p -m pytest
+
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v3
+        with:
+          name: covdata
+          path: .coverage.*
