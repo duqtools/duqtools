@@ -65,11 +65,13 @@ jobs:
         run: |
           if ! test -d ".imasenv"; then
             python3 -m venv .imasenv
+            . .imasenv/bin/activate
             python -m pip install wheel
             python -m pip install -e .[develop,dash]
+          else
+            . .imasenv/bin/activate
           fi
 
-          . .imasenv/bin/activate
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
           echo "PATH=${PATH}" >> $GITHUB_ENV
 
