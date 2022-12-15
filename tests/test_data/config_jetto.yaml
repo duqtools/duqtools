@@ -1,25 +1,27 @@
 create:
-  jruns: "./"
   dimensions:
-  - variable: major_radius
-    operator: copyto
-    values: [295,297]
-  - variable: t_i_ave
+  - values:
+    - 0.8
+    - 1.0
+    - 1.2
     operator: multiply
-    values: [1.1, 1.2, 1.3]
-  - - variable: t_end
-      operator: copyto
-      values: [0.4, 0.5, 0.6]
-    - variable: t_start
-      operator: copyto
-      values: [0.3, 0.4, 0.5]
+    scale_to_error: false
+    variable: t_e
+  - values:
+    - 0.8
+    - 1.0
+    - 1.2
+    operator: multiply
+    scale_to_error: false
+    variable: zeff
   sampler:
     method: latin-hypercube
     n_samples: 3
   data:
-    imasdb: 'test'
-    run_in_start_at: 7010
-    run_out_start_at: 7010
+    user: public
+    imasdb: aug
+    run_in_start_at: 7000
+    run_out_start_at: 8000
   template: ./template_model
 extra_variables:
   - name: my_extra_var
@@ -29,5 +31,3 @@ extra_variables:
     type: IDS-variable
 submit:
   submit_command: "true"
-workspace:
-  root: .

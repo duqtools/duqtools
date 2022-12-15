@@ -10,7 +10,7 @@
 #.. Input       : <none>
 function cd_rundir {
     RUNDIR=$ROOT/jetto/runs/$RUN
-    
+
     if [ ! -d $RUNDIR ] ; then
         echo "*** error : Run directory - $RUNDIR - does not exist"
         errexit 1
@@ -20,7 +20,7 @@ function cd_rundir {
 
 function cd_e2d_rundir {
     RUNDIR=$ROOT/edge2d/runs/$RUN
-    
+
     if [ ! -d $RUNDIR ] ; then
         echo "*** error : Run directory - $RUNDIR - does not exist"
         errexit 1
@@ -53,10 +53,10 @@ function catalogue_case {
             echo    | tee -a $MSGFILE
             catalog | tee -a $MSGFILE
             echo    | tee -a $MSGFILE
-    
+
             local RESULT=`grep "catalogue entry" $MSGFILE | cut -f2 -d:`
             RESULT=`expr "$RESULT"`
-    
+
             if [ -z "$RESULT" ] ; then
                 RESULT="unable to catalogue"
             else
@@ -87,22 +87,22 @@ function rm_batch_jobs {
     if [ "$HPI2" != "" ] ; then
         $llcancel hpi2.jetto.$RUN
     fi
-    
+
     HELENAINT=`$llq_long | grep $USR | grep helena-interf.jetto.$RUN`
     if [ "$HELENAINT" != "" ] ; then
         $llcancel helena-interf.jetto.$RUN
     fi
-    
+
     HELENA=`$llq_long | grep $USR | grep helena.jetto.$RUN`
     if [ "$HELENA" != "" ] ; then
         $llcancel helena.jetto.$RUN
     fi
-    
+
     MISHKA=`$llq_long | grep $USR | grep mishka_ntor.*.jetto.$RUN`
     if [ "$MISHKA" != "" ] ; then
         $llcancel mishka_ntor*.jetto.$RUN
     fi
-    
+
     MISHKACHKEIG=`$llq_long | grep $USR | grep mishka_eigenf.jetto.$RUN`
     if [ "$MISHKACHKEIG" != "" ] ; then
         $llcancel mishka_eigenf.jetto.$RUN

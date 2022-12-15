@@ -191,6 +191,25 @@ CREATENL_OWNER=""
 CREATENL_CONTROLLER=""
 CREATENL_MODE=0
 
+GENRAY=0
+GENRAY_DEBUG=0
+GENRAY_WORKDIR=ebw
+GENRAY_IN=genray.in
+GENRAY_MGR=genray_manager.py
+GENRAY_MGR_LOGLEVEL=info
+GENRAY_MGR_PERIOD=1
+GENRAY_MGR_TIMEOUT=7200
+GENRAY_JOB_TIMEOUT=5400
+GENRAY_MGR_PID=0
+GENRAY_MGR_KILL_FILE=ebw.manager.kill
+GENRAY_EXE=""
+GENRAY_LAUNCH_ANGLE_DIRECTION=""
+GENRAY_CLEANUP=0
+GENRAY_OPTIMISE=0
+CQL3D=0
+CQL3D_IN=cqlinput
+CQL3D_EXE=""
+
 CATALOG=0
 MAIL=""
 PAUSE=0
@@ -260,8 +279,8 @@ while [ `echo $1 | cut -c1` = "-" ] ; do
         shift 1;;
         -s) SETUP=s
         shift 1;;
-	-m) KEEPMESSAGE=Y
-	shift 1;;
+        -m) KEEPMESSAGE=Y
+        shift 1;;
         -n) NPROCSET=`echo $1|cut -c3-`
         shift 1;;
         -?) echo $MESSAGE
@@ -316,6 +335,18 @@ DRIFTMODEL=`getvalue "TransportStdPanel.anomDriftModel"       $JETTO_JSET`
 if [ -z "$DRIFTMODEL" ] ; then
     DRIFTMODEL=0
 fi
+
+EBW_SELECT=`getvalue "EBWPanel.select"                        $JETTO_JSET`
+EBW_SOURCE=`getvalue "EBWPanel.source"                        $JETTO_JSET`
+if [ "$EBW_SELECT" = "true" ] && [ "$EBW_SOURCE" = "GENRAY/CQL3D" ] ; then
+    GENRAY=1
+
+    CQL3D_SELECT=`getvalue "EBWPanel.CQL3Dselect"             $JETTO_JSET`
+    if [ "$CQL3D_SELECT" = "true" ] ; then
+        CQL3D=1
+    fi
+fi
+
 
 ###########################################################################
 # Set paths, set up for mpi
@@ -379,10 +410,17 @@ fi
 if [ ! -z "$IMASDRIVER" ]
     then
     if [ -z "$APPENDIDS" ] ; then
-        createworkflowcfg -r $IMAS_CONFIG
+        APPENDFLAG=-r
     else
-        createworkflowcfg $IMAS_CONFIG
+        APPENDFLAG=
     fi
+    if [ ! -z "$NPROCSET" ] ; then
+        NPROCFLAG=-n$NPROCSET
+    else
+        NPROCFLAG=
+    fi
+    createworkflowcfg $APPENDFLAG $NPROCFLAG $IMAS_CONFIG
+
     if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
         echo "RJETTOV: Python IMAS driver requested..."
         JINTRAC_PYTHON_DIR=$JINTRAC_DIR/python
@@ -413,10 +451,21 @@ if [ -f $ASCOT_CNTL ] ; then
     ASCOT_NPROC=`  getvalue "Number Of Processors"   $ASCOT_CNTL`
     ASCOT_RIPPLE=` getvalue "Ripple Imin/Imax Ratio" $ASCOT_CNTL`
 
-    ASCOT_EXE=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION/jettodata/rascot$POSTFIX_64.perl
-    ASCOT_BIN=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION/ascot$POSTFIX_64
-    GETNBI_EXE=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION/getnbi$POSTFIX_64
-    GETNTM_EXE=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION/getntm$POSTFIX_64
+    if [ "$ASCOT_VERSION" = "N/A" ] ; then
+        if [ -z "$ASCOT_DIR" ] ; then
+            echo "*** error : ASCOT_DIR is not set"
+            errexit 1
+        else
+            ASCOT_DIRECTORY=$ASCOT_DIR
+        fi
+    else
+        ASCOT_DIRECTORY=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION
+    fi
+
+    ASCOT_EXE=$ASCOT_DIRECTORY/jettodata/rascot$POSTFIX_64.perl
+    ASCOT_BIN=$ASCOT_DIRECTORY/ascot$POSTFIX_64
+    GETNBI_EXE=$ASCOT_DIRECTORY/getnbi$POSTFIX_64
+    GETNTM_EXE=$ASCOT_DIRECTORY/getntm$POSTFIX_64
 
 #...... Set up nbi config data from PPF
     ASCOT_NBISEQ=`  getvalue "NBI sequence number"   $ASCOT_CNTL`
@@ -465,6 +514,78 @@ if [ -f $CREATENL_CNTL ] ; then
 
     CREATENL_MACHINE=`  getvalue "Create Machine" $CREATENL_CNTL`
 
+fi
+
+###########################################################################
+# Set up for GENRAY/CQL3D
+###########################################################################
+if [ $GENRAY -eq 1 ] ; then
+    GENRAY_DIR=$JSRCPATH/genray
+
+    export PATH=$PATH:$GENRAY_DIR/python/bin
+    export PYTHONPATH=$PYTHONPATH:$GENRAY_DIR/python
+
+    if [ ! -f $GENRAY_IN ] ; then
+        echo "*** error : GENRAY input file - $GENRAY_IN - does not exist"
+        errexit 1
+
+        if [ $CQL3D -eq 1 ] && [ ! -f $CQL3D_IN ] ; then
+            echo "*** error : CQL3D input file - $CQL3D_IN - does not exist"
+            errexit 1
+        fi
+    fi
+
+    if [ ! -d $GENRAY_WORKDIR ] ; then
+        mkdir $GENRAY_WORKDIR
+    fi
+    if [ ! -z "$(ls -A $GENRAY_WORKDIR)" ] ; then
+        rm -r $GENRAY_WORKDIR/*
+    fi
+
+    ret=`cp $GENRAY_IN $GENRAY_WORKDIR/$GENRAY_IN`
+    if [ $? -ne 0 ] ; then
+        echo "*** error : Failed to set up GENRAY input file ($ret)"
+        errexit 1
+    fi
+
+    if [ $CQL3D -eq 1 ] ; then
+        ret=`cp $CQL3D_IN $GENRAY_WORKDIR/$CQL3D_IN`
+        if [ $? -ne 0 ] ; then
+            echo "*** error : Failed to set up CQL3D input files ($ret)"
+            errexit 1
+        fi
+    fi
+
+    GENRAY_EXE_NAME=`getvalue "EBWPanel.GENRAYname" $JETTO_JSET`
+    GENRAY_EXE_OWNER=`getvalue "EBWPanel.GENRAYuserid" $JETTO_JSET`
+    GENRAY_EXE=$USERS_HOME/$GENRAY_EXE_OWNER/genray/bin/$GENRAY_EXE_NAME
+    if [ ! -f $GENRAY_EXE ] ; then
+        echo "Cannot find GENRAY executable: $GENRAY_EXE"
+        echo "Aborting rjettov - please check set up."
+        errexit 1
+    fi
+
+    GENRAY_DELETE_ARTEFACTS=`getvalue "EBWPanel.GENRAYDeleteArtefacts" $JETTO_JSET`
+    if [ "$GENRAY_DELETE_ARTEFACTS" = "true" ] ; then
+        GENRAY_CLEANUP=1
+    fi
+
+    GENRAY_OPTIMISE_JSET=`getvalue "EBWPanel.GENRAYOptimiseLaunchAngles" $JETTO_JSET`
+    if [ "$GENRAY_OPTIMISE_JSET" = "true" ] ; then
+        GENRAY_OPTIMISE=1
+        GENRAY_LAUNCH_ANGLE_DIRECTION=`getvalue "EBWPanel.GENRAYLaunchAngleDirection" $JETTO_JSET`
+    fi
+
+    if [ $CQL3D -eq 1 ] ; then
+        CQL3D_EXE_NAME=`getvalue "EBWPanel.CQL3Dname" $JETTO_JSET`
+        CQL3D_EXE_OWNER=`getvalue "EBWPanel.CQL3Duserid" $JETTO_JSET`
+        CQL3D_EXE=$USERS_HOME/$CQL3D_EXE_OWNER/cql3d/bin/$CQL3D_EXE_NAME
+        if [ ! -f $CQL3D_EXE ] ; then
+            echo "Cannot find CQL3D executable: $CQL3D_EXE"
+            echo "Aborting rjettov - please check set up."
+            errexit 1
+        fi
+    fi
 fi
 
 ###########################################################################
@@ -526,7 +647,7 @@ rm -f jetto.catinfo *.qlk
 
 rm -f adf11 adf11_bundled adf21 bmstop bmstop8 ionatom linrad
 rm -f eirenedatadir eirenedatadir_v1.0 eirenedatadir_v2.0 eirenedatadir_iter
-rm -f edge2d QLKNN-data helena_bin mishka_bin
+rm -f edge2d QLKNN-data helena_bin mishka_bin castor_bin
 
 DATADIR=$JINTRAC_DIR/data
 if [ ! -d $DATADIR ] ; then
@@ -585,6 +706,9 @@ echo "helena_bin ->" `readlink -e helena_bin` >> jetto.datadir
 ln -s $JAMS_DIR/depot/mishka/bin/mishka mishka_bin
 echo "mishka_bin ->" `readlink -e mishka_bin` >> jetto.datadir
 
+ln -s $JAMS_DIR/depot/mishka/bin/castor castor_bin
+echo "castor_bin ->" `readlink -e castor_bin` >> jetto.datadir
+
 if [ "$DRIFTMODEL" = "Qualikiz" ];  then
     ln -s $JSRCPATH/tci/transport/QLKNN/data QLKNN-data
     echo "QLKNN-data ->" `readlink -e QLKNN-data` >> jetto.datadir
@@ -627,8 +751,6 @@ ln -s jetto.sin                      fort.80
 ln -s jetto.srestart                 fort.81
 ln -s jetto.srestart                 fort.82
 ln -s jetto.shistory                 fort.84
-ln -s jetto.srestarta                fort.85
-ln -s jetto.srestarta                fort.86
 ln -s jetto.shistory                 fort.87
 ln -s jetto.sout                     fort.88
 ln -s jetto.eqfile                   fort.95
@@ -815,6 +937,49 @@ if [ $CREATENL -eq 1 ] && [ "$CREATENL_FLAG" -eq 1 ] ; then
     submitcreatenl
 fi
 
+###########################################################################
+# Launch GENRAY Manager
+###########################################################################
+
+if [ $GENRAY -eq 1 ] ; then
+    CLEANUP_FLAG=""
+    if [ $GENRAY_CLEANUP -eq 1 ] ; then
+        CLEANUP_FLAG="-d "
+    fi
+
+    OPTIMISE_FLAG=""
+    if [ $GENRAY_OPTIMISE -eq 1 ] ; then
+        OPTIMISE_FLAG="-o $GENRAY_LAUNCH_ANGLE_DIRECTION"
+    fi
+
+    CQL3D_FLAG=""
+    if [ $CQL3D -eq 1 ] ; then
+        CQL3D_FLAG="-c $CQL3D_EXE"
+    fi
+
+    # Run GENRAY manager in the background
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY manager application: $GENRAY_MGR"
+        echo "GENRAY manager log level: $GENRAY_MGR_LOGLEVEL"
+        echo "EBW work directory: $GENRAY_WORKDIR"
+        echo "Cleanup flag: $CLEANUP_FLAG"
+        echo "Optimise flag: $OPTIMISE_FLAG"
+        echo "CQL3D: $CQL3D_FLAG"
+        echo "EBW Run Manager period: $GENRAY_MGR_PERIOD"
+        echo "EBW Run Manager timeout: $GENRAY_MGR_TIMEOUT"
+        echo "EBW job timeout: $GENRAY_JOB_TIMEOUT"
+        echo "GENRAY executable: $GENRAY_EXE"
+    fi
+    $GENRAY_MGR -l $GENRAY_MGR_LOGLEVEL -w $GENRAY_WORKDIR $CLEANUP_FLAG $OPTIMISE_FLAG \
+                $CQL3D_FLAG $GENRAY_MGR_PERIOD $GENRAY_MGR_TIMEOUT $GENRAY_JOB_TIMEOUT $GENRAY_EXE \
+                &
+    GENRAY_MGR_PID=$!
+
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY Manager launched (PID $GENRAY_MGR_PID)"
+    fi
+fi
+
 #############################################################################
 # Create JINTRAC provenance file
 #############################################################################
@@ -851,8 +1016,13 @@ if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
 
     # Call IMAS python driver
     echo "Starting python driver..." >$OUT_FILE
-    ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver $OUT_FILE python.err )
-    RC=$?
+    if [ $MPI -eq 0 ] ; then
+        ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver $OUT_FILE python.err )
+    else
+        # The addition of -n$NPROC forces mpirun to be used to call the python driver
+        ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver -n$NPROC $OUT_FILE python.err )
+    fi
+    RC2D=$?
     ( cd_rundir && rm -rf __pycache__ )
 
 else
@@ -963,6 +1133,19 @@ fi
 
 if [ $CREATENL -eq 1 ] ; then
     cp $CREATENL_KILL_MASTER $CREATENL_KILL
+fi
+
+if [ $GENRAY -eq 1 ] ; then
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "Waiting for GENRAY Manager process (PID $GENRAY_MGR_PID) to finish..."
+    fi
+
+    touch $GENRAY_WORKDIR/$GENRAY_MGR_KILL_FILE
+    wait $GENRAY_MGR_PID
+
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY Manager process completed"
+    fi
 fi
 
 exit $RC

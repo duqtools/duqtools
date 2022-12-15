@@ -6,12 +6,15 @@ logger = logging.getLogger(__name__)
 imas_mocked = False
 
 try:
+    import os
     import xml.sax
     import xml.sax.handler
 
     import imas
     from imas import imasdef
-    PATH_IDSDEF = '/gw/swimas/core/installer/src/3.34.0/ual/4.9.3/xml/IDSDef.xml'
+
+    IMAS_PREFIX = os.getenv('IMAS_PREFIX', '')
+    PATH_IDSDEF = f'{IMAS_PREFIX}/include/IDSDef.xml'
 
     class Parser(xml.sax.handler.ContentHandler):
         import xml.sax

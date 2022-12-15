@@ -226,7 +226,10 @@ def rebase_all_coords(
     Tuple[xr.Dataset, ...]
     """
 
-    interp_dict = {name: dim for name, dim in reference_dataset.coords.items()}
+    interp_dict = {
+        name: dim
+        for name, dim in reference_dataset.coords.items() if dim.size > 1
+    }
 
     return tuple(
         ds.interp(coords=interp_dict, kwargs={'fill_value': 'extrapolate'})
