@@ -84,7 +84,7 @@ jobs:
       - name: Test with pytest
         run: |
           . /docker-entrypoint.sh
-          coverage run -p -m pytest
+          coverage run -m pytest
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
@@ -93,7 +93,7 @@ jobs:
           path: .coverage.*
 
   coverage:
-    name: coverage
+    name: Coverage
     needs: test
     runs-on: ubuntu-latest
     steps:
