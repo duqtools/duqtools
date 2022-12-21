@@ -4,7 +4,7 @@ from pathlib import Path
 conn = sqlite3.connect('.coverage')
 cwd = str(Path.cwd())
 
-print(list(conn.execute('select * from file'))[0])
+# print(list(conn.execute('select * from file'))[0])
 
 for (idx, path) in conn.execute('select * from file'):
     new_path = path.replace('/__w/duqtools/duqtools', cwd)
@@ -15,6 +15,6 @@ for (idx, path) in conn.execute('select * from file'):
 
 conn.commit()
 
-print(list(conn.execute('select * from file'))[0])
+# print(list(conn.execute('select * from file'))[0])
 
 conn.close()
