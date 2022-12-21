@@ -70,6 +70,7 @@ jobs:
             python -m pip install -e .[develop,dash]
           else
             . .imasenv/bin/activate
+            python -m pip install -e .[develop,dash]
           fi
 
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
