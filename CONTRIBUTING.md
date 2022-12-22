@@ -76,7 +76,7 @@ pytest
 To check coverage:
 
 ```console
-coverage -m run pytest
+coverage run -m pytest
 coverage report  # terminal
 coverage html    # html report
 ```
