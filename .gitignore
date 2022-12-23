@@ -105,6 +105,9 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.docker
+.imas_env
+.imas
 env/
 venv/
 ENV/
