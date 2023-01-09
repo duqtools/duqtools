@@ -52,10 +52,6 @@ jobs:
           pwd
           ls -alh
 
-      - name: Install tkinter # remove if jetto-tools fixed
-        run: |
-          yum install -y python39-tkinter
-
       - uses: actions/cache@v3
         with:
           path: .imasenv
