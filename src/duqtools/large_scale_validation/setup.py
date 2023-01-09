@@ -7,14 +7,7 @@ from typing import Sequence
 from ..config import Config
 from ..utils import read_imas_handles_from_file
 
-if sys.version_info < (3, 8):
-
-    def prod(iterable: Sequence, *, start: int = 1) -> int:
-        for val in iterable:
-            start *= val
-        return start
-else:
-    from math import prod
+from math import prod
 
 logger = logging.getLogger(__name__)
 
