@@ -13,10 +13,7 @@ from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .variables import VariableConfigModel
 
-if sys.version_info < (3, 8):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
+from typing import Literal
 
 
 class CreateConfigModel(BaseModel):
