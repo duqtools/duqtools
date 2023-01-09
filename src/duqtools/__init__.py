@@ -1,7 +1,7 @@
 # https://setuptools.pypa.io/en/latest/pkg_resources.html#workingset-objects
 def fix_dependencies():
     import __main__
-    __main__.__requires__ = ['jetto_tools>=1.8.6']
+    __main__.__requires__ = ['jetto_tools>=1.8.8']
     import pkg_resources  # noqa
 
 
