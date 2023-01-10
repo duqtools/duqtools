@@ -63,10 +63,10 @@ jobs:
             python3 -m venv .imasenv
             . .imasenv/bin/activate
             python -m pip install wheel
-            python -m pip install -e .[develop,dash]
+            python -m pip install -e .[develop]
           else
             . .imasenv/bin/activate
-            python -m pip install -e .[develop,dash]
+            python -m pip install -e .[develop]
           fi
 
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
