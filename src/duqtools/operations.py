@@ -159,7 +159,7 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))
+        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))  # type: ignore
         if not cfg.quiet:
             with tqdm(total=len(self), position=1) as pbar:
                 pbar.set_description('Applying operations')
@@ -188,9 +188,9 @@ class Operations(deque):
         # To print the descriptions we need to get them
         duqlog_screen.info('')
         duqlog_screen.info(
-            click.style('Operations in the Queue:', **HEADER_STYLE))
+            click.style('Operations in the Queue:', **HEADER_STYLE))  # type: ignore
         duqlog_screen.info(
-            click.style('========================', **HEADER_STYLE))
+            click.style('========================', **HEADER_STYLE))  # type: ignore
         for op in self:
             if not op.quiet:
                 duqlog_screen.info('- ' + op.long_description)
@@ -280,7 +280,6 @@ def add_to_op_queue(op_desc: str,
     """
 
     def op_queue_real(func):
-
         def wrapper(*args, **kwargs) -> None:
             # For the description format we must convert args to kwargs
             sig = signature(func)

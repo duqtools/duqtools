@@ -5,7 +5,7 @@ import operator
 import os
 import sys
 from collections import UserDict
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import Dict, Hashable, List, Optional, Sequence, Tuple, Union
 
 from ..schema import IDSVariableModel
@@ -71,7 +71,6 @@ class VarLookup(UserDict):
 
 
 class VariableConfigLoader:
-
     def __init__(self):
         self.paths = self.get_config_path()
 
@@ -134,8 +133,8 @@ class VariableConfigLoader:
 
     def _get_paths_fallback(self) -> Tuple[Path, ...]:
         module = files('duqtools.data')
-        assert len(module._paths) == 1
-        drc = module._paths[0]
+        assert module.is_dir()
+        drc : PosixPath = module.joinpath("")  # type: ignore
         return tuple(drc.glob(VAR_FILENAME_GLOB))
 
 
