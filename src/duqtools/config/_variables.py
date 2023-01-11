@@ -134,7 +134,7 @@ class VariableConfigLoader:
     def _get_paths_fallback(self) -> Tuple[Path, ...]:
         module = files('duqtools.data')
         assert module.is_dir()
-        drc : PosixPath = module.joinpath("")  # type: ignore
+        drc: PosixPath = module._paths[0]  # type: ignore
         return tuple(drc.glob(VAR_FILENAME_GLOB))
 
 
