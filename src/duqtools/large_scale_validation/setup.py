@@ -1,13 +1,10 @@
 import logging
-import sys
+from math import prod
 from pathlib import Path
 from string import Template
-from typing import Sequence
 
 from ..config import Config
 from ..utils import read_imas_handles_from_file
-
-from math import prod
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +15,7 @@ DUMMY_VARS = {
     'TEMPLATE_DB': 'db',
     'TEMPLATE_SHOT': 123,
     'TEMPLATE_RUN': 456,
-    'RUNS_DIR': '.',
+    'RUN_NAME': 'run_x',
     'RUN_IN_START': 10,
     'RUN_OUT_START': 20,
 }
@@ -45,8 +42,7 @@ def _get_n_samples(cfg: Config) -> int:
     return n_samples
 
 
-def setup(*, template_file, input_file, runs_dir, **kwargs):
-    runs_dir = Path(runs_dir)
+def setup(*, template_file, input_file, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
@@ -77,7 +73,7 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
             TEMPLATE_DB=handle.db,
             TEMPLATE_SHOT=handle.shot,
             TEMPLATE_RUN=handle.run,
-            RUNS_DIR=runs_dir / name,
+            RUN_NAME=name,
             RUN_IN_START=run_in_start,
             RUN_OUT_START=run_out_start,
         )

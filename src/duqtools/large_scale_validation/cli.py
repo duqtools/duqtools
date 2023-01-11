@@ -50,14 +50,6 @@ def cli(**kwargs):
     help='Template duqtools.yaml',
     default='duqtools.template.yaml',
 )
-@click.option(
-    '-r',
-    '--runs',
-    'runs_dir',
-    type=click.Path(),
-    help='Output directory for created runs',
-    default='duqduq',
-)
 def cli_setup(**kwargs):
     """Set up large scale validation."""
     from .setup import setup
