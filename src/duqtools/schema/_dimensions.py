@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Union
 
 from pydantic import Field, validator
 
@@ -35,7 +35,7 @@ class OperatorMixin(BaseModel):
 
 
 class DimMixin(BaseModel):
-    values: list[float] | ARange | LinSpace = Field(description=f("""
+    values: Union[list[float], ARange, LinSpace] = Field(description=f("""
             Values to use with operator on field to create sampling
             space."""))
 
