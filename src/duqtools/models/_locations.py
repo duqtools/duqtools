@@ -20,6 +20,11 @@ class Locations:
         self.parent_dir = parent_dir
 
     @property
+    def data_csv(self):
+        """Location of data.csv."""
+        return self.parent_dir / 'data.csv'
+
+    @property
     def runs_yaml(self):
         """Location of runs.yaml."""
         return self.parent_dir / 'runs.yaml'

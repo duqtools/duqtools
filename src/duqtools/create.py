@@ -38,7 +38,10 @@ class CreateManager:
         self.system = get_system()
         self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
-        self.runs_yaml = Locations().runs_yaml
+
+        locations = Locations()
+        self.runs_yaml = locations.runs_yaml
+        self.data_csv = locations.data_csv
 
     def _get_source_handle(self) -> ImasHandle:
         if not self.options.template_data:
@@ -139,27 +142,30 @@ class CreateManager:
         with open(self.runs_yaml, 'w') as f:
             runs.yaml(stream=f)
 
-        # Only if it is a different directory
-        if Path.cwd().resolve() != self.runs_dir.resolve():
+        if self._is_runs_dir_different_from_config_dir():
             with open(self.runs_dir / 'runs.yaml', 'w') as f:
                 runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
-    def write_runs_csv(self, runs: Sequence[Run], fname: str = 'data.csv'):
+    def write_runs_csv(self, runs: Sequence[Run]):
+        fname = self.data_csv
         run_map = {run.dirname: run.data_out.dict() for run in runs}
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
 
-        # Only if it is a different directory
-        if Path.cwd().resolve() != self.runs_dir.resolve():
+        if self._is_runs_dir_different_from_config_dir():
             df.to_csv(self.runs_dir / fname)
 
     @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
     def copy_config(self, config):
-        # Only if it is a different directory
-        if Path.cwd().resolve() != self.runs_dir.resolve():
+        if self._is_runs_dir_different_from_config_dir():
             shutil.copyfile(Path.cwd() / config,
                             self.runs_dir / 'duqtools.yaml')
+
+    def _is_runs_dir_different_from_config_dir(self) -> bool:
+        """Return True if the runs dir is different from the duqtools config
+        dir."""
+        return Path.cwd().resolve() != self.runs_dir.resolve()
 
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
