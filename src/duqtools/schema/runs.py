@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Union
 
 from pydantic import Field, root_validator
 
@@ -14,8 +15,8 @@ class Run(BaseModel):
     shortname: Path = Field(description='Short name (`dirname.name`)')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
-    operations: list[(IDSOperation | JettoOperation
-                      | list[IDSOperation | JettoOperation])]
+    operations: list[Union[IDSOperation, JettoOperation,
+                           list[Union[IDSOperation, JettoOperation]]]]
 
     @root_validator()
     def shortname_compat(cls, root):

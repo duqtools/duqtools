@@ -5,7 +5,7 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Sequence
+from typing import Callable, Optional, Sequence
 
 import click
 from pydantic import Field, validator
@@ -40,17 +40,18 @@ class Operation(BaseModel):
                         description='print out this operation to the screen')
     description: str = Field(
         description='description of the operation to be done')
-    action: Callable | None = Field(
+    action: Optional[Callable] = Field(
         description='a function which can be executed when we '
         'decide to apply this operation')
-    extra_description: str | None = Field(description='Extra description')
-    args: Sequence | None = Field(
+    extra_description: Optional[str] = Field(description='Extra description')
+    args: Optional[Sequence] = Field(
         None,
         description='positional arguments that have to be '
         'passed to the action')
-    kwargs: dict | None = Field(None,
-                                description='keyword arguments that will be '
-                                'passed to the action')
+    kwargs: Optional[dict] = Field(
+        None,
+        description='keyword arguments that will be '
+        'passed to the action')
 
     def __call__(self) -> Operation:
         """Execute the action with the args and kwargs.

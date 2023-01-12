@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Union
 
 import numpy as np
 
@@ -14,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 @apply_model.register  # type: ignore
-def _apply_ids(model: IDSOperation, *, ids_mapping: ImasHandle | IDSMapping,
-               **kwargs) -> None:
-    """_. Implementation for IDS operations.
+def _apply_ids(model: IDSOperation, *,
+               ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
+    """Implementation for IDS operations.
 
     Parameters
     ----------
