@@ -1,7 +1,6 @@
 import itertools
 from typing import Optional
 
-import numpy as np
 from scipy.stats import qmc
 
 
@@ -28,9 +27,7 @@ def _sampler(func, *iterables, n_samples: int, **kwargs):
     bounds = tuple(len(iterable) for iterable in iterables)
 
     sampler = func(d=len(iterables), **kwargs)
-    unit_samples = sampler.random(n_samples)
-
-    indices = np.floor(unit_samples * np.array(bounds)).astype(int)
+    indices = sampler.integers(l_bounds=bounds, n=n_samples)
 
     samples = []
     for row in indices:
