@@ -115,7 +115,7 @@ def test_example_plot(cmdline_workdir):
     if imas_mocked:
         pytest.xfail('Imas needed for plotting Imas data')
 
-    cmd = ('duqtools plot -h public/aug/36982/167 -v t_i_ave').split()
+    cmd = ('duqtools plot -h g2aho/aug/36982/2 -v t_i_ave').split()
 
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
