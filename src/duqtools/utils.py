@@ -5,9 +5,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from itertools import filterfalse, tee
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Callable, Dict,
-                    List, Tuple)
-from collections.abc import Hashable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -52,7 +50,7 @@ def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
 
     Returns
     -------
-    Union[Dict[str, ImasHandle], 'pd.DataFrame']
+    Union[dict[str, ImasHandle], 'pd.DataFrame']
         Returns a dict with the Imas handles.
 
     Raises
@@ -134,7 +132,7 @@ def partition(pred: Callable, iterable: Iterable) -> tuple[Iterable, Iterable]:
 
     Returns
     -------
-    Tuple[Iterable, Iterable]
+    tuple[Iterable, Iterable]
         Two sequences with false and true entries, respectively.
     """
     t1, t2 = tee(iterable)

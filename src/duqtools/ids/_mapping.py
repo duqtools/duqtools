@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple, Union
-from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
@@ -202,7 +201,7 @@ class IDSMapping(Mapping):
         ----------
         val :
             Current nested object being evaluated
-        path : List
+        path : list
             Current path
         """
 
@@ -316,7 +315,7 @@ class IDSMapping(Mapping):
 
         Parameters
         ----------
-        variables : Sequence[Union[str, IDSVariableModel]]
+        variables : Sequence[str | IDSVariableModel]]
             Dictionary of data variables
         empty_var_ok : bool
             If True, silently skip data that are missing from the mapping.

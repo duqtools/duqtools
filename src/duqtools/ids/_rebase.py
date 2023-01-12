@@ -1,6 +1,5 @@
 import logging
-from typing import Optional, Tuple, Union
-from collections.abc import Sequence
+from typing import Optional, Sequence, Union
 
 import numpy as np
 import xarray as xr
@@ -191,7 +190,7 @@ def standardize_grid_and_time(
 
     Returns
     -------
-    Tuple[xr.Dataset]
+    tuple[xr.Dataset]
         Tuple of output datasets
     """
     reference_grid = datasets[reference_dataset][grid_var].data
@@ -224,7 +223,7 @@ def rebase_all_coords(
 
     Returns
     -------
-    Tuple[xr.Dataset, ...]
+    tuple[xr.Dataset, ...]
     """
 
     interp_dict = {

@@ -6,8 +6,7 @@ import os
 import sys
 from collections import UserDict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
-from collections.abc import Hashable, Sequence
+from typing import Hashable, Sequence
 
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
@@ -107,8 +106,7 @@ class VariableConfigLoader:
 
         return self._get_paths_fallback()
 
-    def _get_paths_from_environment_variable(
-            self) -> tuple[Path, ...] | None:
+    def _get_paths_from_environment_variable(self) -> tuple[Path, ...] | None:
         env = os.environ.get(VAR_ENV)
         if env:
             path = Path(env)
@@ -141,8 +139,8 @@ class VariableConfigLoader:
 
 
 def lookup_vars(
-    variables: Sequence[(str |
-                              IDSVariableModel)]) -> list[IDSVariableModel]:
+        variables: Sequence[(str | IDSVariableModel)]
+) -> list[IDSVariableModel]:
     """Helper function to look up a bunch of variables.
 
     If str, look up the variable from the `var_lookup`. Else, check if

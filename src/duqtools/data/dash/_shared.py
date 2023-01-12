@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from collections.abc import Sequence
+from typing import Sequence
 
 import streamlit as st
 import xarray as xr

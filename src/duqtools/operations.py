@@ -5,8 +5,7 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Optional
-from collections.abc import Sequence
+from typing import Callable, Optional, Sequence
 
 import click
 from pydantic import Field, validator
@@ -49,10 +48,9 @@ class Operation(BaseModel):
         None,
         description='positional arguments that have to be '
         'passed to the action')
-    kwargs: dict | None = Field(
-        None,
-        description='keyword arguments that will be '
-        'passed to the action')
+    kwargs: dict | None = Field(None,
+                                description='keyword arguments that will be '
+                                'passed to the action')
 
     def __call__(self) -> Operation:
         """Execute the action with the args and kwargs.
@@ -259,9 +257,7 @@ def confirm_operations(func):
     return wrapper
 
 
-def add_to_op_queue(op_desc: str,
-                    extra_desc: str | None = None,
-                    quiet=False):
+def add_to_op_queue(op_desc: str, extra_desc: str | None = None, quiet=False):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
     function arguments.

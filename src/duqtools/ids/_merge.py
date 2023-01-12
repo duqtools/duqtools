@@ -1,5 +1,4 @@
-from typing import List
-from collections.abc import Sequence
+from typing import Sequence
 
 import xarray as xr
 

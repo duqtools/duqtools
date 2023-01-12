@@ -1,7 +1,7 @@
 import logging
 import subprocess as sp
 from time import sleep
-from collections.abc import Sequence
+from typing import Sequence
 
 from jetto_tools import config, template
 

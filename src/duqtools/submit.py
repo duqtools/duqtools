@@ -3,8 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, List
-from collections.abc import Sequence
+from typing import Deque, List, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
