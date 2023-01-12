@@ -50,7 +50,7 @@ class IDSVariableModel(BaseModel):
         Path to the data within the IDS.
         The fields are separated by forward slashes (`\\`).
     """))
-    dims: List[str] = Field(description=f("""
+    dims: list[str] = Field(description=f("""
         Give the dimensions of the data,
         i.e. [x] for 1D, or [x, y] for 2D data.
     """))

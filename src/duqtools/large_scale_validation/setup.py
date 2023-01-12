@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 from string import Template
-from typing import Sequence
+from collections.abc import Sequence
 
 from ..config import Config
 from ..utils import read_imas_handles_from_file
@@ -50,7 +50,7 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
-        raise IOError('Input file not defined.')
+        raise OSError('Input file not defined.')
 
     handles = read_imas_handles_from_file(input_file)
 

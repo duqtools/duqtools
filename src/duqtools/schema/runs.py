@@ -15,8 +15,8 @@ class Run(BaseModel):
     shortname: Path = Field(description='Short name (`dirname.name`)')
     data_in: ImasBaseModel
     data_out: ImasBaseModel
-    operations: List[Union[IDSOperation, JettoOperation,
-                           List[Union[IDSOperation, JettoOperation]]]]
+    operations: list[(IDSOperation | JettoOperation |
+                           list[IDSOperation | JettoOperation])]
 
     @root_validator()
     def shortname_compat(cls, root):
@@ -27,7 +27,7 @@ class Run(BaseModel):
 
 
 class Runs(BaseModel):
-    __root__: List[Run] = []
+    __root__: list[Run] = []
 
     def __iter__(self):
         yield from self.__root__

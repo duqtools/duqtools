@@ -1,4 +1,5 @@
-from typing import List, Sequence
+from typing import List
+from collections.abc import Sequence
 
 import xarray as xr
 
@@ -14,7 +15,7 @@ from ._rebase import rebase_all_coords, squash_placeholders
 def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
-    variables: List[IDSVariableModel],
+    variables: list[IDSVariableModel],
     callback=None,
 ):
     """merge_data merges the data from the handles to the target, only merges

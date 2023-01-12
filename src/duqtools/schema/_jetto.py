@@ -8,15 +8,9 @@ from pydantic import Field, validator
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 
-if sys.version_info < (3, 8):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
+from typing import Literal
 
-if sys.version_info < (3, 9):
-    from typing_extensions import Annotated
-else:
-    from typing import Annotated
+from typing import Annotated
 
 
 class JsetField(BaseModel):
@@ -46,7 +40,7 @@ class JettoVar(BaseModel):
     name: str = Field(description='Name of the variable.')
     type: Literal['str', 'int', 'float'] = Field(
         description=f('Type of the variable (str, int, float)'))
-    keys: List[JettoField] = Field(description=f(
+    keys: list[JettoField] = Field(description=f(
         'Jetto keys to update when this jetto variable is requested'))
 
     def get_type(self):

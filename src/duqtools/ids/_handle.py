@@ -4,7 +4,8 @@ import logging
 import re
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence, Union
+from typing import TYPE_CHECKING, Union
+from collections.abc import Sequence
 
 from ..config import lookup_vars
 from ..operations import add_to_op_queue
@@ -172,7 +173,7 @@ class ImasHandle(ImasBaseModel):
 
     def get_variables(
         self,
-        variables: Sequence[Union[str, IDSVariableModel]],
+        variables: Sequence[str | IDSVariableModel],
         squash: bool = True,
         **kwargs,
     ) -> xr.Dataset:
@@ -202,7 +203,7 @@ class ImasHandle(ImasBaseModel):
         """
         var_models = lookup_vars(variables)
 
-        idss = set(var.ids for var in var_models)
+        idss = {var.ids for var in var_models}
 
         if len(idss) > 1:
             raise ValueError(

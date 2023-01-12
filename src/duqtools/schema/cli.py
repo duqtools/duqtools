@@ -19,7 +19,7 @@ from typing import Literal
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[Union[CoupledDim, OperationDim]] = Field(description=f("""
+    dimensions: list[Union[CoupledDim, OperationDim]] = Field(description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @apply_model.register  # type: ignore
 def _apply_ids(model: IDSOperation, *,
-               ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
+               ids_mapping: ImasHandle | IDSMapping, **kwargs) -> None:
     """_. Implementation for IDS operations.
 
     Parameters

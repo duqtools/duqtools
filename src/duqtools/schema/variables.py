@@ -5,7 +5,7 @@ from ._variable import IDSVariableModel, JettoVariableModel
 
 
 class VariableConfigModel(BaseModel):
-    __root__: List[Union[JettoVariableModel, IDSVariableModel]]
+    __root__: list[Union[JettoVariableModel, IDSVariableModel]]
 
     def __iter__(self):
         yield from self.__root__

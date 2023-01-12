@@ -5,7 +5,8 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional
+from collections.abc import Sequence
 
 import click
 from pydantic import Field, validator
@@ -40,15 +41,15 @@ class Operation(BaseModel):
                         description='print out this operation to the screen')
     description: str = Field(
         description='description of the operation to be done')
-    action: Optional[Callable] = Field(
+    action: Callable | None = Field(
         description='a function which can be executed when we '
         'decide to apply this operation')
-    extra_description: Optional[str] = Field(description='Extra description')
-    args: Optional[Sequence] = Field(
+    extra_description: str | None = Field(description='Extra description')
+    args: Sequence | None = Field(
         None,
         description='positional arguments that have to be '
         'passed to the action')
-    kwargs: Optional[dict] = Field(
+    kwargs: dict | None = Field(
         None,
         description='keyword arguments that will be '
         'passed to the action')
@@ -126,7 +127,7 @@ class Operations(deque):
 
     def add_no_op(self,
                   description: str,
-                  extra_description: Optional[str] = None):
+                  extra_description: str | None = None):
         """Adds a line to specify an action will not be undertaken."""
         self.add(action=None,
                  description=description,
@@ -259,7 +260,7 @@ def confirm_operations(func):
 
 
 def add_to_op_queue(op_desc: str,
-                    extra_desc: Optional[str] = None,
+                    extra_desc: str | None = None,
                     quiet=False):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the

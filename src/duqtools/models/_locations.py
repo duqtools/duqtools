@@ -30,7 +30,7 @@ class Locations:
         return self.parent_dir / 'runs.yaml.old'
 
     @property
-    def runs(self) -> List[Run]:
+    def runs(self) -> list[Run]:
         """Get a list of the runs currently created from this config."""
         runs_yaml = self.runs_yaml
 
