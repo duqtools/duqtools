@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import sys
-from typing import List, Tuple, Union
+from typing import Literal
 
 from pydantic import Field, validator
 
@@ -9,8 +8,6 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel, JettoVariableModel
-
-from typing import Literal
 
 
 class OperatorMixin(BaseModel):

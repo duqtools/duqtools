@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from ..config import cfg
 from ..models import Job, Locations

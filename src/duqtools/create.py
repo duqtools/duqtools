@@ -1,7 +1,7 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, Sequence
 
 import pandas as pd
 

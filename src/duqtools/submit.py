@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, List, Sequence
+from typing import Deque, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -134,7 +134,7 @@ def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> list[Job]:
 
     Returns
     -------
-    List[Job]
+    list[Job]
     """
     jobs: list[Job] = []
     run_dict = {run.shortname: run for run in Locations().runs}

@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-import sys
-from typing import List, Union
+from typing import Annotated, Literal, Union
 
 from pydantic import Field, validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-
-from typing import Literal
-
-from typing import Annotated
 
 
 class JsetField(BaseModel):

@@ -1,6 +1,5 @@
-import sys
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Literal, Optional, Union
 
 from pydantic import DirectoryPath, Field, validator
 
@@ -12,8 +11,6 @@ from .data_location import DataLocation
 from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .variables import VariableConfigModel
-
-from typing import Literal
 
 
 class CreateConfigModel(BaseModel):

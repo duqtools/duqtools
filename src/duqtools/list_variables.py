@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import click
 from pydantic import ValidationError
 

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 from ._basemodel import BaseModel
 from ._variable import IDSVariableModel, JettoVariableModel

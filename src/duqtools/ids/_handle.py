@@ -4,7 +4,7 @@ import logging
 import re
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence, Union
+from typing import TYPE_CHECKING, Sequence
 
 from ..config import lookup_vars
 from ..operations import add_to_op_queue

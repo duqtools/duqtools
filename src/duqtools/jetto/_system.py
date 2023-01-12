@@ -3,9 +3,9 @@ import shutil
 import stat
 import subprocess as sp
 import sys
-from pathlib import Path
-from typing import Any, List, Optional
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Any, Optional
 
 from jetto_tools import config
 from jetto_tools import job as jetto_job

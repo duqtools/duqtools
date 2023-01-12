@@ -5,7 +5,7 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Optional, Sequence
+from typing import Callable, Sequence
 
 import click
 from pydantic import Field, validator
