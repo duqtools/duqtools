@@ -197,7 +197,7 @@ def common_options(*options):
     return decorator
 
 
-def cli_entry():
+def cli_entry(**kwargs):
     from duqtools import fix_dependencies
     fix_dependencies()
     cli()
@@ -456,6 +456,26 @@ def cli_list_variables(**kwargs):
     """
     from .list_variables import list_variables
     list_variables(**kwargs)
+
+
+@cli.command('version')
+def cli_version(**kwargs):
+    """Print the version and exit."""
+    import git
+
+    from duqtools import __version__
+
+    string = f'duqtools {__version__}'
+
+    try:
+        repo = git.Repo(Path(__file__), search_parent_directories=True)
+        sha = repo.head.object.hexsha
+    except OSError:
+        pass
+    else:
+        string += f' (rev: {sha})'
+
+    click.echo(string)
 
 
 if __name__ == '__main__':
