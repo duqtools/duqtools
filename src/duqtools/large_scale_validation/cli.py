@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from ..cli import common_options, debug_option, logfile_option
+from ..cli import common_options, logging_options
 from ..operations import op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -50,17 +50,22 @@ def cli(**kwargs):
     help='Template duqtools.yaml',
     default='duqtools.template.yaml',
 )
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite existing run config directories')
+@common_options(*logging_options)
 def cli_setup(**kwargs):
     """Set up large scale validation."""
     from .setup import setup
-    setup(**kwargs)
+    with op_queue_context():
+        setup(**kwargs)
 
 
 @cli.command('create')
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
-@common_options(logfile_option, debug_option)
+@common_options(*logging_options)
 def cli_create(**kwargs):
     """Create data sets for large scale validation."""
     from .create import create
@@ -80,7 +85,7 @@ def cli_create(**kwargs):
               '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
-@common_options(logfile_option, debug_option)
+@common_options(*logging_options)
 def cli_submit(**kwargs):
     """Submit large scale validation runs."""
     from .submit import submit
@@ -91,7 +96,7 @@ def cli_submit(**kwargs):
 @cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
-@common_options(logfile_option, debug_option)
+@common_options(*logging_options)
 def cli_status(**kwargs):
     """Check status large scale validation runs."""
     from .status import status
