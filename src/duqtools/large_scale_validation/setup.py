@@ -1,13 +1,10 @@
 import logging
-import sys
+from math import prod
 from pathlib import Path
 from string import Template
-from collections.abc import Sequence
 
 from ..config import Config
 from ..utils import read_imas_handles_from_file
-
-from math import prod
 
 logger = logging.getLogger(__name__)
 
