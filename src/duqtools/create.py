@@ -1,7 +1,7 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, Sequence
 
 import pandas as pd
 
@@ -50,7 +50,7 @@ class CreateManager:
 
         return source
 
-    def generate_ops_list(self) -> List[Any]:
+    def generate_ops_list(self) -> list[Any]:
         """Generate set of operations for a run."""
         dimensions = self.options.dimensions
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
@@ -59,7 +59,7 @@ class CreateManager:
 
         return ops_list
 
-    def make_run_models(self, ops_list: Sequence[Any]) -> List[Run]:
+    def make_run_models(self, ops_list: Sequence[Any]) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
 
@@ -129,7 +129,7 @@ class CreateManager:
 
     @add_to_op_queue('Setting inital condition of', '{data_in}', quiet=True)
     def apply_operations(self, data_in: ImasHandle, run_dir: Path,
-                         operations: List[Any]):
+                         operations: list[Any]):
         for model in operations:
             apply_model(model, run_dir=run_dir, ids_mapping=data_in)
 

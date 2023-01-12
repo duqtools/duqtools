@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 import xarray as xr
@@ -167,7 +167,7 @@ def standardize_grid_and_time(
     grid_var: str = 'rho_tor_norm',
     time_var: str = 'time',
     reference_dataset: int = 0,
-) -> Tuple[xr.Dataset, ...]:
+) -> tuple[xr.Dataset, ...]:
     """Standardize list of datasets by applying standard rebase operations.
 
     Applies, in sequence:
@@ -190,7 +190,7 @@ def standardize_grid_and_time(
 
     Returns
     -------
-    Tuple[xr.Dataset]
+    tuple[xr.Dataset]
         Tuple of output datasets
     """
     reference_grid = datasets[reference_dataset][grid_var].data
@@ -211,7 +211,7 @@ def standardize_grid_and_time(
 def rebase_all_coords(
     datasets: Sequence[xr.Dataset],
     reference_dataset: xr.Dataset,
-) -> Tuple[xr.Dataset, ...]:
+) -> tuple[xr.Dataset, ...]:
     """Rebase all coords, by applying rebase operations.
 
     Parameters
@@ -223,7 +223,7 @@ def rebase_all_coords(
 
     Returns
     -------
-    Tuple[xr.Dataset, ...]
+    tuple[xr.Dataset, ...]
     """
 
     interp_dict = {

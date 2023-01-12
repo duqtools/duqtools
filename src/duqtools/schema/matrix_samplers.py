@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import sys
+from typing import Literal
 
 from pydantic import Field
 
 from ._basemodel import BaseModel
-
-from typing import Literal
 
 
 class LHSSampler(BaseModel):

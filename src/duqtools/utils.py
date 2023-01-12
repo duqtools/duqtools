@@ -5,8 +5,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from itertools import filterfalse, tee
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Hashable, Iterable,
-                    List, Tuple)
+from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
 from ._types import PathLike
 from .schema.runs import Runs
@@ -32,7 +31,7 @@ def work_directory(path: PathLike):
         os.chdir(prev_cwd)
 
 
-def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
+def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
     """Read a collection of imas paths from a file.
 
     Input can be a `Runs.yaml` file `data.csv` file.
@@ -51,7 +50,7 @@ def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
 
     Returns
     -------
-    Union[Dict[str, ImasHandle], 'pd.DataFrame']
+    Union[dict[str, ImasHandle], 'pd.DataFrame']
         Returns a dict with the Imas handles.
 
     Raises
@@ -90,7 +89,7 @@ def read_imas_handles_from_file(inp: PathLike, ) -> Dict[str, ImasHandle]:
 
 
 def groupby(iterable: Iterable,
-            keyfunc: Callable) -> Dict[Hashable, List[Any]]:
+            keyfunc: Callable) -> dict[Hashable, list[Any]]:
     """Group iterable by key function. The items are grouped by the value that
     is returned by the `keyfunc`
 
@@ -115,7 +114,7 @@ def groupby(iterable: Iterable,
     return grouped
 
 
-def partition(pred: Callable, iterable: Iterable) -> Tuple[Iterable, Iterable]:
+def partition(pred: Callable, iterable: Iterable) -> tuple[Iterable, Iterable]:
     """Use a predicate to partition entries into false entries and true
     entries.
 
@@ -133,7 +132,7 @@ def partition(pred: Callable, iterable: Iterable) -> Tuple[Iterable, Iterable]:
 
     Returns
     -------
-    Tuple[Iterable, Iterable]
+    tuple[Iterable, Iterable]
         Two sequences with false and true entries, respectively.
     """
     t1, t2 = tee(iterable)

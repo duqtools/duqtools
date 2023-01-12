@@ -1,6 +1,6 @@
 from os import getenv
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ..config import cfg
 from ..schema.runs import Run, Runs
@@ -30,7 +30,7 @@ class Locations:
         return self.parent_dir / 'runs.yaml.old'
 
     @property
-    def runs(self) -> List[Run]:
+    def runs(self) -> list[Run]:
         """Get a list of the runs currently created from this config."""
         runs_yaml = self.runs_yaml
 

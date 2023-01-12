@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import sys
-from typing import List, Tuple, Union
+from typing import Literal, Union
 
 from pydantic import Field, validator
 
@@ -9,8 +8,6 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel, JettoVariableModel
-
-from typing import Literal
 
 
 class OperatorMixin(BaseModel):
@@ -38,7 +35,7 @@ class OperatorMixin(BaseModel):
 
 
 class DimMixin(BaseModel):
-    values: Union[List[float], ARange, LinSpace] = Field(description=f("""
+    values: Union[list[float], ARange, LinSpace] = Field(description=f("""
             Values to use with operator on field to create sampling
             space."""))
 
@@ -74,7 +71,7 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
 
 
 class CoupledDim(BaseModel):
-    __root__: List[OperationDim]
+    __root__: list[OperationDim]
 
     @validator('__root__')
     def check_dimensions_match(cls, dims):
@@ -115,7 +112,7 @@ class IDSOperationDim(IDSPathMixin, OperatorMixin, DimMixin, BaseModel):
     the given values.
     """
 
-    def expand(self, *args, variable, **kwargs) -> Tuple[IDSOperation, ...]:
+    def expand(self, *args, variable, **kwargs) -> tuple[IDSOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
             IDSOperation(variable=variable,
@@ -137,7 +134,7 @@ class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
 
 class JettoOperationDim(JettoPathMixin, OperatorMixin, DimMixin, BaseModel):
 
-    def expand(self, *args, variable, **kwargs) -> Tuple[JettoOperation, ...]:
+    def expand(self, *args, variable, **kwargs) -> tuple[JettoOperation, ...]:
         """Expand list of values into operations with its components."""
         return tuple(
             JettoOperation(variable=variable,
