@@ -5,7 +5,7 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from inspect import signature
-from typing import Callable, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
 import click
 from pydantic import Field, validator
@@ -48,6 +48,8 @@ class Operation(BaseModel):
         None,
         description='positional arguments that have to be '
         'passed to the action')
+    style: dict[str, Any] = Field(OP_STYLE,
+                                  description='Styling for op description')
     kwargs: Optional[dict] = Field(
         None,
         description='keyword arguments that will be '
@@ -68,9 +70,7 @@ class Operation(BaseModel):
 
     @property
     def long_description(self):
-        style = NO_OP_STYLE if self.action is None else OP_STYLE
-
-        description = click.style(self.description, **style)
+        description = click.style(self.description, **self.style)
 
         if self.extra_description is not None:
             description = f'{description} : {self.extra_description}'
@@ -130,7 +130,15 @@ class Operations(deque):
         """Adds a line to specify an action will not be undertaken."""
         self.add(action=None,
                  description=description,
-                 extra_description=extra_description)
+                 extra_description=extra_description,
+                 style=NO_OP_STYLE)
+
+    def info(self, description: str, extra_description: Optional[str] = None):
+        """Adds an info line."""
+        self.add(action=None,
+                 description=description,
+                 extra_description=extra_description,
+                 style=OP_STYLE)
 
     def put(self, item: Operation):
         """synonym for append."""
