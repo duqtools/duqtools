@@ -1,5 +1,6 @@
 import logging
 import shutil
+import warnings
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -136,13 +137,16 @@ class CreateManager:
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
         runs = Runs.parse_obj(runs)
-        with open(self.runs_yaml, 'w') as f:
-            runs.yaml(stream=f)
 
-        # Only if it is a different directory
-        if Path.cwd().resolve() != self.runs_dir.resolve():
-            with open(self.runs_dir / 'runs.yaml', 'w') as f:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            with open(self.runs_yaml, 'w') as f:
                 runs.yaml(stream=f)
+
+            # Only if it is a different directory
+            if Path.cwd().resolve() != self.runs_dir.resolve():
+                with open(self.runs_dir / 'runs.yaml', 'w') as f:
+                    runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
     def write_runs_csv(self, runs: Sequence[Run], fname: str = 'data.csv'):

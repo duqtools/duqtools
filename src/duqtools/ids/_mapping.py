@@ -39,7 +39,7 @@ def replace_index_str(string: str) -> str:
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids: ImasHandle):
+    def __init__(self, ids):
         """Map the IMASDB object.
 
         Empty arrays are excluded from the mapping.
@@ -83,7 +83,7 @@ class IDSMapping(Mapping):
             except ValueError:
                 pointer = getattr(pointer, part)
             else:
-                pointer = pointer[i]
+                pointer = pointer[i]  # type: ignore
 
         return pointer, attr
 
