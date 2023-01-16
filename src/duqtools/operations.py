@@ -126,7 +126,7 @@ class Operations(deque):
 
     def add_no_op(self,
                   description: str,
-                  extra_description: Optional[str] = None):
+                  extra_description: str | None = None):
         """Adds a line to specify an action will not be undertaken."""
         self.add(action=None,
                  description=description,
@@ -258,9 +258,7 @@ def confirm_operations(func):
     return wrapper
 
 
-def add_to_op_queue(op_desc: str,
-                    extra_desc: Optional[str] = None,
-                    quiet=False):
+def add_to_op_queue(op_desc: str, extra_desc: str | None = None, quiet=False):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
     function arguments.

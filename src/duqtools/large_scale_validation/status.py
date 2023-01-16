@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from ..config import cfg
 from ..models import Job, Locations
@@ -21,7 +20,7 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
     config_files = cwd.glob('**/duqtools.yaml')
 
-    jobs: List[Job] = []
+    jobs: list[Job] = []
 
     for config_file in config_files:
         cfg.parse_file(config_file)

@@ -6,7 +6,7 @@ import os
 import sys
 from collections import UserDict
 from pathlib import Path, PosixPath
-from typing import Dict, Hashable, List, Optional, Sequence, Tuple, Union
+from typing import Hashable, Sequence
 
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
@@ -39,7 +39,7 @@ class VarLookup(UserDict):
     def __getitem__(self, key: str) -> IDSVariableModel:
         return self.data[self.normalize(key)]
 
-    def normalize(self, *keys: str) -> Union[str, Tuple[str, ...]]:
+    def normalize(self, *keys: str) -> str | tuple[str, ...]:
         """Normalize variable names (remove `$`)."""
         keys = tuple(key.lstrip(self._prefix) for key in keys)
         if len(keys) == 1:
@@ -51,7 +51,7 @@ class VarLookup(UserDict):
         cmp = operator.ne if invert else operator.eq
         return VarLookup({k: v for k, v in self.items() if cmp(v.type, type)})
 
-    def groupby_type(self) -> Dict[Hashable, List[IDSVariableModel]]:
+    def groupby_type(self) -> dict[Hashable, list[IDSVariableModel]]:
         """Group entries by type."""
         grouped_ids_vars = groupby(self.values(), keyfunc=lambda var: var.type)
         return grouped_ids_vars
@@ -62,7 +62,7 @@ class VarLookup(UserDict):
 
         return VarLookup({k: v for k, v in ids_vars.items() if v.ids == ids})
 
-    def groupby_ids(self) -> Dict[Hashable, List[IDSVariableModel]]:
+    def groupby_ids(self) -> dict[Hashable, list[IDSVariableModel]]:
         """Group entries by IDS."""
         ids_vars = self.filter_type(self._ids_variable_key).values()
 
@@ -86,7 +86,7 @@ class VariableConfigLoader:
 
         return var_lookup
 
-    def get_config_path(self) -> Tuple[Path, ...]:
+    def get_config_path(self) -> tuple[Path, ...]:
         """Try to get the config file with variable definitions.
 
         Search order:
@@ -105,8 +105,7 @@ class VariableConfigLoader:
 
         return self._get_paths_fallback()
 
-    def _get_paths_from_environment_variable(
-            self) -> Optional[Tuple[Path, ...]]:
+    def _get_paths_from_environment_variable(self) -> tuple[Path, ...] | None:
         env = os.environ.get(VAR_ENV)
         if env:
             path = Path(env)
@@ -119,10 +118,10 @@ class VariableConfigLoader:
 
         return None
 
-    def _get_paths_local_directory(self) -> Optional[Tuple[Path, ...]]:
+    def _get_paths_local_directory(self) -> tuple[Path, ...] | None:
         return None  # Not implemented
 
-    def _get_paths_from_config_home(self) -> Optional[Tuple[Path, ...]]:
+    def _get_paths_from_config_home(self) -> tuple[Path, ...] | None:
         config_home = os.environ.get('XDG_CONFIG_HOME', USER_CONFIG_HOME)
 
         drc = Path(config_home) / DUQTOOLS_DIR
@@ -131,7 +130,7 @@ class VariableConfigLoader:
 
         return None
 
-    def _get_paths_fallback(self) -> Tuple[Path, ...]:
+    def _get_paths_fallback(self) -> tuple[Path, ...]:
         module = files('duqtools.data')
         assert module.is_dir()
         drc: PosixPath = module._paths[0]  # type: ignore
@@ -139,8 +138,8 @@ class VariableConfigLoader:
 
 
 def lookup_vars(
-    variables: Sequence[Union[str,
-                              IDSVariableModel]]) -> List[IDSVariableModel]:
+        variables: Sequence[(str | IDSVariableModel)]
+) -> list[IDSVariableModel]:
     """Helper function to look up a bunch of variables.
 
     If str, look up the variable from the `var_lookup`. Else, check if

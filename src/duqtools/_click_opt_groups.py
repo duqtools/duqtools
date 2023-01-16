@@ -17,7 +17,7 @@ class GroupOpt(click.Option):
 
     def __init__(self, *args, **kwargs):
         self.group = kwargs.pop('group', None)
-        super(GroupOpt, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class GroupCmd(click.Command):

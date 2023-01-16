@@ -1,6 +1,5 @@
-import sys
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Literal, Optional, Union
 
 from pydantic import DirectoryPath, Field, validator
 
@@ -13,13 +12,11 @@ from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
                               SobolSampler)
 from .variables import VariableConfigModel
 
-from typing import Literal
-
 
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: List[Union[CoupledDim, OperationDim]] = Field(description=f("""
+    dimensions: list[Union[CoupledDim, OperationDim]] = Field(description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.

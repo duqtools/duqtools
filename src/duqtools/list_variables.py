@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import click
 from pydantic import ValidationError
 
@@ -12,7 +10,7 @@ ST_HEADER = {'fg': 'red', 'bold': True}
 ST_INFO = {'fg': 'white', 'bold': False}
 
 
-def list_group(group: List, extra_variables: Dict):
+def list_group(group: list, extra_variables: dict):
     group = sorted(group, key=lambda var: var.name)
 
     for var in group:

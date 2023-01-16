@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
@@ -58,8 +58,8 @@ class IDSMapping(Mapping):
         self._ids = ids
 
         # All available data fields are stored in this set.
-        self._keys: Set[str] = set()
-        self._paths: Dict[str, Any] = {}
+        self._keys: set[str] = set()
+        self._paths: dict[str, Any] = {}
 
         self.dive(ids, [])
 
@@ -121,8 +121,8 @@ class IDSMapping(Mapping):
         return key in self._keys
 
     @staticmethod
-    def _path_at_index(variable: Union[str, IDSVariableModel],
-                       index: Union[int, Sequence[int]]):
+    def _path_at_index(variable: str | IDSVariableModel,
+                       index: int | Sequence[int]):
         path = variable.path if isinstance(variable,
                                            IDSVariableModel) else variable
 
@@ -134,8 +134,8 @@ class IDSMapping(Mapping):
 
         return path
 
-    def get_at_index(self, variable: Union[str, IDSVariableModel],
-                     index: Union[int, Sequence[int]], **kwargs) -> Any:
+    def get_at_index(self, variable: str | IDSVariableModel,
+                     index: int | Sequence[int], **kwargs) -> Any:
         """Grab key with index replacement.
 
         Example: `IDSMapping.get_at_index(var, index=0)`
@@ -143,8 +143,8 @@ class IDSMapping(Mapping):
         path = self._path_at_index(variable, index)
         return self[path]
 
-    def set_at_index(self, variable: Union[str, IDSVariableModel],
-                     index: Union[int, Sequence[int]], value: Any, **kwargs):
+    def set_at_index(self, variable: str | IDSVariableModel,
+                     index: int | Sequence[int], value: Any, **kwargs):
         """Grab key with index replacement.
 
         Example: `IDSMapping.set_at_index(var, value, index=0)`
@@ -201,7 +201,7 @@ class IDSMapping(Mapping):
         ----------
         val :
             Current nested object being evaluated
-        path : List
+        path : list
             Current path
         """
 
@@ -237,7 +237,7 @@ class IDSMapping(Mapping):
             cur = cur[part]
         cur[path[-1]] = str_path
 
-    def findall(self, pattern: str) -> Dict[str, Any]:
+    def findall(self, pattern: str) -> dict[str, Any]:
         """Find keys matching regex pattern.
 
         Parameters
@@ -257,7 +257,7 @@ class IDSMapping(Mapping):
 
         return {key: self[key] for key in self._keys if pat.match(key)}
 
-    def find_by_group(self, pattern: str) -> Dict[Union[tuple, str], Any]:
+    def find_by_group(self, pattern: str) -> dict[tuple | str, Any]:
         """Find keys matching regex pattern by group.
 
         The dict key is defined by `match.groups()`.
@@ -307,7 +307,7 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        variables: Sequence[Union[str, IDSVariableModel]],
+        variables: Sequence[str | IDSVariableModel],
         empty_var_ok: bool = False,
         **kwargs,
     ) -> xr.Dataset:
@@ -315,7 +315,7 @@ class IDSMapping(Mapping):
 
         Parameters
         ----------
-        variables : Sequence[Union[str, IDSVariableModel]]
+        variables : Sequence[str | IDSVariableModel]]
             Dictionary of data variables
         empty_var_ok : bool
             If True, silently skip data that are missing from the mapping.
@@ -343,7 +343,7 @@ class IDSMapping(Mapping):
 
         import xarray as xr
 
-        xr_data_vars: Dict[str, Tuple[List[str], np.ndarray]] = {}
+        xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 
         variables = lookup_vars(variables)
 

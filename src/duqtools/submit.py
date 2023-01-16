@@ -3,7 +3,7 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, List, Sequence
+from typing import Deque, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import cfg
@@ -124,7 +124,7 @@ def lockfile_ok(job, *, force):
     return True
 
 
-def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> List[Job]:
+def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> list[Job]:
     """get_resubmit_jobs.
 
     Parameters
@@ -134,9 +134,9 @@ def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> List[Job]:
 
     Returns
     -------
-    List[Job]
+    list[Job]
     """
-    jobs: List[Job] = []
+    jobs: list[Job] = []
     run_dict = {run.shortname: run for run in Locations().runs}
     for name in resubmit_names:
         if name in run_dict:  # check for shortname
