@@ -61,6 +61,8 @@ class BaseJettoSystem(AbstractSystem):
     def submit_job(job: Job):
         if cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_slurm(job)
+        elif cfg.submit.submit_system == 'docker':
+            JettoSystem.submit_docker(job)
         elif cfg.submit.submit_system == 'prominence':
             JettoSystem.submit_prominence(job)
         else:
@@ -82,6 +84,23 @@ class BaseJettoSystem(AbstractSystem):
         logger.info('submission returned: ' + str(ret.stdout))
         with open(job.lockfile, 'wb') as f:
             f.write(ret.stdout)
+
+    @staticmethod
+    def submit_docker(job: Job):
+
+        jetto_template = template.from_directory(job.dir)
+        jetto_config = config.RunConfig(jetto_template)
+        jetto_manager = jetto_job.JobManager()
+        extra_volumes = {
+            job.dir / '..' / 'imasdb': {
+                'bind': '/home/docker/public/imasdb',
+                'mode': 'rw'
+            }
+        }
+
+        _ = jetto_manager.submit_job_to_docker(jetto_config,
+                                               job.dir,
+                                               extra_volumes=extra_volumes)
 
     @staticmethod
     def submit_prominence(job: Job):
