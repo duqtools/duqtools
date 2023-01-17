@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import stat
 import subprocess as sp
@@ -98,6 +99,7 @@ class BaseJettoSystem(AbstractSystem):
             }
         }
 
+        os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_docker(jetto_config,
                                                job.dir,
                                                extra_volumes=extra_volumes)
@@ -108,6 +110,7 @@ class BaseJettoSystem(AbstractSystem):
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
+        os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
