@@ -4,6 +4,7 @@ from pathlib import Path
 from string import Template
 
 from ..config import Config
+from ..operations import op_queue
 from ..utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ DUMMY_VARS = {
     'TEMPLATE_DB': 'db',
     'TEMPLATE_SHOT': 123,
     'TEMPLATE_RUN': 456,
-    'RUNS_DIR': '.',
+    'RUN_NAME': 'run_x',
     'RUN_IN_START': 10,
     'RUN_OUT_START': 20,
 }
@@ -23,6 +24,13 @@ DUMMY_VARS = {
 
 class SetupError(Exception):
     ...
+
+
+def _generate_run_dir(drc: Path, cfg: str, force: bool):
+    drc.mkdir(exist_ok=force, parents=True)
+
+    with open(drc / 'duqtools.yaml', 'w') as f:
+        f.write(cfg)
 
 
 def _get_n_samples(cfg: Config) -> int:
@@ -42,8 +50,7 @@ def _get_n_samples(cfg: Config) -> int:
     return n_samples
 
 
-def setup(*, template_file, input_file, runs_dir, **kwargs):
-    runs_dir = Path(runs_dir)
+def setup(*, template_file, input_file, force, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
@@ -74,7 +81,7 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
             TEMPLATE_DB=handle.db,
             TEMPLATE_SHOT=handle.shot,
             TEMPLATE_RUN=handle.run,
-            RUNS_DIR=runs_dir / name,
+            RUN_NAME=name,
             RUN_IN_START=run_in_start,
             RUN_OUT_START=run_out_start,
         )
@@ -82,7 +89,14 @@ def setup(*, template_file, input_file, runs_dir, **kwargs):
         Config.parse_raw(cfg)  # make sure config is valid
 
         out_drc = cwd / name
-        out_drc.mkdir(exist_ok=False, parents=True)
 
-        with open(out_drc / 'duqtools.yaml', 'w') as f:
-            f.write(cfg)
+        op_queue.add(
+            action=_generate_run_dir,
+            kwargs={
+                'drc': out_drc,
+                'cfg': cfg,
+                'force': force
+            },
+            description='Setup run',
+            extra_description=name,
+        )

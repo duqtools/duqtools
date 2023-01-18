@@ -80,8 +80,9 @@ def logfile_option(f):
                         group='Common options')(f)
 
 
-all_options = (logfile_option, debug_option, config_option, quiet_option,
-               dry_run_option, yes_option)
+logging_options = (logfile_option, debug_option)
+all_options = (*logging_options, config_option, quiet_option, dry_run_option,
+               yes_option)
 
 
 def handles_option(f):
@@ -197,7 +198,7 @@ def common_options(*options):
     return decorator
 
 
-def cli_entry():
+def cli_entry(**kwargs):
     from duqtools import fix_dependencies
     fix_dependencies()
     cli()
@@ -219,8 +220,7 @@ def cli(**kwargs):
               help='Path to write config to (default=duqtools.yaml).',
               default='duqtools.yaml')
 @click.option('--force', is_flag=True, help='Overwrite existing config.')
-@common_options(logfile_option, debug_option, quiet_option, dry_run_option,
-                yes_option)
+@common_options(*logging_options, quiet_option, dry_run_option, yes_option)
 def cli_init(**kwargs):
     """Create a default config file."""
     from .init import init
@@ -456,6 +456,26 @@ def cli_list_variables(**kwargs):
     """
     from .list_variables import list_variables
     list_variables(**kwargs)
+
+
+@cli.command('version')
+def cli_version(**kwargs):
+    """Print the version and exit."""
+    import git
+
+    from duqtools import __version__
+
+    string = f'duqtools {__version__}'
+
+    try:
+        repo = git.Repo(Path(__file__), search_parent_directories=True)
+        sha = repo.head.object.hexsha
+    except OSError:
+        pass
+    else:
+        string += f' (rev: {sha})'
+
+    click.echo(string)
 
 
 if __name__ == '__main__':
