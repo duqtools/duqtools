@@ -126,7 +126,7 @@ class Operations(deque):
 
     def add_no_op(self,
                   description: str,
-                  extra_description: Optional[str] = None):
+                  extra_description: str | None = None):
         """Adds a line to specify an action will not be undertaken."""
         self.add(action=None,
                  description=description,
@@ -167,7 +167,7 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))
+        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))  # type: ignore
         if not cfg.quiet:
             with tqdm(total=len(self), position=1) as pbar:
                 pbar.set_description('Applying operations')
@@ -196,9 +196,9 @@ class Operations(deque):
         # To print the descriptions we need to get them
         duqlog_screen.info('')
         duqlog_screen.info(
-            click.style('Operations in the Queue:', **HEADER_STYLE))
+            click.style('Operations in the Queue:', **HEADER_STYLE))  # type: ignore
         duqlog_screen.info(
-            click.style('========================', **HEADER_STYLE))
+            click.style('========================', **HEADER_STYLE))  # type: ignore
         for op in self:
             if not op.quiet:
                 duqlog_screen.info('- ' + op.long_description)
@@ -266,9 +266,7 @@ def confirm_operations(func):
     return wrapper
 
 
-def add_to_op_queue(op_desc: str,
-                    extra_desc: Optional[str] = None,
-                    quiet=False):
+def add_to_op_queue(op_desc: str, extra_desc: str | None = None, quiet=False):
     """Decorator which adds the function call to the op_queue, instead of
     executing it directly, the string can be a format string and use the
     function arguments.
@@ -288,7 +286,6 @@ def add_to_op_queue(op_desc: str,
     """
 
     def op_queue_real(func):
-
         def wrapper(*args, **kwargs) -> None:
             # For the description format we must convert args to kwargs
             sig = signature(func)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
 
 from .config import var_lookup
 from .ids import ImasHandle, merge_data
@@ -12,8 +11,8 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def merge(*, merge_all: bool, target: str, template: str, handles: List[str],
-          input_files: List[str], var_names: Optional[List[str]], force: bool,
+def merge(*, merge_all: bool, target: str, template: str, handles: list[str],
+          input_files: list[str], var_names: list[str] | None, force: bool,
           **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.from_string(template)

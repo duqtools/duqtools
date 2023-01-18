@@ -3,8 +3,9 @@ import shutil
 import stat
 import subprocess as sp
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, List, Optional, Sequence
+from typing import Any, Optional
 
 from jetto_tools import config
 from jetto_tools import job as jetto_job
@@ -75,7 +76,7 @@ class JettoSystem(AbstractSystem):
             raise FileNotFoundError(job.submit_script)
 
         submit_cmd = cfg.submit.submit_command.split()
-        cmd: List[Any] = [*submit_cmd, str(job.submit_script)]
+        cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting script via slurm {cmd}')
 
@@ -131,7 +132,7 @@ class JettoSystem(AbstractSystem):
             f.write(''.join(template))
 
         submit_cmd = cfg.submit.submit_command.split()
-        cmd: List[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
+        cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
 

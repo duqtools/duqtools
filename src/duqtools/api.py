@@ -4,7 +4,7 @@ Functions:
 
 - [rebase_on_grid][duqtools.api.rebase_on_grid]
 - [rebase_on_time][duqtools.api.rebase_on_time]
-- [standardize_datasets][duqtools.api.standardize_datasets]
+- [standardize_grid_and_time][duqtools.api.standardize_grid_and_time]
 
 Data classes:
 

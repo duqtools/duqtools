@@ -54,7 +54,7 @@ def setup(*, template_file, input_file, force, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
-        raise IOError('Input file not defined.')
+        raise OSError('Input file not defined.')
 
     handles = read_imas_handles_from_file(input_file)
 

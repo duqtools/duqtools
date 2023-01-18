@@ -21,7 +21,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     container:
       image: gitlab.eufus.psnc.pl:5050/containerization/imas/imas-installer/rockylinux8.6/ual
-      options: --user root # only way to install tkinter, can be removed if jetto-tools fixed
       credentials:
         password: ${{ secrets.GITLAB_PSNC_TOKEN }}
         username: ${{ secrets.GITLAB_PSNC_USERNAME }}
