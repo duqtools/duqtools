@@ -93,7 +93,7 @@ class BaseJettoSystem(AbstractSystem):
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
         extra_volumes = {
-            job.dir / '..' / 'imasdb': {
+            job.dir.parent / 'imasdb': {
                 'bind': '/home/docker/public/imasdb',
                 'mode': 'rw'
             }
