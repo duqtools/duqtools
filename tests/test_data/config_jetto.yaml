@@ -24,7 +24,6 @@ create:
     run_out_start_at: 8000
   template: ./template_model
   template_data:
-    user: root
     db: test
     shot: 11111
     run: 6666
