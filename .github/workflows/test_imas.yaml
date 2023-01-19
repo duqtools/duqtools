@@ -42,7 +42,9 @@ jobs:
       - name: Put the IMAS db in the right location
         run: |
           mkdir /opt/imas/shared
+          mkdir -p ${HOME}/public/
           ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/
+          ln -s `pwd`/containerized_runs/imasdb ${HOME}/public/imasdb
 
       - name: Python and Environment info
         run: |

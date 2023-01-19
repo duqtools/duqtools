@@ -19,12 +19,12 @@ create:
     n_samples: 3
   data:
     user: public
-    imasdb: test
+    imasdb: aug
     run_in_start_at: 7000
     run_out_start_at: 8000
   template: ./template_model
   template_data:
-    user: public
+    user: root
     db: test
     shot: 11111
     run: 6666
