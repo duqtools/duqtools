@@ -61,13 +61,6 @@ jobs:
           path: .imasenv
           key: ${{ hashFiles('setup.cfg') }}
 
-      - name: Test paths
-        shell: python
-        run: |
-          from duqtools.api import ImasHandle
-          print(ImasHandle.from_string('root/test/11111/6666').path())
-          print(ImasHandle.from_string('test/11111/4444').path())
-
       - name: Create venv and setup duqtools
         run: |
           if ! test -d ".imasenv"; then
@@ -87,6 +80,13 @@ jobs:
         run: |
           . /docker-entrypoint.sh
           python -m imas
+
+      - name: Test paths
+        shell: python
+        run: |
+          from duqtools.api import ImasHandle
+          print(ImasHandle.from_string('root/test/11111/6666').path())
+          print(ImasHandle.from_string('test/11111/4444').path())
 
       - name: Test with pytest
         run: |
