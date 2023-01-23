@@ -1,0 +1,18 @@
+Symbolic:  /home/docker/jintrac/build/data
+Absolute:  /home/docker/jintrac/build/data
+
+adf11 -> /opt/data/adas_v1.1/adf11
+adf11_bundled -> /opt/data/adas_v1.1/adf11
+adf21 -> /home/docker/jintrac/build/data/adf21
+bmstop -> /home/docker/jintrac/build/data/bmstop
+bmstop8 -> /home/docker/jintrac/build/data/bmstop8
+ionatom -> /home/docker/jintrac/build/data/ionatom
+linrad -> /home/docker/jintrac/build/data/linrad
+eirenedatadir -> /opt/data/eqirene/Database_v1.0
+eirenedatadir_v1.0 -> /opt/data/eqirene/Database_v1.0
+eirenedatadir_v2.0 -> /opt/data/eqirene/Database_v2.0
+edge2d -> /home/docker/jintrac/build/data/edge2d
+helena_bin ->
+mishka_bin ->
+castor_bin ->
+QLKNN-data -> /home/docker/jintrac/build/jetto/tci/transport/QLKNN/data

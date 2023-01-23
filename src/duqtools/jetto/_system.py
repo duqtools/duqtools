@@ -93,10 +93,10 @@ class BaseJettoSystem(AbstractSystem):
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
         extra_volumes = {
-            job.dir / 'imasdb': {
-                'bind': '/home/docker/public/imasdb',
+            job.dir.parent / 'imasdb': {
+                'bind': '/opt/imas/shared/imasdb',
                 'mode': 'rw'
-            }
+            },
         }
 
         os.environ['RUNS_HOME'] = os.getcwd()
@@ -104,6 +104,7 @@ class BaseJettoSystem(AbstractSystem):
                                                job.dir,
                                                image=cfg.submit.docker_image,
                                                extra_volumes=extra_volumes)
+        job.lockfile.touch()
 
     @staticmethod
     def submit_prominence(job: Job):

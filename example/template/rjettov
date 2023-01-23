@@ -1,0 +1,1136 @@
+#!/bin/bash
+
+# ######################################################################
+#
+#  Usage       : rjettov [-g] [-c] [-a] [-I<type>] [-e<MAIL>] [-p<PAUSE>]
+#                        [-xmpi] [-x64] [-s] [-m] [-D] [-n<N>]
+#                        <RUNDIR> [JETTODIR | VERSION OWNER]
+#
+#  Description : Execute associated JETTO.
+#
+#  Input       : RUNDIR          = Run directory name (e.g. run1).
+#                JETTODIR        = Jetto top-level directory
+#                  or...
+#                VERSION         = Load module name - only used if OWNER is present
+#                OWNER           = Load module owner
+#
+#        VERSION OWNER (the old style calling method) are only used if both are specified,
+#        otherwise the argument after RUNDIR is assumed to be JETTODIR.
+#        If there are no arguments after RUNDIR, JETTODIR is set to environment variable $JETTO
+#
+#                -g              = Run in Totalview debugger.
+#                -c              = Catalog case on successful completion.
+#                -a              = append to IDS's if used.
+#                -I<type>        = run IMAS driver for type :-
+#                                = 0 => run IMAS generic python driver
+#                                       (type not present defaults to type=0).
+#                                = 1 => run IMAS generic Fortran driver.
+#                -e[MAIL]        = E-mail MAIL run completion details.
+#                -p<PAUSE>       = Pause $CMG_JOB_PAUSE seconds before
+#                                  execution begins.
+#                                  If PAUSE is given then pause $PAUSE
+#                                  seconds before execution begins.
+#                -x[suffix]      = Version suffix (multiple suffices allowed)
+#                -S              = Redundant (kept for backwards compatibility)
+#                -s              = only set up symbolic links in run directory
+#                                  (no run is performed)
+#                -m              = Keep message file after simulation is over
+#                -n<N>           = Number of MPI processes to use (only if -xmpi specified)
+#                                  (use -n to override the value given in jset file)
+#
+#  Returns     : 0               = Successful.
+#                >0              = Failure.
+#
+#  Notes       : 1. Environment variable for advanced operations,
+#                      JETTO_TLIMIT = Run time limit (in minutes).
+#                                     (default = 43200 = 30 days)
+#                2. Streams for jetto.ex and jetto.ext are also opened
+#                   inside jetto/getex.f
+#                3. If 'ascot.cntl' exists in run directory then run
+#                   JETTO in ASCOT-EIRENE mode.
+#                4. Set environment variable JINTRAC_HOST=ITER to use at ITER.
+#                5. To set up directory rundir for the IMAS wrapper, use
+#                      rjettov -x64 -s rundir [jettodir | version owner]
+#
+#  History     : 20/06/2015 --- (GC) Creation from sim rjetto_frozen.
+#
+#                  HISTORY OBSOLETE - SEE GIT COMMITS
+#
+# #########################################################################
+
+RAMDRIVE_FILE=CoconutRAMcoupling.nfo
+if [ -f $RAMDRIVE_FILE ] ; then
+  STATUS_FILE=jetto_RAMcoupl.status
+else
+  STATUS_FILE=jetto.status
+fi
+
+export OMPI_MCA_orte_rsh_agent=/usr/bin/ssh
+# OpenMP not needed for QLK present setting (simple_mpi_only), but needs two threads if this is changed
+export OMP_NUM_THREADS=1
+export OMP_STACKSIZE=100000
+
+#
+###########################################################################
+# Functions
+###########################################################################
+#
+#.. Function    : errexit
+#.. Description : write a failure message to $STATUS_FILE and return with given exit code
+#.. Input       : $1 = exit code
+function errexit {
+    echo "Status : Failed (rjettov problem)" > $STATUS_FILE
+    exit $1
+}
+
+#.. Function    : getvalue
+#.. Description : get value "label : value" line in a file
+#.. Input       : $1 = label
+#..               $2 = name of file
+#.. Output      : label's value
+function getvalue {
+    LABEL=$1
+    FILE=$2
+    RESULT=""
+
+    LINE=`grep "$LABEL" $FILE`
+
+    if [ ! -z "$LINE" ] ; then
+        RESULT=`echo $LINE | cut -f2 -d:`
+    fi
+
+    echo $RESULT
+}
+
+#.. Function    : lnconfig
+#.. Description : Copy and link configuration file to run directory
+#.. Input       : $1 = file name e.g.jsp
+#..               $2 = name of link e.g. fort.101
+function lnconfig {
+
+    CONFIG=$JSRCPATH/configs/$1
+    if [ -f $CONFIG ] ; then
+        cp $CONFIG configs 2>/dev/null
+        ln -s configs/$1 $2 2>/dev/null
+    else
+        cp $USERS_HOME/$GUSR/jintrac/default/jetto/configs/$1 configs 2>/dev/null
+        ln -s configs/$1 $2 2>/dev/null
+        echo "Warning: config file $1 not found in $JSRCPATH/configs !"
+        echo "         Copied $USERS_HOME/$GUSR/jintrac/default/jetto/configs/$1"
+    fi
+}
+
+#.. Function    : submitcreatenl
+#.. Description : submit createnl to loadleveller
+function submitcreatenl {
+
+#...... initialise
+    LLFILE=$RUNDIR/.llcmd_createnl
+    PLATFORM=`uname -i`
+
+    ARGS="-S $RUN $CREATENL_VERSION $CREATENL_OWNER"
+    if [ ! -z "$CREATENL_CONTROLLER" ] ; then
+        ARGS="-c$CREATENL_CONTROLLER "$ARGS
+    fi
+
+    ARGS="-S -c$CREATENL_CONTROLLER $RUN $CREATENL_VERSION $CREATENL_OWNER"
+
+#...... build load leveller script
+    if [ ! -z "$CREATENL_JAC" ] ; then
+        req='(Machine== \"batch-0$CREATENL_JAC\")'
+    else
+        req='()'
+    fi
+    write_batchscript $LLFILE \
+        --jobname jetto.createnl.$RUN \
+        --executable $JSRCPATH/sh/rcreatenlv \
+        --arguments $ARGS \
+        --rundir $RUNDIR \
+        --outputfile ll.createnl.out \
+        --errorfile ll.createnl.err \
+        --requirements $req \
+        --checkpoint no \
+        --restart no
+
+    llsubmit=`batch_submit`
+    $llsubmit $LLFILE
+}
+
+
+###########################################################################
+# Initialisation
+###########################################################################
+
+MYLOCATION="$(dirname $(readlink -f $0))"
+
+if [ -f utils_jetto ] ; then
+    . $MYLOCATION/utils_jetto
+else # for JAMS backwards compatibility
+    if [ -f $RAMDRIVE_FILE ] ; then
+        echo "Aborting rjettov - utils_jetto file not present in COCONUT simulation with RAM drive coupling"
+        errexit 1
+    else
+        . $MYLOCATION/utils
+    fi
+fi
+
+MESSAGE="Usage: rjettov [-g] [-c] [-a] [-I<type>] [-e<MAIL>] [-p<PAUSE>] [-xmpi] [-x64] [-s] [-m]"
+MESSAGE=$MESSAGE" RUNDIR [JETTODIR | VERSION OWNER]"
+
+ROOT=$RUNS_HOME
+
+ASCOT=0
+ASCOT_VERSION=""
+ASCOT_OWNER=""
+ASCOT_NPROC=""
+ASCOT_RIPPLE=""
+
+CREATENL=0
+CREATENL_VERSION=""
+CREATENL_OWNER=""
+CREATENL_CONTROLLER=""
+CREATENL_MODE=0
+
+GENRAY=0
+GENRAY_DEBUG=0
+GENRAY_WORKDIR=ebw
+GENRAY_IN=genray.in
+GENRAY_MGR=genray_manager.py
+GENRAY_MGR_LOGLEVEL=info
+GENRAY_MGR_PERIOD=1
+GENRAY_MGR_TIMEOUT=7200
+GENRAY_JOB_TIMEOUT=5400
+GENRAY_MGR_PID=0
+GENRAY_MGR_KILL_FILE=ebw.manager.kill
+GENRAY_EXE=""
+GENRAY_LAUNCH_ANGLE_DIRECTION=""
+GENRAY_CLEANUP=0
+GENRAY_OPTIMISE=0
+CQL3D=0
+CQL3D_IN=cqlinput
+CQL3D_EXE=""
+
+CATALOG=0
+MAIL=""
+PAUSE=0
+POSTFIX=""
+POSTFIX_64=""
+DEBUG=0
+SETUP=""
+MPI=0
+NPROCSET=
+NPROC=1
+APPENDIDS=""
+IMASDRIVER=""
+IMASPYTHONDRIVER=0
+IMASFORTRANDRIVER=1
+JETTODIR=$JETTO
+VERSION=
+OWNER=
+JETTOBINDIR=
+
+export IMAS_CONFIG="jintrac_imas_config.cfg"
+
+JETTO_JSET=jetto.jset
+
+if [ -z "$JETTO_TLIMIT" ] ; then
+    JETTO_TLIMIT=43200
+fi
+
+###########################################################################
+#  Read input
+###########################################################################
+
+while [ `echo $1 | cut -c1` = "-" ] ; do
+    case `echo $1|cut -c1-2` in
+        -g) DEBUG=1
+        shift 1;;
+        -c) CATALOG=1
+        shift 1;;
+        -a) APPENDIDS=1
+        shift 1;;
+        -I) IMASDRIVER=$IMASPYTHONDRIVER
+        TYPE=`echo $1|cut -c3-`
+        if [ ! -z $TYPE ] ; then
+            IMASDRIVER=$TYPE
+        fi
+        shift 1;;
+        -e) MAIL=`echo $1|cut -c3-`
+        shift 1;;
+        -p) PAUSE=`echo $1|cut -c3-`
+        if [ -z "$PAUSE" ] ; then
+            if [ -z "$CMG_JOB_PAUSE" ] ; then
+                PAUSE=5
+            else
+                PAUSE=$CMG_JOB_PAUSE
+            fi
+        fi
+        shift 1;;
+        -x) SUFFIX=`echo $1|cut -c3-`
+        POSTFIX=$POSTFIX"_"$SUFFIX
+        if [ "x$SUFFIX" = "x64" ] ; then
+            POSTFIX_64='_64'
+        fi
+        if [ "x$SUFFIX" = "xmpi" ] ; then
+            MPI=1
+        fi
+        shift 1;;
+        -S) true # Redundant: ROOT=$RUNS_HOME instead of $HOME
+        shift 1;;
+        -s) SETUP=s
+        shift 1;;
+        -m) KEEPMESSAGE=Y
+        shift 1;;
+        -n) NPROCSET=`echo $1|cut -c3-`
+        shift 1;;
+        -?) echo $MESSAGE
+        errexit 1;;
+        *) echo "*** error : invalid flags : $1"
+        echo $MESSAGE
+        errexit 1;;
+    esac
+done
+
+# Run directory (relative to $ROOT/jetto/runs/)
+RUN=$1
+
+if [ ! -z "$2" ] ; then
+    JETTODIR=$2
+fi
+
+if [ ! -z "$3" ] ; then  #  old style usage
+    VERSION=$2
+    OWNER=$3
+    JETTOBINDIR=$USERS_HOME/$OWNER/jetto/bin/$OSD
+fi
+JETTODIR=`realpath $JETTODIR`
+
+# Pause
+if [ $PAUSE -gt 0 ] ; then
+    sleep $PAUSE
+fi
+
+if [ -f $RAMDRIVE_FILE ] ; then
+  cd_e2d_rundir
+else
+  cd_rundir
+fi
+
+###########################################################################
+# Additional input direct from jset
+###########################################################################
+
+if [ $MPI -gt 0 ] ; then
+    NPROC=`getvalue "JobProcessingPanel.numProcessors"       $JETTO_JSET`
+    if [ -z "$NPROC" ] ; then
+        NPROC=1
+    fi
+    # Override NPROC if -n argument is given
+    if [ ! -z $NPROCSET ] ; then
+        NPROC=$NPROCSET
+    fi
+fi
+
+DRIFTMODEL=`getvalue "TransportStdPanel.anomDriftModel"       $JETTO_JSET`
+if [ -z "$DRIFTMODEL" ] ; then
+    DRIFTMODEL=0
+fi
+
+EBW_SELECT=`getvalue "EBWPanel.select"                        $JETTO_JSET`
+EBW_SOURCE=`getvalue "EBWPanel.source"                        $JETTO_JSET`
+if [ "$EBW_SELECT" = "true" ] && [ "$EBW_SOURCE" = "GENRAY/CQL3D" ] ; then
+    GENRAY=1
+
+    CQL3D_SELECT=`getvalue "EBWPanel.CQL3Dselect"             $JETTO_JSET`
+    if [ "$CQL3D_SELECT" = "true" ] ; then
+        CQL3D=1
+    fi
+fi
+
+
+###########################################################################
+# Set paths, set up for mpi
+# JETTO_EXEV is the executable to use to find the load module
+# JETTO_EXE  is the executable for the run proper
+###########################################################################
+
+# Turn off limits on stack size
+ulimit -s unlimited
+
+if [ ! -z "$JETTOBINDIR" ]; then  #  Legacy logic to deal with specified VERSION OWNER
+    if [ -z "$IMASDRIVER" ]; then  # Standard driver
+        ulimit -f 1000000      # This breaks the python IMAS driver with certain JINTRAC-HCD combinations
+        EXEI=$VERSION$POSTFIX
+    else
+        EXEI=$VERSION"_jintrac_imasdriver"
+        if [ $MPI -eq 1 ] ; then
+            EXEI=$EXEI"_mpi"
+        fi
+    fi
+
+    JETTO_EXE=$JETTOBINDIR/$EXEI
+    JETTO_EXEV=$JETTOBINDIR/$VERSION$POSTFIX
+else
+    if [ $MPI -ne 1 ] ; then
+        JETTO_EXEV=$JETTODIR/bin/jetto.exe
+    else
+        JETTO_EXEV=$JETTODIR/bin/jetto_mpi.exe
+    fi
+    if [ -z "$IMASDRIVER" ]; then  # Standard driver
+        ulimit -f 1000000          # This breaks the python IMAS driver with certain JINTRAC-HCD combinations
+        JETTO_EXE=$JETTO_EXEV
+    else
+        if [ $MPI -ne 1 ] ; then
+            JETTO_EXE=$JETTODIR/bin/jetto_jintrac_imasdriver
+        else
+            JETTO_EXE=$JETTODIR/bin/jetto_jintrac_imasdriver_mpi
+        fi
+    fi
+fi
+
+if [ ! -f $JETTO_EXE ] ; then
+    echo "Cannot find executable: $JETTO_EXE"
+    echo "Aborting rjettov - please check environment."
+    errexit 1
+fi
+
+JSRCPATH=`$JETTO_EXEV -v | grep "GIT repository" | sed "s/^.*: *//"`
+
+if [ ! -d $JSRCPATH ] ; then
+    echo "JSRCPATH not set correctly: $JSRCPATH"
+    echo "Aborting rjettov - please check environment."
+    errexit 1
+fi
+
+###########################################################################
+# Set up for IMAS
+###########################################################################
+
+# Generate IMAS workflow configuration file if required
+if [ ! -z "$IMASDRIVER" ]
+    then
+    if [ -z "$APPENDIDS" ] ; then
+        createworkflowcfg -r $IMAS_CONFIG
+    else
+        createworkflowcfg $IMAS_CONFIG
+    fi
+    if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
+        echo "RJETTOV: Python IMAS driver requested..."
+        JINTRAC_PYTHON_DIR=$JINTRAC_DIR/python
+    else
+        echo "RJETTOV: Fortran IMAS driver requested..."
+    fi
+fi
+
+###########################################################################
+# Set up for Ascot
+###########################################################################
+
+ASCOT_CNTL=ascot.cntl
+NBICFG=jetto.nbicfg
+
+if [ -f $ASCOT_CNTL ] ; then
+    ASCOT=1
+
+#...... hello : move asalmi to sim to 'sim'
+
+#...... Set up kill file
+    ASCOT_KILL=ascot.trigger
+    ASCOT_KILL_MASTER=$JINTRAC_DIR/data/ascot/$ASCOT_KILL"_kill"
+
+#...... Set up variables for Ascot call
+    ASCOT_VERSION=`getvalue "Ascot Version"          $ASCOT_CNTL`
+    ASCOT_OWNER=`  getvalue "Ascot Owner"            $ASCOT_CNTL`
+    ASCOT_NPROC=`  getvalue "Number Of Processors"   $ASCOT_CNTL`
+    ASCOT_RIPPLE=` getvalue "Ripple Imin/Imax Ratio" $ASCOT_CNTL`
+
+    if [ "$ASCOT_VERSION" = "N/A" ] ; then
+        if [ -z "$ASCOT_DIR" ] ; then
+            echo "*** error : ASCOT_DIR is not set"
+            errexit 1
+        else
+            ASCOT_DIRECTORY=$ASCOT_DIR
+        fi
+    else
+        ASCOT_DIRECTORY=$USERS_HOME/$ASCOT_OWNER/ascot_jintrac/$ASCOT_VERSION
+    fi
+
+    ASCOT_EXE=$ASCOT_DIRECTORY/jettodata/rascot$POSTFIX_64.perl
+    ASCOT_BIN=$ASCOT_DIRECTORY/ascot$POSTFIX_64
+    GETNBI_EXE=$ASCOT_DIRECTORY/getnbi$POSTFIX_64
+    GETNTM_EXE=$ASCOT_DIRECTORY/getntm$POSTFIX_64
+
+#...... Set up nbi config data from PPF
+    ASCOT_NBISEQ=`  getvalue "NBI sequence number"   $ASCOT_CNTL`
+    if [ ! -z "$ASCOT_NBISEQ" ] ; then
+        SHOT=`getvalue "SetUpPanel.shotNum"          $JETTO_JSET`
+        TBEG=`getvalue "SetUpPanel.startTime"        $JETTO_JSET`
+        TEND=`getvalue "SetUpPanel.endTime"          $JETTO_JSET`
+        MACH=`getvalue "SetUpPanel.machine"          $JETTO_JSET`
+        if [ "$MACH" = "jet" ] ; then
+            $GETNBI_EXE <<@@ > getnbi.diag
+$SHOT
+$ASCOT_NBISEQ
+$TBEG
+$TEND
+@@
+            mv input.dynam_nbi $NBICFG
+        fi
+    fi
+fi
+
+###########################################################################
+# Set up for Create
+###########################################################################
+
+CREATENL_CNTL=$RUNDIR/createnl.cntl
+
+if [ -f $CREATENL_CNTL ] ; then
+    CREATENL=1
+
+    CREATENL_KILL=jetto.createnld
+    CREATENL_KILL_MASTER=$JINTRAC_DIR/data/createnl/$CREATENL_KILL"_kill"
+
+    CREATENL_VERSION=`getvalue "Create Version"       $CREATENL_CNTL`
+
+    CREATENL_OWNER=`  getvalue "Create Owner"         $CREATENL_CNTL`
+
+    CREATENL_CONTROLLER=`  getvalue "Create Controller" $CREATENL_CNTL`
+
+    CREATENL_MODE=`  getvalue "Create Mode"           $CREATENL_CNTL`
+
+    if [ "$CREATENL_MODE" = "Batch" ] ; then
+        CREATENL_FLAG=1
+    else
+        CREATENL_FLAG=0
+    fi
+
+    CREATENL_MACHINE=`  getvalue "Create Machine" $CREATENL_CNTL`
+
+fi
+
+###########################################################################
+# Set up for GENRAY/CQL3D
+###########################################################################
+if [ $GENRAY -eq 1 ] ; then
+    GENRAY_DIR=$JSRCPATH/genray
+
+    export PATH=$PATH:$GENRAY_DIR/python/bin
+    export PYTHONPATH=$PYTHONPATH:$GENRAY_DIR/python
+
+    if [ ! -f $GENRAY_IN ] ; then
+        echo "*** error : GENRAY input file - $GENRAY_IN - does not exist"
+        errexit 1
+
+        if [ $CQL3D -eq 1 ] && [ ! -f $CQL3D_IN ] ; then
+            echo "*** error : CQL3D input file - $CQL3D_IN - does not exist"
+            errexit 1
+        fi
+    fi
+
+    if [ ! -d $GENRAY_WORKDIR ] ; then
+        mkdir $GENRAY_WORKDIR
+    fi
+    if [ ! -z "$(ls -A $GENRAY_WORKDIR)" ] ; then
+        rm -r $GENRAY_WORKDIR/*
+    fi
+
+    ret=`cp $GENRAY_IN $GENRAY_WORKDIR/$GENRAY_IN`
+    if [ $? -ne 0 ] ; then
+        echo "*** error : Failed to set up GENRAY input file ($ret)"
+        errexit 1
+    fi
+
+    if [ $CQL3D -eq 1 ] ; then
+        ret=`cp $CQL3D_IN $GENRAY_WORKDIR/$CQL3D_IN`
+        if [ $? -ne 0 ] ; then
+            echo "*** error : Failed to set up CQL3D input files ($ret)"
+            errexit 1
+        fi
+    fi
+
+    GENRAY_EXE_NAME=`getvalue "EBWPanel.GENRAYname" $JETTO_JSET`
+    GENRAY_EXE_OWNER=`getvalue "EBWPanel.GENRAYuserid" $JETTO_JSET`
+    GENRAY_EXE=$USERS_HOME/$GENRAY_EXE_OWNER/genray/bin/$GENRAY_EXE_NAME
+    if [ ! -f $GENRAY_EXE ] ; then
+        echo "Cannot find GENRAY executable: $GENRAY_EXE"
+        echo "Aborting rjettov - please check set up."
+        errexit 1
+    fi
+
+    GENRAY_DELETE_ARTEFACTS=`getvalue "EBWPanel.GENRAYDeleteArtefacts" $JETTO_JSET`
+    if [ "$GENRAY_DELETE_ARTEFACTS" = "true" ] ; then
+        GENRAY_CLEANUP=1
+    fi
+
+    GENRAY_OPTIMISE_JSET=`getvalue "EBWPanel.GENRAYOptimiseLaunchAngles" $JETTO_JSET`
+    if [ "$GENRAY_OPTIMISE_JSET" = "true" ] ; then
+        GENRAY_OPTIMISE=1
+        GENRAY_LAUNCH_ANGLE_DIRECTION=`getvalue "EBWPanel.GENRAYLaunchAngleDirection" $JETTO_JSET`
+    fi
+
+    if [ $CQL3D -eq 1 ] ; then
+        CQL3D_EXE_NAME=`getvalue "EBWPanel.CQL3Dname" $JETTO_JSET`
+        CQL3D_EXE_OWNER=`getvalue "EBWPanel.CQL3Duserid" $JETTO_JSET`
+        CQL3D_EXE=$USERS_HOME/$CQL3D_EXE_OWNER/cql3d/bin/$CQL3D_EXE_NAME
+        if [ ! -f $CQL3D_EXE ] ; then
+            echo "Cannot find CQL3D executable: $CQL3D_EXE"
+            echo "Aborting rjettov - please check set up."
+            errexit 1
+        fi
+    fi
+fi
+
+###########################################################################
+# Set up for Matlab
+###########################################################################
+
+if [ "$JINTRAC_HOST" = "JET" ] || [ "$JINTRAC_HOST" = "CULHAM" ] ; then
+    . $MODULESHOME/init/bash
+    module unload matlab
+    module load matlab/14
+fi
+
+###########################################################################
+# Checks
+###########################################################################
+
+if [ ! -f $JETTO_EXE ] ; then
+    echo "*** error : Jetto version - $JETTO_EXE - does not exist"
+    errexit 1
+fi
+
+if [ $ASCOT -eq 1 ] ; then
+    if [ ! -f $ASCOT_EXE ] ; then
+        echo "*** error : Ascot script - $ASCOT_EXE - does not exist"
+        errexit 1
+    fi
+
+    if [ ! -f $ASCOT_KILL_MASTER ] ; then
+        echo "*** error : Ascot kill file - $ASCOT_KILL_MASTER - does not exist"
+        errexit 1
+    fi
+fi
+
+if [ $CREATENL -eq 1 ] ; then
+    if [ ! -f $CREATENL_KILL_MASTER ] ; then
+        echo "*** error : CreateNL kill file - $CREATE_KILL_MASTER - does not exist"
+        errexit 1
+    fi
+fi
+
+###########################################################################
+# Set symbolic links
+###########################################################################
+
+echo "*** Using run directory : $RUNDIR"
+
+cd $RUNDIR
+
+#for i in {00..16}; do mkdir neo$i; done
+if [ ! -f $RAMDRIVE_FILE ] ; then
+    rm -f fort.*
+fi
+
+EQUSRC=`getvalue "EquilibriumPanel.source"        $JETTO_JSET`
+if [ "$EQUSRC" != "CBANK" ] ; then
+    rm -f jetto.cbank
+fi
+rm -f jetto.catinfo *.qlk
+
+rm -f adf11 adf11_bundled adf21 bmstop bmstop8 ionatom linrad
+rm -f eirenedatadir eirenedatadir_v1.0 eirenedatadir_v2.0 eirenedatadir_iter
+rm -f edge2d QLKNN-data helena_bin mishka_bin
+
+DATADIR=$JINTRAC_DIR/data
+if [ ! -d $DATADIR ] ; then
+    echo "Data directory not found: $DATADIR"
+    errexit 1
+else
+  echo "Symbolic: " $DATADIR > jetto.datadir
+  echo "Absolute: " `readlink -e $DATADIR` >> jetto.datadir
+  echo >> jetto.datadir
+fi
+
+ln -s $DATADIR/adf11 adf11
+echo "adf11 ->" `readlink -e adf11` >> jetto.datadir
+
+ln -s $DATADIR/adf11_bundled adf11_bundled
+echo "adf11_bundled ->" `readlink -e adf11_bundled` >> jetto.datadir
+
+ln -s $DATADIR/adf21 adf21
+echo "adf21 ->" `readlink -e adf21` >> jetto.datadir
+
+ln -s $DATADIR/bmstop bmstop
+echo "bmstop ->" `readlink -e bmstop` >> jetto.datadir
+
+ln -s $DATADIR/bmstop8 bmstop8
+echo "bmstop8 ->" `readlink -e bmstop8` >> jetto.datadir
+
+ln -s $DATADIR/ionatom ionatom
+echo "ionatom ->" `readlink -e ionatom` >> jetto.datadir
+
+ln -s $DATADIR/linrad linrad
+echo "linrad ->" `readlink -e linrad` >> jetto.datadir
+
+if [ -e $DATADIR/eirenedata ] ; then # for backward compatibility
+    ln -s $DATADIR/eirenedata eirenedatadir
+    echo "eirenedatadir ->" `readlink -e eirenedatadir` >> jetto.datadir
+fi
+if [ -e $DATADIR/eirenedata1 ] ; then
+    ln -s $DATADIR/eirenedata1 eirenedatadir_v1.0
+    echo "eirenedatadir_v1.0 ->" `readlink -e eirenedatadir_v1.0` >> jetto.datadir
+fi
+if [ -e $DATADIR/eirenedata2 ] ; then
+    ln -s $DATADIR/eirenedata2 eirenedatadir_v2.0
+    echo "eirenedatadir_v2.0 ->" `readlink -e eirenedatadir_v2.0` >> jetto.datadir
+fi
+if [ -e $DATADIR/eirenedata3 ] ; then
+    ln -s $DATADIR/eirenedata3 eirenedatadir_iter
+    echo "eirenedatadir_iter ->" `readlink -e eirenedatadir_iter` >> jetto.datadir
+fi
+
+ln -s $DATADIR/edge2d edge2d
+echo "edge2d ->" `readlink -e edge2d` >> jetto.datadir
+
+ln -s $JAMS_DIR/depot/helena/bin helena_bin
+echo "helena_bin ->" `readlink -e helena_bin` >> jetto.datadir
+
+ln -s $JAMS_DIR/depot/mishka/bin/mishka mishka_bin
+echo "mishka_bin ->" `readlink -e mishka_bin` >> jetto.datadir
+
+if [ "$DRIFTMODEL" = "Qualikiz" ];  then
+    ln -s $JSRCPATH/tci/transport/QLKNN/data QLKNN-data
+    echo "QLKNN-data ->" `readlink -e QLKNN-data` >> jetto.datadir
+fi
+
+if [ ! -f jetto.shistory ] ; then
+    touch jetto.shistory
+fi
+
+#   $IN_FILE no longer passed through STDIN (not reliable in parallel)
+#   all versions now read input from fort.77
+ln -s jetto.in                       fort.77
+
+ln -s jetto.lh                       fort.1
+ln -s jetto.restart                  fort.8
+ln -s jetto.bnd                      fort.9
+#.. Warning : jetto.ex stream in also opened in jetto/getex.f
+ln -s jetto.ex                       fort.11
+ln -s jetto.restart                  fort.29
+ln -s jetto.chksum                   fort.40
+ln -s jetto.mhddb                    fort.45
+
+# ln -s $DATADIR/pencil/eigen fort.48 - superseded below
+
+ln -s jetto.history                  fort.60
+ln -s jetto.ec                       fort.72
+
+if [ -f jetto.sgrid ] ; then
+    ln -s jetto.sgrid fort.78
+else
+    ln -s jetto.sin   fort.78
+fi
+
+ln -s flistprm                       fort.73
+ln -s ntm.print                      fort.74
+ln -s ntm.out                        fort.75
+ln -s ntm.greout                     fort.76
+ln -s jetto.str                      fort.79
+ln -s jetto.sin                      fort.80
+ln -s jetto.srestart                 fort.81
+ln -s jetto.srestart                 fort.82
+ln -s jetto.shistory                 fort.84
+ln -s jetto.shistory                 fort.87
+ln -s jetto.sout                     fort.88
+ln -s jetto.eqfile                   fort.95
+ln -s jetto.stat                     fort.96
+ln -s jetto.eqdsk_out                fort.97
+ln -s jetto.eqrestart                fort.98
+ln -s jetto.cbank                    fort.99
+ln -s jetto.jsp                      fort.102
+ln -s jetto.jst                      fort.104
+ln -s jetto.jse                      fort.106
+ln -s jetto.gra2                     fort.108
+ln -s jetto.jsp_tmp                  fort.110
+ln -s jetto.catid                    fort.111
+ln -s jetto.jasp                     fort.122
+ln -s jetto.jast                     fort.124
+ln -s jetto.kg1v                     fort.126
+ln -s jetto.lidr                     fort.128
+ln -s jetto.hrts                     fort.130
+ln -s jetto.kk3                      fort.132
+ln -s jetto.msm                      fort.134
+ln -s jetto.jsd                      fort.136
+ln -s jetto.jss                      fort.138
+ln -s jetto.jnb4                     fort.140
+ln -s jetto.jnb8                     fort.142
+ln -s jetto.ssp                      fort.201
+ln -s jetto.ssp1                     fort.203
+ln -s jetto.ssp2                     fort.205
+ln -s jetto.ssp3                     fort.207
+ln -s jetto.ssp4                     fort.209
+ln -s jetto.ssp5                     fort.211
+ln -s jetto.ssp6                     fort.213
+ln -s jetto.ssp7                     fort.215
+ln -s jetto.ssp8                     fort.217
+ln -s jetto.ssp9                     fort.219
+ln -s jetto.sst                      fort.225
+ln -s jetto.sst1                     fort.227
+ln -s jetto.sst2                     fort.229
+ln -s jetto.sst3                     fort.231
+ln -s jetto.sst4                     fort.233
+ln -s jetto.sst5                     fort.235
+ln -s jetto.sst6                     fort.237
+ln -s jetto.sst7                     fort.239
+ln -s jetto.sst8                     fort.241
+ln -s jetto.sst9                     fort.243
+ln -s jetto.ecp                      fort.250
+ln -s jetto.lhp                      fort.252
+ln -s jetto.rfp                      fort.254
+ln -s jetto.ebwp                     fort.256
+ln -s jetto.nbip                     fort.260
+ln -s jetto.nbip1                    fort.261
+ln -s jetto.nbip2                    fort.262
+ln -s jetto.nbip3                    fort.263
+ln -s jetto.evp                      fort.270
+ln -s jetto.tep                      fort.271
+ln -s jetto.tip                      fort.272
+ln -s jetto.ni1p                     fort.273
+ln -s jetto.ni2p                     fort.274
+ln -s jetto.gasp                     fort.275
+ln -s jetto.cup                      fort.276
+ln -s jetto.vlp                      fort.277
+ln -s jetto.eqt                      fort.278
+ln -s jetto.sadas                    fort.280
+
+ln -s jetto.beamionsource            fort.364
+
+#.. Warning : jetto.ext stream in also opened in jetto/getex.f
+ln -s jetto.ext                      fort.300
+#
+# PION from UNITS=400-499 (491-494 are used for PPF output)
+#
+ln -s pion.0                         fort.400
+ln -s pion.1                         fort.401
+ln -s pion.2                         fort.402
+ln -s pion.6                         fort.406
+ln -s pion.7                         fort.407
+ln -s pion.19                        fort.419
+ln -s pion.20                        fort.420
+ln -s pion.51                        fort.451
+ln -s pion.52                        fort.452
+ln -s pion.53                        fort.453
+ln -s pion.54                        fort.454
+ln -s pion.55                        fort.455
+ln -s pion.56                        fort.456
+ln -s pion.70                        fort.470
+ln -s pion.71                        fort.471
+ln -s pion.72                        fort.472
+ln -s jetto.jht                      fort.492
+ln -s jetto.jhp                      fort.494
+#
+# NB.. UNITS=500-599 reserved for Eirene internally (Coconut)
+#
+
+mkdir -p configs
+
+cp $DATADIR/pencil/eigen configs
+ln -s configs/eigen fort.48
+
+lnconfig jsp  fort.101
+lnconfig jst  fort.103
+lnconfig jse  fort.105
+lnconfig gra2 fort.107
+lnconfig jasp fort.121
+lnconfig jast fort.123
+lnconfig kg1v fort.125
+lnconfig lidr fort.127
+lnconfig hrts fort.129
+lnconfig kk3  fort.131
+lnconfig msm  fort.133
+lnconfig jsd  fort.135
+lnconfig jss  fort.137
+lnconfig jnb4 fort.139
+lnconfig jnb8 fort.141
+lnconfig ssp  fort.200
+lnconfig sspn fort.202
+lnconfig sspn fort.204
+lnconfig sspn fort.206
+lnconfig sspn fort.208
+lnconfig sspn fort.210
+lnconfig sspn fort.212
+lnconfig sspn fort.214
+lnconfig sspn fort.216
+lnconfig sspn fort.218
+lnconfig sst  fort.224
+lnconfig sstn fort.226
+lnconfig sstn fort.228
+lnconfig sstn fort.230
+lnconfig sstn fort.232
+lnconfig sstn fort.234
+lnconfig sstn fort.236
+lnconfig sstn fort.238
+lnconfig sstn fort.240
+lnconfig sstn fort.242
+lnconfig jht  fort.491
+lnconfig jhp  fort.493
+lnconfig lhcd6/jetto.grill jetto.grill
+lnconfig lhcd6/jetto.ray   jetto.ray
+#
+# NB.. UNITS=600-699 reserved for GRAY internally
+#
+ln -s gray_central_ray_coord           fort.604
+ln -s gray_beam_CS                     fort.608
+ln -s gray_beam_transv                 fort.612
+
+
+if [ "$SETUP" = "s" ] ; then
+    echo " "
+    echo "...Done. "
+    echo " "
+    exit 0
+fi
+
+###########################################################################
+# Launch ASCOT
+###########################################################################
+
+if [ $ASCOT -eq 1 ] ; then
+
+    # Load a specific mpi environment for 32 bit ASCOT versions not statically linked with MPI
+    # The environemt for ASCOT should be handled by the rascot_64.perl script in future, as it
+    # may change with ASCOT version, while rjettov is linked to a JETTO version
+    if [[ $(ldd $ASCOT_BIN | grep mpi | head -1 | awk -F['>'] '{print $2}') == " not found" ]];
+        then
+        if [[ -z  $POSTFIX_64  ]] ; then
+            module swap openmpi/1.3.3
+        fi
+    fi
+
+    rm -f $ASCOT_KILL
+
+    $ASCOT_EXE $ASCOT_VERSION $ASCOT_OWNER $ASCOT_NPROC $ASCOT_RIPPLE &
+fi
+
+###########################################################################
+# Launch CREATE-NL
+###########################################################################
+
+if [ $CREATENL -eq 1 ] && [ "$CREATENL_FLAG" -eq 1 ] ; then
+    REALKILL=`diff $CREATENL_KILL $CREATENL_KILL_MASTER | wc -l`
+
+    if [ $REALKILL -eq 0 ] ; then
+        rm -f $CREATENL_KILL
+    fi
+
+    submitcreatenl
+fi
+
+###########################################################################
+# Launch GENRAY Manager
+###########################################################################
+
+if [ $GENRAY -eq 1 ] ; then
+    CLEANUP_FLAG=""
+    if [ $GENRAY_CLEANUP -eq 1 ] ; then
+        CLEANUP_FLAG="-d "
+    fi
+
+    OPTIMISE_FLAG=""
+    if [ $GENRAY_OPTIMISE -eq 1 ] ; then
+        OPTIMISE_FLAG="-o $GENRAY_LAUNCH_ANGLE_DIRECTION"
+    fi
+
+    CQL3D_FLAG=""
+    if [ $CQL3D -eq 1 ] ; then
+        CQL3D_FLAG="-c $CQL3D_EXE"
+    fi
+
+    # Run GENRAY manager in the background
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY manager application: $GENRAY_MGR"
+        echo "GENRAY manager log level: $GENRAY_MGR_LOGLEVEL"
+        echo "EBW work directory: $GENRAY_WORKDIR"
+        echo "Cleanup flag: $CLEANUP_FLAG"
+        echo "Optimise flag: $OPTIMISE_FLAG"
+        echo "CQL3D: $CQL3D_FLAG"
+        echo "EBW Run Manager period: $GENRAY_MGR_PERIOD"
+        echo "EBW Run Manager timeout: $GENRAY_MGR_TIMEOUT"
+        echo "EBW job timeout: $GENRAY_JOB_TIMEOUT"
+        echo "GENRAY executable: $GENRAY_EXE"
+    fi
+    $GENRAY_MGR -l $GENRAY_MGR_LOGLEVEL -w $GENRAY_WORKDIR $CLEANUP_FLAG $OPTIMISE_FLAG \
+                $CQL3D_FLAG $GENRAY_MGR_PERIOD $GENRAY_MGR_TIMEOUT $GENRAY_JOB_TIMEOUT $GENRAY_EXE \
+                &
+    GENRAY_MGR_PID=$!
+
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY Manager launched (PID $GENRAY_MGR_PID)"
+    fi
+fi
+
+#############################################################################
+# Create JINTRAC provenance file
+#############################################################################
+
+getGITinfo -h $JINTRAC_DIR > $JINTRAC_PROV_FILE 2>/dev/null
+
+###########################################################################
+# Execute
+###########################################################################
+
+IN_FILE=jetto.in
+MSGFILE=.msg
+if [ -f $RAMDRIVE_FILE ] ; then
+    OUT_FILE=jetto.outa
+else
+    OUT_FILE=jetto.out
+fi
+
+echo "Status : Running" >$STATUS_FILE
+
+if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
+
+    # Copy HCD python files into run directory and add to PYTHONPATH
+    # (Exclude CI runs for now)
+    if [ "$JINTRAC_HCD_FOLDER" != "" ] && [ -z "$ITERCI" ] ; then
+        cp -R $JINTRAC_HCD_FOLDER/* $RUNDIR
+        export HCD_FOLDER=$RUNDIR
+        export PYTHONPATH=$HCD_FOLDER:$PYTHONPATH
+        export PYTHONPATH=$HCD_FOLDER/tools:$PYTHONPATH
+        export PYTHONPATH=$HCD_FOLDER/interface:$PYTHONPATH
+        export PYTHONPATH=$HCD_FOLDER/workflow:$PYTHONPATH
+        export PYTHONPATH=$HCD_FOLDER/plugins:$PYTHONPATH
+    fi
+
+    # Call IMAS python driver
+    echo "Starting python driver..." >$OUT_FILE
+    ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver $OUT_FILE python.err )
+    RC=$?
+    ( cd_rundir && rm -rf __pycache__ )
+
+else
+    if [ $DEBUG -eq 0 ] ; then
+        # Prevent core dumps
+        ulimit -c 0
+        if [ $MPI -eq 0 ] ; then
+            (time $JETTO_EXE $JETTO_TLIMIT >$OUT_FILE) 2>&1
+        else
+            # allow to run as root for usage in ci context
+            echo mpirun --allow-run-as-root --quiet -np $NPROC $JETTO_EXE $JETTO_TLIMIT
+            (time mpirun --allow-run-as-root --quiet -np $NPROC $JETTO_EXE $JETTO_TLIMIT >$OUT_FILE) 2>&1
+            # (use /usr/bin/time -v for memory measurements)
+        fi
+        RC=$?
+    else
+        SEARCHPATH=""
+        for DIR in `ls -R -F $JSRCPATH | grep ":" | cut -f1 -d":"` ; do
+            SEARCHPATH=$SEARCHPATH:$DIR
+        done
+        if [ $MPI -eq 0 ] ; then
+            if [ `echo $LOADEDMODULES | grep totalview | wc -l` -eq 0 ] ; then
+                module load totalview
+            fi
+            totalview  --search_path $SEARCHPATH                \
+                $JETTO_EXE -a $JETTO_TLIMIT >$OUT_FILE
+        else
+            # mpirun -tv -np $NPROC $JETTO_EXE -a $JETTO_TLIMIT >$OUT_FILE
+            # alternative with GDB
+            mpirun -np $NPROC -x DISPLAY=$DISPLAY xterm -hold -e gdb --args $JETTO_EXE -a $JETTO_TLIMIT >$OUT_FILE
+        fi
+
+        RC=$?
+    fi
+fi
+
+if [ -f $RAMDRIVE_FILE ] ; then
+  OK=`isok jetto.outt`
+else
+  OK=`isok $OUT_FILE`
+fi
+
+if [ $OK -eq 1 ] ; then
+    MSG="Completed successfully"
+else
+    MSG="Failed"
+fi
+
+echo "Status : $MSG" >$STATUS_FILE
+
+rm -f kill
+
+###########################################################################
+# Catalogue case
+###########################################################################
+
+echo                  | tee    $MSGFILE
+echo "... JETTO $MSG" | tee -a $MSGFILE
+
+if [ $OK -eq 1 ] ; then
+    if [ $CATALOG -eq 1 ] ; then
+        echo    | tee -a $MSGFILE
+        catalog | tee -a $MSGFILE
+        echo    | tee -a $MSGFILE
+
+        RESULT=`grep "catalogue entry" $MSGFILE | cut -f2 -d:`
+        RESULT=`expr "$RESULT"`
+
+        if [ -z "$RESULT" ] ; then
+            RESULT="unable to catalogue"
+        else
+            RESULT="cataloged as "$RESULT
+        fi
+    else
+        RESULT="uncatalogued"
+    fi
+else
+    RESULT="failed !"
+fi
+
+###########################################################################
+# Email completion details
+###########################################################################
+
+if [ "$MAIL" != "" ] ; then
+    mail -s "Jetto $RUN ended - $RESULT" $MAIL <$MSGFILE
+
+    sleep 10
+fi
+
+if [ -z $KEEPMESSAGE ]; then
+    rm -f $MSGFILE
+fi
+
+###########################################################################
+# Exit
+###########################################################################
+
+rmlinks
+rmempty
+rm -rf configs
+
+rm_batch_jobs
+
+if [ $ASCOT -eq 1 ] ; then
+    cp $ASCOT_KILL_MASTER $ASCOT_KILL
+fi
+
+if [ $CREATENL -eq 1 ] ; then
+    cp $CREATENL_KILL_MASTER $CREATENL_KILL
+fi
+
+if [ $GENRAY -eq 1 ] ; then
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "Waiting for GENRAY Manager process (PID $GENRAY_MGR_PID) to finish..."
+    fi
+
+    touch $GENRAY_WORKDIR/$GENRAY_MGR_KILL_FILE
+    wait $GENRAY_MGR_PID
+
+    if [ $GENRAY_DEBUG -eq 1 ] ; then
+        echo "GENRAY Manager process completed"
+    fi
+fi
+
+exit $RC

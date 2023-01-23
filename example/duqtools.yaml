@@ -1,0 +1,38 @@
+create:
+  dimensions:
+  - values:
+    - 1.0
+    - 1.0
+    - 1.0
+    operator: multiply
+    scale_to_error: false
+    variable: t_e
+  - values:
+    - 1.0
+    - 1.0
+    - 1.0
+    operator: multiply
+    scale_to_error: false
+    variable: zeff
+  sampler:
+    method: latin-hypercube
+    n_samples: 3
+  data:
+    user: public
+    imasdb: jet
+    run_in_start_at: 7000
+    run_out_start_at: 8000
+  template: ./template
+  template_data:
+    user: public
+    db: jet
+    shot: 90350
+    run: 2
+extra_variables:
+  - name: my_extra_var
+    ids: core_profiles
+    path: profiles_1d/*/t_i_average
+    dims: [time, x]
+    type: IDS-variable
+submit:
+  submit_system: docker
