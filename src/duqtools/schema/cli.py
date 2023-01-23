@@ -103,6 +103,8 @@ class SubmitConfigModel(BaseModel):
         '.llcmd', description='Name of the submission script.')
     submit_command: str = Field('sbatch',
                                 description='Submission command for slurm.')
+    docker_image: str = Field('jintrac-imas',
+                              description='Docker image used for submission')
     submit_system: Literal['prominence', 'slurm', 'docker'] = Field(
         'slurm',
         description='System to submit jobs to '
