@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH -J jetto.runaug_ecrh.case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs
+#SBATCH -J jetto.runparallel.jet90350.interpretive_esco02
 #SBATCH -i /dev/null
 #SBATCH -o ll.out
 #SBATCH -e ll.err
@@ -9,8 +9,8 @@
 
 
 #SBATCH -N 1
-#SBATCH -n 16
-#SBATCH -t 48:0:00
+#SBATCH -n 2
+#SBATCH -t 2:0:00
 
-cd /pfs/work/g2jcitri/jetto/runs/runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs
-/pfs/work/g2jcitri/jetto/runs/runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs/rjettov -S -I -p -xmpi -x64 runaug_ecrh/case7_noj_QLK_feedback_4.5e15_f005_tar09_rho095_outputs v210921_gateway_v9 g2fkoech
+cd /pfs/work/g2aho/jetto/runs/runparallel/jet90350/interpretive_esco02
+/pfs/work/g2aho/jetto/runs/runparallel/jet90350/interpretive_esco02/rjettov -S -I -p -xmpi -x64 runparallel/jet90350/interpretive_esco02 v210921_gateway_imas_parallel g2fkoech
