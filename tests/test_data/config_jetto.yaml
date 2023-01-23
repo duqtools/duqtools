@@ -19,10 +19,15 @@ create:
     n_samples: 3
   data:
     user: public
-    imasdb: aug
+    imasdb: test
     run_in_start_at: 7000
     run_out_start_at: 8000
   template: ./template_model
+  template_data:
+    user: public
+    db: test
+    shot: 11111
+    run: 6666
 extra_variables:
   - name: my_extra_var
     ids: core_profiles

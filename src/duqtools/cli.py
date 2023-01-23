@@ -385,7 +385,7 @@ def cli_yolo(ctx, **kwargs):
 
 
 @cli.command('dash', cls=GroupCmd)
-@common_options(*all_options)
+@common_options(*logging_options, quiet_option, dry_run_option, yes_option)
 def cli_dash(**kwargs):
     """Open dashboard for evaluating IDS data."""
     from .dash import dash
