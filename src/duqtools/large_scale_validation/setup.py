@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from math import prod
 from pathlib import Path
 from string import Template
@@ -50,7 +51,20 @@ def _get_n_samples(cfg: Config) -> int:
     return n_samples
 
 
-def setup(*, template_file, input_file, force, **kwargs):
+def setup(*,
+          template_file,
+          input_file,
+          force,
+          min_run_number_to_use: int = 1000,
+          **kwargs):
+    """Setup large scale validation runs for template.
+
+    Parameters
+    ----------
+    min_run_number_to_use : int
+        Track start run number for each db/shot combination starting
+        at 1000
+    """
     cwd = Path.cwd()
 
     if not input_file:
@@ -65,15 +79,16 @@ def setup(*, template_file, input_file, force, **kwargs):
 
     n_samples = _get_n_samples(dummy_cfg)
 
-    current_run_number = 0
+    run_numbers: dict[tuple[str, int],
+                      int] = defaultdict(lambda: min_run_number_to_use)
 
     for name, handle in handles.items():
 
-        run_in_start = current_run_number
+        run_in_start = run_numbers[handle.db, handle.shot]
         run_out_start = run_in_start + n_samples
-        current_run_number = run_out_start + n_samples
+        run_numbers[handle.db, handle.shot] = run_out_start + n_samples
 
-        if current_run_number > MAX_RUN:
+        if run_numbers[handle.db, handle.shot] > MAX_RUN:
             raise ValueError(f'Cannot write data with run number > {MAX_RUN}')
 
         cfg = template.substitute(
