@@ -82,6 +82,8 @@ def setup(*,
     run_numbers: dict[tuple[str, int],
                       int] = defaultdict(lambda: min_run_number_to_use)
 
+    any_exists = False
+
     for name, handle in handles.items():
 
         run_in_start = run_numbers[handle.db, handle.shot]
@@ -105,13 +107,24 @@ def setup(*,
 
         out_drc = cwd / name
 
-        op_queue.add(
-            action=_generate_run_dir,
-            kwargs={
-                'drc': out_drc,
-                'cfg': cfg,
-                'force': force
-            },
-            description='Setup run',
-            extra_description=name,
-        )
+        if out_drc.exists() and not force:
+            op_queue.add_no_op(description='Directory exists',
+                               extra_description=name)
+            any_exists = True
+        else:
+            op_queue.add(
+                action=_generate_run_dir,
+                kwargs={
+                    'drc': out_drc,
+                    'cfg': cfg,
+                    'force': force
+                },
+                description='Setup run',
+                extra_description=name,
+            )
+
+    if any_exists:
+        op_queue.add_no_op(description='Not creating run directories',
+                           extra_description='Some targets already exist, '
+                           'use --force to override')
+        return
