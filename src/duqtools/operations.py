@@ -28,6 +28,10 @@ HEADER_STYLE = {
     'bold': True,
 }
 
+loginfo = duqlog_screen.info
+logwarning = duqlog_screen.warning
+style = click.style
+
 
 class Operation(BaseModel):
     """Operation, simple class which has a callable action.
@@ -70,7 +74,7 @@ class Operation(BaseModel):
 
     @property
     def long_description(self):
-        description = click.style(self.description, **self.style)
+        description = style(self.description, **self.style)
 
         if self.extra_description is not None:
             description = f'{description} : {self.extra_description}'
@@ -151,15 +155,24 @@ class Operations(deque):
                 f'Appended {item.description} to the operations queue')
             super().append(item)
         else:
-            duqlog_screen.info('- ' + item.long_description)
+            loginfo('- ' + item.long_description)
             item()
 
     def apply(self) -> Operation:
         """Apply the next operation in the queue and remove it."""
+        op = self.popleft()
+        op()
 
-        operation = self.popleft()
-        operation()
-        return operation
+        logger.info(op.long_description)
+
+        return op
+
+    def _apply_all(self, callback: Optional[Callable] = None) -> None:
+        """Pop and apply all operations in the queue."""
+        while self:
+            op = self.apply()
+            if callback:
+                callback(op)
 
     def apply_all(self) -> None:
         """Apply all queued operations and empty the queue.
@@ -167,23 +180,22 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))  # type: ignore
-        if not cfg.quiet:
-            with tqdm(total=len(self), position=1) as pbar:
-                pbar.set_description('Applying operations')
-                with tqdm(iterable=False, bar_format='{desc}',
-                          position=0) as dbar:
-                    while len(self) != 0:
-                        op = self.popleft()
-                        if not op.quiet:
-                            dbar.set_description(op.long_description)
-                        logger.info(op.long_description)
-                        pbar.update()
-                        op()
-        else:
-            while len(self) != 0:
-                op = self.popleft()
-                op()
+        loginfo(style('Applying Operations', **HEADER_STYLE))  # type: ignore
+
+        if cfg.quiet:
+            return self._apply_all()
+
+        with tqdm(total=len(self), position=1) as pbar:
+            pbar.set_description('Progress')
+
+            with tqdm(bar_format='{desc}') as dbar:
+
+                def callback(op):
+                    if not op.quiet:
+                        dbar.set_description(op.long_description)
+                    pbar.update()
+
+                self._apply_all(callback=callback)
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -194,22 +206,22 @@ class Operations(deque):
         """
 
         # To print the descriptions we need to get them
-        duqlog_screen.info('')
-        duqlog_screen.info(
-            click.style('Operations in the Queue:', **HEADER_STYLE))  # type: ignore
-        duqlog_screen.info(
-            click.style('========================', **HEADER_STYLE))  # type: ignore
+        loginfo('')
+        loginfo(style('Operations in the Queue:',
+                      **HEADER_STYLE))  # type: ignore
+        loginfo(style('========================',
+                      **HEADER_STYLE))  # type: ignore
         for op in self:
             if not op.quiet:
-                duqlog_screen.info('- ' + op.long_description)
+                loginfo('- ' + op.long_description)
 
         if self.dry_run:
-            duqlog_screen.info('Dry run enabled, not applying op_queue')
+            loginfo('Dry run enabled, not applying op_queue')
             return False
 
         # Do not confirm if all actions are no-op
         if all(op.action is None for op in self):
-            duqlog_screen.info('\nNo actions to execute.')
+            loginfo('\nNo actions to execute.')
             return False
 
         ans = self.yes or click.confirm(
@@ -223,10 +235,10 @@ class Operations(deque):
     def check_unconfirmed_operations(self):
         """Safety check, it should never happen that operations are not
         executed."""
-        if len(self) != 0:
-            duqlog_screen.warning(
-                click.style((f'There are still {len(self)} operations '
-                             'in the queue at program exit!'), **HEADER_STYLE))
+        if self:
+            logwarning(
+                style((f'There are still {len(self)} operations '
+                       'in the queue at program exit!'), **HEADER_STYLE))
 
 
 op_queue = Operations()
@@ -286,6 +298,7 @@ def add_to_op_queue(op_desc: str, extra_desc: str | None = None, quiet=False):
     """
 
     def op_queue_real(func):
+
         def wrapper(*args, **kwargs) -> None:
             # For the description format we must convert args to kwargs
             sig = signature(func)
