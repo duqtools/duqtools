@@ -33,7 +33,37 @@ logwarning = duqlog_screen.warning
 style = click.style
 
 
-class Operation(BaseModel):
+class LongDescriptionMixin:
+    description: str
+    extra_description: Optional[str]
+    style: dict
+
+    @property
+    def long_description(self) -> str:
+        description = style(self.description, **self.style)
+
+        if self.extra_description:
+            description = f'{description} : {self.extra_description}'
+
+        return description
+
+
+class Warning(LongDescriptionMixin):
+    """Warning item for screen log."""
+    style = NO_OP_STYLE
+
+    def __init__(self, description: str, extra_description: str):
+        self.description = description
+        self.extra_description = extra_description
+
+    def __hash__(self):
+        return hash((self.description, self.extra_description))
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+
+class Operation(LongDescriptionMixin, BaseModel):
     """Operation, simple class which has a callable action.
 
     Usually not called directly but used through Operations. has the
@@ -72,15 +102,6 @@ class Operation(BaseModel):
             self.action(*self.args, **self.kwargs)  # type: ignore
         return self
 
-    @property
-    def long_description(self):
-        description = style(self.description, **self.style)
-
-        if self.extra_description is not None:
-            description = f'{description} : {self.extra_description}'
-
-        return description
-
     @validator('args', always=True)
     def validate_args(cls, v):
         if v is None:
@@ -109,6 +130,7 @@ class Operations(deque):
     yes = False  # Apply operations without prompt
     enabled = False  # Actually do something
     dry_run = False  # Never apply any operations (do not even ask)
+    warnings: set[Warning] = set()
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
@@ -144,6 +166,11 @@ class Operations(deque):
                  extra_description=extra_description,
                  style=OP_STYLE)
 
+    def warning(self, description: str, extra_description: str):
+        self.warnings.add(
+            Warning(description=description,
+                    extra_description=extra_description))
+
     def put(self, item: Operation):
         """synonym for append."""
         self.append(item)
@@ -162,9 +189,6 @@ class Operations(deque):
         """Apply the next operation in the queue and remove it."""
         op = self.popleft()
         op()
-
-        logger.info(op.long_description)
-
         return op
 
     def _apply_all(self, callback: Optional[Callable] = None) -> None:
@@ -215,6 +239,9 @@ class Operations(deque):
             if not op.quiet:
                 loginfo('- ' + op.long_description)
 
+        for warning in self.warnings:
+            loginfo('- ' + warning.long_description)
+
         if self.dry_run:
             loginfo('Dry run enabled, not applying op_queue')
             return False
@@ -225,7 +252,8 @@ class Operations(deque):
             return False
 
         ans = self.yes or click.confirm(
-            '\nDo you want to apply all these operations?', default=False)
+            f'\nDo you want to apply all {len(self)} operations?',
+            default=False)
 
         if ans:
             self.apply_all()
