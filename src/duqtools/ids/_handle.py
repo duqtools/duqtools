@@ -96,6 +96,10 @@ class ImasHandle(ImasBaseModel):
                                  run=self.run,
                                  suffix=SUFFIXES[0]))
 
+    def imasdb_path(self) -> Path:
+        """Return path to imasdb."""
+        return self.path().parents[2]
+
     def exists(self) -> bool:
         """Return true if the directory exists.
 
@@ -115,6 +119,12 @@ class ImasHandle(ImasBaseModel):
             Copy data to a new location.
         """
         logger.debug('Copy %s to %s', self, destination)
+
+        imasdb = destination.imasdb_path()
+        if not imasdb.exists():
+            raise OSError(f"Cannot copy to '{str(destination)}', "
+                          f"imasdb '{str(imasdb)}' does not exist.")
+
         try:
             copy_ids_entry(self, destination)
         except Exception as err:
