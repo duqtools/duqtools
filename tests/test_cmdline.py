@@ -149,7 +149,7 @@ def test_example_plot(cmdline_workdir):
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
         assert (result.returncode == 0)
-        assert (Path('./chart_rho_tor_norm-t_i_ave.html').exists())
+        assert (Path('./chart_rho_tor_norm-zeff.html').exists())
 
 
 def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):
