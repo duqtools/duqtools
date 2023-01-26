@@ -6,10 +6,11 @@ import subprocess as sp
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
+from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..config import cfg
 from ..ids import ImasHandle
@@ -179,9 +180,13 @@ class BaseJettoSystem(AbstractSystem):
         if (source_drc / 'jetto.sin').exists():
             jetto_sanco = namelist.read(source_drc / 'jetto.sin')
 
-        jetto_extra = []
-        if (source_drc / 'jetto.ex').exists():
-            jetto_extra = [str(source_drc / 'jetto.ex')]
+        all_files = os.listdir(source_drc)
+
+        jetto_extra: List[str] = []
+        for regex in _EXTRA_FILE_REGEXES:
+            jetto_extra = jetto_extra + list(filter(regex.match, all_files))
+
+        jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
         jetto_template = template.Template(jset=jetto_jset,
                                            namelist=jetto_namelist,
