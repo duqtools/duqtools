@@ -2135,7 +2135,7 @@ JobProcessingPanel.loadModuleType                           : 64-bit
 JobProcessingPanel.machine                                  : jac
 JobProcessingPanel.machineNumber                            : gw
 JobProcessingPanel.name                                     : v210921_gateway_imas_parallel
-JobProcessingPanel.numProcessors                            : 2
+JobProcessingPanel.numProcessors                            : 1
 JobProcessingPanel.priority                                 : prio1
 JobProcessingPanel.queueName                                : gen9_ib-short
 JobProcessingPanel.runDirNumber                             : parallel/jet90350/interpretive_esco02

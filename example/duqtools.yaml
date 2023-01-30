@@ -16,12 +16,12 @@ create:
     variable: zeff
   sampler:
     method: latin-hypercube
-    n_samples: 3
+    n_samples: 1
   data:
     user: public
     imasdb: jet
-    run_in_start_at: 7000
-    run_out_start_at: 8000
+    run_in_start_at: 1
+    run_out_start_at: 2
   template: ./template
   template_data:
     user: public
