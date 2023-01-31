@@ -21,9 +21,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _FILENAME = 'ids_{shot}{run:04d}{suffix}'
-_IMASDB = ('imasdb', '{db}', '3', '0')
+_IMASDB = ('{db}', '3', '0')
 GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
-                                                       *_IMASDB, _FILENAME))
+                                                       'imasdb', *_IMASDB,
+                                                       _FILENAME))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
 
 SUFFIXES = (
@@ -98,7 +99,7 @@ class ImasHandle(ImasBaseModel):
         """
         if self.is_local_db:
             # jintrac v220922
-            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path().parent.mkdir(parents=True, exist_ok=True)
         elif self.user == getuser() or self.user == 'public':
             # jintrac v210921
             pass
@@ -109,13 +110,14 @@ class ImasHandle(ImasBaseModel):
         """Generate string representation of Imas location."""
         return f'{self.user}/{self.db}/{self.shot}/{self.run}'
 
+    @property
     def is_local_db(self):
         """Return True if the handle points to a local imas database."""
         return self.user.startswith('/')
 
     def path(self) -> Path:
         """Return location as Path."""
-        if self.local_imasdb:
+        if self.is_local_db:
             template = LOCAL_PATH_TEMPLATE
         else:
             template = GLOBAL_PATH_TEMPLATE

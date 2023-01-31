@@ -84,7 +84,7 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     KeyError
         If the IDS entry you are trying to copy does not exist.
     """
-    target.validate_user()
+    target.validate()
 
     imas_version, _ = get_imas_ual_version()
 
