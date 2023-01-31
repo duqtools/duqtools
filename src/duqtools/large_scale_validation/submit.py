@@ -4,8 +4,7 @@ from typing import Deque
 
 from ..config import cfg
 from ..models import Job, Locations
-from ..submit import (SubmitError, job_scheduler, job_submitter, lockfile_ok,
-                      status_file_ok)
+from ..submit import SubmitError, job_scheduler, job_submitter, lockfile_ok, status_file_ok
 
 
 def submit(*, force, max_jobs, schedule, **kwargs):

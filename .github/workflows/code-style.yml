@@ -18,15 +18,15 @@ jobs:
     if: github.event.pull_request.draft == false
 
     steps:
-      - name: Set up python
-        uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       - name: Install additional dependencies
         run: |
-          pip install flake8
+          pip install ruff
 
       - name: Check code style
         run: |
-          flake8
+          ruff src/duqtools tests

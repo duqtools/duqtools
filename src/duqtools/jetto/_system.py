@@ -7,9 +7,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Optional
 
-from jetto_tools import config
+from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
-from jetto_tools import jset, lookup, namelist, template
 
 from ..config import cfg
 from ..ids import ImasHandle
