@@ -8,8 +8,7 @@ from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, OperationDim
 from ._imas import ImasBaseModel
 from .data_location import DataLocation
-from .matrix_samplers import (CartesianProduct, HaltonSampler, LHSSampler,
-                              SobolSampler)
+from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel
 
 

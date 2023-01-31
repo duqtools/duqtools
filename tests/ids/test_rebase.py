@@ -3,8 +3,13 @@ import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample
 
-from duqtools.ids import (IDSMapping, rebase_on_grid, rebase_on_time,
-                          standardize_grid, standardize_time)
+from duqtools.ids import (
+    IDSMapping,
+    rebase_on_grid,
+    rebase_on_time,
+    standardize_grid,
+    standardize_time,
+)
 from duqtools.schema import IDSVariableModel
 
 TIME_VAR = IDSVariableModel(
