@@ -35,4 +35,4 @@ def test_jintrac_v220922():
     h = ImasHandle(user=user, db='moo', shot=1, run=1)
 
     assert h.is_local_db
-    assert str(h.path().parent) == '/some/path/imasdb/moo/3/0/'
+    assert str(h.path().parent) == '/some/path/imasdb/moo/3/0'
