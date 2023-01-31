@@ -237,11 +237,73 @@ class BaseJettoSystem(AbstractSystem):
 
 
 class JettoSystemV210921(BaseJettoSystem):
-    ...
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_in_start_at + seq_number,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_out_start_at + seq_number,
+        )
 
 
 class JettoSystemV220922(BaseJettoSystem):
-    ...
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=1,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=2,
+        )
 
 
 JettoSystem = JettoSystemV220922
