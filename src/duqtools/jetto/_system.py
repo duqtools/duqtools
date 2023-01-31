@@ -30,7 +30,7 @@ lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 jetto_lookup = lookup.from_file(lookup_file)
 
 
-class JettoSystem(AbstractSystem):
+class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def get_runs_dir() -> Path:
@@ -234,3 +234,14 @@ class JettoSystem(AbstractSystem):
             jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
+
+
+class JettoSystemV210921(BaseJettoSystem):
+    ...
+
+
+class JettoSystemV220922(BaseJettoSystem):
+    ...
+
+
+JettoSystem = JettoSystemV220922

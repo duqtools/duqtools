@@ -164,8 +164,8 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[VariableConfigModel] = Field(
         description='Specify extra variables for this run.')
 
-    system: Literal['jetto', 'dummy', 'jetto-pythontools',
-                    'jetto-duqtools'] = Field(
+    system: Literal['jetto', 'dummy', 'jetto-v210921',
+                    'jetto-v220922'] = Field(
                         'jetto', description='backend system to use')
 
     quiet: bool = Field(
