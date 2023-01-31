@@ -70,14 +70,25 @@ class CreateManager:
         for i, operations in enumerate(ops_list):
             dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
 
-            data_in = ImasHandle(user=self.options.data.user,
-                                 db=self.options.data.imasdb,
+            # v210921
+            # data_in = ImasHandle(user=self.options.system.user,
+            #                      db=self.options.system.imasdb,
+            #                      shot=self.source.shot,
+            #                      run=self.options.system.run_in_start_at + i)
+            # data_out = ImasHandle(user=self.options.system.user,
+            #                       db=self.options.system.imasdb,
+            #                       shot=self.source.shot,
+            #                       run=self.options.system.run_out_start_at + i)
+
+            # v220922
+            data_in = ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                                 db=self.source.db,
                                  shot=self.source.shot,
-                                 run=self.options.data.run_in_start_at + i)
-            data_out = ImasHandle(user=self.options.data.user,
-                                  db=self.options.data.imasdb,
+                                 run=1)
+            data_out = ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                                  db=self.source.db,
                                   shot=self.source.shot,
-                                  run=self.options.data.run_out_start_at + i)
+                                  run=2)
 
             model = Run(dirname=dirname.resolve(),
                         shortname=dirname.name,
