@@ -11,7 +11,7 @@ from pytest_dependency import depends
 from duqtools.utils import work_directory
 
 config_file_name = 'config_jetto.yaml'
-systems = ['jetto']
+systems = ['jetto-v220922', 'jetto-v210921']
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -43,25 +43,51 @@ def cmdline_workdir(tmp_path_factory, system):
         with open(workdir / 'config.yaml', 'w') as fo:
             fo.write(fi.read())
             fo.write(f'\nsystem: {system}')
-    return workdir
+    yield workdir
+
+    if system == 'v210921':
+        for i in range(3):
+            p = Path(cmdline_workdir,
+                     f'run_000{i}/imasdb/test/3/0/ids_111110001.datafile')
+            p.unlink()
 
 
 @pytest.mark.dependency()
-def test_example_create(cmdline_workdir):
+def test_example_create(cmdline_workdir, system):
     cmd = 'duqtools create -c config.yaml --force --yes'.split()
 
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
         assert (result.returncode == 0)
 
+        for i in range(3):
+            if system == 'jetto-v210921':
+                p = Path(
+                    f'/root/public/imasdb/test/3/0/ids_11111700{i}.datafile')
+            else:
+                p = Path(cmdline_workdir,
+                         f'run_000{i}/imasdb/test/3/0/ids_111110001.datafile')
+            assert p.exists()
+
 
 @pytest.mark.dependency()
-def test_example_recreate(cmdline_workdir):
+def test_example_recreate(cmdline_workdir, system):
     cmd = 'duqtools recreate run_0000 -c config.yaml --yes'.split()
+
+    if system == 'jetto-v210921':
+        p = Path('/root/public/imasdb/test/3/0/ids_111117000.datafile')
+    else:
+        p = Path(cmdline_workdir,
+                 'run_0000/imasdb/test/3/0/ids_111110001.datafile')
+
+    p.unlink()
+    assert not p.exists()
 
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
         assert (result.returncode == 0)
+
+        assert p.exists()
 
 
 @pytest.mark.dependency()
@@ -109,7 +135,6 @@ def test_example_status(cmdline_workdir, system, request):
         assert (result.returncode == 0)
 
 
-@pytest.mark.dependency()
 def test_example_plot(cmdline_workdir):
     from duqtools.ids import imas_mocked
     if imas_mocked:
