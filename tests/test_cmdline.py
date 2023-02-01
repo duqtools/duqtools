@@ -11,7 +11,7 @@ from pytest_dependency import depends
 from duqtools.utils import work_directory
 
 config_file_name = 'config_jetto.yaml'
-systems = ['jetto-duqtools']
+systems = ['jetto']
 
 
 @pytest.fixture(scope='session', autouse=True)
