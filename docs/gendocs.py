@@ -11,12 +11,23 @@ from pathlib import Path
 import mkdocs_gen_files
 
 from duqtools.jetto import JettoSystem
-from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
-                             ImasBaseModel, JettoVar, JettoVariableModel,
-                             LinSpace, OperationDim)
+from duqtools.schema import (
+    ARange,
+    IDSOperationDim,
+    IDSVariableModel,
+    ImasBaseModel,
+    JettoVar,
+    JettoVariableModel,
+    LinSpace,
+    OperationDim,
+)
 from duqtools.schema._jetto import JsetField, NamelistField
-from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
-                                 StatusConfigModel, SubmitConfigModel)
+from duqtools.schema.cli import (
+    ConfigModel,
+    CreateConfigModel,
+    StatusConfigModel,
+    SubmitConfigModel,
+)
 from duqtools.schema.data_location import DataLocation
 from duqtools.system import DummySystem
 

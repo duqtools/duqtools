@@ -7,9 +7,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Optional
 
-from jetto_tools import config
+from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
-from jetto_tools import jset, lookup, namelist, template
 
 from ..config import cfg
 from ..ids import ImasHandle
@@ -54,7 +53,6 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path):
-
         jetto_jset = jset.read(run_dir / 'jetto.jset')
 
         jetto_write_batchfile(run_dir, jetto_jset)
@@ -87,7 +85,6 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_prominence(job: Job):
-
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
@@ -198,7 +195,6 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 
