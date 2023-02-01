@@ -5,7 +5,7 @@ from string import Template
 
 from ..config import Config
 from ..operations import op_queue
-from ..utils import read_imas_handles_from_file
+from ..utils import no_op, read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +88,7 @@ def setup(*, template_file, input_file, force, **kwargs):
         extra_params = ExtrasV210921(dummy_cfg)
         update_mapping = extra_params.update_mapping
     else:
-
-        def update_mapping(x):
-            return None  # default to no-op
+        update_mapping = no_op  # default to no-op
 
     for name, handle in handles.items():
         mapping = {
