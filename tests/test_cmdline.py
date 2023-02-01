@@ -10,6 +10,9 @@ from pytest_dependency import depends
 
 from duqtools.utils import work_directory
 
+imas = pytest.importorskip('imas',
+                           reason='No way of testing this without IMAS')
+
 config_file_name = 'config_jetto.yaml'
 systems = ['jetto-v220922', 'jetto-v210921']
 
