@@ -63,7 +63,8 @@ def test_example_create(cmdline_workdir, system):
         for i in range(3):
             if system == 'jetto-v210921':
                 p = Path(
-                    f'/root/public/imasdb/test/3/0/ids_11111700{i}.datafile')
+                    f'/opt/imas/shared/imasdb/test/3/0/ids_11111700{i}.datafile'
+                )
             else:
                 p = Path(cmdline_workdir,
                          f'run_000{i}/imasdb/test/3/0/ids_111110001.datafile')
@@ -75,7 +76,7 @@ def test_example_recreate(cmdline_workdir, system):
     cmd = 'duqtools recreate run_0000 -c config.yaml --yes'.split()
 
     if system == 'jetto-v210921':
-        p = Path('/root/public/imasdb/test/3/0/ids_111117000.datafile')
+        p = Path('/opt/imas/shared/imasdb/test/3/0/ids_111117000.datafile')
     else:
         p = Path(cmdline_workdir,
                  'run_0000/imasdb/test/3/0/ids_111110001.datafile')
