@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import logging
 from math import prod
 from pathlib import Path
 from string import Template
+from typing import TYPE_CHECKING
 
 from ..config import Config
 from ..operations import op_queue
 from ..utils import no_op, read_imas_handles_from_file
+
+if TYPE_CHECKING:
+    from duqtools.api import ImasHandle
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +23,10 @@ DUMMY_VARS = {
     'RUN_NAME': 'run_x',
     'RUN_IN_START': 10,  # v210921
     'RUN_OUT_START': 20,  # v210921
+    'T_START': 0.0,
+    'T_END': 0.0,
+    'B_FIELD': 0.0,
+    'MAJOR_RADIUS': 0.0,
 }
 
 
@@ -71,7 +81,20 @@ class ExtrasV210921:
         mapping['RUN_OUT_START'] = run_out_start
 
 
-def setup(*, template_file, input_file, force, **kwargs):
+def update_for_ids(mapping: dict, handle: ImasHandle, duration: float = 0.01):
+    """Grabs some values from the imas handle."""
+    cp = handle.get('core_profiles')
+    mapping['T_START'] = t_start = cp['time'][0]
+    mapping['T_END'] = t_start + duration
+
+    try:
+        mapping['B_FIELD'] = cp['vacuum_toroidal_field/b0'][0]
+    except IndexError:
+        mapping['B_FIELD'] = 0
+    mapping['MAJOR_RADIUS'] = cp['vacuum_toroidal_field/r0']
+
+
+def setup(*, template_file, input_file, force, duration=0.01, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
@@ -86,9 +109,9 @@ def setup(*, template_file, input_file, force, **kwargs):
 
     if (dummy_cfg.system == 'v210921'):
         extra_params = ExtrasV210921(dummy_cfg)
-        update_mapping = extra_params.update_mapping
+        update_for_system = extra_params.update_mapping
     else:
-        update_mapping = no_op  # default to no-op
+        update_for_system = no_op  # default to no-op
 
     for name, handle in handles.items():
         mapping = {
@@ -99,7 +122,8 @@ def setup(*, template_file, input_file, force, **kwargs):
             'RUN_NAME': name,
         }
 
-        update_mapping(mapping)
+        update_for_system(mapping)
+        update_for_ids(mapping, handle)
 
         cfg = template.substitute(mapping)
 
