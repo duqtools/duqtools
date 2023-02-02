@@ -32,6 +32,11 @@ jetto_lookup = lookup.from_file(lookup_file)
 
 
 class BaseJettoSystem(AbstractSystem):
+    """System that can be used to create runs for jetto.
+
+    This system can submit to various backends like docker, prominence
+    and the gateway.
+    """
 
     @staticmethod
     def get_runs_dir() -> Path:
@@ -89,7 +94,6 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_docker(job: Job):
-
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
