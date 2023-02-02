@@ -1,22 +1,22 @@
 create:
   dimensions:
   - values:
+    - 0.8
     - 1.0
-    - 1.0
-    - 1.0
+    - 1.2
     operator: multiply
     scale_to_error: false
     variable: t_e
   - values:
+    - 0.8
     - 1.0
-    - 1.0
-    - 1.0
+    - 1.2
     operator: multiply
     scale_to_error: false
     variable: zeff
   sampler:
     method: latin-hypercube
-    n_samples: 1
+    n_samples: 3
   data:
     user: public
     imasdb: jet
@@ -36,3 +36,4 @@ extra_variables:
     type: IDS-variable
 submit:
   submit_system: docker
+system: jetto-v220922
