@@ -51,7 +51,7 @@ def cmdline_workdir(tmp_path_factory, system):
     if system == 'v210921':
         for i in range(3):
             p = Path(cmdline_workdir,
-                     f'run_000{i}/imasdb/test/3/0/ids_111110001.datafile')
+                     f'run_000{i}/imasdb/jet/3/0/ids_111110001.datafile')
             p.unlink()
 
 
@@ -66,11 +66,11 @@ def test_example_create(cmdline_workdir, system):
         for i in range(3):
             if system == 'jetto-v210921':
                 p = Path(
-                    f'/opt/imas/shared/imasdb/test/3/0/ids_11111700{i}.datafile'
+                    f'/opt/imas/shared/imasdb/jet/3/0/ids_90350700{i}.datafile'
                 )
             else:
                 p = Path(cmdline_workdir,
-                         f'run_000{i}/imasdb/test/3/0/ids_111110001.datafile')
+                         f'run_000{i}/imasdb/jet/3/0/ids_903500001.datafile')
             assert p.exists()
 
 
@@ -79,10 +79,10 @@ def test_example_recreate(cmdline_workdir, system):
     cmd = 'duqtools recreate run_0000 -c config.yaml --yes'.split()
 
     if system == 'jetto-v210921':
-        p = Path('/opt/imas/shared/imasdb/test/3/0/ids_111117000.datafile')
+        p = Path('/opt/imas/shared/imasdb/jet/3/0/ids_903507000.datafile')
     else:
         p = Path(cmdline_workdir,
-                 'run_0000/imasdb/test/3/0/ids_111110001.datafile')
+                 'run_0000/imasdb/jet/3/0/ids_903500001.datafile')
 
     p.unlink()
     assert not p.exists()
@@ -144,12 +144,12 @@ def test_example_plot(cmdline_workdir):
     if imas_mocked:
         pytest.xfail('Imas needed for plotting Imas data')
 
-    cmd = ('duqtools plot -h public/test/11111/6666 -v t_i_ave').split()
+    cmd = ('duqtools plot -h public/jet/90350/2 -v zeff').split()
 
     with work_directory(cmdline_workdir):
         result = sp.run(cmd)
         assert (result.returncode == 0)
-        assert (Path('./chart_rho_tor_norm-t_i_ave.html').exists())
+        assert (Path('./chart_rho_tor_norm-zeff.html').exists())
 
 
 def test_create_missing_sanco_input(cmdline_workdir, system, tmp_path):

@@ -1,14 +1,16 @@
 import logging
+import os
 import shutil
 import stat
 import subprocess as sp
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
+from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..config import cfg
 from ..ids import ImasHandle
@@ -61,6 +63,8 @@ class BaseJettoSystem(AbstractSystem):
     def submit_job(job: Job):
         if cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_slurm(job)
+        elif cfg.submit.submit_system == 'docker':
+            JettoSystem.submit_docker(job)
         elif cfg.submit.submit_system == 'prominence':
             JettoSystem.submit_prominence(job)
         else:
@@ -84,11 +88,33 @@ class BaseJettoSystem(AbstractSystem):
             f.write(ret.stdout)
 
     @staticmethod
+    def submit_docker(job: Job):
+
+        jetto_template = template.from_directory(job.dir)
+        jetto_config = config.RunConfig(jetto_template)
+        jetto_manager = jetto_job.JobManager()
+        extra_volumes = {
+            job.dir.parent / 'imasdb': {
+                'bind': '/opt/imas/shared/imasdb',
+                'mode': 'rw'
+            },
+        }
+
+        os.environ['RUNS_HOME'] = os.getcwd()
+        os.environ['JINTRAC_IMAS_BACKEND'] = 'MDSPLUS'
+        _ = jetto_manager.submit_job_to_docker(jetto_config,
+                                               job.dir,
+                                               image=cfg.submit.docker_image,
+                                               extra_volumes=extra_volumes)
+        job.lockfile.touch()
+
+    @staticmethod
     def submit_prominence(job: Job):
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
+        os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
@@ -155,9 +181,13 @@ class BaseJettoSystem(AbstractSystem):
         if (source_drc / 'jetto.sin').exists():
             jetto_sanco = namelist.read(source_drc / 'jetto.sin')
 
-        jetto_extra = []
-        if (source_drc / 'jetto.ex').exists():
-            jetto_extra = [str(source_drc / 'jetto.ex')]
+        all_files = os.listdir(source_drc)
+
+        jetto_extra: List[str] = []
+        for regex in _EXTRA_FILE_REGEXES:
+            jetto_extra.extend(filter(regex.match, all_files))
+
+        jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
         jetto_template = template.Template(jset=jetto_jset,
                                            namelist=jetto_namelist,

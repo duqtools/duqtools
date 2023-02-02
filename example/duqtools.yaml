@@ -1,16 +1,16 @@
 create:
   dimensions:
   - values:
-    - 0.8
     - 1.0
-    - 1.2
+    - 1.00001
+    - 1.00002
     operator: multiply
     scale_to_error: false
     variable: t_e
   - values:
-    - 0.8
     - 1.0
-    - 1.2
+    - 1.00001
+    - 1.00002
     operator: multiply
     scale_to_error: false
     variable: zeff
@@ -20,9 +20,9 @@ create:
   data:
     user: public
     imasdb: jet
-    run_in_start_at: 7000
-    run_out_start_at: 8000
-  template: ./template_model
+    run_in_start_at: 1
+    run_out_start_at: 2
+  template: ./template
   template_data:
     user: public
     db: jet
@@ -35,4 +35,5 @@ extra_variables:
     dims: [time, x]
     type: IDS-variable
 submit:
-  submit_command: "true"
+  submit_system: docker
+system: jetto-v220922
