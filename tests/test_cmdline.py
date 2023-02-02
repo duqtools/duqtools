@@ -66,7 +66,7 @@ def test_example_create(cmdline_workdir, system):
         for i in range(3):
             if system == 'jetto-v210921':
                 p = Path(
-                    f'/opt/imas/shared/imasdb/jet/3/0/ids_90350000{i}.datafile'
+                    f'/opt/imas/shared/imasdb/jet/3/0/ids_90350700{i}.datafile'
                 )
             else:
                 p = Path(cmdline_workdir,
