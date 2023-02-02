@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from contextlib import contextmanager
+from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
@@ -19,9 +20,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public', 'imasdb',
-                                                '{db}', '3', '0',
-                                                'ids_{shot}{run:04d}{suffix}'))
+_FILENAME = 'ids_{shot}{run:04d}{suffix}'
+_IMASDB = ('{db}', '3', '0')
+GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
+                                                       'imasdb', *_IMASDB,
+                                                       _FILENAME))
+LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
 
 SUFFIXES = (
     '.datafile',
@@ -83,18 +87,47 @@ class ImasHandle(ImasBaseModel):
 
         raise ValueError(f'Could not match {string!r}')
 
+    def validate(self):
+        """Validate the user.
+
+        If the user is a path, then create it.
+
+        Raises
+        ------
+        ValueError:
+            If the user is invalid.
+        """
+        if self.is_local_db:
+            # jintrac v220922
+            self.path().parent.mkdir(parents=True, exist_ok=True)
+        elif self.user == getuser() or self.user == 'public':
+            # jintrac v210921
+            pass
+        else:
+            raise ValueError(f'Invalid user: {self.user}')
+
     def to_string(self) -> str:
         """Generate string representation of Imas location."""
         return f'{self.user}/{self.db}/{self.shot}/{self.run}'
 
+    @property
+    def is_local_db(self):
+        """Return True if the handle points to a local imas database."""
+        return self.user.startswith('/')
+
     def path(self) -> Path:
         """Return location as Path."""
+        if self.is_local_db:
+            template = LOCAL_PATH_TEMPLATE
+        else:
+            template = GLOBAL_PATH_TEMPLATE
+
         return Path(
-            PATH_TEMPLATE.format(user=self.user,
-                                 db=self.db,
-                                 shot=self.shot,
-                                 run=self.run,
-                                 suffix=SUFFIXES[0]))
+            template.format(user=self.user,
+                            db=self.db,
+                            shot=self.shot,
+                            run=self.run,
+                            suffix=SUFFIXES[0]))
 
     def exists(self) -> bool:
         """Return true if the directory exists.

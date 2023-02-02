@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -85,7 +84,7 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     KeyError
         If the IDS entry you are trying to copy does not exist.
     """
-    assert target.user == getuser() or target.user == 'public'
+    target.validate()
 
     imas_version, _ = get_imas_ual_version()
 

@@ -30,7 +30,7 @@ repos:
         additional_dependencies:
           - toml
   - repo: https://github.com/myint/docformatter
-    rev: 'v1.5.0'
+    rev: 'v1.6.0.rc1'
     hooks:
       - id: docformatter
   - repo: https://github.com/charliermarsh/ruff-pre-commit

@@ -29,7 +29,7 @@ lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 jetto_lookup = lookup.from_file(lookup_file)
 
 
-class JettoSystem(AbstractSystem):
+class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def get_runs_dir() -> Path:
@@ -53,7 +53,6 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path):
-
         jetto_jset = jset.read(run_dir / 'jetto.jset')
 
         jetto_write_batchfile(run_dir, jetto_jset)
@@ -86,7 +85,6 @@ class JettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_prominence(job: Job):
-
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
@@ -197,7 +195,6 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 
@@ -233,3 +230,76 @@ class JettoSystem(AbstractSystem):
             jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
+
+
+class JettoSystemV210921(BaseJettoSystem):
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_in_start_at + seq_number,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_out_start_at + seq_number,
+        )
+
+
+class JettoSystemV220922(BaseJettoSystem):
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=1,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=2,
+        )
+
+
+JettoSystem = JettoSystemV220922
