@@ -185,7 +185,7 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_extra: List[str] = []
         for regex in _EXTRA_FILE_REGEXES:
-            jetto_extra = jetto_extra + list(filter(regex.match, all_files))
+            jetto_extra.extend(filter(regex.match, all_files))
 
         jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
