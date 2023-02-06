@@ -67,7 +67,7 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def submit_job(job: Job):
         # Make sure we get a new correct status
-        if (job.dir / 'jetto.status').exists:
+        if (job.dir / 'jetto.status').exists():
             os.remove(job.dir / 'jetto.status')
 
         if cfg.submit.submit_system == 'slurm':
