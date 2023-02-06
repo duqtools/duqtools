@@ -48,12 +48,12 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
     tasks: Deque[Job] = deque()
     completed: Deque[Job] = deque()
 
-    for _ in range(max_jobs):
-        job = queue.popleft()
-        task = job.start()
-        tasks.append(task)
+    while tasks or queue:
+        if queue and len(tasks) < max_jobs:
+            job = queue.popleft()
+            task = job.start()
+            tasks.append(task)
 
-    while tasks:
         time.sleep(interval)
         task = tasks.popleft()
         try:
@@ -61,11 +61,6 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
             tasks.append(task)  # Reschedule
         except StopIteration:
             completed.append(task)
-
-        if queue and len(tasks) < max_jobs:
-            job = queue.popleft()
-            task = job.start()
-            tasks.append(task)
 
         print(
             f' {next(s)} Running: {len(tasks)},'
