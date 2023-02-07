@@ -3,35 +3,46 @@ from __future__ import annotations
 import logging
 from math import prod
 from pathlib import Path
-from string import Template
 from typing import TYPE_CHECKING
+
+import yaml
+from jinja2 import Environment, FileSystemLoader
 
 from ..config import Config
 from ..operations import op_queue
 from ..utils import no_op, read_imas_handles_from_file
 
 if TYPE_CHECKING:
+    import jinja2
+
     from duqtools.api import ImasHandle
 
 logger = logging.getLogger(__name__)
 
-DUMMY_VARS = {
-    'TEMPLATE_USER': 'user',
-    'TEMPLATE_DB': 'db',
-    'TEMPLATE_SHOT': 123,
-    'TEMPLATE_RUN': 456,
-    'RUN_NAME': 'run_x',
-    'RUN_IN_START': 10,  # v210921
-    'RUN_OUT_START': 20,  # v210921
-    'T_START': 0.0,
-    'T_END': 0.0,
-    'B_FIELD': 0.0,
-    'MAJOR_RADIUS': 0.0,
-}
-
 
 class SetupError(Exception):
     ...
+
+
+def get_template(filename: str) -> jinja2.Template:
+    """Load filename as a jinja2 template."""
+    path = Path(filename)
+    drc = Path(path).parent
+    file_loader = FileSystemLoader(str(drc))
+    environment = Environment(loader=file_loader, autoescape=False)
+    return environment.get_template(path.name)
+
+
+def get_system(filename: str):
+    """Grab the system from the config file without pre-defining possible
+    values."""
+    with open(filename, 'rb') as f:
+        for line in f:
+            try:
+                item = yaml.safe_load(line)
+                return item['system']
+            except (yaml.YAMLError, TypeError, KeyError):
+                continue
 
 
 def _generate_run_dir(drc: Path, cfg: str, force: bool):
@@ -102,12 +113,9 @@ def setup(*, template_file, input_file, force, duration=0.01, **kwargs):
 
     handles = read_imas_handles_from_file(input_file)
 
-    with open(template_file) as f:
-        template = Template(f.read())
+    template = get_template(template_file)
 
-    dummy_cfg = Config.parse_raw(template.substitute(DUMMY_VARS))
-
-    if (dummy_cfg.system == 'v210921'):
+    if get_system(template) == 'v210921':
         extra_params = ExtrasV210921(dummy_cfg)
         update_for_system = extra_params.update_mapping
     else:
@@ -125,7 +133,7 @@ def setup(*, template_file, input_file, force, duration=0.01, **kwargs):
         update_for_system(mapping)
         update_for_ids(mapping, handle)
 
-        cfg = template.substitute(mapping)
+        cfg = template.render(handle, **mapping)
 
         Config.parse_raw(cfg)  # make sure config is valid
 
