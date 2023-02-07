@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import yaml
@@ -71,24 +72,24 @@ class ExtrasV210921:
 
         return n_samples
 
-    def update_mapping(self, mapping: dict):
-        """Update mapping with run numbers."""
-        run_in_start = self.current_run_number
-        run_out_start = run_in_start + self.n_samples
-        self.current_run_number = run_out_start + self.n_samples
+    def add_system_attrs(self, run: SimpleNamespace):
+        """Add system specific attributes to run namespace."""
+        data_in_start = self.current_run_number
+        data_out_start = data_in_start + self.n_samples
+        self.current_run_number = data_out_start + self.n_samples
 
         if self.current_run_number > self.MAX_RUN:
             raise ValueError(
                 f'Cannot write data with run number > {self.MAX_RUN}')
 
-        mapping['RUN_IN_START'] = run_in_start
-        mapping['RUN_OUT_START'] = run_out_start
+        run.data_in_start = data_in_start
+        run.data_out_start = data_out_start
 
 
-def update_for_ids(mapping: dict, handle: ImasHandle):
+def get_ids_variables(handle: ImasHandle) -> SimpleNamespace:
     """Grabs some values from the imas handle."""
     e = handle.get('equilibrium')
-    mapping['T_START'] = e['time'][0]
+    t_start = e['time'][0]
 
     for path in (
             'vacuum_toroidal_field/r0',
@@ -96,7 +97,7 @@ def update_for_ids(mapping: dict, handle: ImasHandle):
     ):
         r0 = e[path]
         if r0 and abs(r0) < 1e40:
-            mapping['MAJOR_RADIUS'] = r0
+            major_radius = r0
             break
 
     for path in (
@@ -105,8 +106,12 @@ def update_for_ids(mapping: dict, handle: ImasHandle):
     ):
         b0 = e[path]
         if b0 and abs(b0) < 1e40:
-            mapping['B_FIELD'] = b0[0]
+            b_field = b0[0]
             break
+
+    return SimpleNamespace(t_start=t_start,
+                           b_field=b_field,
+                           major_radius=major_radius)
 
 
 def setup(*, template_file, input_file, force, **kwargs):
@@ -121,23 +126,17 @@ def setup(*, template_file, input_file, force, **kwargs):
 
     if _get_key(template_file, key='system') == 'jetto-v210921':
         extra_params = ExtrasV210921(template_file)
-        update_for_system = extra_params.update_mapping
+        add_system_attrs = extra_params.add_system_attrs
     else:
-        update_for_system = no_op  # default to no-op
+        add_system_attrs = no_op  # default to no-op
 
     for name, handle in handles.items():
-        mapping = {
-            'TEMPLATE_USER': handle.user,
-            'TEMPLATE_DB': handle.db,
-            'TEMPLATE_SHOT': handle.shot,
-            'TEMPLATE_RUN': handle.run,
-            'RUN_NAME': name,
-        }
+        run = SimpleNamespace(name=name)
 
-        update_for_system(mapping)
-        update_for_ids(mapping, handle)
+        add_system_attrs(run)
+        variables = get_ids_variables(handle)
 
-        cfg = template.render(handle, **mapping)
+        cfg = template.render(run=run, variables=variables, handle=handle)
 
         Config.parse_raw(cfg)  # make sure config is valid
 
