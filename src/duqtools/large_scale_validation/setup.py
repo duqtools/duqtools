@@ -87,15 +87,26 @@ class ExtrasV210921:
 
 def update_for_ids(mapping: dict, handle: ImasHandle):
     """Grabs some values from the imas handle."""
-    cp = handle.get('core_profiles')
-    mapping['T_START'] = t_start = cp['time'][0]
+    e = handle.get('equilibrium')
+    mapping['T_START'] = e['time'][0]
 
-    try:
-        mapping['B_FIELD'] = cp['vacuum_toroidal_field/b0'][0]
-    except IndexError:
-        mapping['B_FIELD'] = 0
+    for path in (
+            'vacuum_toroidal_field/r0',
+            'time_slice/0/global_quantities/magnetic_axis/r',
+    ):
+        r0 = e[path]
+        if r0 and abs(r0) < 1e40:
+            mapping['MAJOR_RADIUS'] = r0
+            break
 
-    mapping['MAJOR_RADIUS'] = cp['vacuum_toroidal_field/r0']
+    for path in (
+            'vacuum_toroidal_field/b0',
+            'time_slice/0/global_quantities/magnetic_axis/b_field_tor',
+    ):
+        b0 = e[path]
+        if b0 and abs(b0) < 1e40:
+            mapping['B_FIELD'] = b0[0]
+            break
 
 
 def setup(*, template_file, input_file, force, **kwargs):
