@@ -85,20 +85,20 @@ class ExtrasV210921:
         mapping['RUN_OUT_START'] = run_out_start
 
 
-def update_for_ids(mapping: dict, handle: ImasHandle, duration: float = 0.01):
+def update_for_ids(mapping: dict, handle: ImasHandle):
     """Grabs some values from the imas handle."""
     cp = handle.get('core_profiles')
     mapping['T_START'] = t_start = cp['time'][0]
-    mapping['T_END'] = t_start + duration
 
     try:
         mapping['B_FIELD'] = cp['vacuum_toroidal_field/b0'][0]
     except IndexError:
         mapping['B_FIELD'] = 0
+
     mapping['MAJOR_RADIUS'] = cp['vacuum_toroidal_field/r0']
 
 
-def setup(*, template_file, input_file, force, duration=0.01, **kwargs):
+def setup(*, template_file, input_file, force, **kwargs):
     cwd = Path.cwd()
 
     if not input_file:
