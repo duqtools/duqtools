@@ -32,6 +32,11 @@ jetto_lookup = lookup.from_file(lookup_file)
 
 
 class BaseJettoSystem(AbstractSystem):
+    """System that can be used to create runs for jetto.
+
+    This system can submit to various backends like docker, prominence
+    and the gateway.
+    """
 
     @staticmethod
     def get_runs_dir() -> Path:
@@ -61,6 +66,10 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_job(job: Job):
+        # Make sure we get a new correct status
+        if (job.dir / 'jetto.status').exists():
+            os.remove(job.dir / 'jetto.status')
+
         if cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_slurm(job)
         elif cfg.submit.submit_system == 'docker':
@@ -89,7 +98,6 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_docker(job: Job):
-
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
