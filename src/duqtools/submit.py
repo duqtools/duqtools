@@ -49,7 +49,7 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
     completed: Deque[Job] = deque()
 
     while tasks or queue:
-        if queue and len(tasks) < max_jobs:
+        while queue and len(tasks) < max_jobs:
             job = queue.popleft()
             task = job.start()
             tasks.append(task)
