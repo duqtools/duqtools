@@ -28,8 +28,42 @@ HEADER_STYLE = {
     'bold': True,
 }
 
+loginfo = duqlog_screen.info
+logwarning = duqlog_screen.warning
+style = click.style
 
-class Operation(BaseModel):
+
+class LongDescriptionMixin:
+    description: str
+    extra_description: Optional[str]
+    style: dict
+
+    @property
+    def long_description(self) -> str:
+        description = style(self.description, **self.style)
+
+        if self.extra_description:
+            description = f'{description} : {self.extra_description}'
+
+        return description
+
+
+class Warning(LongDescriptionMixin):
+    """Warning item for screen log."""
+    style = NO_OP_STYLE
+
+    def __init__(self, description: str, extra_description: str):
+        self.description = description
+        self.extra_description = extra_description
+
+    def __hash__(self):
+        return hash((self.description, self.extra_description))
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+
+class Operation(LongDescriptionMixin, BaseModel):
     """Operation, simple class which has a callable action.
 
     Usually not called directly but used through Operations. has the
@@ -68,15 +102,6 @@ class Operation(BaseModel):
             self.action(*self.args, **self.kwargs)  # type: ignore
         return self
 
-    @property
-    def long_description(self):
-        description = click.style(self.description, **self.style)
-
-        if self.extra_description is not None:
-            description = f'{description} : {self.extra_description}'
-
-        return description
-
     @validator('args', always=True)
     def validate_args(cls, v):
         if v is None:
@@ -105,12 +130,18 @@ class Operations(deque):
     yes = False  # Apply operations without prompt
     enabled = False  # Actually do something
     dry_run = False  # Never apply any operations (do not even ask)
+    warnings: set[Warning] = set()
 
     def __new__(cls, *args, **kwargs):
         # Make it a singleton
         if not Operations._instance:
             Operations._instance = super().__new__(cls)
         return Operations._instance
+
+    @property
+    def n_actions(self):
+        """Return number of actions (no no-op)."""
+        return sum(op.action is not None for op in self)
 
     def add(self, **kwargs) -> None:
         """Convenience Operation wrapper around .append().
@@ -119,7 +150,7 @@ class Operations(deque):
         from duqtools.operations import add_to_op_queue.
 
         op_queue.add(action=print, args=('Hello World,),
-                description="Function that prints hello world")
+        description="Function that prints hello world")
         ```
         """
         self.append(Operation(**kwargs))
@@ -140,6 +171,11 @@ class Operations(deque):
                  extra_description=extra_description,
                  style=OP_STYLE)
 
+    def warning(self, description: str, extra_description: str):
+        self.warnings.add(
+            Warning(description=description,
+                    extra_description=extra_description))
+
     def put(self, item: Operation):
         """synonym for append."""
         self.append(item)
@@ -151,15 +187,21 @@ class Operations(deque):
                 f'Appended {item.description} to the operations queue')
             super().append(item)
         else:
-            duqlog_screen.info('- ' + item.long_description)
+            loginfo('- ' + item.long_description)
             item()
 
     def apply(self) -> Operation:
         """Apply the next operation in the queue and remove it."""
+        op = self.popleft()
+        op()
+        return op
 
-        operation = self.popleft()
-        operation()
-        return operation
+    def _apply_all(self, callback: Optional[Callable] = None) -> None:
+        """Pop and apply all operations in the queue."""
+        while self:
+            op = self.apply()
+            if callback:
+                callback(op)
 
     def apply_all(self) -> None:
         """Apply all queued operations and empty the queue.
@@ -167,23 +209,26 @@ class Operations(deque):
         and show a fancy progress bar while applying
         """
         from tqdm import tqdm
-        duqlog_screen.info(click.style('Applying Operations', **HEADER_STYLE))  # type: ignore
-        if not cfg.quiet:
-            with tqdm(total=len(self), position=1) as pbar:
-                pbar.set_description('Applying operations')
-                with tqdm(iterable=False, bar_format='{desc}',
-                          position=0) as dbar:
-                    while len(self) != 0:
-                        op = self.popleft()
-                        if not op.quiet:
-                            dbar.set_description(op.long_description)
-                        logger.info(op.long_description)
-                        pbar.update()
-                        op()
-        else:
-            while len(self) != 0:
-                op = self.popleft()
-                op()
+        loginfo(style('Applying Operations', **HEADER_STYLE))  # type: ignore
+
+        if cfg.quiet:
+            return self._apply_all()
+
+        print(self.n_actions)
+
+        with tqdm(total=self.n_actions, position=1) as pbar:
+            pbar.set_description('Progress')
+
+            with tqdm(bar_format='{desc}') as dbar:
+
+                def callback(op):
+                    if not op.action:
+                        return
+                    if not op.quiet:
+                        dbar.set_description(op.long_description)
+                    pbar.update()
+
+                self._apply_all(callback=callback)
 
     def confirm_apply_all(self) -> bool:
         """First asks the user if he wants to apply everything.
@@ -192,28 +237,31 @@ class Operations(deque):
         -------
         bool: did we apply everything or not
         """
-
         # To print the descriptions we need to get them
-        duqlog_screen.info('')
-        duqlog_screen.info(
-            click.style('Operations in the Queue:', **HEADER_STYLE))  # type: ignore
-        duqlog_screen.info(
-            click.style('========================', **HEADER_STYLE))  # type: ignore
+        loginfo('')
+        loginfo(style('Operations in the Queue:',
+                      **HEADER_STYLE))  # type: ignore
+        loginfo(style('========================',
+                      **HEADER_STYLE))  # type: ignore
         for op in self:
             if not op.quiet:
-                duqlog_screen.info('- ' + op.long_description)
+                loginfo('- ' + op.long_description)
+
+        for warning in self.warnings:
+            loginfo('- ' + warning.long_description)
 
         if self.dry_run:
-            duqlog_screen.info('Dry run enabled, not applying op_queue')
+            loginfo('Dry run enabled, not applying op_queue')
             return False
 
         # Do not confirm if all actions are no-op
         if all(op.action is None for op in self):
-            duqlog_screen.info('\nNo actions to execute.')
+            loginfo('\nNo actions to execute.')
             return False
 
         ans = self.yes or click.confirm(
-            '\nDo you want to apply all these operations?', default=False)
+            f'\nDo you want to apply all {self.n_actions} operations?',
+            default=False)
 
         if ans:
             self.apply_all()
@@ -223,10 +271,10 @@ class Operations(deque):
     def check_unconfirmed_operations(self):
         """Safety check, it should never happen that operations are not
         executed."""
-        if len(self) != 0:
-            duqlog_screen.warning(
-                click.style((f'There are still {len(self)} operations '
-                             'in the queue at program exit!'), **HEADER_STYLE))
+        if self:
+            logwarning(
+                style((f'There are still {self.n_actions} operations '
+                       'in the queue at program exit!'), **HEADER_STYLE))
 
 
 op_queue = Operations()
@@ -286,6 +334,7 @@ def add_to_op_queue(op_desc: str, extra_desc: str | None = None, quiet=False):
     """
 
     def op_queue_real(func):
+
         def wrapper(*args, **kwargs) -> None:
             # For the description format we must convert args to kwargs
             sig = signature(func)
@@ -320,7 +369,6 @@ def op_queue_context():
 
     Works more or less the same as the `@confirm_operations` decorator
     """
-
     if op_queue.enabled:
         raise RuntimeError('op_queue already enabled')
     try:

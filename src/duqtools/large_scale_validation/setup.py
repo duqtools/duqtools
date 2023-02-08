@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
@@ -58,7 +59,8 @@ class ExtrasV210921:
 
     def __init__(self, template_file: str):
         self.n_samples = self._get_n_samples(template_file)
-        self.current_run_number = 0
+        self.run_numbers: dict[tuple[str, int],
+                               int] = defaultdict(lambda: 1000)
 
     @staticmethod
     def _get_n_samples(template_file: str) -> int:
@@ -72,13 +74,15 @@ class ExtrasV210921:
 
         return n_samples
 
-    def add_system_attrs(self, run: SimpleNamespace):
+    def add_system_attrs(self, handle: ImasHandle, run: SimpleNamespace):
         """Add system specific attributes to run namespace."""
-        data_in_start = self.current_run_number
+        data_in_start = self.run_numbers[handle.db, handle.shot]
         data_out_start = data_in_start + self.n_samples
-        self.current_run_number = data_out_start + self.n_samples
 
-        if self.current_run_number > self.MAX_RUN:
+        self.run_numbers[handle.db,
+                         handle.shot] = data_out_start + self.n_samples
+
+        if self.run_numbers[handle.db, handle.shot] > self.MAX_RUN:
             raise ValueError(
                 f'Cannot write data with run number > {self.MAX_RUN}')
 
@@ -115,6 +119,7 @@ def get_ids_variables(handle: ImasHandle) -> SimpleNamespace:
 
 
 def setup(*, template_file, input_file, force, **kwargs):
+    """Setup large scale validation runs for template."""
     cwd = Path.cwd()
 
     if not input_file:
@@ -142,13 +147,20 @@ def setup(*, template_file, input_file, force, **kwargs):
 
         out_drc = cwd / name
 
-        op_queue.add(
-            action=_generate_run_dir,
-            kwargs={
-                'drc': out_drc,
-                'cfg': cfg,
-                'force': force
-            },
-            description='Setup run',
-            extra_description=name,
-        )
+        if out_drc.exists() and not force:
+            op_queue.add_no_op(description='Directory exists',
+                               extra_description=name)
+            op_queue.warning(description='Warning',
+                             extra_description='Some targets already exist, '
+                             'use --force to override')
+        else:
+            op_queue.add(
+                action=_generate_run_dir,
+                kwargs={
+                    'drc': out_drc,
+                    'cfg': cfg,
+                    'force': force
+                },
+                description='Setup run',
+                extra_description=name,
+            )

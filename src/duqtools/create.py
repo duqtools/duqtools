@@ -133,9 +133,9 @@ class CreateManager:
 
     def warn_no_create_runs(self):
         """Add warning to op queue if runs will not be created."""
-        op_queue.add_no_op(description='Not creating runs',
-                           extra_description='some targets already exist, '
-                           'use --force to override')
+        op_queue.warning(description='Warning',
+                         extra_description='Some targets already exist, '
+                         'use --force to override')
 
     @add_to_op_queue('Setting inital condition of', '{data_in}', quiet=True)
     def apply_operations(self, data_in: ImasHandle, run_dir: Path,
@@ -180,7 +180,6 @@ class CreateManager:
 
     def create_run(self, model: Run, *, force: bool = False):
         """Take a run model and create it."""
-
         op_queue.add(action=model.dirname.mkdir,
                      kwargs={
                          'parents': True,
