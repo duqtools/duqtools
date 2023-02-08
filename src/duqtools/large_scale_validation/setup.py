@@ -30,7 +30,7 @@ def get_template(filename: str) -> jinja2.Template:
     path = Path(filename)
     drc = Path(path).parent
     file_loader = FileSystemLoader(str(drc))
-    environment = Environment(loader=file_loader, autoescape=False)
+    environment = Environment(loader=file_loader, autoescape=True)
     return environment.get_template(path.name)
 
 
