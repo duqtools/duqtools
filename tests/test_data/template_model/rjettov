@@ -410,17 +410,10 @@ fi
 if [ ! -z "$IMASDRIVER" ]
     then
     if [ -z "$APPENDIDS" ] ; then
-        APPENDFLAG=-r
+        createworkflowcfg -r $IMAS_CONFIG
     else
-        APPENDFLAG=
+        createworkflowcfg $IMAS_CONFIG
     fi
-    if [ ! -z "$NPROCSET" ] ; then
-        NPROCFLAG=-n$NPROCSET
-    else
-        NPROCFLAG=
-    fi
-    createworkflowcfg $APPENDFLAG $NPROCFLAG $IMAS_CONFIG
-
     if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
         echo "RJETTOV: Python IMAS driver requested..."
         JINTRAC_PYTHON_DIR=$JINTRAC_DIR/python
@@ -647,7 +640,7 @@ rm -f jetto.catinfo *.qlk
 
 rm -f adf11 adf11_bundled adf21 bmstop bmstop8 ionatom linrad
 rm -f eirenedatadir eirenedatadir_v1.0 eirenedatadir_v2.0 eirenedatadir_iter
-rm -f edge2d QLKNN-data helena_bin mishka_bin castor_bin
+rm -f edge2d QLKNN-data helena_bin mishka_bin
 
 DATADIR=$JINTRAC_DIR/data
 if [ ! -d $DATADIR ] ; then
@@ -705,9 +698,6 @@ echo "helena_bin ->" `readlink -e helena_bin` >> jetto.datadir
 
 ln -s $JAMS_DIR/depot/mishka/bin/mishka mishka_bin
 echo "mishka_bin ->" `readlink -e mishka_bin` >> jetto.datadir
-
-ln -s $JAMS_DIR/depot/mishka/bin/castor castor_bin
-echo "castor_bin ->" `readlink -e castor_bin` >> jetto.datadir
 
 if [ "$DRIFTMODEL" = "Qualikiz" ];  then
     ln -s $JSRCPATH/tci/transport/QLKNN/data QLKNN-data
@@ -1016,13 +1006,8 @@ if [ "$IMASDRIVER" = "$IMASPYTHONDRIVER" ] ; then
 
     # Call IMAS python driver
     echo "Starting python driver..." >$OUT_FILE
-    if [ $MPI -eq 0 ] ; then
-        ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver $OUT_FILE python.err )
-    else
-        # The addition of -n$NPROC forces mpirun to be used to call the python driver
-        ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver -n$NPROC $OUT_FILE python.err )
-    fi
-    RC2D=$?
+    ( cd_rundir && $JINTRAC_PYTHON_DIR/run_python_driver $OUT_FILE python.err )
+    RC=$?
     ( cd_rundir && rm -rf __pycache__ )
 
 else

@@ -3,20 +3,31 @@ auto-fills the place-hodlers with the pydantic models defined in this file.
 
 To generate the docs:
 
-    python gendocs.py
+python gendocs.py
 """
 import sys
 from pathlib import Path
 
 import mkdocs_gen_files
 
-from duqtools.jetto import JettoSystem
-from duqtools.schema import (ARange, IDSOperationDim, IDSVariableModel,
-                             ImasBaseModel, JettoVar, JettoVariableModel,
-                             LinSpace, OperationDim)
+from duqtools.jetto import BaseJettoSystem
+from duqtools.schema import (
+    ARange,
+    IDSOperationDim,
+    IDSVariableModel,
+    ImasBaseModel,
+    JettoVar,
+    JettoVariableModel,
+    LinSpace,
+    OperationDim,
+)
 from duqtools.schema._jetto import JsetField, NamelistField
-from duqtools.schema.cli import (ConfigModel, CreateConfigModel,
-                                 StatusConfigModel, SubmitConfigModel)
+from duqtools.schema.cli import (
+    ConfigModel,
+    CreateConfigModel,
+    StatusConfigModel,
+    SubmitConfigModel,
+)
 from duqtools.schema.data_location import DataLocation
 from duqtools.system import DummySystem
 
@@ -36,7 +47,7 @@ objects = {
     IDSOperationDim,
     IDSVariableModel,
     ImasBaseModel,
-    JettoSystem,
+    BaseJettoSystem,
     JettoVariableModel,
     JettoVar,
     JsetField,
@@ -46,12 +57,10 @@ objects = {
     StatusConfigModel,
     SubmitConfigModel,
 }
-
 schemas = {
     f'schema_{obj.__name__}': obj.schema()  # type: ignore
     for obj in objects
 }
-
 for page in 'index', 'status', 'submit', 'create':
     template = get_template(f'template_{page}.md')
 

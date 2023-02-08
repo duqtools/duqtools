@@ -1,15 +1,16 @@
 import logging
+import os
 import shutil
 import stat
 import subprocess as sp
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 
-from jetto_tools import config
+from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
-from jetto_tools import jset, lookup, namelist, template
+from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..config import cfg
 from ..ids import ImasHandle
@@ -30,7 +31,12 @@ lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 jetto_lookup = lookup.from_file(lookup_file)
 
 
-class JettoSystem(AbstractSystem):
+class BaseJettoSystem(AbstractSystem):
+    """System that can be used to create runs for jetto.
+
+    This system can submit to various backends like docker, prominence
+    and the gateway.
+    """
 
     @staticmethod
     def get_runs_dir() -> Path:
@@ -54,15 +60,20 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path):
-
         jetto_jset = jset.read(run_dir / 'jetto.jset')
 
         jetto_write_batchfile(run_dir, jetto_jset)
 
     @staticmethod
     def submit_job(job: Job):
+        # Make sure we get a new correct status
+        if (job.dir / 'jetto.status').exists():
+            os.remove(job.dir / 'jetto.status')
+
         if cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_slurm(job)
+        elif cfg.submit.submit_system == 'docker':
+            JettoSystem.submit_docker(job)
         elif cfg.submit.submit_system == 'prominence':
             JettoSystem.submit_prominence(job)
         else:
@@ -86,12 +97,32 @@ class JettoSystem(AbstractSystem):
             f.write(ret.stdout)
 
     @staticmethod
-    def submit_prominence(job: Job):
+    def submit_docker(job: Job):
+        jetto_template = template.from_directory(job.dir)
+        jetto_config = config.RunConfig(jetto_template)
+        jetto_manager = jetto_job.JobManager()
+        extra_volumes = {
+            job.dir.parent / 'imasdb': {
+                'bind': '/opt/imas/shared/imasdb',
+                'mode': 'rw'
+            },
+        }
 
+        os.environ['RUNS_HOME'] = os.getcwd()
+        os.environ['JINTRAC_IMAS_BACKEND'] = 'MDSPLUS'
+        _ = jetto_manager.submit_job_to_docker(jetto_config,
+                                               job.dir,
+                                               image=cfg.submit.docker_image,
+                                               extra_volumes=extra_volumes)
+        job.lockfile.touch()
+
+    @staticmethod
+    def submit_prominence(job: Job):
         jetto_template = template.from_directory(job.dir)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
+        os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
@@ -158,9 +189,13 @@ class JettoSystem(AbstractSystem):
         if (source_drc / 'jetto.sin').exists():
             jetto_sanco = namelist.read(source_drc / 'jetto.sin')
 
-        jetto_extra = []
-        if (source_drc / 'jetto.ex').exists():
-            jetto_extra = [str(source_drc / 'jetto.ex')]
+        all_files = os.listdir(source_drc)
+
+        jetto_extra: List[str] = []
+        for regex in _EXTRA_FILE_REGEXES:
+            jetto_extra.extend(filter(regex.match, all_files))
+
+        jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
         jetto_template = template.Template(jset=jetto_jset,
                                            namelist=jetto_namelist,
@@ -198,7 +233,6 @@ class JettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 
@@ -234,3 +268,76 @@ class JettoSystem(AbstractSystem):
             jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
+
+
+class JettoSystemV210921(BaseJettoSystem):
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_in_start_at + seq_number,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=options.user,
+            db=options.imasdb,
+            shot=source.shot,
+            run=options.run_out_start_at + seq_number,
+        )
+
+
+class JettoSystemV220922(BaseJettoSystem):
+
+    @staticmethod
+    def get_data_in_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data input."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=1,
+        )
+
+    @staticmethod
+    def get_data_out_handle(
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ):
+        """Get handle for data output."""
+        return ImasHandle(
+            user=str((dirname / 'imasdb').resolve()),
+            db=source.db,
+            shot=source.shot,
+            run=2,
+        )
+
+
+JettoSystem = JettoSystemV220922

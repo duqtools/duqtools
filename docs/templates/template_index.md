@@ -37,7 +37,7 @@ system: jetto
 
 ### jetto
 
-{{ schema_JettoSystem['description'] }}
+{{ schema_BaseJettoSystem['description'] }}
 
 ### dummy
 

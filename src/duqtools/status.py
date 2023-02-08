@@ -155,14 +155,14 @@ class Monitor():
     def set_status(self):
         if not self.job.has_status:
             status = 'No status'
-        elif not self.job.is_submitted:
-            status = 'Unsubmitted '
         elif self.job.is_running:
             status = 'Running     '
         elif self.job.is_failed:
             status = 'FAILED      '
         elif self.job.is_completed:
             status = 'COMPLETED   '
+        elif not self.job.is_submitted:
+            status = 'Unsubmitted '
         else:
             status = 'UNKNOWN'
 

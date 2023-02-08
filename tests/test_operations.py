@@ -1,5 +1,4 @@
-from duqtools.operations import (Operation, add_to_op_queue, op_queue,
-                                 op_queue_context)
+from duqtools.operations import Operation, add_to_op_queue, op_queue, op_queue_context
 
 op_queue.yes = True
 
