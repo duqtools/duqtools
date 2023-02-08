@@ -153,11 +153,6 @@ class ImasHandle(ImasBaseModel):
         """
         logger.debug('Copy %s to %s', self, destination)
 
-        imasdb = destination.imasdb_path()
-        if not imasdb.exists():
-            raise OSError(f"Cannot copy to '{str(destination)}', "
-                          f"imasdb '{str(imasdb)}' does not exist.")
-
         try:
             copy_ids_entry(self, destination)
         except Exception as err:
