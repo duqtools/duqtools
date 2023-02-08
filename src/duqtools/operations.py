@@ -138,6 +138,11 @@ class Operations(deque):
             Operations._instance = super().__new__(cls)
         return Operations._instance
 
+    @property
+    def n_actions(self):
+        """Return number of actions (no no-op)."""
+        return sum(op.action is not None for op in self)
+
     def add(self, **kwargs) -> None:
         """Convenience Operation wrapper around .append().
 
@@ -145,7 +150,7 @@ class Operations(deque):
         from duqtools.operations import add_to_op_queue.
 
         op_queue.add(action=print, args=('Hello World,),
-                description="Function that prints hello world")
+        description="Function that prints hello world")
         ```
         """
         self.append(Operation(**kwargs))
@@ -209,12 +214,16 @@ class Operations(deque):
         if cfg.quiet:
             return self._apply_all()
 
-        with tqdm(total=len(self), position=1) as pbar:
+        print(self.n_actions)
+
+        with tqdm(total=self.n_actions, position=1) as pbar:
             pbar.set_description('Progress')
 
             with tqdm(bar_format='{desc}') as dbar:
 
                 def callback(op):
+                    if not op.action:
+                        return
                     if not op.quiet:
                         dbar.set_description(op.long_description)
                     pbar.update()
@@ -228,7 +237,6 @@ class Operations(deque):
         -------
         bool: did we apply everything or not
         """
-
         # To print the descriptions we need to get them
         loginfo('')
         loginfo(style('Operations in the Queue:',
@@ -252,7 +260,7 @@ class Operations(deque):
             return False
 
         ans = self.yes or click.confirm(
-            f'\nDo you want to apply all {len(self)} operations?',
+            f'\nDo you want to apply all {self.n_actions} operations?',
             default=False)
 
         if ans:
@@ -265,7 +273,7 @@ class Operations(deque):
         executed."""
         if self:
             logwarning(
-                style((f'There are still {len(self)} operations '
+                style((f'There are still {self.n_actions} operations '
                        'in the queue at program exit!'), **HEADER_STYLE))
 
 
@@ -361,7 +369,6 @@ def op_queue_context():
 
     Works more or less the same as the `@confirm_operations` decorator
     """
-
     if op_queue.enabled:
         raise RuntimeError('op_queue already enabled')
     try:
