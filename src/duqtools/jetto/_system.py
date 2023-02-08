@@ -195,6 +195,12 @@ class BaseJettoSystem(AbstractSystem):
         for regex in _EXTRA_FILE_REGEXES:
             jetto_extra.extend(filter(regex.match, all_files))
 
+        if 'jetto.restart' in jetto_extra or 'jetto.srestart' in jetto_extra:
+            raise OSError(
+                'Template contains `jetto.restart` and/or `jetto.srestart` files. '
+                'Please remove these before running duqtools again. '
+                'More info: https://github.com/duqtools/duqtools/issues/498')
+
         jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
         jetto_template = template.Template(jset=jetto_jset,
