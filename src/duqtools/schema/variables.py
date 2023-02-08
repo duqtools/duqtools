@@ -1,11 +1,12 @@
 from typing import Union
 
 from ._basemodel import BaseModel
-from ._variable import IDSVariableModel, JettoVariableModel
+from ._variable import IDS2JettoVariableModel, IDSVariableModel, JettoVariableModel
 
 
 class VariableConfigModel(BaseModel):
-    __root__: list[Union[JettoVariableModel, IDSVariableModel]]
+    __root__: list[Union[JettoVariableModel, IDSVariableModel,
+                         IDS2JettoVariableModel]]
 
     def __iter__(self):
         yield from self.__root__
