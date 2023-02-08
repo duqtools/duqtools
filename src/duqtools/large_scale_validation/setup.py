@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
+from duqtools.config import var_lookup
+
 from ..config import Config
 from ..operations import op_queue
 from ..utils import no_op, read_imas_handles_from_file
@@ -90,32 +92,26 @@ class ExtrasV210921:
         run.data_out_start = data_out_start
 
 
-def get_ids_variables(handle: ImasHandle) -> SimpleNamespace:
-    """Grabs some values from the imas handle."""
-    e = handle.get('equilibrium')
-    t_start = e['time'][0]
+class Variables:
 
-    for path in (
-            'vacuum_toroidal_field/r0',
-            'time_slice/0/global_quantities/magnetic_axis/r',
-    ):
-        r0 = e[path]
-        if r0 and abs(r0) < 1e40:
-            major_radius = r0
-            break
+    def __init__(self, *, handle: ImasHandle, lookup: dict):
+        # TODO
+        # - Some sort of caching for the root ids
+        # - Implement __getattr__ to avoid defining properties
+        self.lookup = lookup
+        self.handle = handle
 
-    for path in (
-            'vacuum_toroidal_field/b0',
-            'time_slice/0/global_quantities/magnetic_axis/b_field_tor',
-    ):
-        b0 = e[path]
-        if b0 and abs(b0) < 1e40:
-            b_field = b0[0]
-            break
+    @property
+    def t_start(self):
+        return 0
 
-    return SimpleNamespace(t_start=t_start,
-                           b_field=b_field,
-                           major_radius=major_radius)
+    @property
+    def major_radius(self):
+        return 0
+
+    @property
+    def b_field(self):
+        return 0
 
 
 def setup(*, template_file, input_file, force, **kwargs):
@@ -139,7 +135,8 @@ def setup(*, template_file, input_file, force, **kwargs):
         run = SimpleNamespace(name=name)
 
         add_system_attrs(run)
-        variables = get_ids_variables(handle)
+
+        variables = Variables(handle=handle, lookup=var_lookup)
 
         cfg = template.render(run=run, variables=variables, handle=handle)
 
