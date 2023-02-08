@@ -71,27 +71,34 @@ class IDSMapping(Mapping):
 
         return s
 
-    def _deconstruct_key(self, key: str):
+    @staticmethod
+    def _getattr(pointer: Any, attr: str) -> Any:
+        """Like `getattr`, but will return the index if `attr` is an int."""
+        try:
+            i = int(attr)
+        except (ValueError, TypeError):
+            ret = getattr(pointer, attr)
+        else:
+            ret = pointer[i]  # type: ignore
+
+        return ret
+
+    def _deconstruct_key(self, key: str) -> tuple[Any, str]:
         """Break down key and return pointer + attr."""
         *parts, attr = key.split('/')
 
         pointer = self._ids
 
         for part in parts:
-            try:
-                i = int(part)
-            except ValueError:
-                pointer = getattr(pointer, part)
-            else:
-                pointer = pointer[i]  # type: ignore
+            pointer = self._getattr(pointer, part)
 
         return pointer, attr
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
 
         try:
             pointer, attr = self._deconstruct_key(key)
-            ret = getattr(pointer, attr)
+            ret = self._getattr(pointer, attr)
         except AttributeError as err:
             raise KeyError(key) from err
         except IndexError as err:

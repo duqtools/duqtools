@@ -42,6 +42,9 @@ def test_mapping():
     assert_equal(s['data/2/x'], np.array([8, 9]))
     assert_equal(s['data/2/y'], np.array([10, 11]))
 
+    assert_equal(s['data/0/x/0'], 0)
+    assert_equal(s['data/0/x/1'], 1)
+
     assert 'data/0/z' not in s._keys
 
 
