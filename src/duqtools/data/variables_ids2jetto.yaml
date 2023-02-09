@@ -15,8 +15,10 @@
     - ids: equilibrium
       path: time_slice/0/global_quantities/magnetic_axis/b_field_tor/0
   accept_if:
-    - [ne, 0]
-    - [lt, 1e40]
+    - operator: eq
+      args: [0]
+    - operator: lt
+      args: [1e40]
   default: null  # raise if None
 
 - name: ids-major_radius
@@ -27,6 +29,8 @@
     - ids: equilibrium
       path: time_slice/0/global_quantities/magnetic_axis/r
   accept_if:
-    - [ne, 0]
-    - [lt, 1e40]
+    - operator: ne
+      args: [0]
+    - operator: lt
+      args: [1e40]
   default: null  # raise if None
