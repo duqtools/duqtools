@@ -19,7 +19,7 @@ from ..utils import no_op, read_imas_handles_from_file
 if TYPE_CHECKING:
     import jinja2
 
-    from duqtools.api import ImasHandle
+    from duqtools.api import IDSMapping, ImasHandle
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,17 @@ class Variables:
 
     def __init__(self, *, handle: ImasHandle):
         self.handle = handle
+        self._ids_cache: dict[str, IDSMapping] = {}
+
+    def _get_ids(self, ids: str):
+        """Cache ids lookups to avoid repeated data reads."""
+        if ids in self._ids_cache:
+            mapping = self._ids_cache[ids]
+        else:
+            mapping = self.handle.get(ids)
+            self._ids_cache[ids] = mapping
+
+        return mapping
 
     def __getattr__(self, key: str):
         try:
@@ -109,7 +120,7 @@ class Variables:
         value = spec.default
 
         for item in spec.paths:
-            mapping = self.handle.get(item.ids)
+            mapping = self._get_ids(item.ids)
             try:
                 trial = mapping[item.path]
             except KeyError:
@@ -152,7 +163,7 @@ def setup(*, template_file, input_file, force, **kwargs):
 
         add_system_attrs(run)
 
-        variables = Variables(handle=handle, lookup=var_lookup)
+        variables = Variables(handle=handle)
 
         cfg = template.render(run=run, variables=variables, handle=handle)
 

@@ -26,10 +26,8 @@ def test_pick_first(var):
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
-      - ids: t0
-        path: time/0
-      - ids: t1
-        path: time/1
+      - {ids: t0, path: time/0}
+      - {ids: t1, path: time/1}
     """)
     }
 
@@ -44,10 +42,8 @@ def test_pick_second(var):
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
-      - ids: t0
-        path: does-not-exist/0
-      - ids: t1
-        path: time/1
+      - {ids: t0, path: does-not-exist/0}
+      - {ids: t1, path: time/1}
     """)
     }
 
@@ -62,8 +58,7 @@ def test_default(var):
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
-      - ids: t0
-        path: does-not-exist/0
+      - {ids: t0, path: does-not-exist/0}
     default: 1337
     """)
     }
@@ -79,9 +74,7 @@ def test_raise(var):
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
-      - ids: t0
-        path: does-not-exist/0
-    default: null
+      - {ids: t0, path: does-not-exist/0}
     """)
     }
 
@@ -98,16 +91,11 @@ def test_conditionals(var):
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
-      - ids: t0
-        path: time/0
-      - ids: t1
-        path: time/1
-    default: null
+      - {ids: t0, path: time/0}
+      - {ids: t1, path: time/1}
     accept_if:
-      - operator: ne
-        args: [10]
-      - operator: gt
-        args: [0]
+      - {operator: ne, args: [10]}
+      - {operator: gt, args: [0]}
     """)
     }
 
@@ -127,3 +115,24 @@ def test_getattr(var):
     # ensure that default attribute lookup does not fail
     var.moo = 123
     assert var.moo == 123
+
+
+def test_caching(var):
+    lookup = {
+        'ids-t_start':
+        IDS2JettoVariableModel.parse_raw("""
+    name: ids-t_start
+    type: IDS2jetto-variable
+    paths:
+      - {ids: t0, path: time/0}
+      - {ids: t1, path: time/1}
+    """)
+    }
+
+    var.lookup = lookup
+    assert not var._ids_cache
+
+    var.t_start
+
+    assert 't0' in var._ids_cache
+    assert 't1' not in var._ids_cache
