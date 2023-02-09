@@ -12,7 +12,7 @@ def var():
         time = np.array((10, 20, 30))
 
     class t1:
-        time = np.array((10, 20, 30))
+        time = np.array((40, 50, 60))
 
     handle = {'t0': IDSMapping(t0), 't1': IDSMapping(t1)}
 
@@ -48,7 +48,7 @@ def test_pick_second(var):
     }
 
     var.lookup = lookup
-    assert var.t_start == 20
+    assert var.t_start == 50
 
 
 def test_default(var):
@@ -95,13 +95,13 @@ def test_conditionals(var):
       - {ids: t1, path: time/1}
     accept_if:
       - {operator: ne, args: [10]}
-      - {operator: gt, args: [0]}
+      - {operator: gt, args: [35]}
     """)
     }
 
     var.lookup = lookup
 
-    assert var.t_start == 20
+    assert var.t_start == 50
 
 
 def test_getattr(var):
