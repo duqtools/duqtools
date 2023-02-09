@@ -17,6 +17,13 @@ In the list below, you will find variables prefixed `$`. This means that these v
 
 The default duqtools variables are listed below.
 
+{% for name in ids_vars %}
+- [IDS: {{ name }}](#ids-{{ name }})
+{% endfor %}
+{% for name in other_vars %}
+- [{{ name }}s](#{{ name | lower }}s)
+{% endfor %}
+
 {% for name, var_group in ids_vars.items() %}
 ### IDS: {{ name }}
 
