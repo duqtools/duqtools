@@ -103,7 +103,6 @@ class IDS2JettoVariableModel(BaseModel):
         Accept variable if it matches the given conditions. This can be used
         to filter undefined values (i.e. set to 0 or some very small or large number).
         """))
-    default: Optional[float] = Field([],
-                                     description=f("""
+    default: Optional[float] = Field(description=f("""
         Default value if no match is found. Set to None to raise an exeption instead."""
                                                    ))

@@ -114,7 +114,7 @@ class Variables:
             spec = self.lookup[f'ids-{key}']
         except KeyError as exc:
             msg = f'Cannot find {key!r} in your variable listing (i.e. `variables.yaml`).'
-            raise KeyError(msg) from exc
+            raise AttributeError(msg) from exc
 
         value = spec.default
 
@@ -130,7 +130,7 @@ class Variables:
                 break
 
         if value is None:
-            raise ValueError(
+            raise AttributeError(
                 f'No value matches specifications given by: {spec}')
 
         return value

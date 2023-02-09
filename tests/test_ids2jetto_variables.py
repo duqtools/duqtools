@@ -80,7 +80,7 @@ def test_raise(var):
 
     var.lookup = lookup
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         var.t_start
 
 
@@ -109,7 +109,7 @@ def test_getattr(var):
 
     var.lookup = lookup
 
-    with pytest.raises(KeyError, match='does_not_exist'):
+    with pytest.raises(AttributeError, match='does_not_exist'):
         var.does_not_exist
 
     # ensure that default attribute lookup does not fail
