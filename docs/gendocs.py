@@ -10,7 +10,7 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-from duqtools.jetto import BaseJettoSystem
+from duqtools.jetto import BaseJettoSystem, JettoSystemV210921, JettoSystemV220922
 from duqtools.schema import (
     ARange,
     IDSOperationDim,
@@ -48,6 +48,8 @@ objects = {
     IDSVariableModel,
     ImasBaseModel,
     BaseJettoSystem,
+    JettoSystemV210921,
+    JettoSystemV220922,
     JettoVariableModel,
     JettoVar,
     JsetField,

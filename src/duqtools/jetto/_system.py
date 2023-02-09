@@ -277,6 +277,19 @@ class BaseJettoSystem(AbstractSystem):
 
 
 class JettoSystemV210921(BaseJettoSystem):
+    """System that can be used to create runs for jetto.
+
+    The backend that is  assumed is jetto-v210921.
+
+    This system can submit to various backends like docker, prominence
+    and the gateway.
+
+    ```yaml title="duqtools.yaml"
+    system: jetto-v210921
+    submit:
+      submit_system: prominence
+    ```
+    """
 
     @staticmethod
     def get_data_in_handle(
@@ -312,6 +325,21 @@ class JettoSystemV210921(BaseJettoSystem):
 
 
 class JettoSystemV220922(BaseJettoSystem):
+    """System that can be used to create runs for jetto.
+
+    The backend that is  assumed is jetto-v220922. The most important
+    difference with v210921 is that the IMAS data is handled locally
+    instead of via a public `imasdb`
+
+    This system can submit to various backends like docker, prominence
+    and the gateway.
+
+    ```yaml title="duqtools.yaml"
+    system: jetto-v220922
+    submit:
+      submit_system: docker
+    ```
+    """
 
     @staticmethod
     def get_data_in_handle(
