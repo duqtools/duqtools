@@ -97,20 +97,18 @@ class Variables:
     lookup = var_lookup.filter_type('IDS2jetto-variable')
 
     def __init__(self, *, handle: ImasHandle):
-        # TODO
-        # - Some sort of caching for the root ids
-        # - Implement __getattr__ to avoid defining properties
         self.handle = handle
 
-    @property
-    def t_start(self):
-        spec = self.lookup['ids-t_start']
+    def __getattr__(self, key: str):
+        try:
+            spec = self.lookup[f'ids-{key}']
+        except KeyError as exc:
+            msg = f'Cannot find {key!r} in your variable listing (i.e. `variables.yaml`).'
+            raise KeyError(msg) from exc
 
         value = spec.default
 
         for item in spec.paths:
-            # from IPython import embed; embed()
-
             mapping = self.handle.get(item.ids)
             try:
                 trial = mapping[item.path]
@@ -130,14 +128,6 @@ class Variables:
                 f'No value matches specifications given by: {spec}')
 
         return value
-
-    @property
-    def major_radius(self):
-        return 0
-
-    @property
-    def b_field(self):
-        return 0
 
 
 def setup(*, template_file, input_file, force, **kwargs):

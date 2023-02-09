@@ -114,3 +114,16 @@ def test_conditionals(var):
     var.lookup = lookup
 
     assert var.t_start == 20
+
+
+def test_getattr(var):
+    lookup = {'ids-t_start': None}
+
+    var.lookup = lookup
+
+    with pytest.raises(KeyError, match='does_not_exist'):
+        var.does_not_exist
+
+    # ensure that default attribute lookup does not fail
+    var.moo = 123
+    assert var.moo == 123
