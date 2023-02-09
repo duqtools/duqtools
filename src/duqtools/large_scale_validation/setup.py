@@ -104,11 +104,11 @@ class Variables:
 
     @property
     def t_start(self):
-        model = self.lookup['ids-t_start']
+        spec = self.lookup['ids-t_start']
 
-        value = model.default
+        value = spec.default
 
-        for item in model.paths:
+        for item in spec.paths:
             # from IPython import embed; embed()
 
             mapping = self.handle.get(item.ids)
@@ -117,7 +117,7 @@ class Variables:
             except KeyError:
                 continue
 
-            for cond in model.accept_if:
+            for cond in spec.accept_if:
                 test = getattr(operator, cond.operator)
                 if not test(trial, *cond.args):
                     break
@@ -126,7 +126,8 @@ class Variables:
                 break
 
         if not value:
-            raise ValueError(f'Cannot look up value for: {model}')
+            raise ValueError(
+                f'No value matches specifications given by: {spec}')
 
         return value
 
