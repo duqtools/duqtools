@@ -148,8 +148,7 @@ def setup(*, template_file, input_file, force, **kwargs):
     template = get_template(template_file)
 
     if _get_key(template_file, key='system') == 'jetto-v210921':
-        extra_params = ExtrasV210921(template_file)
-        add_system_attrs = extra_params.add_system_attrs
+        add_system_attrs = ExtrasV210921(template_file).add_system_attrs
     else:
         add_system_attrs = no_op  # default to no-op
 
