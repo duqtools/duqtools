@@ -5,6 +5,8 @@
   paths:
     - ids: equilibrium
       path: time/0
+    - ids: core_profiles
+      path: time/0
   default: null  # raise if None
 
 - name: ids-b_field

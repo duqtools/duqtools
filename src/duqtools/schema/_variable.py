@@ -93,7 +93,8 @@ class IDS2JettoVariableModel(BaseModel):
         Search these variables in the given order until a match with the conditions
         defined below is found.
     """))
-    accept_if: Optional[list[Condition]] = Field(description=f("""
+    accept_if: Optional[list[Condition]] = Field([],
+                                                 description=f("""
         Accept variable if it matches the given conditions. This can be used
         to filter undefined values (i.e. set to 0 or some very small or large number).
         """))

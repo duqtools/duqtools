@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import operator
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
@@ -93,17 +94,41 @@ class ExtrasV210921:
 
 
 class Variables:
+    lookup = var_lookup.filter_type('IDS2jetto-variable')
 
-    def __init__(self, *, handle: ImasHandle, lookup: dict):
+    def __init__(self, *, handle: ImasHandle):
         # TODO
         # - Some sort of caching for the root ids
         # - Implement __getattr__ to avoid defining properties
-        self.lookup = lookup
         self.handle = handle
 
     @property
     def t_start(self):
-        return 0
+        model = self.lookup['ids-t_start']
+
+        value = model.default
+
+        for item in model.paths:
+            # from IPython import embed; embed()
+
+            mapping = self.handle.get(item.ids)
+            try:
+                trial = mapping[item.path]
+            except KeyError:
+                continue
+
+            for cond in model.accept_if:
+                test = getattr(operator, cond.operator)
+                if not test(trial, *cond.args):
+                    break
+            else:
+                value = trial
+                break
+
+        if not value:
+            raise ValueError(f'Cannot look up value for: {model}')
+
+        return value
 
     @property
     def major_radius(self):
