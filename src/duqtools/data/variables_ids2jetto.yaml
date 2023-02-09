@@ -1,0 +1,38 @@
+### Convert from IDs to jetto/other variables
+
+- name: ids-t_start
+  type: IDS2jetto-variable
+  paths:
+    - ids: equilibrium
+      path: time/0
+    - ids: core_profiles
+      path: time/0
+  default: null  # raise if None
+
+- name: ids-b_field
+  type: IDS2jetto-variable
+  paths:
+    - ids: equilibrium
+      path: vacuum_toroidal_field/b0/0
+    - ids: equilibrium
+      path: time_slice/0/global_quantities/magnetic_axis/b_field_tor
+  accept_if:
+    - operator: ne
+      args: [0]
+    - operator: lt
+      args: [1e40]
+  default: null  # raise if None
+
+- name: ids-major_radius
+  type: IDS2jetto-variable
+  paths:
+    - ids: equilibrium
+      path: vacuum_toroidal_field/r0
+    - ids: equilibrium
+      path: time_slice/0/global_quantities/magnetic_axis/r
+  accept_if:
+    - operator: ne
+      args: [0]
+    - operator: lt
+      args: [1e40]
+  default: null  # raise if None

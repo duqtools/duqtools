@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
+from duqtools.config import var_lookup
+
 from ..config import Config
 from ..operations import op_queue
 from ..utils import no_op, read_imas_handles_from_file
@@ -16,7 +18,7 @@ from ..utils import no_op, read_imas_handles_from_file
 if TYPE_CHECKING:
     import jinja2
 
-    from duqtools.api import ImasHandle
+    from duqtools.api import IDSMapping, ImasHandle
 
 logger = logging.getLogger(__name__)
 
@@ -90,32 +92,48 @@ class ExtrasV210921:
         run.data_out_start = data_out_start
 
 
-def get_ids_variables(handle: ImasHandle) -> SimpleNamespace:
-    """Grabs some values from the imas handle."""
-    e = handle.get('equilibrium')
-    t_start = e['time'][0]
+class Variables:
+    lookup = var_lookup.filter_type('IDS2jetto-variable')
 
-    for path in (
-            'vacuum_toroidal_field/r0',
-            'time_slice/0/global_quantities/magnetic_axis/r',
-    ):
-        r0 = e[path]
-        if r0 and abs(r0) < 1e40:
-            major_radius = r0
-            break
+    def __init__(self, *, handle: ImasHandle):
+        self.handle = handle
+        self._ids_cache: dict[str, IDSMapping] = {}
 
-    for path in (
-            'vacuum_toroidal_field/b0',
-            'time_slice/0/global_quantities/magnetic_axis/b_field_tor',
-    ):
-        b0 = e[path]
-        if b0 and abs(b0) < 1e40:
-            b_field = b0[0]
-            break
+    def _get_ids(self, ids: str):
+        """Cache ids lookups to avoid repeated data reads."""
+        if ids in self._ids_cache:
+            mapping = self._ids_cache[ids]
+        else:
+            mapping = self.handle.get(ids)
+            self._ids_cache[ids] = mapping
 
-    return SimpleNamespace(t_start=t_start,
-                           b_field=b_field,
-                           major_radius=major_radius)
+        return mapping
+
+    def __getattr__(self, key: str):
+        try:
+            spec = self.lookup[f'ids-{key}']
+        except KeyError as exc:
+            msg = f'Cannot find {key!r} in your variable listing (i.e. `variables.yaml`).'
+            raise AttributeError(msg) from exc
+
+        value = spec.default
+
+        for item in spec.paths:
+            mapping = self._get_ids(item.ids)
+            try:
+                trial = mapping[item.path]
+            except KeyError:
+                continue
+
+            if all(condition(trial) for condition in spec.accept_if):
+                value = trial
+                break
+
+        if value is None:
+            raise AttributeError(
+                f'No value matches specifications given by: {spec}')
+
+        return value
 
 
 def setup(*, template_file, input_file, force, **kwargs):
@@ -130,8 +148,7 @@ def setup(*, template_file, input_file, force, **kwargs):
     template = get_template(template_file)
 
     if _get_key(template_file, key='system') == 'jetto-v210921':
-        extra_params = ExtrasV210921(template_file)
-        add_system_attrs = extra_params.add_system_attrs
+        add_system_attrs = ExtrasV210921(template_file).add_system_attrs
     else:
         add_system_attrs = no_op  # default to no-op
 
@@ -139,7 +156,8 @@ def setup(*, template_file, input_file, force, **kwargs):
         run = SimpleNamespace(name=name)
 
         add_system_attrs(run)
-        variables = get_ids_variables(handle)
+
+        variables = Variables(handle=handle)
 
         cfg = template.render(run=run, variables=variables, handle=handle)
 

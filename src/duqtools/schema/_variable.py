@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import Field
 
@@ -23,7 +23,15 @@ class JettoVariableModel(BaseModel):
     """))
 
 
-class IDSVariableModel(BaseModel):
+class IDSPath(BaseModel):
+    ids: str = Field(description='Root IDS name.')
+    path: str = Field(description=f("""
+        Path to the data within the IDS.
+        The fields are separated by forward slashes (`\\`).
+    """))
+
+
+class IDSVariableModel(IDSPath):
     """Variable for describing data within a IMAS database.
 
     The variable can be given a name, which will be used in the rest of the config
@@ -48,9 +56,53 @@ class IDSVariableModel(BaseModel):
     ids: str = Field(description='Root IDS name.')
     path: str = Field(description=f("""
         Path to the data within the IDS.
-        The fields are separated by forward slashes (`\\`).
+        The fields are separated by forward slashes (`/`).
     """))
     dims: list[str] = Field(description=f("""
         Give the dimensions of the data,
         i.e. [x] for 1D, or [x, y] for 2D data.
     """))
+
+
+class Condition(BaseModel):
+    """Only accept value if this condition returns `True`.
+
+    Equivalent to: `operator(X, *args)`, where `X` is the value
+    retrieved from the IDS paths.
+    """
+    operator: str = Field(
+        'Name of a function in the `operator` module in the standard library.')
+    args: list[Any] = Field('Arguments to pass to the operator.')
+
+    def __call__(self, value: Any):
+        import operator
+        test = getattr(operator, self.operator)
+        return test(value, *self.args)
+
+
+class IDS2JettoVariableModel(BaseModel):
+    """Variable for describing the relation between IDS data and jetto
+    variables.
+
+    The variable can be given a name, which can be used in the config
+    template to reference the variable. It will also be used as the
+    column labels or on plots.
+    """
+    name: str = Field(description=f("""
+        Name of the variable.
+        This will be used to reference this variable.
+    """))
+    type: str = Field('IDS2jetto-variable',
+                      description='discriminator for the variable type')
+    paths: list[IDSPath] = Field(description=f("""
+        Search these variables in the given order until a match with the conditions
+        defined below is found.
+    """))
+    accept_if: Optional[list[Condition]] = Field([],
+                                                 description=f("""
+        Accept variable if it matches the given conditions. This can be used
+        to filter undefined values (i.e. set to 0 or some very small or large number).
+        """))
+    default: Optional[float] = Field(description=f("""
+        Default value if no match is found. Set to None to raise an exeption instead."""
+                                                   ))
