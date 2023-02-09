@@ -15,9 +15,9 @@
     - ids: equilibrium
       path: vacuum_toroidal_field/b0/0
     - ids: equilibrium
-      path: time_slice/0/global_quantities/magnetic_axis/b_field_tor/0
+      path: time_slice/0/global_quantities/magnetic_axis/b_field_tor
   accept_if:
-    - operator: eq
+    - operator: ne
       args: [0]
     - operator: lt
       args: [1e40]

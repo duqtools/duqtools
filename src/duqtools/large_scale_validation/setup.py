@@ -129,7 +129,7 @@ class Variables:
                 value = trial
                 break
 
-        if not value:
+        if value is None:
             raise ValueError(
                 f'No value matches specifications given by: {spec}')
 
