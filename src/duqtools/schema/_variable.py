@@ -74,6 +74,11 @@ class Condition(BaseModel):
         'Name of a function in the `operator` module in the standard library.')
     args: list[Any] = Field('Arguments to pass to the operator.')
 
+    def __call__(self, value: Any):
+        import operator
+        test = getattr(operator, self.operator)
+        return test(value, *self.args)
+
 
 class IDS2JettoVariableModel(BaseModel):
     """Variable for describing the relation between IDS data and jetto

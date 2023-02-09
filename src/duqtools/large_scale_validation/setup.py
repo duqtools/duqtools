@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import operator
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
@@ -126,11 +125,7 @@ class Variables:
             except KeyError:
                 continue
 
-            for cond in spec.accept_if:
-                test = getattr(operator, cond.operator)
-                if not test(trial, *cond.args):
-                    break
-            else:
+            if all(condition(trial) for condition in spec.accept_if):
                 value = trial
                 break
 
