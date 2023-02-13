@@ -110,11 +110,14 @@ class BaseJettoSystem(AbstractSystem):
 
         os.environ['RUNS_HOME'] = os.getcwd()
         os.environ['JINTRAC_IMAS_BACKEND'] = 'MDSPLUS'
-        _ = jetto_manager.submit_job_to_docker(jetto_config,
-                                               job.dir,
-                                               image=cfg.submit.docker_image,
-                                               extra_volumes=extra_volumes)
+        container = jetto_manager.submit_job_to_docker(
+            jetto_config,
+            job.dir,
+            image=cfg.submit.docker_image,
+            extra_volumes=extra_volumes)
         job.lockfile.touch()
+        with open(job.lockfile, 'w') as f:
+            f.write(container.name)
 
     @staticmethod
     def submit_prominence(job: Job):
