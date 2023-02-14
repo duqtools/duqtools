@@ -28,23 +28,19 @@ run_4,user,jet,3333,0002
 run_5,user,jet,4444,0001
 ```
 
-## Config template 
+## Config template
 
 `duqtools.template.yaml` is a template for the [duqtools create config](../config/create/#the-create-config). It contains a few placeholders for variable data (see [below](#placeholder-variables)).
 
 ```yaml title="duqtools.template.yaml"
 create:
-  runs_dir: /pfs/work/username/jetto_runs/duqduq/$RUNS_NAME
+  runs_dir: /pfs/work/username/jetto_runs/duqduq/{{ run.name }}
   template: /pfs/work/username/jetto/runs/path/to/template/
   template_data:
-    user: $TEMPLATE_USER
-    db: $TEMPLATE_DB
-    shot: $TEMPLATE_SHOT
-    run: $TEMPLATE_RUN
-  data:
-    imasdb: duqduq
-    run_in_start_at: $RUN_IN_START
-    run_out_start_at: $RUN_OUT_START
+    user: {{ handle.user }}
+    db: {{ handle.db }}
+    shot: {{ handle.shot }}
+    run: {{ handle.run }}
   sampler:
     method: latin-hypercube
     n_samples: 3
@@ -55,36 +51,47 @@ create:
     - variable: t_e
       operator: multiply
       values: [0.8, 1.0, 1.2]
+    - variable: major_radius
+      operator: copyto
+      values: [ {{ variables.major_radius | round(4) }} ]
+    - variable: b_field
+      operator: copyto
+      values: [ {{ variables.b_field | round(4) }} ]
+    - variable: t_start
+      operator: copyto
+      values: [ {{ variables.t_start | round(4) }} ]
+    - variable: t_end
+      operator: copyto
+      values: [ {{ (variables.t_start + 0.01) | round(4) }} ]
+system: jetto-v220922
 ```
 
 ### Placeholder variables
 
-Placeholder variables are prefixed by `$` and in capital letters. Each of these must be present in the config template. These get overwritte by the entries in the `data.csv` file.
+The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/3.0.x/) as the templating language.
 
-`$RUNS_NAME` 
-: Name of the run. This maps to the index (first column) of the `data.csv` file.
+`run`
+: This contains attributes related to the current run. You can access the run name (`run.name`).
 
-`$TEMPLATE_USER` 
-: This is filled by user of the corresponding entry in the `data.csv` 
+`handle` (`ImasHandle`)
+: The handle corresponds to the entry from the Imas location in the `data.csv`. This means you have access to all attributes from [duqtools.api.ImasHandle][], such as `handle.user`, `handle.db`, `handle.run`, and `handle.shot`.
 
-`$TEMPLATE_DB` 
-: This is filled by database or machine name of the corresponding entry in the `data.csv` 
+`variables`
+: These variable corresponds to pre-defined values in the IDS data.
 
+-> Link to where the variables are defined (variable.yaml)
+-> Explain how jinja2 works in a nutshell
 
-`$TEMPLATE_SHOT` 
-: This is filled by the shot number of the corresponding entry in the `data.csv` 
+### Jetto V210921
 
+For compatibility with Jintrac v210921 distributions (`system: jetto-v210921`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
 
-`$TEMPLATE_RUN` 
-: This is filled by the run number of the corresponding entry in the `data.csv` 
-
-
-`$RUN_IN_START` 
-: `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at` so that input and output data are stored to free run numbers.
-
-`$RUN_OUT_START` 
-: See `$RUN_IN_START`
-
+```
+  data:
+    imasdb: {{ handle.db }}
+    run_in_start_at: {{ run.data_in_start }}
+    run_out_start_at: {{ run.data_out_start }}
+```
 
 ::: mkdocs-click
     :module: duqtools.large_scale_validation.cli
