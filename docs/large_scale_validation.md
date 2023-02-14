@@ -12,12 +12,20 @@ For information on how to configure your UQ runs via `duqtools.yaml`, check out 
 
 To start with large scale validation, two files are needed:
 
-1. `data.csv`
-2. `duqtools.template.yaml`
+1. `data.csv` contains the [template data](#input-data)
+2. `duqtools.template.yaml` is the [duqtools config template](#config-template)
+
+Then, run the programs in the intended sequence:
+
+1. [`duqduq setup`](#duqduq-setup)
+2. [`duqduq create`](#duqduq-create)
+3. [`duqduq submit`](#duqduq-submit)
+4. [`duqduq status`](#duqduq-status)
+5. [`duqduq merge`](#duqduq-merge)
 
 ## Input data
 
-1. `data.csv` - This file contains a list of IMAS handles pointing. For more info, click [here](../dash/#from-a-csv-file). `duqduq setup` creates a new directory (named after the index column) in the current directory with input for duqtools.
+`data.csv` contains a list of IMAS handles pointing. For more info on this file, click [here](../dash/#from-a-csv-file). `duqduq setup` will loop over the entries in this file, and create a new directory (named after the index column) in the current directory with input for duqtools.
 
 ```csv title="data.csv"
 ,user,db,shot,run
@@ -28,23 +36,21 @@ run_4,user,jet,3333,0002
 run_5,user,jet,4444,0001
 ```
 
-## Config template 
+Each column will be exposed through the `handle` dataclass in the config template below.
+
+## Config template
 
 `duqtools.template.yaml` is a template for the [duqtools create config](../config/create/#the-create-config). It contains a few placeholders for variable data (see [below](#placeholder-variables)).
 
 ```yaml title="duqtools.template.yaml"
 create:
-  runs_dir: /pfs/work/username/jetto_runs/duqduq/$RUNS_NAME
+  runs_dir: /pfs/work/username/jetto_runs/duqduq/{{ run.name }}
   template: /pfs/work/username/jetto/runs/path/to/template/
   template_data:
-    user: $TEMPLATE_USER
-    db: $TEMPLATE_DB
-    shot: $TEMPLATE_SHOT
-    run: $TEMPLATE_RUN
-  data:
-    imasdb: duqduq
-    run_in_start_at: $RUN_IN_START
-    run_out_start_at: $RUN_OUT_START
+    user: {{ handle.user }}
+    db: {{ handle.db }}
+    shot: {{ handle.shot }}
+    run: {{ handle.run }}
   sampler:
     method: latin-hypercube
     n_samples: 3
@@ -55,36 +61,63 @@ create:
     - variable: t_e
       operator: multiply
       values: [0.8, 1.0, 1.2]
+    - variable: major_radius
+      operator: copyto
+      values: [ {{ variables.major_radius | round(4) }} ]
+    - variable: b_field
+      operator: copyto
+      values: [ {{ variables.b_field | round(4) }} ]
+    - variable: t_start
+      operator: copyto
+      values: [ {{ variables.t_start | round(4) }} ]
+    - variable: t_end
+      operator: copyto
+      values: [ {{ (variables.t_start + 0.01) | round(4) }} ]
+system: jetto-v220922
 ```
 
 ### Placeholder variables
 
-Placeholder variables are prefixed by `$` and in capital letters. Each of these must be present in the config template. These get overwritte by the entries in the `data.csv` file.
+The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/latest/) as the templating engine. Jinja2 is widely used in the Python ecosystem and outside.
 
-`$RUNS_NAME` 
-: Name of the run. This maps to the index (first column) of the `data.csv` file.
+`run`
+: This contains attributes related to the current run. You can access the run name (`run.name`).
 
-`$TEMPLATE_USER` 
-: This is filled by user of the corresponding entry in the `data.csv` 
+`handle` (`ImasHandle`)
+: The handle corresponds to the entry from the Imas location in the `data.csv`. This means you have access to all attributes from [duqtools.api.ImasHandle][], such as `handle.user`, `handle.db`, `handle.run`, and `handle.shot`.
 
-`$TEMPLATE_DB` 
-: This is filled by database or machine name of the corresponding entry in the `data.csv` 
+`variables`
+: These variable corresponds to pre-defined values in the IDS data. They are defined via as variables with the type `IDS2jetto-variable`. Essentially, each variable of this type is accessible as an attribute of `variables`. These are grabbed from the IDS data on-the-fly in the current IMAS handle.
+: For more information on how to set this up, see the section on [variables](../variables/#ids2jetto-variables).
 
+### Jetto V210921
 
-`$TEMPLATE_SHOT` 
-: This is filled by the shot number of the corresponding entry in the `data.csv` 
+For compatibility with Jintrac v210921 distributions (`system: jetto-v210921`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
 
+```
+  data:
+    imasdb: {{ handle.db }}
+    run_in_start_at: {{ run.data_in_start }}
+    run_out_start_at: {{ run.data_out_start }}
+```
 
-`$TEMPLATE_RUN` 
-: This is filled by the run number of the corresponding entry in the `data.csv` 
+### Jinja2 quickstart
 
+Jinja2 allows expressions everywhere. Anything between `{{` and  `}}` is evaluated as an [expression](https://jinja.palletsprojects.com/en/latest/templates/#expressions). This means that:
 
-`$RUN_IN_START` 
-: `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at` so that input and output data are stored to free run numbers.
+`shot: {{ handle.shot }}` gets expanded to `shot: 12345`
 
-`$RUN_OUT_START` 
-: See `$RUN_IN_START`
+But, it is also possible to perform some operations inside the expression. In the example above we used this to calculate `t_end` from `t_start`.
 
+For example, if `t_start = 10`:
+
+`values: [ {{ variables.t_start + 0.01 }} ]` gets expanded to `values: [ 10.01 ]`.
+
+Another useful feature of jinja2 is [filters](https://jinja.palletsprojects.com/en/latest/templates/#builtin-filters). These are functions that can be used inside expressions to modify the variables. Let's say `t_start = 10.123`, and we want to round to the nearest tenth:
+
+`values: [ {{ variables.t_start | round(1) }} ]` becomes `values: [ 10.1 ]`.
+
+For more information, have a look at the [jinja2 documentation](https://jinja.palletsprojects.com/en/latest/).
 
 ::: mkdocs-click
     :module: duqtools.large_scale_validation.cli
