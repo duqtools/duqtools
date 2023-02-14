@@ -81,11 +81,10 @@ plugins:
         - https://numpy.org/doc/stable/objects.inv
         - https://docs.scipy.org/doc/scipy/objects.inv
         - https://pandas.pydata.org/docs/objects.inv
-        selection:
+        options:
           docstring_style: numpy
           docstring_options:
             ignore_init_summary: yes
-        rendering:
           show_submodules: no
           show_source: true
           docstring_section_style: list
@@ -96,11 +95,11 @@ plugins:
     scripts:
       - docs/gendocs.py
       - docs/genvariables.py
-- mkdocs-jupyter:
-    include_source: True
-    ignore:
-      - gendocs.py
-      - genvariables.py
+# - mkdocs-jupyter:
+#     include_source: True
+#     ignore:
+#       - gendocs.py
+#       - genvariables.py
 
 watch:
   - src/duqtools
