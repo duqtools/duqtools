@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from ..cli import common_options, logging_options
+from ..cli import common_options, logging_options, yes_option
 from ..operations import op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ def cli(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run config directories')
-@common_options(*logging_options)
+@common_options(*logging_options, yes_option)
 def cli_setup(**kwargs):
     """Set up large scale validation."""
     from .setup import setup
@@ -65,7 +65,7 @@ def cli_setup(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
-@common_options(*logging_options)
+@common_options(*logging_options, yes_option)
 def cli_create(**kwargs):
     """Create data sets for large scale validation."""
     from .create import create
@@ -85,7 +85,7 @@ def cli_create(**kwargs):
               '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
-@common_options(*logging_options)
+@common_options(*logging_options, yes_option)
 def cli_submit(**kwargs):
     """Submit large scale validation runs."""
     from .submit import submit
