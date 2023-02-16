@@ -160,7 +160,13 @@ class CreateManager:
     @add_to_op_queue('Writing csv', quiet=True)
     def write_runs_csv(self, runs: Sequence[Run]):
         fname = self.data_csv
-        run_map = {run.dirname: run.data_out.dict() for run in runs}
+
+        prefix = f'{cfg.tag}.' if cfg.tag else ''
+
+        run_map = {
+            f'{prefix}{run.shortname}': run.data_out.dict()
+            for run in runs
+        }
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
 
