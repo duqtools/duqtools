@@ -9,14 +9,23 @@ import jetto_tools
 from ..models import Locations
 
 
-def write_batchfile(run_dir: Path, jset: jetto_tools.jset.JSET):
+def write_batchfile(run_dir: Path,
+                    jset: jetto_tools.jset.JSET,
+                    tag: str | None = None):
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters
     ----------
-    target_drc : Path
+    run_dir : Path
         Directory to place batch file into.
+    jset: JSET
+        Jetto settings object (from jetto-pythontools)
+    tag : str | None
+        Tag the job, defaults to 'jetto'.
     """
+    if not tag:
+        tag = 'jetto'
+
     llcmd_path = run_dir / '.llcmd'
 
     rjettov_path = run_dir / 'rjettov'
@@ -30,7 +39,7 @@ def write_batchfile(run_dir: Path, jset: jetto_tools.jset.JSET):
 
     with open(llcmd_path, 'w') as f:
         f.write(f"""#!/bin/sh
-#SBATCH -J duqtools.jetto.{run_dir.name}
+#SBATCH -J duqtools.{tag}.{run_dir.name}
 #SBATCH -i /dev/null
 #SBATCH -o {run_dir / 'll.out'}
 #SBATCH -e {run_dir / 'll.err'}
