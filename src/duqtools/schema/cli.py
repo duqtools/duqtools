@@ -153,6 +153,11 @@ class StatusConfigModel(BaseModel):
 
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
+    tag: str = Field(
+        '',
+        description=
+        'Create a tag for the runs to identify them in slurm or `data.csv`')
+
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
         description='Configuration for the submit subcommand')
