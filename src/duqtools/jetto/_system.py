@@ -70,16 +70,19 @@ class BaseJettoSystem(AbstractSystem):
         if (job.dir / 'jetto.status').exists():
             os.remove(job.dir / 'jetto.status')
 
-        if cfg.submit.submit_system == 'slurm':
-            JettoSystem.submit_slurm(job)
-        elif cfg.submit.submit_system == 'docker':
-            JettoSystem.submit_docker(job)
-        elif cfg.submit.submit_system == 'prominence':
-            JettoSystem.submit_prominence(job)
+        submit_system = cfg.submit.submit_system
+
+        if submit_system == 'slurm':
+            submit = JettoSystem.submit_slurm
+        elif submit_system == 'docker':
+            submit = JettoSystem.submit_docker
+        elif submit_system == 'prominence':
+            submit = JettoSystem.submit_prominence
         else:
-            raise NotImplementedError(
-                'submission type {cfg.submit.submit_system}'
-                ' not implemented')
+            raise NotImplementedError(f'submission type {submit_system}'
+                                      ' not implemented')
+
+        submit(job)
 
     @staticmethod
     def submit_slurm(job: Job):
