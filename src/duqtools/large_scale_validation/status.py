@@ -22,7 +22,7 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
     config_files = cwd.glob('**/duqtools.yaml')
 
-    jobs: list[Job] = []
+    all_jobs: list[Job] = []
 
     click.echo(Job.symbol_help())
     click.echo()
@@ -36,18 +36,18 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
         config_dir = config_file.parent
 
-        new_jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
-        jobs.extend(new_jobs)
+        jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
+        all_jobs.extend(jobs)
 
         name = config_file.parent.name
         tag = cfg.tag
-        status = ''.join(sorted(job.symbol for job in new_jobs))
+        status = ''.join(job.symbol for job in jobs)
 
         click.echo(f'{name} ({tag}): {status}')
 
     click.echo()
 
-    tracker = Status(jobs)
+    tracker = Status(all_jobs)
 
     if detailed:
         tracker.detailed_status()
