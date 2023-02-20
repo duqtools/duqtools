@@ -8,6 +8,17 @@ from ..config import cfg
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
+cs = click.style
+
+STATUS_CODES = {
+    'no status': cs('_', fg='yellow'),
+    'completed': cs('.', fg='green'),
+    'failed': cs('f', fg='red'),
+    'running': cs('r', fg='yellow'),
+    'submitted': cs('s', fg='yellow'),
+    'unknown': cs('u', fg='yellow')
+}
+
 
 class Job:
 
@@ -18,20 +29,17 @@ class Job:
         run = str(self.dir)
         return f'{self.__class__.__name__}({run!r})'
 
+    @staticmethod
+    def symbol_help():
+        """Return help string for status codes."""
+        s = ', '.join(f'{code} : {status}'
+                      for status, code in STATUS_CODES.items())
+        return f'Status codes:\n{s}'
+
     @property
     def symbol(self):
-        """One letter status symbol
-        c: completed, f: failed, r: running, s: submitted, _: no status, 'u': unknown.
-        """
-        status_codes = {
-            'no status': '_',
-            'completed': 'c',
-            'failed': 'f',
-            'running': 'r',
-            'submitted': 's',
-            'unknown': 'u'
-        }
-        return status_codes[self.status()]
+        """One letter status symbol."""
+        return STATUS_CODES[self.status()]
 
     @property
     def has_submit_script(self) -> bool:

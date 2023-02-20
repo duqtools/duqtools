@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import click
+
 from ..config import cfg
 from ..models import Job, Locations
 from ..status import Status, StatusError
@@ -22,6 +24,9 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
     jobs: list[Job] = []
 
+    click.echo(Job.symbol_help())
+    click.echo()
+
     for config_file in config_files:
         cfg.parse_file(config_file)
 
@@ -38,9 +43,9 @@ def status(*, progress: bool, detailed: bool, **kwargs):
         tag = cfg.tag
         status = ''.join(sorted(job.symbol for job in new_jobs))
 
-        print(f'{name} ({tag}): {status}')
+        click.echo(f'{name} ({tag}): {status}')
 
-    print()
+    click.echo()
 
     tracker = Status(jobs)
 
