@@ -146,8 +146,7 @@ class Monitor():
     def set_status(self):
         status = self.job.status()
 
-        self.pbar.set_description(
-            f'{self.job.dir.name:8s}, status: {status:12s}')
+        self.pbar.set_description(f'{self.job.dir.name:8s}, {status:12s}')
         self.pbar.refresh()
 
         return status
