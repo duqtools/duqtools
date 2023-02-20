@@ -19,6 +19,21 @@ class Job:
         return f'{self.__class__.__name__}({run!r})'
 
     @property
+    def symbol(self):
+        """One letter status symbol
+        c: completed, f: failed, r: running, s: submitted, _: no status, 'u': unknown.
+        """
+        status_codes = {
+            'no status': '_',
+            'completed': 'c',
+            'failed': 'f',
+            'running': 'r',
+            'submitted': 's',
+            'unknown': 'u'
+        }
+        return status_codes[self.status()]
+
+    @property
     def has_submit_script(self) -> bool:
         return self.submit_script.exists()
 

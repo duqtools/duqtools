@@ -31,7 +31,16 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
         config_dir = config_file.parent
 
-        jobs.extend(Job(run.dirname) for run in Locations(config_dir).runs)
+        new_jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
+        jobs.extend(new_jobs)
+
+        name = config_file.parent.name
+        tag = cfg.tag
+        status = ''.join(sorted(job.symbol for job in new_jobs))
+
+        print(f'{name} ({tag}): {status}')
+
+    print()
 
     tracker = Status(jobs)
 
