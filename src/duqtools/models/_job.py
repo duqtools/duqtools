@@ -30,25 +30,36 @@ class Job:
     def is_submitted(self) -> bool:
         return (self.dir / 'duqtools.submit.lock').exists()
 
-    def status_file_contains(self, msg) -> bool:
+    def status(self) -> str:
+        if not self.has_status:
+            return 'no status'
+
         sf = self.status_file
         with open(sf) as f:
             content = f.read()
-            debug('Checking if content of %s file: %s contains %s', sf,
-                  content, msg)
-            return msg in content
+            if cfg.status.msg_completed in content:
+                return 'completed'
+            elif cfg.status.msg_failed in content:
+                return 'failed'
+            elif cfg.status.msg_running in content:
+                return 'running'
+
+        if not self.is_submitted:
+            return 'unsubmitted'
+
+        return 'unknown'
 
     @property
     def is_completed(self) -> bool:
-        return self.status_file_contains(cfg.status.msg_completed)
+        return self.status == 'completed'
 
     @property
     def is_failed(self) -> bool:
-        return self.status_file_contains(cfg.status.msg_failed)
+        return self.status == 'failed'
 
     @property
     def is_running(self) -> bool:
-        return self.status_file_contains(cfg.status.msg_running)
+        return self.status == 'running'
 
     @property
     def in_file(self) -> Path:
