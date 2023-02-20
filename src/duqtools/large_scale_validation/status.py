@@ -24,7 +24,7 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
     all_jobs: list[Job] = []
 
-    click.echo(Job.symbol_help())
+    click.echo(Job.status_symbol_help())
     click.echo()
 
     for config_file in config_files:
@@ -41,7 +41,7 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
         name = config_file.parent.name
         tag = cfg.tag
-        status = ''.join(job.symbol for job in jobs)
+        status = ''.join(job.status_symbol for job in jobs)
 
         click.echo(f'{name} ({tag}): {status}')
 

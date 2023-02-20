@@ -8,7 +8,7 @@ from jetto_tools import config, template
 
 from .config import cfg
 from .jetto._system import jetto_lookup
-from .models import Job, Locations
+from .models import Job, JobStatus, Locations
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -45,11 +45,11 @@ class Status():
 
         counter = Counter(job.status() for job in self.jobs)
 
-        self.n_submitted = counter['submitted']
-        self.n_completed = counter['completed']
-        self.n_running = counter['running']
-        self.n_failed = counter['failed']
-        self.n_unknown = counter['unknown']
+        self.n_submitted = counter[JobStatus.SUBMITTED]
+        self.n_completed = counter[JobStatus.COMPLETED]
+        self.n_running = counter[JobStatus.RUNNING]
+        self.n_failed = counter[JobStatus.FAILED]
+        self.n_unknown = counter[JobStatus.UNKNOWN]
 
     def simple_status(self):
         """stateless status."""
@@ -166,12 +166,12 @@ class Monitor():
 
     def update(self):
         status = self.set_status()
-        if status in ('completed', 'failed'):
-            self.pbar.n = 100 if status == 'completed' else 0
+        if status in (JobStatus.COMPLETED, JobStatus.FAILED):
+            self.pbar.n = 100 if status == JobStatus.COMPLETED else 0
             self.pbar.refresh()
             self.finished = True
             return
-        if not self.job.is_running:
+        if not status == JobStatus.RUNNING:
             return
 
         steptime = self.get_steptime()

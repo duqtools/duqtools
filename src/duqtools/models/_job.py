@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 from pathlib import Path
 
 import click
@@ -10,7 +11,7 @@ info, debug = logger.info, logger.debug
 
 cs = click.style
 
-STATUS_CODES = {
+STATUS_SYMBOLS = {
     'no status': cs('_', fg='yellow'),
     'completed': cs('.', fg='green'),
     'failed': cs('f', fg='red'),
@@ -18,6 +19,25 @@ STATUS_CODES = {
     'submitted': cs('s', fg='yellow'),
     'unknown': cs('u', fg='yellow')
 }
+
+
+class JobStatus(str, Enum):
+    NOSTATUS = 'no status'
+    COMPLETED = 'completed'
+    FAILED = 'failed'
+    RUNNING = 'running'
+    SUBMITTED = 'submitted'
+    UNKNOWN = 'unknown'
+
+    @property
+    def symbol(self):
+        return STATUS_SYMBOLS[self.value]
+
+    @staticmethod
+    def symbol_help():
+        s = ', '.join(f'{code} : {status}'
+                      for status, code in STATUS_SYMBOLS.items())
+        return f'Status codes:\n{s}'
 
 
 class Job:
@@ -30,16 +50,14 @@ class Job:
         return f'{self.__class__.__name__}({run!r})'
 
     @staticmethod
-    def symbol_help():
+    def status_symbol_help():
         """Return help string for status codes."""
-        s = ', '.join(f'{code} : {status}'
-                      for status, code in STATUS_CODES.items())
-        return f'Status codes:\n{s}'
+        return JobStatus.symbol_help()
 
     @property
-    def symbol(self):
+    def status_symbol(self):
         """One letter status symbol."""
-        return STATUS_CODES[self.status()]
+        return self.status().symbol
 
     @property
     def has_submit_script(self) -> bool:
@@ -55,34 +73,34 @@ class Job:
 
     def status(self) -> str:
         if not self.has_status:
-            return 'no status'
+            return JobStatus.NOSTATUS
 
         sf = self.status_file
         with open(sf) as f:
             content = f.read()
             if cfg.status.msg_completed in content:
-                return 'completed'
+                return JobStatus.COMPLETED
             elif cfg.status.msg_failed in content:
-                return 'failed'
+                return JobStatus.FAILED
             elif cfg.status.msg_running in content:
-                return 'running'
+                return JobStatus.RUNNING
 
-        if not self.is_submitted:
-            return 'unsubmitted'
+        if self.is_submitted:
+            return JobStatus.SUBMITTED
 
-        return 'unknown'
+        return JobStatus.UNKNOWN
 
     @property
     def is_completed(self) -> bool:
-        return self.status == 'completed'
+        return self.status == JobStatus.COMPLETED
 
     @property
     def is_failed(self) -> bool:
-        return self.status == 'failed'
+        return self.status == JobStatus.FAILED
 
     @property
     def is_running(self) -> bool:
-        return self.status == 'running'
+        return self.status == JobStatus.RUNNING
 
     @property
     def in_file(self) -> Path:
