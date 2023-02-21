@@ -1,7 +1,7 @@
 # This CITATION.cff file was generated with cffinit.
 # Visit https://bit.ly/cffinit to generate yours today!
 
-cff-version: 1.3.0
+cff-version: 1.4.0
 title: duqtools
 message: >-
   If you use this software, please cite it using the
@@ -33,4 +33,4 @@ keywords:
   - uncertainty-quantification
   - fusion-reactor
 license: Apache-2.0
-version: 1.3.0
+version: 1.4.0
