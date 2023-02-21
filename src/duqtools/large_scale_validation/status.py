@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import click
+
 from ..config import cfg
 from ..models import Job, Locations
 from ..status import Status, StatusError
@@ -20,7 +22,10 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
     config_files = cwd.glob('**/duqtools.yaml')
 
-    jobs: list[Job] = []
+    all_jobs: list[Job] = []
+
+    click.echo(Job.status_symbol_help())
+    click.echo()
 
     for config_file in config_files:
         cfg.parse_file(config_file)
@@ -31,9 +36,18 @@ def status(*, progress: bool, detailed: bool, **kwargs):
 
         config_dir = config_file.parent
 
-        jobs.extend(Job(run.dirname) for run in Locations(config_dir).runs)
+        jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
+        all_jobs.extend(jobs)
 
-    tracker = Status(jobs)
+        name = config_file.parent.name
+        tag = cfg.tag
+        status = ''.join(job.status_symbol for job in jobs)
+
+        click.echo(f'{name} ({tag}): {status}')
+
+    click.echo()
+
+    tracker = Status(all_jobs)
 
     if detailed:
         tracker.detailed_status()

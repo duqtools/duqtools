@@ -25,18 +25,26 @@ def Spinner(frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'):
 
 
 @add_to_op_queue('Submitting', '{job}')
-def _submit_job(job: Job):
+def _submit_job(job: Job, *, delay: float = 0):
+    """
+    Parameters
+    ----------
+    delay : float
+        Add a delay to avoid all jobs starting at the same time.
+        This causes issues with slurm, for example.
+    """
+    if delay:
+        time.sleep(delay)
     job.submit()
 
 
 def job_submitter(jobs: Sequence[Job], *, max_jobs):
     for n, job in enumerate(jobs):
-
         if max_jobs and (n >= max_jobs):
             info(f'Max jobs ({max_jobs}) reached.')
             break
 
-        _submit_job(job)
+        _submit_job(job, delay=0.1)
 
 
 @add_to_op_queue('Start job scheduler')
@@ -53,6 +61,8 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
             job = queue.popleft()
             task = job.start()
             tasks.append(task)
+            # starting jobs at the same time causes issues
+            time.sleep(0.1)
 
         time.sleep(interval)
         task = tasks.popleft()

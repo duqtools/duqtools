@@ -1,5 +1,6 @@
 import logging
 import subprocess as sp
+from collections import Counter
 from time import sleep
 from typing import Sequence
 
@@ -7,7 +8,7 @@ from jetto_tools import config, template
 
 from .config import cfg
 from .jetto._system import jetto_lookup
-from .models import Job, Locations
+from .models import Job, JobStatus, Locations
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -22,13 +23,13 @@ class StatusError(Exception):
 
 class Status():
 
-    jobs: list
-    jobs_submit: list
-    jobs_submitted: list
-    jobs_status: list
-    jobs_failed: list
-    jobs_running: list
-    jobs_unknown: list
+    jobs: Sequence[Job]
+    jobs_submit: int
+    jobs_submitted: int
+    jobs_status: int
+    jobs_failed: int
+    jobs_running: int
+    jobs_unknown: int
 
     def __init__(self, jobs=Sequence[Job]):
         self.jobs = jobs
@@ -39,57 +40,47 @@ class Status():
 
     def update_status(self):
 
-        self.jobs_submit = [job for job in self.jobs if job.has_submit_script]
-        self.jobs_status = [job for job in self.jobs if job.has_status]
-        self.jobs_submitted = [job for job in self.jobs if job.is_submitted]
+        self.n_submit_script = sum(job.has_submit_script for job in self.jobs)
+        self.n_status = sum(job.has_status for job in self.jobs)
 
-        self.jobs_completed = [
-            job for job in self.jobs_status if job.is_completed
-        ]
-        self.jobs_failed = [job for job in self.jobs_status if job.is_failed]
-        self.jobs_running = [job for job in self.jobs_status if job.is_running]
+        counter = Counter(job.status() for job in self.jobs)
 
-        self.jobs_unknown = [
-            job for job in self.jobs_status
-            if not (job in self.jobs_completed or job in self.jobs_failed
-                    or job in self.jobs_running)
-        ]
+        self.n_submitted = counter[JobStatus.SUBMITTED]
+        self.n_completed = counter[JobStatus.COMPLETED]
+        self.n_running = counter[JobStatus.RUNNING]
+        self.n_failed = counter[JobStatus.FAILED]
+        self.n_unknown = counter[JobStatus.UNKNOWN]
 
     def simple_status(self):
         """stateless status."""
-
         self.update_status()
-        info('Total number of directories with submission script : %i',
-             len(self.jobs_submit))
-        info('      number of not submitted jobs                 : %i',
-             (len(self.jobs_submit) - len(self.jobs_status)))
-        info('Total number of directories with status     script : %i',
-             len(self.jobs_status))
-        info('Total number of directories with Completed status  : %i',
-             len(self.jobs_completed))
-        info('Total number of directories with Failed    status  : %i',
-             len(self.jobs_failed))
-        info('Total number of directories with Running   status  : %i',
-             len(self.jobs_running))
-        info('Total number of directories with Unknown   status  : %i',
-             len(self.jobs_unknown))
+
+        msg = 'Total number of directories with %-17s : %i'
+
+        info(msg, 'submit script', self.n_submit_script)
+        info(msg, 'unsubmitted jobs', self.n_submit_script - self.n_status)
+        info(msg, 'status script', self.n_status)
+        info(msg, 'completed status', self.n_completed)
+        info(msg, 'failed status', self.n_failed)
+        info(msg, 'running status', self.n_running)
+        info(msg, 'unknown status', self.n_unknown)
 
     def progress_status(self):
         """Monitor the directory for status changes."""
         from tqdm import tqdm
         pbar_a = tqdm(total=len(self.jobs), position=0)
         pbar_a.set_description('Submitted jobs            ...')
-        pbar_b = tqdm(total=len(self.jobs_submit), position=1)
+        pbar_b = tqdm(total=self.n_submit_script, position=1)
         pbar_b.set_description('Running jobs              ...')
-        pbar_c = tqdm(total=len(self.jobs_submit), position=2)
+        pbar_c = tqdm(total=self.n_submit_script, position=2)
         pbar_c.set_description('Completed jobs            ...')
-        pbar_d = tqdm(total=len(self.jobs_submit), position=3)
+        pbar_d = tqdm(total=self.n_submit_script, position=3)
         pbar_d.set_description('Failed? jobs              ...')
-        while len(self.jobs_completed) < len(self.jobs_submit):
-            pbar_a.n = len(self.jobs_submitted)
-            pbar_b.n = len(self.jobs_running)
-            pbar_c.n = len(self.jobs_completed)
-            pbar_d.n = len(self.jobs_failed) + len(self.jobs_unknown)
+        while self.n_completed < self.n_submit_script:
+            pbar_a.n = self.n_submitted
+            pbar_b.n = self.n_running
+            pbar_c.n = self.n_completed
+            pbar_d.n = self.n_failed + self.n_unknown
             pbar_a.refresh()
             pbar_b.refresh()
             pbar_c.refresh()
@@ -153,22 +144,12 @@ class Monitor():
             raise StatusError(msg)
 
     def set_status(self):
-        if not self.job.has_status:
-            status = 'No status'
-        elif self.job.is_running:
-            status = 'Running     '
-        elif self.job.is_failed:
-            status = 'FAILED      '
-        elif self.job.is_completed:
-            status = 'COMPLETED   '
-        elif not self.job.is_submitted:
-            status = 'Unsubmitted '
-        else:
-            status = 'UNKNOWN'
+        status = self.job.status()
 
-        self.pbar.set_description(
-            f'{self.job.dir.name:8s}, status: {status:12s}')
+        self.pbar.set_description(f'{self.job.dir.name:8s}, {status:12s}')
         self.pbar.refresh()
+
+        return status
 
     def get_steptime(self):
         if not self.job.out_file.exists():
@@ -184,15 +165,14 @@ class Monitor():
         return None
 
     def update(self):
-        self.set_status()
-        if self.job.has_status:
-            if self.job.is_completed or self.job.is_failed:
-                self.pbar.n = 100 if self.job.is_completed else 0
-                self.pbar.refresh()
-                self.finished = True
-                return
-            if not self.job.is_running:
-                return
+        status = self.set_status()
+        if status in (JobStatus.COMPLETED, JobStatus.FAILED):
+            self.pbar.n = 100 if status == JobStatus.COMPLETED else 0
+            self.pbar.refresh()
+            self.finished = True
+            return
+        if not status == JobStatus.RUNNING:
+            return
 
         steptime = self.get_steptime()
         if steptime:
