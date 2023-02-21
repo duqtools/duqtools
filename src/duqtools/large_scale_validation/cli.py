@@ -17,11 +17,6 @@ except ImportError:
 def cli_entry():
     from duqtools import fix_dependencies
     fix_dependencies()
-    click.secho(
-        'Note: This tool is a work in progress and not ready to be used.',
-        bold=True,
-        bg='red',
-        fg='white')
     cli()
 
 
