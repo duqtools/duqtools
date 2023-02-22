@@ -44,6 +44,7 @@ class Job:
 
     def __init__(self, dir: Path):
         self.dir = Path(dir)
+        self.cfg = cfg
 
     def __repr__(self):
         run = str(self.dir)
@@ -78,11 +79,11 @@ class Job:
         sf = self.status_file
         with open(sf) as f:
             content = f.read()
-            if cfg.status.msg_completed in content:
+            if self.cfg.status.msg_completed in content:
                 return JobStatus.COMPLETED
-            elif cfg.status.msg_failed in content:
+            elif self.cfg.status.msg_failed in content:
                 return JobStatus.FAILED
-            elif cfg.status.msg_running in content:
+            elif self.cfg.status.msg_running in content:
                 return JobStatus.RUNNING
 
         if self.is_submitted:
@@ -104,19 +105,19 @@ class Job:
 
     @property
     def in_file(self) -> Path:
-        return self.dir / cfg.status.in_file
+        return self.dir / self.cfg.status.in_file
 
     @property
     def out_file(self) -> Path:
-        return self.dir / cfg.status.out_file
+        return self.dir / self.cfg.status.out_file
 
     @property
     def status_file(self) -> Path:
-        return self.dir / cfg.status.status_file
+        return self.dir / self.cfg.status.status_file
 
     @property
     def submit_script(self) -> Path:
-        return self.dir / cfg.submit.submit_script_name
+        return self.dir / self.cfg.submit.submit_script_name
 
     @property
     def lockfile(self) -> Path:

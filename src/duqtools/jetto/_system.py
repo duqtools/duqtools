@@ -12,7 +12,7 @@ from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..config import cfg
+from ..config import Config, cfg
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
@@ -59,7 +59,7 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
-    def write_batchfile(run_dir: Path):
+    def write_batchfile(run_dir: Path, cfg: Config):
         jetto_jset = jset.read(run_dir / 'jetto.jset')
         jetto_write_batchfile(run_dir, jetto_jset, tag=cfg.tag)
 
@@ -69,7 +69,7 @@ class BaseJettoSystem(AbstractSystem):
         if (job.dir / 'jetto.status').exists():
             os.remove(job.dir / 'jetto.status')
 
-        submit_system = cfg.submit.submit_system
+        submit_system = job.cfg.submit.submit_system
 
         if submit_system == 'slurm':
             submit = JettoSystem.submit_slurm
@@ -88,7 +88,7 @@ class BaseJettoSystem(AbstractSystem):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = cfg.submit.submit_command.split()
+        submit_cmd = job.cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting script via slurm {cmd}')
@@ -115,7 +115,7 @@ class BaseJettoSystem(AbstractSystem):
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
             job.dir,
-            image=cfg.submit.docker_image,
+            image=job.cfg.submit.docker_image,
             extra_volumes=extra_volumes)
         job.lockfile.touch()
         with open(job.lockfile, 'w') as f:
@@ -132,11 +132,11 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_array(jobs: Sequence[Job], max_jobs: int):
-        if cfg.submit.submit_system == 'slurm':
+        if jobs[0].cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_array_slurm(jobs, max_jobs)
         else:
             raise NotImplementedError(
-                'array submission type {cfg.submit.submit_system}'
+                'array submission type {jobs[0].cfg.submit.submit_system}'
                 ' not implemented')
 
     @staticmethod
@@ -168,7 +168,7 @@ class BaseJettoSystem(AbstractSystem):
         with open('duqtools_slurm_array.sh', 'w') as f:
             f.write(''.join(template))
 
-        submit_cmd = cfg.submit.submit_command.split()
+        submit_cmd = jobs[0].cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')

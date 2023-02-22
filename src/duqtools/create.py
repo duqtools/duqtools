@@ -8,7 +8,7 @@ import pandas as pd
 
 from .apply_model import apply_model
 from .cleanup import remove_run
-from .config import cfg
+from .config import Config, cfg
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models import Locations
@@ -158,7 +158,7 @@ class CreateManager:
                     runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
-    def write_runs_csv(self, runs: Sequence[Run]):
+    def write_runs_csv(self, runs: Sequence[Run], cfg: Config):
         fname = self.data_csv
 
         prefix = f'{cfg.tag}.' if cfg.tag else ''
@@ -242,7 +242,7 @@ def create(*, force, config, **kwargs):
         create_mgr.create_run(model, force=force)
 
     create_mgr.write_runs_file(runs)
-    create_mgr.write_runs_csv(runs)
+    create_mgr.write_runs_csv(runs, cfg)
     create_mgr.copy_config(config)
 
 
