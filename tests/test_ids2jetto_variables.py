@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from duqtools.api import IDSMapping
-from duqtools.large_scale_validation.setup import Variables
 from duqtools.schema._variable import IDS2JettoVariableModel
+from duqtools.setup import Variables
 
 
 @pytest.fixture

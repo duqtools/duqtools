@@ -231,6 +231,32 @@ def cli_init(**kwargs):
             exit(e)
 
 
+@cli.command('setup')
+@click.option(
+    '-r',
+    '--run_name',
+    type=str,
+    help='Name of the run.',
+    default='duqtools',
+)
+@click.option(
+    '-t',
+    '--template',
+    'template_file',
+    type=click.Path(exists=True),
+    help='Template duqtools.yaml',
+    default='duqtools.template.yaml',
+)
+@click.option('-h', '--handle', 'handle', type=str, help='IMAS data handle.')
+@click.option('--force', is_flag=True, help='Overwrite existing config')
+@common_options(*logging_options, yes_option)
+def cli_setup(**kwargs):
+    """Template substitution for duqtools config."""
+    from .setup import setup
+    with op_queue_context():
+        setup(**kwargs)
+
+
 @cli.command('create', cls=GroupCmd)
 @click.option('--force',
               is_flag=True,
