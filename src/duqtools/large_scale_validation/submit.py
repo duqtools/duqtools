@@ -4,10 +4,17 @@ from typing import Deque
 
 from ..config import cfg
 from ..models import Job, Locations
-from ..submit import SubmitError, job_scheduler, job_submitter, lockfile_ok, status_file_ok
+from ..submit import (
+    SubmitError,
+    job_array_submitter,
+    job_scheduler,
+    job_submitter,
+    lockfile_ok,
+    status_file_ok,
+)
 
 
-def submit(*, force, max_jobs, schedule, **kwargs):
+def submit(*, array, force, max_jobs, schedule, **kwargs):
     """Submit nested duqtools configs.
 
     Parameters
@@ -47,5 +54,5 @@ def submit(*, force, max_jobs, schedule, **kwargs):
         job_queue.append(job)
 
     submitter = job_scheduler if schedule else job_submitter
-
+    submitter = job_array_submitter if array else submitter
     submitter(job_queue, max_jobs=max_jobs)
