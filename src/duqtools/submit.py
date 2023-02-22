@@ -89,7 +89,11 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs):
                      description='Adding to array',
                      extra_description=f'{job}')
 
-    get_system().submit_array(jobs)
+    if not max_jobs:
+        logger.info('Max jobs not specified, defaulting to 10')
+        max_jobs = 10
+
+    get_system().submit_array(jobs, max_jobs)
 
 
 def submission_script_ok(job):
