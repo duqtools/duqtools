@@ -372,12 +372,12 @@ class JettoSystemV220922(BaseJettoSystem):
         options,
     ):
         """Get handle for data output."""
-        return ImasHandle(
-            user=str((dirname / 'imasdb').resolve()),
-            db=source.db,
-            shot=source.shot,
-            run=2,
-        )
+        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                          db=source.db,
+                          shot=source.shot,
+                          run=2,
+                          relative_location=str(
+                              os.path.relpath((dirname / 'imasdb').resolve())))
 
 
 JettoSystem = JettoSystemV220922

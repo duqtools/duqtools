@@ -9,6 +9,10 @@ from ._basemodel import BaseModel
 
 class ImasBaseModel(BaseModel):
     """This model describes an IMAS data location."""
+    relative_location: str = Field(
+        None,
+        description='Set as the relative location to the'
+        ' imasdb location if a local imasdb is used')
     user: str = Field(None, description='Username.')
     db: str = Field(description='IMAS db/machine name.')
     shot: int = Field(description='IMAS Shot number.')
