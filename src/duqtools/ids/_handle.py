@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
+
+from pydantic import validator
 
 from ..config import lookup_vars
 from ..operations import add_to_op_queue
@@ -86,6 +89,13 @@ class ImasHandle(ImasBaseModel):
             return cls(**match.groupdict())
 
         raise ValueError(f'Could not match {string!r}')
+
+    @validator('user')
+    def user_rel_path(cls, v, values):
+        # Override user if we have a relative location
+        if values['relative_location']:
+            return os.path.abspath(values['relative_location'])
+        return v
 
     def validate(self):
         """Validate the user.
