@@ -319,6 +319,7 @@ def cli_status(**kwargs):
               is_flag=True,
               help='Plot the errorbars (if present)')
 @datafile_option
+@common_options(*logging_options)
 def cli_plot(**kwargs):
     """Plot some IDS data.
 

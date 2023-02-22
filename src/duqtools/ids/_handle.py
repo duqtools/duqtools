@@ -94,6 +94,9 @@ class ImasHandle(ImasBaseModel):
     def user_rel_path(cls, v, values):
         # Override user if we have a relative location
         if values['relative_location']:
+            logger.info(
+                f'Updating imasdb location with relative location {values["relative_location"]}'
+            )
             return os.path.abspath(values['relative_location'])
         return v
 
