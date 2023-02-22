@@ -80,6 +80,12 @@ def cli_create(**kwargs):
               '--max_jobs',
               type=int,
               help='Maximum number of jobs to submit.')
+@click.option('-s',
+              '--status',
+              'status_filter',
+              type=str,
+              multiple=True,
+              help='Only submit jobs with this status.')
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
 @common_options(*logging_options, yes_option)
 def cli_submit(**kwargs):

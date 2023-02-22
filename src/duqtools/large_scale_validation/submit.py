@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import Deque
+from typing import Deque, Sequence
 
 from ..config import cfg
 from ..models import Job, Locations
@@ -14,7 +14,8 @@ from ..submit import (
 )
 
 
-def submit(*, array, force, max_jobs, schedule, **kwargs):
+def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
+           **kwargs):
     """Submit nested duqtools configs.
 
     Parameters
@@ -26,12 +27,14 @@ def submit(*, array, force, max_jobs, schedule, **kwargs):
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
+    status_filter : list[str]
+        Only submit jobs with this status.
     """
     cwd = Path.cwd()
 
     config_files = cwd.glob('**/duqtools.yaml')
 
-    jobs = []
+    jobs: list[Job] = []
 
     for config_file in config_files:
         cfg.parse_file(config_file)
@@ -47,6 +50,10 @@ def submit(*, array, force, max_jobs, schedule, **kwargs):
     job_queue: Deque[Job] = deque()
 
     for job in jobs:
+        status = job.status()
+
+        if status not in status_filter:
+            continue
         if not status_file_ok(job, force=force):
             continue
         if not lockfile_ok(job, force=force):

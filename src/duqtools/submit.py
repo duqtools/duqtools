@@ -162,6 +162,7 @@ def submit(*,
            schedule: bool,
            array: bool,
            resubmit: Sequence[Path] = (),
+           status_filter: Sequence[str],
            **kwargs):
     """submit. Function which implements the functionality to submit jobs to
     the cluster.
@@ -181,6 +182,8 @@ def submit(*,
         If any jobs need to be resubmitted, this is has a nonzero length, and
         contains a Sequence of Paths which either are the full Path to the run
         that needs to be resubmitted, or the shortname
+    status_filter : list[str]
+        Only submit jobs with this status.
     """
     if not cfg.submit:
         raise SubmitError('Submit field required in config file')
@@ -198,6 +201,10 @@ def submit(*,
     job_queue: Deque[Job] = deque()
 
     for job in jobs:
+        status = job.status()
+
+        if status not in status_filter:
+            continue
         if not status_file_ok(job, force=force):
             continue
         if not lockfile_ok(job, force=force):
