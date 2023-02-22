@@ -278,6 +278,12 @@ def cli_recreate(**kwargs):
               default=tuple(),
               type=Path,
               help='Case to re-submit, can be specified multiple times')
+@click.option('-s',
+              '--status',
+              'status_filter',
+              type=str,
+              multiple=True,
+              help='Only submit jobs with this status.')
 @common_options(*all_options)
 def cli_submit(**kwargs):
     """Submit the UQ runs.

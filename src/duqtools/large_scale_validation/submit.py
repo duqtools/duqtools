@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import Deque
+from typing import Deque, Sequence
 
 from ..config import cfg
 from ..models import Job, Locations
@@ -14,7 +14,8 @@ from ..submit import (
 )
 
 
-def submit(*, array, force, max_jobs, schedule, status_filter, **kwargs):
+def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
+           **kwargs):
     """Submit nested duqtools configs.
 
     Parameters
@@ -33,7 +34,7 @@ def submit(*, array, force, max_jobs, schedule, status_filter, **kwargs):
 
     config_files = cwd.glob('**/duqtools.yaml')
 
-    jobs = []
+    jobs: list[Job] = []
 
     for config_file in config_files:
         cfg.parse_file(config_file)
