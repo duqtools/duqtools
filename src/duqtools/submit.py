@@ -203,7 +203,7 @@ def submit(*,
     for job in jobs:
         status = job.status()
 
-        if status not in status_filter:
+        if status_filter and (status not in status_filter):
             continue
         if not status_file_ok(job, force=force):
             continue
