@@ -13,6 +13,10 @@ class ImasBaseModel(BaseModel):
     db: str = Field(description='IMAS db/machine name.')
     shot: int = Field(description='IMAS Shot number.')
     run: int = Field(description='IMAS Run number.')
+    relative_location: str = Field(
+        None,
+        description='Set as the relative location to the'
+        ' imasdb location if a local imasdb is used')
 
     @validator('user', pre=True, always=True)
     def validate_user(cls, v):
