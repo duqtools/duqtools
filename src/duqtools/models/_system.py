@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from ..config import Config
 from ..schema import BaseModel, ImasBaseModel
 
 if TYPE_CHECKING:
@@ -33,7 +34,7 @@ class AbstractSystem(ABC, BaseModel):
 
     @staticmethod
     @abstractmethod
-    def write_batchfile(run_dir: Path):
+    def write_batchfile(run_dir: Path, cfg: Config):
         """Write the batchfile used to submit the job inside run directory
         `run_dir`.
 
