@@ -200,7 +200,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname)
+        self.system.write_batchfile(model.dirname, cfg)
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
