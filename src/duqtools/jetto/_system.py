@@ -131,9 +131,9 @@ class BaseJettoSystem(AbstractSystem):
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
-    def submit_array(jobs: Sequence[Job]):
+    def submit_array(jobs: Sequence[Job], max_jobs: int):
         if cfg.submit.submit_system == 'slurm':
-            JettoSystem.submit_array_slurm(jobs)
+            JettoSystem.submit_array_slurm(jobs, max_jobs)
         else:
             raise NotImplementedError(
                 'array submission type {cfg.submit.submit_system}'
@@ -141,7 +141,7 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
-    def submit_array_slurm(jobs: Sequence[Job]):
+    def submit_array_slurm(jobs: Sequence[Job], max_jobs: int):
         for job in jobs:
             job.lockfile.touch()
 
@@ -153,7 +153,8 @@ class BaseJettoSystem(AbstractSystem):
         # Append our own options, later options have precedence
         template.append('#SBATCH -o duqtools_slurm_array.out\n')
         template.append('#SBATCH -e duqtools_slurm_array.err\n')
-        template.append('#SBATCH --array=0-' + str(len(jobs) - 1) + '\n')
+        template.append('#SBATCH --array=0-' + str(len(jobs) - 1))
+        template.append('%' + str(max_jobs) + '\n')
         template.append('#SBATCH -J duqtools_array\n')
 
         scripts = [str(job.submit_script) for job in jobs]
