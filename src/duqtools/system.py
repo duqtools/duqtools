@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .config import cfg
+from .config import Config, cfg
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
@@ -18,7 +18,7 @@ class DummySystem(AbstractSystem):
         return Path()
 
     @staticmethod
-    def write_batchfile(run_dir: Path):
+    def write_batchfile(run_dir: Path, cfg: Config):
         pass
 
     @staticmethod
