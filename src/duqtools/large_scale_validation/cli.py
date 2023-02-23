@@ -107,6 +107,8 @@ def cli_status(**kwargs):
 
 
 @cli.command('merge')
+@click.option('--force', is_flag=True, help='Overwrite existing data')
+@common_options(*logging_options, yes_option)
 def cli_merge(**kwargs):
     """Merge large scale validation data."""
     from .merge import merge
