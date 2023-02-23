@@ -183,7 +183,7 @@ class BaseJettoSystem(AbstractSystem):
         """Apply settings that are necessary for duqtools to function."""
         # Force output of IDS data
         # https://github.com/duqtools/duqtools/issues/343
-        jetto_template.jset._settings['JobProcessingPanel.selIdsRunid'] = False
+        jetto_template.jset._settings['JobProcessingPanel.selIdsRunid'] = True
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
