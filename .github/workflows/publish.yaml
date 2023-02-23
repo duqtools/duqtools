@@ -21,6 +21,7 @@ jobs:
         python -m pip install .
 
     - name: Create requirements files
+      run: |
         python -m pip freeze > requirements_full.txt
         pyreqs . --print > requirements.txt
 
