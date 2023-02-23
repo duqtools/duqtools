@@ -23,7 +23,16 @@ def merge(**kwargs):
         cfg.parse_file(config_file)
 
         data_csv = config_file.parent / 'data.csv'
-        handles = read_imas_handles_from_file(data_csv)
+        handles = list(read_imas_handles_from_file(data_csv).values())
+
+        run_name = config_file.parent.name
+
+        handles = [handle for handle in handles if handle.exists()]
+        if not handles:
+            op_queue.warning(run_name, 'No data to merge.')
+            continue
+
+        op_queue.info(run_name, description=f'Merging {len(handles)} datasets')
 
         template_data = ImasHandle.parse_obj(cfg.create.template_data)
 
