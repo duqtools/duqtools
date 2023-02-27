@@ -93,15 +93,15 @@ class Job:
 
     @property
     def is_completed(self) -> bool:
-        return self.status == JobStatus.COMPLETED
+        return self.status() == JobStatus.COMPLETED
 
     @property
     def is_failed(self) -> bool:
-        return self.status == JobStatus.FAILED
+        return self.status() == JobStatus.FAILED
 
     @property
     def is_running(self) -> bool:
-        return self.status == JobStatus.RUNNING
+        return self.status() == JobStatus.RUNNING
 
     @property
     def in_file(self) -> Path:
