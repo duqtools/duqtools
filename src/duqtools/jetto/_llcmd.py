@@ -2,11 +2,16 @@
 from __future__ import annotations
 
 import stat
+from os.path import commonpath
 from pathlib import Path
+from typing import TYPE_CHECKING, Sequence
 
 import jetto_tools
 
 from ..models import Locations
+
+if TYPE_CHECKING:
+    from ..models import Job
 
 
 def write_batchfile(run_dir: Path,
@@ -37,8 +42,7 @@ def write_batchfile(run_dir: Path,
     num_proc = jset['JobProcessingPanel.numProcessors']
     wall_time = jset['JobProcessingPanel.wallTime']
 
-    with open(llcmd_path, 'w') as f:
-        f.write(f"""#!/bin/sh
+    string = f"""#!/bin/sh
 #SBATCH -J duqtools.{tag}.{run_dir.name}
 #SBATCH -i /dev/null
 #SBATCH -o {run_dir / 'll.out'}
@@ -51,6 +55,52 @@ def write_batchfile(run_dir: Path,
 
 cd {run_dir}
 {rjettov_path} -S -I -p -xmpi -x64 {rel_path} \
-{build_name} {build_user_name}""")
+{build_name} {build_user_name}"""
+
+    with open(llcmd_path, 'w') as f:
+        f.write(string)
 
     llcmd_path.chmod(llcmd_path.stat().st_mode | stat.S_IXUSR)
+
+
+def write_array_batchfile(jobs: Sequence[Job], max_jobs: int):
+    """Write array batchfile to start jetto runs.
+
+    Parameters
+    ----------
+    jobs : Sequence[Job]
+        List of jobs to run.
+    max_jobs : int
+        Maximum number of jobs to run at the same time.
+    """
+    common_dir = Path(commonpath(job.dir for job in jobs))  # type: ignore
+
+    # Get the first jobs submission script as a template
+    lines = open(jobs[0].submit_script)
+    sbatch_lines = (line for line in lines if line.startswith('#SBATCH'))
+    option_lines = (line for line in sbatch_lines
+                    if line.split()[1] not in ('-o', '-e', '-J'))
+    options = ''.join(option_lines)
+
+    # Append our own options, later options have precedence
+    out_file = common_dir / 'duqtools-%A_%a.out'
+    err_file = common_dir / 'duqtools-%A_%a.err'
+
+    scripts = '\n'.join(f'    {job.submit_script}' for job in jobs)
+
+    string = f"""#!/bin/sh
+{options}
+#SBATCH -o {out_file}
+#SBATCH -e {err_file}
+#SBATCH --array=0-{len(jobs)-1}%{max_jobs}
+#SBATCH -J duqtools-array
+
+scripts=(
+{scripts}
+)
+echo executing ${{scripts[$SLURM_ARRAY_TASK_ID]}}
+${{scripts[$SLURM_ARRAY_TASK_ID]}} || true
+"""
+
+    with open('duqtools_slurm_array.sh', 'w') as f:
+        f.write(string)
