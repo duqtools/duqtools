@@ -11,7 +11,7 @@ from ..utils import read_imas_handles_from_file
 logger = logging.getLogger(__name__)
 
 
-def merge(**kwargs):
+def merge(force: bool, **kwargs):
     cwd = Path.cwd()
 
     variables = tuple(var_lookup.filter_type('IDS-variable').values())
@@ -32,7 +32,8 @@ def merge(**kwargs):
             op_queue.warning(run_name, 'No data to merge.')
             continue
 
-        op_queue.info(run_name, description=f'Merging {len(handles)} datasets')
+        op_queue.info(run_name,
+                      extra_description=f'Merging {len(handles)} datasets')
 
         template_data = ImasHandle.parse_obj(cfg.create.template_data)
 
@@ -44,5 +45,5 @@ def merge(**kwargs):
             handles=handles,
             target=target_data,
             template=template_data,
-            force=False,
+            force=force,
         )
