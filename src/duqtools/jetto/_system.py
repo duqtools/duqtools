@@ -149,8 +149,6 @@ class BaseJettoSystem(AbstractSystem):
         logger.info('writing duqtools_slurm_array.sh file')
         _write_array_batchfile(jobs, max_jobs)
 
-        exit()
-
         submit_cmd = jobs[0].cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
