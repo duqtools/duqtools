@@ -74,6 +74,8 @@ def write_array_batchfile(jobs: Sequence[Job], max_jobs: int):
         Maximum number of jobs to run at the same time.
     """
     common_dir = Path(commonpath(job.dir for job in jobs))  # type: ignore
+    logs_dir = common_dir / 'logs'
+    logs_dir.mkdir(exist_ok=True)
 
     # Get the first jobs submission script as a template
     lines = open(jobs[0].submit_script)
@@ -83,8 +85,8 @@ def write_array_batchfile(jobs: Sequence[Job], max_jobs: int):
     options = ''.join(option_lines)
 
     # Append our own options, later options have precedence
-    out_file = common_dir / 'duqtools-%A_%a.out'
-    err_file = common_dir / 'duqtools-%A_%a.err'
+    out_file = logs_dir / 'duqtools-%A_%a.out'
+    err_file = logs_dir / 'duqtools-%A_%a.err'
 
     scripts = '\n'.join(f'    {job.submit_script}' for job in jobs)
 
