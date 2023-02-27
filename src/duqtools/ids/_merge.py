@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence
 
 import xarray as xr
@@ -8,6 +9,10 @@ from ..schema import IDSVariableModel
 from ..utils import groupby
 from ._handle import ImasHandle
 from ._rebase import rebase_all_coords, squash_placeholders
+
+logger = logging.getLogger(__name__)
+
+info = logger.info
 
 
 @add_to_op_queue('Merging to', '{target}')
@@ -57,6 +62,12 @@ def merge_data(
 
         # Get all data, and rebase it
         target_ids = target.get(ids_name)  # type: ignore
+
+        # Do not rebase to target if the target is empty
+        if not target_ids:
+            info('target %s:%s contains no data, skipping', target, ids_name)
+            continue
+
         target_data = target_ids.to_xarray(variables=ids_vars,
                                            empty_var_ok=True)
         target_data = squash_placeholders(target_data)
@@ -67,7 +78,6 @@ def merge_data(
         ]
 
         ids_data = rebase_all_coords(ids_data, target_data)
-
         ids_data = xr.concat(ids_data, 'handle')
 
         # Now we have to get the stddeviations
