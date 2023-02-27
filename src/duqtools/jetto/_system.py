@@ -17,9 +17,9 @@ from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
 from ..schema import JettoVar
+from ._batchfile import write_array_batchfile as _write_array_batchfile
+from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
-from ._llcmd import write_array_batchfile as _write_array_batchfile
-from ._llcmd import write_batchfile as _write_batchfile
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
