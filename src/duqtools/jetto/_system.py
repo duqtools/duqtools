@@ -17,8 +17,9 @@ from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
 from ..schema import JettoVar
+from ._batchfile import write_array_batchfile as _write_array_batchfile
+from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
-from ._llcmd import write_batchfile as jetto_write_batchfile
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -61,7 +62,7 @@ class BaseJettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path, cfg: Config):
         jetto_jset = jset.read(run_dir / 'jetto.jset')
-        jetto_write_batchfile(run_dir, jetto_jset, tag=cfg.tag)
+        _write_batchfile(run_dir, jetto_jset, tag=cfg.tag)
 
     @staticmethod
     def submit_job(job: Job):
@@ -145,28 +146,8 @@ class BaseJettoSystem(AbstractSystem):
         for job in jobs:
             job.lockfile.touch()
 
-        # Get the first jobs submission script as a template
-        template = []
-        for line in open(jobs[0].submit_script).readlines():
-            if line.startswith('#SBATCH') or line.startswith('#!'):
-                template.append(line)
-        # Append our own options, later options have precedence
-        template.append('#SBATCH -o duqtools_slurm_array.out\n')
-        template.append('#SBATCH -e duqtools_slurm_array.err\n')
-        template.append('#SBATCH --array=0-' + str(len(jobs) - 1))
-        template.append('%' + str(max_jobs) + '\n')
-        template.append('#SBATCH -J duqtools_array\n')
-
-        scripts = [str(job.submit_script) for job in jobs]
-        script_str = 'scripts=(' + ' '.join(scripts) + ')\n'
-        template.append(script_str)
-
-        template.append('echo executing ${scripts[$SLURM_ARRAY_TASK_ID]}\n')
-        template.append('${scripts[$SLURM_ARRAY_TASK_ID]} || true\n')
-
         logger.info('writing duqtools_slurm_array.sh file')
-        with open('duqtools_slurm_array.sh', 'w') as f:
-            f.write(''.join(template))
+        _write_array_batchfile(jobs, max_jobs)
 
         submit_cmd = jobs[0].cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
@@ -175,8 +156,10 @@ class BaseJettoSystem(AbstractSystem):
 
         ret = sp.run(cmd, check=True, capture_output=True)
         logger.info('submission returned: ' + str(ret.stdout))
-        with open(job.lockfile, 'wb') as f:
-            f.write(ret.stdout)
+
+        for job in jobs:
+            with open(job.lockfile, 'wb') as f:
+                f.write(ret.stdout)
 
     @staticmethod
     def _apply_patches_to_template(jetto_template: template.Template):
