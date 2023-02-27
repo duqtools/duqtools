@@ -150,23 +150,23 @@ class BaseJettoSystem(AbstractSystem):
         for line in open(jobs[0].submit_script).readlines():
             if line.startswith('#SBATCH') or line.startswith('#!'):
                 template.append(line)
+
         # Append our own options, later options have precedence
         template.append('#SBATCH -o duqtools_slurm_array.out\n')
         template.append('#SBATCH -e duqtools_slurm_array.err\n')
-        template.append('#SBATCH --array=0-' + str(len(jobs) - 1))
-        template.append('%' + str(max_jobs) + '\n')
+        template.append(f'#SBATCH --array=0-{len(jobs)-1}%{max_jobs}\n')
         template.append('#SBATCH -J duqtools_array\n')
 
-        scripts = [str(job.submit_script) for job in jobs]
-        script_str = 'scripts=(' + ' '.join(scripts) + ')\n'
-        template.append(script_str)
+        template.append('scripts=(\n')
+        template.extend(f'    {job.submit_script}\n' for job in jobs)
+        template.append(')\n')
 
         template.append('echo executing ${scripts[$SLURM_ARRAY_TASK_ID]}\n')
         template.append('${scripts[$SLURM_ARRAY_TASK_ID]} || true\n')
 
         logger.info('writing duqtools_slurm_array.sh file')
         with open('duqtools_slurm_array.sh', 'w') as f:
-            f.write(''.join(template))
+            f.writelines(template)
 
         submit_cmd = jobs[0].cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
