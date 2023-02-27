@@ -5,8 +5,8 @@ from duqtools.api import ImasHandle
 
 from ..config import cfg, var_lookup
 from ..merge import _merge
+from ..models import Job, Locations
 from ..operations import op_queue
-from ..utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +22,23 @@ def merge(force: bool, **kwargs):
     for config_file in config_files:
         cfg.parse_file(config_file)
 
-        data_csv = config_file.parent / 'data.csv'
-        handles = list(read_imas_handles_from_file(data_csv).values())
+        config_dir = config_file.parent
+
+        runs = Locations(config_dir).runs
+
+        handles = []
+
+        for run in runs:
+            if not Job(run.dirname).is_completed:
+                continue
+            handle = ImasHandle.parse_obj(run.data_out)
+            if not handle.exists():
+                continue
+
+            handles.append(handle)
 
         run_name = config_file.parent.name
 
-        handles = [handle for handle in handles if handle.exists()]
         if not handles:
             op_queue.warning(run_name, 'No data to merge.')
             continue
