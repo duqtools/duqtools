@@ -35,11 +35,10 @@ def _merge(*,
         Force overwriting existing files.
     """
     for handle in handles:
-        op_queue.info(description='Source for merge',
-                      extra_description=f'{handle}')
+        logger.debug('Source for merge %s', handle)
 
-    op_queue.add(description='Template for merge',
-                 extra_description=f'{template}')
+    op_queue.info(description='Template for merge',
+                  extra_description=f'{template}')
 
     if target.exists() and not force:
         op_queue.add_no_op(description='Abort merge',
