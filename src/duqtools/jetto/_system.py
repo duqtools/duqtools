@@ -142,6 +142,8 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
     def submit_array_slurm(jobs: Sequence[Job], max_jobs: int):
+        job0 = jobs[0]
+
         for job in jobs:
             job.lockfile.touch()
 
@@ -152,10 +154,14 @@ class BaseJettoSystem(AbstractSystem):
                 template.append(line)
 
         # Append our own options, later options have precedence
-        template.append('#SBATCH -o duqtools_slurm_array.out\n')
-        template.append('#SBATCH -e duqtools_slurm_array.err\n')
+        out_file = job0.dir.parent / 'duqtools-%A_%a.out'
+        template.append(f'#SBATCH -o {out_file}\n')
+
+        err_file = job0.dir.parent / 'duqtools-%A_%a.err'
+        template.append(f'#SBATCH -e {err_file}\n')
+
         template.append(f'#SBATCH --array=0-{len(jobs)-1}%{max_jobs}\n')
-        template.append('#SBATCH -J duqtools_array\n')
+        template.append('#SBATCH -J duqtools-%A_%a\n')
 
         template.append('scripts=(\n')
         template.extend(f'    {job.submit_script}\n' for job in jobs)
@@ -168,7 +174,7 @@ class BaseJettoSystem(AbstractSystem):
         with open('duqtools_slurm_array.sh', 'w') as f:
             f.writelines(template)
 
-        submit_cmd = jobs[0].cfg.submit.submit_command.split()
+        submit_cmd = job0.cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
