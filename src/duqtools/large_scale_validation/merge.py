@@ -46,7 +46,7 @@ def merge(force: bool, **kwargs):
         op_queue.info(run_name,
                       extra_description=f'Merging {len(handles)} datasets')
 
-        template_data = ImasHandle.parse_obj(cfg.create.template_data)
+        template_data = handles[0]
 
         target_data = template_data.copy()
         target_data.user = str(cfg.create.runs_dir / 'imasdb')
