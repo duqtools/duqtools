@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 OP_STYLE = {'fg': 'green'}
 
+INFO_STYLE = {'fg': 'blue'}
+
 NO_OP_STYLE = {
     'fg': 'red',
     'bold': True,
@@ -169,7 +171,7 @@ class Operations(deque):
         self.add(action=None,
                  description=description,
                  extra_description=extra_description,
-                 style=OP_STYLE)
+                 style=INFO_STYLE)
 
     def warning(self, description: str, extra_description: str):
         self.warnings.add(
