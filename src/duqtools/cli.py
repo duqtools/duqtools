@@ -471,7 +471,7 @@ def cli_merge(**kwargs):
     `user/db/shot/number` or `db/shot/number`.
 
     By default, `duqduq merge` attempts to merge all known variables.
-    Use `--variables` to select which variables to merge.
+    Use `--variable` to select which variables to merge.
     """
     from .merge import merge
     with op_queue_context():
