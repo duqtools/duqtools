@@ -86,9 +86,10 @@ def merge_data(
 
         # Then, write it back to target
         for name in ids_data.data_vars.keys():
-            target_ids.write_array_in_parts(variable_dict[name].path,
-                                            mean_data[name])
-            target_ids.write_array_in_parts(
-                variable_dict[name].path + '_error_upper', std_data[name])
+            path = variable_dict[name].path
+            target_ids.write_array_in_parts(path, mean_data[name])
+
+            path_upper = path + '_error_upper'
+            target_ids.write_array_in_parts(path_upper, std_data[name])
 
         target_ids.sync(target)
