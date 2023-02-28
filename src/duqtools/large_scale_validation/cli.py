@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from ..cli import common_options, logging_options, yes_option
+from ..cli import common_options, logging_options, variables_option, yes_option
 from ..operations import op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -108,9 +108,14 @@ def cli_status(**kwargs):
 
 @cli.command('merge')
 @click.option('--force', is_flag=True, help='Overwrite existing data')
+@variables_option
 @common_options(*logging_options, yes_option)
 def cli_merge(**kwargs):
-    """Merge large scale validation data."""
+    """Merge data sets with error propagation.
+
+    By default, `duqduq merge` attempts to merge all known variables.
+    Use `--variables` to select which variables to merge.
+    """
     from .merge import merge
     with op_queue_context():
         merge(**kwargs)

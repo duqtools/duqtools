@@ -439,10 +439,6 @@ def cli_dash(**kwargs):
               required=True,
               type=str,
               help='IMAS location to store the result in')
-@click.option('--all',
-              'merge_all',
-              is_flag=True,
-              help='Try to merge all known variables.')
 @datafile_option
 @click.option('--force',
               is_flag=True,
@@ -473,6 +469,9 @@ def cli_merge(**kwargs):
 
     The `-t`, `-o` and `-h` options expect an IMAS path formatted as
     `user/db/shot/number` or `db/shot/number`.
+
+    By default, `duqduq merge` attempts to merge all known variables.
+    Use `--variables` to select which variables to merge.
     """
     from .merge import merge
     with op_queue_context():

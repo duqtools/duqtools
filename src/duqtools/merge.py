@@ -13,6 +13,22 @@ logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
+def _resolve_variables(var_names: Sequence[str]) -> list[IDSVariableModel]:
+    """Looks up variables if specified, if empty return all variables."""
+    idsvar_lookup = var_lookup.filter_type('IDS-variable')
+
+    if not var_names:
+        variables = list(idsvar_lookup.values())
+        op_queue.info(description='Merging all known variables')
+    else:
+        variables = list(idsvar_lookup[name] for name in var_names)
+        for variable in variables:
+            op_queue.info(description='Variable for merge',
+                          extra_description=f'{variable.name}')
+
+    return variables
+
+
 def _merge(*,
            handles: Sequence[ImasHandle],
            template: ImasHandle,
@@ -51,9 +67,8 @@ def _merge(*,
     merge_data(handles, target, variables)
 
 
-def merge(*, merge_all: bool, target: str, template: str, handles: list[str],
-          input_files: list[str], var_names: list[str] | None, force: bool,
-          **kwargs):
+def merge(*, target: str, template: str, handles: list[str],
+          input_files: list[str], var_names: list[str], force: bool, **kwargs):
     """Merge as many data as possible."""
     template = ImasHandle.from_string(template)
     target = ImasHandle.from_string(target)
@@ -64,23 +79,11 @@ def merge(*, merge_all: bool, target: str, template: str, handles: list[str],
 
     handles = list(set(handles))  # Remove duplicate handles
 
-    if merge_all:
-        ids_variables = tuple(var_lookup.filter_type('IDS-variable').values())
-
-        op_queue.info(description='Merging all known variables')
-    else:
-        if not var_names or len(var_names) == 0:
-            op_queue.add_no_op('No variables specified for merge', 'aborting')
-            return
-
-        ids_variables = tuple(var_lookup[name] for name in var_names)
-        for variable in ids_variables:
-            op_queue.info(description='Variable for merge',
-                          extra_description=f'{variable.name}')
+    variables = _resolve_variables(var_names)
 
     _merge(
         handles=handles,
         template=template,
         target=target,
-        variables=ids_variables,
+        variables=variables,
     )
