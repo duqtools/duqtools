@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from getpass import getuser
+from typing import Optional
 
 from pydantic import Field, validator
 
@@ -9,7 +10,7 @@ from ._basemodel import BaseModel
 
 class ImasBaseModel(BaseModel):
     """This model describes an IMAS data location."""
-    relative_location: str = Field(
+    relative_location: Optional[str] = Field(
         None,
         description='Set as the relative location to the'
         ' imasdb location if a local imasdb is used')
