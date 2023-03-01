@@ -354,13 +354,17 @@ class JettoSystemV220922(BaseJettoSystem):
         seq_number: int,
         options,
     ):
+        relative_location: Optional[str] = str(
+            os.path.relpath((dirname / 'imasdb').resolve()))
+        if relative_location:
+            if relative_location.startswith('..'):
+                relative_location = None
         """Get handle for data output."""
         return ImasHandle(user=str((dirname / 'imasdb').resolve()),
                           db=source.db,
                           shot=source.shot,
                           run=2,
-                          relative_location=str(
-                              os.path.relpath((dirname / 'imasdb').resolve())))
+                          relative_location=relative_location)
 
 
 JettoSystem = JettoSystemV220922
