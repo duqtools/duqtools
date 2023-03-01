@@ -25,9 +25,9 @@ create:
   template: ./template_model
   template_data:
     user: public
-    db: jet
-    shot: 90350
-    run: 2
+    db: test
+    shot: 11111
+    run: 6666
 extra_variables:
   - name: my_extra_var
     ids: core_profiles
