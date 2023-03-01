@@ -16,7 +16,7 @@ create:
     variable: zeff
   sampler:
     method: latin-hypercube
-    n_samples: 3
+    n_samples: 2
   data:
     user: public
     imasdb: test
