@@ -41,11 +41,7 @@ def plot(*, var_names, handles, input_files, extensions, errorbars, **kwargs):
         variables = [data_var, grid_var, time_var]
 
         if errorbars:
-            data_var_std = variable.copy()
-            data_var_std.path += '_error_upper'
-            data_var_std.name += '_error_upper'
-
-            variables.append(data_var_std)
+            variables.append(var_lookup.error_upper(data_var))
 
         datasets = []
         for handle in handles.values():
