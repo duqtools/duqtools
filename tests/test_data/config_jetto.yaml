@@ -19,15 +19,15 @@ create:
     n_samples: 2
   data:
     user: public
-    imasdb: test
-    run_in_start_at: 7000
-    run_out_start_at: 8000
+    imasdb: jet
+    run_in_start_at: 700
+    run_out_start_at: 800
   template: ./template_model
   template_data:
     user: public
-    db: test
-    shot: 11111
-    run: 6666
+    db: jet
+    shot: 123
+    run: 1
 extra_variables:
   - name: my_extra_var
     ids: core_profiles
