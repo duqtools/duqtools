@@ -45,7 +45,6 @@ def test_clean_database(cmdline_workdir):
                   standalone_mode=False)
         assert (not Path('./run_0000').exists())
         assert (not Path('./run_0001').exists())
-        assert (not Path('./run_0002').exists())
         assert (not Path('./runs.yaml').exists())
         assert (Path('./runs.yaml.old').exists())
 
@@ -63,7 +62,6 @@ def test_create(cmdline_workdir):
                    standalone_mode=False)
         assert (not Path('./run_0000').exists())
         assert (not Path('./run_0001').exists())
-        assert (not Path('./run_0002').exists())
         assert (not Path('./runs.yaml').exists())
 
 
@@ -75,7 +73,6 @@ def test_real_create(cmdline_workdir):
                    standalone_mode=False)
         assert (Path('./run_0000').exists())
         assert (Path('./run_0001').exists())
-        assert (Path('./run_0002').exists())
         assert (Path('./runs.yaml').exists())
 
 
@@ -85,7 +82,6 @@ def test_submit(cmdline_workdir):
         cli_submit(['-c', 'config.yaml', '--dry-run'], standalone_mode=False)
         assert (not Path('./run_0000/duqtools.lock').exists())
         assert (not Path('./run_0001/duqtools.lock').exists())
-        assert (not Path('./run_0002/duqtools.lock').exists())
 
 
 @pytest.mark.xfail(reason='https://github.com/duqtools/duqtools/issues/257')

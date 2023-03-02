@@ -37,7 +37,6 @@ jobs:
         with:
           ssh-key: ${{ secrets.SSH_KEY_CONTAINERIZED_RUNS_REPO }}
           repository: duqtools/containerized_runs
-          ref: aarons_runs
           path: containerized_runs
 
       - name: Put the IMAS db in the right location
