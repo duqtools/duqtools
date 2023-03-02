@@ -38,9 +38,9 @@ with st.sidebar:
     st.header('Plotting options')
 
     aggregate_data = st.checkbox(
-        'Aggregate data',
+        'Aggregate data (mean)',
         help=(
-            'Calculate mean y-value for data. All '
+            'Calculate mean y-value and standard deviation. All '
             'y-values are interpolated to put them on a common basis for x.'),
     )
     show_errorbar = st.checkbox(
