@@ -37,25 +37,31 @@ with st.sidebar:
 
     st.header('Plotting options')
 
-    show_error_bar = st.checkbox(
-        'Show errorbar',
+    aggregate_data = st.checkbox(
+        'Aggregate data',
         help=(
-            'Show standard deviation band around mean y-value. All '
+            'Calculate mean y-value for data. All '
             'y-values are interpolated to put them on a common basis for x.'),
+    )
+    show_errorbar = st.checkbox(
+        'Show error bars',
+        help=('Show standard deviation band around mean y-value.'),
     )
 
 for variable in (var_lookup[var_name] for var_name in var_names):
-
-    source, time_var, grid_var, data_var = get_dataset(handles, variable)
+    source, time_var, grid_var, data_var = get_dataset(
+        handles, variable, include_error=show_errorbar)
 
     st.header(f'{grid_var} vs. {data_var}')
 
-    chart_func = alt_errorband_chart if show_error_bar else alt_line_chart
-
-    if show_error_bar:
+    if aggregate_data:
         chart = alt_errorband_chart(source, x=grid_var, y=data_var, z=time_var)
     else:
-        chart = alt_line_chart(source, x=grid_var, y=data_var, z=time_var)
+        chart = alt_line_chart(source,
+                               x=grid_var,
+                               y=data_var,
+                               z=time_var,
+                               std=show_errorbar)
 
     st.altair_chart(chart, use_container_width=True)
 

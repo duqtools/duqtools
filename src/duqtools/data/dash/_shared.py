@@ -42,16 +42,20 @@ def get_variables(*, ids: str, x_key: str, y_keys: Sequence[str]):
 
 
 @cache_data
-def _get_dataset(handles, variable):
+def _get_dataset(handles, variable, *, include_error: bool = False):
     data_var = variable['name']
     time_var = variable['dims'][0]
     grid_var = variable['dims'][1]
+    variables = [data_var, time_var, grid_var]
 
     datasets = []
 
+    if include_error:
+        variables.append(var_lookup.error_upper(data_var))
+
     for name, handle in handles.items():
         handle = ImasHandle(**handle)
-        ds = handle.get_variables(variables=(time_var, grid_var, data_var))
+        ds = handle.get_variables(variables=variables)
         datasets.append(ds)
 
     grid_var_norm = var_lookup.normalize(grid_var)
@@ -69,9 +73,9 @@ def _get_dataset(handles, variable):
     return dataset, time_var_norm, grid_var_norm, data_var
 
 
-def get_dataset(handles, variable):
+def get_dataset(handles, variable, *, include_error: bool = False):
     """Convert to hashable types before calling `_get_dataset`."""
     handles = {name: handle.dict() for name, handle in handles.items()}
     variable = variable.dict()
 
-    return _get_dataset(handles, variable)
+    return _get_dataset(handles, variable, include_error=include_error)
