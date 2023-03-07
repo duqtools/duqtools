@@ -143,12 +143,6 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
     max_y = source[y].max()
     max_slider = source['slider'].max()
 
-    slider = alt.binding_range(min=0, max=max_slider, step=1)
-    select_step = alt.selection_single(name=z,
-                                       fields=['slider'],
-                                       bind=slider,
-                                       init={'slider': 0})
-
     line = alt.Chart(source).mark_line().encode(
         x=f'{x}:Q',
         y=alt.Y(
@@ -157,30 +151,45 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
             axis=alt.Axis(format='.4~g'),
         ),
         color=alt.Color('tstep:N'),
-    ).add_selection(select_step).transform_filter(select_step).interactive()
+    )
 
     # altair-viz.github.io/user_guide/generated/core/altair.ErrorBandDef
-    band = alt.Chart(source).mark_errorband(
-        extent='stdev', interpolate='linear').encode(
-            x=f'{x}:Q',
-            y=f'{y}:Q',
-            color=alt.Color('tstep:N'),
-        ).add_selection(select_step).transform_filter(
-            select_step).interactive()
-
-    slider = alt.binding_range(name='Reference time index',
-                               min=0,
-                               max=max_slider,
-                               step=1)
-    select_step = alt.selection_single(name='reference',
-                                       fields=['slider'],
-                                       bind=slider,
-                                       init={'slider': 0})
+    band = alt.Chart(source).mark_errorband(extent='stdev',
+                                            interpolate='linear').encode(
+                                                x=f'{x}:Q',
+                                                y=f'{y}:Q',
+                                                color=alt.Color('tstep:N'),
+                                            )
 
     ref = alt.Chart(source).mark_line(strokeDash=[5, 5]).encode(
         x=f'{x}:Q',
         y=f'mean({y}):Q',
         color=alt.Color('tstep:N'),
-    ).add_selection(select_step).transform_filter(select_step).interactive()
+    )
+
+    if max_slider != 0:
+        slider = alt.binding_range(min=0, max=max_slider, step=1)
+        select_step = alt.selection_single(name=z,
+                                           fields=['slider'],
+                                           bind=slider,
+                                           init={'slider': 0})
+
+        line = line.add_selection(select_step).transform_filter(
+            select_step).interactive()
+        band = band.add_selection(select_step).transform_filter(
+            select_step).interactive()
+
+        slider = alt.binding_range(name='Reference time index',
+                                   min=0,
+                                   max=max_slider,
+                                   step=1)
+
+        select_step = alt.selection_single(name='reference',
+                                           fields=['slider'],
+                                           bind=slider,
+                                           init={'slider': 0})
+
+        ref = ref.add_selection(select_step).transform_filter(
+            select_step).interactive()
 
     return line + band + ref

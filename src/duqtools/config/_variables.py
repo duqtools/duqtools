@@ -25,6 +25,7 @@ LOCAL_DIR = Path('.').absolute()
 DUQTOOLS_DIR = 'duqtools'
 VAR_FILENAME = 'variables.yaml'
 VAR_FILENAME_GLOB = 'variables*.yaml'
+ERROR_SUFFIX = '_error_upper'
 
 
 class VarLookup(UserDict):
@@ -38,6 +39,16 @@ class VarLookup(UserDict):
 
     def __getitem__(self, key: str) -> IDSVariableModel:
         return self.data[self.normalize(key)]
+
+    def error_upper(self, key: str) -> IDSVariableModel:
+        """Return error variable for given key.
+
+        i.e. `t_i_ave` -> `t_i_ave_error_upper`
+        """
+        var = self[key.removesuffix(ERROR_SUFFIX)].copy()
+        var.name += ERROR_SUFFIX
+        var.path += ERROR_SUFFIX
+        return var
 
     def normalize(self, *keys: str) -> str | tuple[str, ...]:
         """Normalize variable names (remove `$`)."""
@@ -71,6 +82,7 @@ class VarLookup(UserDict):
 
 
 class VariableConfigLoader:
+
     def __init__(self):
         self.paths = self.get_config_path()
 
@@ -148,7 +160,10 @@ def lookup_vars(
     var_models = []
     for var in variables:
         if isinstance(var, str):
-            var = var_lookup[var]
+            if var.endswith(ERROR_SUFFIX):
+                var = var_lookup.error_upper(var)
+            else:
+                var = var_lookup[var]
         if not isinstance(var, IDSVariableModel):
             raise ValueError(f'Cannot lookup variable with type {type(var)}')
         var_models.append(var)
