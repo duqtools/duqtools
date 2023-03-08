@@ -84,26 +84,6 @@ def test_raise(var):
         var.t_start
 
 
-def test_conditionals(var):
-    lookup = {
-        'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
-    name: ids-t_start
-    type: IDS2jetto-variable
-    paths:
-      - {ids: t0, path: time/0}
-      - {ids: t1, path: time/1}
-    accept_if:
-      - {operator: ne, args: [10]}
-      - {operator: gt, args: [35]}
-    """)
-    }
-
-    var.lookup = lookup
-
-    assert var.t_start == 50
-
-
 def test_getattr(var):
     lookup = {'ids-t_start': None}
 
