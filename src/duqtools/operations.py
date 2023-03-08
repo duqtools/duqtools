@@ -261,14 +261,18 @@ class Operations(deque):
             loginfo('\nNo actions to execute.')
             return False
 
-        ans = self.yes or click.confirm(
+        if n_no_op := sum(op.action is None for op in self):
+            loginfo(
+                f'\nThere are {n_no_op} operations that will not be applied.')
+
+        is_confirmed = self.yes or click.confirm(
             f'\nDo you want to apply all {self.n_actions} operations?',
             default=False)
 
-        if ans:
+        if is_confirmed:
             self.apply_all()
 
-        return ans
+        return is_confirmed
 
     def check_unconfirmed_operations(self):
         """Safety check, it should never happen that operations are not
