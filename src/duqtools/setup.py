@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -13,6 +13,7 @@ from duqtools.api import ImasHandle
 from duqtools.config import var_lookup
 
 from .config import Config
+from .ids._imas import imasdef
 from .operations import op_queue
 from .utils import no_op
 
@@ -110,6 +111,18 @@ class Variables:
 
         return mapping
 
+    @staticmethod
+    def is_empty(value: Any) -> bool:
+        """Check against imasdef if variable is empty."""
+        if isinstance(value, float):
+            return value in (imasdef.EMPTY_FLOAT, imasdef.EMPTY_DOUBLE)
+        elif isinstance(value, int):
+            return value == imasdef.EMPTY_INT
+        elif isinstance(value, complex):
+            return value == imasdef.EMPTY_COMPLEX
+
+        return False
+
     def __getattr__(self, key: str):
         try:
             spec = self.lookup[f'ids-{key}']
@@ -126,7 +139,7 @@ class Variables:
             except KeyError:
                 continue
 
-            if all(condition(trial) for condition in spec.accept_if):
+            if not self.is_empty(trial):
                 value = trial
                 break
 

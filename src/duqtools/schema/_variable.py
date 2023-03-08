@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import Field
 
@@ -64,22 +64,6 @@ class IDSVariableModel(IDSPath):
     """))
 
 
-class Condition(BaseModel):
-    """Only accept value if this condition returns `True`.
-
-    Equivalent to: `operator(X, *args)`, where `X` is the value
-    retrieved from the IDS paths.
-    """
-    operator: str = Field(
-        'Name of a function in the `operator` module in the standard library.')
-    args: list[Any] = Field('Arguments to pass to the operator.')
-
-    def __call__(self, value: Any):
-        import operator
-        test = getattr(operator, self.operator)
-        return test(value, *self.args)
-
-
 class IDS2JettoVariableModel(BaseModel):
     """Variable for describing the relation between IDS data and jetto
     variables.
@@ -98,11 +82,6 @@ class IDS2JettoVariableModel(BaseModel):
         Search these variables in the given order until a match with the conditions
         defined below is found.
     """))
-    accept_if: Optional[list[Condition]] = Field([],
-                                                 description=f("""
-        Accept variable if it matches the given conditions. This can be used
-        to filter undefined values (i.e. set to 0 or some very small or large number).
-        """))
     default: Optional[float] = Field(description=f("""
         Default value if no match is found. Set to None to raise an exeption instead."""
                                                    ))
