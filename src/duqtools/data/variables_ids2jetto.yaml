@@ -16,11 +16,6 @@
       path: vacuum_toroidal_field/b0/0
     - ids: equilibrium
       path: time_slice/0/global_quantities/magnetic_axis/b_field_tor
-  accept_if:
-    - operator: ne
-      args: [0]
-    - operator: lt
-      args: [1.0e+40]
   default: null  # raise if None
 
 - name: ids-major_radius
@@ -30,9 +25,4 @@
       path: vacuum_toroidal_field/r0
     - ids: equilibrium
       path: time_slice/0/global_quantities/magnetic_axis/r
-  accept_if:
-    - operator: ne
-      args: [0]
-    - operator: lt
-      args: [1.0e+40]
   default: null  # raise if None
