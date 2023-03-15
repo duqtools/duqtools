@@ -24,6 +24,7 @@ nav:
     - examples/xarray.ipynb
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
+    - examples/demo_single_run.ipynb
   - Scripts:
     - Overview: scripts/index.md
     - scripts/modify_imas_data.md
