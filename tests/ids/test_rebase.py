@@ -7,8 +7,8 @@ from duqtools.ids import (
     IDSMapping,
     rebase_on_grid,
     rebase_on_time,
-    standardize_grid,
     rezero_time,
+    standardize_grid,
 )
 from duqtools.schema import IDSVariableModel
 

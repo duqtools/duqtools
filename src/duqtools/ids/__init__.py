@@ -8,10 +8,10 @@ from ._rebase import (
     rebase_all_coords,
     rebase_on_grid,
     rebase_on_time,
+    rezero_time,
     squash_placeholders,
     standardize_grid,
     standardize_grid_and_time,
-    rezero_time,
 )
 
 logger = logging.getLogger(__name__)
