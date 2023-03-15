@@ -8,7 +8,7 @@ from duqtools.ids import (
     rebase_on_grid,
     rebase_on_time,
     standardize_grid,
-    standardize_time,
+    rezero_time,
 )
 from duqtools.schema import IDSVariableModel
 
@@ -163,8 +163,8 @@ def test_standardize_grid_valid(sample_dataset, expected_standardized):
     xr.testing.assert_equal(sample_dataset, expected_standardized)
 
 
-def test_standardize_time_valid(sample_dataset, expected_standardized_time):
-    standardize_time(sample_dataset, start=1)
+def test_rezero_time_valid(sample_dataset, expected_standardized_time):
+    rezero_time(sample_dataset, start=1)
     xr.testing.assert_equal(sample_dataset, expected_standardized_time)
 
 

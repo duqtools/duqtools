@@ -7,8 +7,8 @@ import xarray as xr
 logger = logging.getLogger(__name__)
 
 
-def standardize_time(ds: xr.Dataset, *, start: int = 0) -> None:
-    """Standardize the time within a dataset.
+def rezero_time(ds: xr.Dataset, *, start: int = 0) -> None:
+    """Standardize the time within a dataset by setting the first timestep to 0.
 
     Simply subtracts time[0] from all time entries and adds `start`
     Note: this does not interpolate the times between different datasets
@@ -20,7 +20,6 @@ def standardize_time(ds: xr.Dataset, *, start: int = 0) -> None:
     start : int, optional
         Where to start the returned time series
     """
-
     ds['time'] = ds['time'] - ds['time'][0] + start
 
 
@@ -171,9 +170,10 @@ def standardize_grid_and_time(
     """Standardize list of datasets by applying standard rebase operations.
 
     Applies, in sequence:
-    1. `standardize_grid`
-    2. `rebase_on_grid`
-    3. `rebase_on_time`
+    1. `rezero_time`
+    2. `standardize_grid`
+    3. `rebase_on_grid`
+    4. `rebase_on_time`
 
     Parameters
     ----------
