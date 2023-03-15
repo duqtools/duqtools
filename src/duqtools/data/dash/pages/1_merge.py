@@ -39,7 +39,7 @@ with st.sidebar:
 
     st.header('Merging options')
 
-    merge_all = st.checkbox('Merge all', help=('Try to merge all variables.'))
+    merge_all = st.checkbox('Merge all', help='Try to merge all variables.', value=True)
 
     var_names = st.multiselect('Select variables to merge',
                                tuple(ids_variables),

@@ -1,11 +1,8 @@
 system: jetto
 quiet: false
 create:
-  template: ./template #TODO edit to directory where initial run is stored
-  data:
-    imasdb: test
-    run_in_start_at: 7000
-    run_out_start_at: 8000
+  runs_dir: ./runs_dir #TODO edit to output directory
+  template: ./template #TODO edit to directory with template
   dimensions:
   - operator: multiply
     scale_to_error: false
