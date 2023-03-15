@@ -95,11 +95,11 @@ plugins:
     scripts:
       - docs/gendocs.py
       - docs/genvariables.py
-# - mkdocs-jupyter:
-#     include_source: True
-#     ignore:
-#       - gendocs.py
-#       - genvariables.py
+- mkdocs-jupyter:
+    include_source: True
+    ignore:
+      - gendocs.py
+      - genvariables.py
 
 watch:
   - src/duqtools
