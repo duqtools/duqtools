@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from ..cli import common_options, logging_options, variables_option, yes_option
+from ..cli import common_options, dry_run_option, logging_options, variables_option, yes_option
 from ..operations import op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ def cli(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run config directories')
-@common_options(*logging_options, yes_option)
+@common_options(*logging_options, yes_option, dry_run_option)
 def cli_setup(**kwargs):
     """Set up large scale validation."""
     from .setup import setup
@@ -60,7 +60,7 @@ def cli_setup(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
-@common_options(*logging_options, yes_option)
+@common_options(*logging_options, yes_option, dry_run_option)
 def cli_create(**kwargs):
     """Create data sets for large scale validation."""
     from .create import create
@@ -87,7 +87,7 @@ def cli_create(**kwargs):
               multiple=True,
               help='Only submit jobs with this status.')
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
-@common_options(*logging_options, yes_option)
+@common_options(*logging_options, yes_option, dry_run_option)
 def cli_submit(**kwargs):
     """Submit large scale validation runs."""
     from .submit import submit
@@ -109,7 +109,7 @@ def cli_status(**kwargs):
 @cli.command('merge')
 @click.option('--force', is_flag=True, help='Overwrite existing data')
 @variables_option
-@common_options(*logging_options, yes_option)
+@common_options(*logging_options, yes_option, dry_run_option)
 def cli_merge(**kwargs):
     """Merge data sets with error propagation.
 

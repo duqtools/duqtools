@@ -1,4 +1,4 @@
-site_name: dUQtools
+site_name: duqtools
 site_url: https://duqtools.readthedocs.io
 repo_url: https://github.com/duqtools/duqtools
 repo_name: GitHub
@@ -25,6 +25,7 @@ nav:
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
     - examples/demo_single_run.ipynb
+    - examples/demo_lsv_run.ipynb
   - Scripts:
     - Overview: scripts/index.md
     - scripts/modify_imas_data.md
