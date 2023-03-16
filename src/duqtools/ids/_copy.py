@@ -45,7 +45,7 @@ def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
         entry = data_entry_target.get(ids)
 
         # Set the name
-        entry.code.name = 'dUQtools'
+        entry.code.name = 'duqtools'
 
         # Get the commit if we are in a repository
         try:
