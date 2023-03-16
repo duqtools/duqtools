@@ -8,3 +8,4 @@ This section contains example notebooks explaining in detail how the duqtools AP
 4. [Multidimensional data sets](xarray-ions)
 5. [CLI demo single run](demo_single_run)
 6. [Running duqtools with docker](duqtools_in_docker)
+6. [Running duqtools on prominence](duqtools_on_prominence)
