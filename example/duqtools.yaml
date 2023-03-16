@@ -18,7 +18,7 @@ create:
     method: latin-hypercube
     n_samples: 3
   data:
-    user: public
+    user: "/example/imasdb"
     imasdb: jet
     run_in_start_at: 1
     run_out_start_at: 2
