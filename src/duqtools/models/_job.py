@@ -43,7 +43,7 @@ class JobStatus(str, Enum):
 class Job:
 
     def __init__(self, dir: Path):
-        self.dir = Path(dir)
+        self.dir = Path(dir).resolve()
         self.cfg = cfg
 
     def __repr__(self):

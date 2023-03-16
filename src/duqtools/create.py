@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import warnings
 from pathlib import Path
@@ -68,7 +69,9 @@ class CreateManager:
         run_models = []
 
         for i, operations in enumerate(ops_list):
-            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
+            dirname = Path(
+                os.path.relpath(
+                    (self.runs_dir / f'{RUN_PREFIX}{i:04d}').resolve()))
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
@@ -84,7 +87,7 @@ class CreateManager:
                 options=self.options.data,
             )
 
-            model = Run(dirname=dirname.resolve(),
+            model = Run(dirname=dirname,
                         shortname=dirname.name,
                         data_in=data_in,
                         data_out=data_out,

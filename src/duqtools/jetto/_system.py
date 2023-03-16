@@ -338,13 +338,17 @@ class JettoSystemV220922(BaseJettoSystem):
         seq_number: int,
         options,
     ):
+        relative_location: Optional[str] = str(
+            os.path.relpath((dirname / 'imasdb').resolve()))
+        if relative_location:
+            if relative_location.startswith('..'):
+                relative_location = None
         """Get handle for data input."""
-        return ImasHandle(
-            user=str((dirname / 'imasdb').resolve()),
-            db=source.db,
-            shot=source.shot,
-            run=1,
-        )
+        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                          db=source.db,
+                          shot=source.shot,
+                          run=1,
+                          relative_location=relative_location)
 
     @staticmethod
     def get_data_out_handle(
