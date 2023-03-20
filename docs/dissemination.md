@@ -9,4 +9,4 @@ materials are hosted on a different github repository:
 | Date | Type | Material | Description |
 | ---  | ---  | ---      | --- |
 | 04-11-2022 | Presentation | [duqtools-demo.pptx](https://github.com/duqtools/duqtools_dissemination/blob/main/2022-11-04_duqtools-demo.pptx?raw=true) | Presentation of basic duqtools features, presented to the TSVV11 group  |
-| 20-03-2023 | Presentation | [differ-workshop-duqtools.pptx](https://github.com/duqtools/duqtools_dissemination/blob/main/20230320_differ-workshop-duqtools.pptx?raw=true) | Introduction of duqtools for [Workshop on Advances in Tokamak Integrated Modelling 2023](https://www.differ.nl/atim) |
+| 20-03-2023 | Presentation | [differ-workshop-duqtools.pptx](https://github.com/duqtools/duqtools_dissemination/blob/main/2023-03-20_differ-workshop-duqtools.pptx?raw=true) | Introduction of duqtools for [Workshop on Advances in Tokamak Integrated Modelling 2023](https://www.differ.nl/atim) |
