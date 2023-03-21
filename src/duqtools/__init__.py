@@ -1,12 +1,14 @@
 # https://setuptools.pypa.io/en/latest/pkg_resources.html#workingset-objects
 def fix_dependencies():
     import __main__
-    __main__.__requires__ = ['jetto_tools>=1.8.8']
-    __main__.__requires__ = ['jinja2>=3.0.0']
     __main__.__requires__ = [
-        'pydantic!=1.10.3', 'pydantic!=1.10.4', 'pydantic!=1.10.5'
+        'jetto_tools>=1.8.8',
+        'pydantic!=1.10.3',
+        'pydantic!=1.10.4',
+        'pydantic!=1.10.5'
+        'scipy>=1.09',
+        'jinja2>=3.0.0',
     ]
-    __main__.__requires__ = ['scipy>=1.09']
     import pkg_resources  # noqa
 
 
