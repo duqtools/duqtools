@@ -223,14 +223,16 @@ class ImasHandle(ImasBaseModel):
 
     def get_all_variables(
         self,
-        extra_variables: Sequence[IDSVariableModel],
+        extra_variables: Sequence[IDSVariableModel] = [],
         squash: bool = True,
+        ids: str = 'core_profiles',
         **kwargs,
     ) -> xr.Dataset:
-        """Get all variables that duqtools knows of from the dataset.
+        """Get all variables that duqtools knows of from selected ids from the
+        dataset.
 
         This function looks up the data location from the
-        `duqtools.config.var_lookup` table, and returns
+        `duqtools.config.var_lookup` table
 
         Parameters
         ----------
@@ -251,10 +253,13 @@ class ImasHandle(ImasBaseModel):
         ValueError
             When variables are from multiple IDSs.
         """
-        idsvar_lookup = var_lookup.filter_type('IDS-variable')
+        idsvar_lookup = var_lookup.filter_ids(ids)
         variables = list(
-            set(list(extra_variables) + list(idsvar_lookup.values())))
-        return self.get_variables(variables, squash, **kwargs)
+            set(list(extra_variables) + list(idsvar_lookup.keys())))
+        return self.get_variables(variables,
+                                  squash,
+                                  empty_var_ok=True,
+                                  **kwargs)
 
     def get_variables(
         self,
