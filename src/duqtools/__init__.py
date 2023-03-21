@@ -3,7 +3,7 @@ def fix_dependencies():
     import __main__
     __main__.__requires__ = ['jetto_tools>=1.8.8']
     __main__.__requires__ = ['jinja2>=3.0.0']
-    __main__.__requires__ = ['scipy>=1.10']
+    __main__.__requires__ = ['scipy>=1.09']
     import pkg_resources  # noqa
 
 
