@@ -16,4 +16,6 @@ def create(**kwargs):
         config_dir = config_file.parent
 
         with work_directory(config_dir):
-            duqtools_create(config=config_file, **kwargs)
+            duqtools_create(config=config_file,
+                            absolute_dirpath=True,
+                            **kwargs)
