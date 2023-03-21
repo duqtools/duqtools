@@ -221,7 +221,7 @@ class ImasHandle(ImasBaseModel):
         raw_data = self.get_raw_data(ids)
         return IDSMapping(raw_data)
 
-    def get_most_variables(
+    def get_all_variables(
         self,
         extra_variables: Sequence[str | IDSVariableModel],
         squash: bool = True,
