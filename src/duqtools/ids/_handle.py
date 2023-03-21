@@ -223,7 +223,7 @@ class ImasHandle(ImasBaseModel):
 
     def get_all_variables(
         self,
-        extra_variables: Sequence[str | IDSVariableModel],
+        extra_variables: Sequence[IDSVariableModel],
         squash: bool = True,
         **kwargs,
     ) -> xr.Dataset:
