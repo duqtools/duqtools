@@ -6,6 +6,7 @@ def fix_dependencies():
     __main__.__requires__ = [
         'pydantic!=1.10.3', 'pydantic!=1.10.4', 'pydantic!=1.10.5'
     ]
+    __main__.__requires__ = ['scipy>=1.09']
     import pkg_resources  # noqa
 
 
