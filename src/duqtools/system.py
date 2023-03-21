@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from .config import CFG, Config
+from .ets import Ets6System
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
@@ -50,6 +51,8 @@ def get_system(cfg=None):
         return JettoSystemV220922
     elif (cfg.system in ['jetto-v210921']):
         return JettoSystemV210921
+    elif (cfg.system == 'ets6'):
+        return Ets6System
     elif (cfg.system == 'dummy'):
         return DummySystem
     else:
