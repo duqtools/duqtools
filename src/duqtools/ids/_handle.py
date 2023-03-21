@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Sequence
 
 from pydantic import validator
 
-from ..config import lookup_vars
+from ..config import lookup_vars, var_lookup
 from ..operations import add_to_op_queue
 from ..schema import IDSVariableModel, ImasBaseModel
 from ._copy import copy_ids_entry
@@ -220,6 +220,41 @@ class ImasHandle(ImasBaseModel):
         """
         raw_data = self.get_raw_data(ids)
         return IDSMapping(raw_data)
+
+    def get_most_variables(
+        self,
+        extra_variables: Sequence[str | IDSVariableModel],
+        squash: bool = True,
+        **kwargs,
+    ) -> xr.Dataset:
+        """Get all variables that duqtools knows of from the dataset.
+
+        This function looks up the data location from the
+        `duqtools.config.var_lookup` table, and returns
+
+        Parameters
+        ----------
+        variables : Sequence[Union[str, IDSVariableModel]]
+            Variable names of the data to load.
+        squash : bool
+            Squash placeholder variables
+
+        Returns
+        -------
+        ds : xarray
+            The data in `xarray` format.
+        **kwargs
+            These keyword arguments are passed to `IDSMapping.to_xarray()`
+
+        Raises
+        ------
+        ValueError
+            When variables are from multiple IDSs.
+        """
+        idsvar_lookup = var_lookup.filter_type('IDS-variable')
+        variables = list(
+            set(list(extra_variables) + list(idsvar_lookup.values())))
+        return self.get_variables(variables, squash, **kwargs)
 
     def get_variables(
         self,
