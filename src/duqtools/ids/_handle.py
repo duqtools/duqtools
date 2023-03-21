@@ -234,8 +234,8 @@ class ImasHandle(ImasBaseModel):
 
         Parameters
         ----------
-        variables : Sequence[Union[str, IDSVariableModel]]
-            Variable names of the data to load.
+        variables : Sequence[IDSVariableModel]
+            Extra variables to load in addition to the ones known by duqtools.
         squash : bool
             Squash placeholder variables
 
