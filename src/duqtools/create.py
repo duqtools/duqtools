@@ -65,7 +65,7 @@ class CreateManager:
         return ops_list
 
     def make_run_models(self, ops_list: Sequence[Any],
-                        absolute_dirpath) -> list[Run]:
+                        absolute_dirpath: bool) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
 
@@ -214,7 +214,7 @@ class CreateManager:
                                           out=model.data_out)
 
 
-def create(*, force, config, absolute_dirpath=False, **kwargs):
+def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -231,7 +231,7 @@ def create(*, force, config, absolute_dirpath=False, **kwargs):
 
     ops_list = create_mgr.generate_ops_list()
 
-    runs = create_mgr.make_run_models(ops_list)
+    runs = create_mgr.make_run_models(ops_list, absolute_dirpath)
 
     if not force:
 
