@@ -64,14 +64,18 @@ class CreateManager:
 
         return ops_list
 
-    def make_run_models(self, ops_list: Sequence[Any]) -> list[Run]:
+    def make_run_models(self, ops_list: Sequence[Any],
+                        absolute_dirpath) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
 
         for i, operations in enumerate(ops_list):
-            dirname = Path(
-                os.path.relpath(
-                    (self.runs_dir / f'{RUN_PREFIX}{i:04d}').resolve()))
+            if absolute_dirpath:
+                dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
+            else:
+                dirname = Path(
+                    os.path.relpath(
+                        (self.runs_dir / f'{RUN_PREFIX}{i:04d}').resolve()))
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
@@ -210,7 +214,7 @@ class CreateManager:
                                           out=model.data_out)
 
 
-def create(*, force, config, **kwargs):
+def create(*, force, config, absolute_dirpath=False, **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
