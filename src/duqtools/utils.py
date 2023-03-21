@@ -72,6 +72,14 @@ def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
     if inp.suffix == '.csv':
         handles = {}
         with open(inp) as f:
+            has_header = csv.Sniffer().has_header(f.read(1024))
+            f.seek(0)
+
+            if not has_header:
+                raise IOError(
+                    f'`{inp}` does not have a header. Expecting at least'
+                    '`user`,`db`,`shot`,`run`.')
+
             reader = csv.DictReader(f)
 
             index_col = reader.fieldnames[0]  # type: ignore
