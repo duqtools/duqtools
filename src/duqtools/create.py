@@ -1,5 +1,4 @@
 import logging
-import os
 import shutil
 import warnings
 from pathlib import Path
@@ -70,12 +69,7 @@ class CreateManager:
         run_models = []
 
         for i, operations in enumerate(ops_list):
-            if absolute_dirpath:
-                dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
-            else:
-                dirname = Path(
-                    os.path.relpath(
-                        (self.runs_dir / f'{RUN_PREFIX}{i:04d}').resolve()))
+            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
