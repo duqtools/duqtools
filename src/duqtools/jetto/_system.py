@@ -156,7 +156,8 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def submit_array(jobs: Sequence[Job],
                      max_jobs: int,
-                     max_array_size: int = 100):
+                     max_array_size: int = 100,
+                     **kwargs):
         if jobs[0].cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_array_slurm(jobs, max_jobs, max_array_size)
         else:

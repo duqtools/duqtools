@@ -94,7 +94,7 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
         logger.info('Max jobs not specified, defaulting to 10')
         max_jobs = 10
 
-    get_system().submit_array(jobs, max_jobs, max_array_size)
+    get_system().submit_array(jobs, max_jobs, max_array_size, cfg.create.template.name)
 
 
 def submission_script_ok(job):

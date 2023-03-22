@@ -1,6 +1,7 @@
 import logging
 import shutil
-import sys
+import stat
+import subprocess as sp
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -8,11 +9,6 @@ from ..config import Config
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
-
-if sys.version_info < (3, 10):
-    pass
-else:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +25,28 @@ class Ets6System(AbstractSystem):
     def write_batchfile(run_dir: Path, cfg: Config):
         pass
 
-    #raise NotImplementedError('writE_batchfile not implemented')
+    @staticmethod
+    def write_array_batchfile(jobs: Sequence[Job], max_jobs: int,
+                              cfg_filename):
+        scripts = '\n'.join(
+                f'kepler -runwf -nogui -redirectgui {job.dir} ' \
+                        f'-paramFile {job.dir / cfg_filename } ' \
+                        '$ITMWORK/ets6wf/ETS6.xml ' \
+                        f'> {job.dir}/ets6.out ' \
+                        f'2> {job.dir}/ets6.err' for job in jobs)
+
+        batchfile = f"""#!/bin/sh
+module purge
+module load cineca
+module load ets6
+module switch kepler/2.5p5-3.1.1_ETS_6.6.0_3.31.0
+kepler_load test_duq
+
+{scripts}"""
+        array = Path('duqtools_array.sh')
+        with open(array, 'w') as f:
+            f.write(batchfile)
+        array.chmod(array.stat().st_mode | stat.S_IXUSR)
 
     @staticmethod
     def submit_job(job: Job):
@@ -37,8 +54,24 @@ class Ets6System(AbstractSystem):
         raise NotImplementedError('submission not implemented')
 
     @staticmethod
-    def submit_array(jobs: Sequence[Job], max_jobs: int):
-        raise NotImplementedError('array submission not implemented')
+    @add_to_op_queue('Submit single array job', 'duqtools_array.sh')
+    def submit_array(jobs: Sequence[Job], max_jobs: int, cfg_filename):
+        for job in jobs:
+            job.lockfile.touch()
+
+        logger.info('writing duqtools_slurm_array.sh file')
+        Ets6System.write_array_batchfile(jobs, max_jobs, cfg_filename)
+
+        jobs[0].cfg.submit.submit_command.split()
+        cmd: list[str] = ['./duqtools_array.sh']
+
+        logger.info(f'Submitting script via: {cmd}')
+
+        sp.Popen(cmd, )
+
+        for job in jobs:
+            with open(job.lockfile, 'w') as f:
+                f.write('being run')
 
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
@@ -48,13 +81,6 @@ class Ets6System(AbstractSystem):
     @staticmethod
     def imas_from_path(template_drc: Path) -> ImasHandle:
         raise NotImplementedError('imas_from_path')
-
-
-#        return ImasHandle(
-#            db  =,  # type: ignore
-#            user=,  # type: ignore
-#            run =,  # type: ignore
-#            shot=)  # type: ignore
 
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
@@ -71,7 +97,10 @@ class Ets6System(AbstractSystem):
                     new_input.append('START.input_run = ' + str(inp.run) +
                                      '\n')
                 elif line.startswith('START.shot_number'):
-                    new_input.append('START.shout_number = ' + str(inp.shot) +
+                    new_input.append('START.shot_number = ' + str(inp.shot) +
+                                     '\n')
+                elif line.startswith('START.user_name'):
+                    new_input.append('START.user_name = ' + str(out.user) +
                                      '\n')
                 else:
                     new_input.append(line)
