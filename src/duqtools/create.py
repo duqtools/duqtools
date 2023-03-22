@@ -233,7 +233,8 @@ class CreateManager:
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
-                                          out=model.data_out)
+                                          out=model.data_out,
+                                          cfg_filename=self.template_drc.name)
 
 
 def create(*,

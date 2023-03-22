@@ -91,7 +91,7 @@ class AbstractSystem(ABC, BaseModel):
     @staticmethod
     @abstractmethod
     def update_imas_locations(run: Path, inp: ImasBaseModel,
-                              out: ImasBaseModel):
+                              out: ImasBaseModel, **kwargs):
         """Set the imas entries for the run, both input imas file `in` and
         output imas file `out`.
 

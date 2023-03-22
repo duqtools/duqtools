@@ -244,7 +244,8 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
+    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle,
+                              **kwargs):
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 

@@ -1,11 +1,12 @@
 import logging
+import shutil
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from ..config import Config, cfg
+from ..config import Config
 from ..ids import ImasHandle
-from ..models import AbstractSystem, Job, Locations
+from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
 
 if sys.version_info < (3, 10):
@@ -21,28 +22,14 @@ class Ets6System(AbstractSystem):
 
     @staticmethod
     def get_runs_dir() -> Path:
-        raise NotImplementedError('get_runs_dir')
-        path = Locations().jruns_path
-        runs_dir = cfg.create.runs_dir  # type: ignore
-        if not runs_dir:
-            abs_cwd = str(Path.cwd().resolve())
-            abs_jruns = str(path.resolve())
-            # Check if jruns is parent dir of current dir
-            if abs_cwd.startswith(abs_jruns):
-                runs_dir = Path()
-            else:  # jruns is somewhere else
-                count = 0
-                while True:  # find the next free folder
-                    runs_dir = f'duqtools_experiment_{count:04d}'
-                    if not (path / runs_dir).exists():
-                        break
-                    count = count + 1
-        return path / runs_dir
+        return Path()
 
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path, cfg: Config):
-        raise NotImplementedError('writE_batchfile not implemented')
+        pass
+
+    #raise NotImplementedError('writE_batchfile not implemented')
 
     @staticmethod
     def submit_job(job: Job):
@@ -56,7 +43,7 @@ class Ets6System(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(source_drc: Path, target_drc: Path):
-        raise NotImplementedError('copy_from_template')
+        shutil.copy(source_drc, target_drc)
 
     @staticmethod
     def imas_from_path(template_drc: Path) -> ImasHandle:
@@ -71,8 +58,25 @@ class Ets6System(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
-        raise NotImplementedError('update_imas_location')
+    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle,
+                              cfg_filename: Path):
+        #raise NotImplementedError('update_imas_location')
+        new_input = []
+        with open(run / cfg_filename) as f:
+            for line in f.readlines():
+                if line.startswith('START.output_run'):
+                    new_input.append('START.output_run = ' + str(out.run) +
+                                     '\n')
+                elif line.startswith('START.input_run'):
+                    new_input.append('START.input_run = ' + str(inp.run) +
+                                     '\n')
+                elif line.startswith('START.shot_number'):
+                    new_input.append('START.shout_number = ' + str(inp.shot) +
+                                     '\n')
+                else:
+                    new_input.append(line)
+        with open(run / cfg_filename, 'w') as f:
+            f.write(''.join(new_input))
 
     @staticmethod
     def get_data_in_handle(

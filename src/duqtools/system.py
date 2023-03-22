@@ -35,7 +35,7 @@ class DummySystem(AbstractSystem):
         return ImasHandle(db='', shot='-1', run='-1')
 
     @staticmethod
-    def update_imas_locations(run: Path, inp, out):
+    def update_imas_locations(run: Path, inp, out, **kwargs):
         pass
 
 

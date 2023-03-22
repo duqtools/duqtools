@@ -22,7 +22,7 @@ class CreateConfigModel(BaseModel):
         This defaults to `workspace/duqtools_experiment_x`
         where `x` is a not yet existing integer."""))
 
-    template: DirectoryPath = Field(description=f("""
+    template: Path = Field(description=f("""
         Template directory to modify. Duqtools copies and updates the settings
         required for the specified system from this directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
