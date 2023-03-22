@@ -2,7 +2,7 @@
 
 {% block content %}
 {% if page.nb_url %}
-    <a href="{{ page.nb_url }}" title="Download Notebook" class="md-content__button md-icon">
+    <a href="{{ '../' ~ base_url }}{{ page.nb_url }}" title="Download Notebook" class="md-content__button md-icon">
         Download Notebook {% include ".icons/material/download.svg" %}
     </a>
 {% endif %}
