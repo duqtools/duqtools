@@ -22,19 +22,29 @@ jobs:
         python -m pip install pipreqs
         python -m pip install .
 
+    - name: Set configuration
+      run: |
+        git config --global user.name 'Github Action (publish.yaml)'
+        git config --global user.email 'victor@lipsum.eu'
+
     - name: Create requirements files
       run: |
         python -m pip freeze > requirements_full.txt
         pipreqs . --print > requirements.txt
+        git add requirements_full.txt requirements.txt
+        git commit -m "Added requirements.txt files"
 
-    - name: Push back requirement files
+    - name: Bump version to new tag
       run: |
-          git config --global user.name 'Github Action (publish.yaml)'
-          git config --global user.email 'victor@lipsum.eu'
-          git add requirements_full.txt requirements.txt
-          git commit -m "Added requirements.txt files"
+        python -m pip install bumpversion
+        bumpversion --new-version $GITHUB_REF_NAME --commit patch
+
+    - name: Push back changes to main and tag
+      run: |
           git tag --force $GITHUB_REF_NAME HEAD
           git push --force --tags
+          git switch -C main
+          git push --set-upstream -f origin main
 
   deploy:
     needs: fix_release_deps
