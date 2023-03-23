@@ -105,7 +105,7 @@ kepler_load test_duq
                 else:
                     new_input.append(line)
         with open(run / cfg_filename, 'w') as f:
-            f.write(''.join(new_input))
+            f.writelines(new_input)
 
     @staticmethod
     def get_data_in_handle(
