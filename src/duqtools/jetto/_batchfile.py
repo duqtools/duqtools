@@ -33,7 +33,7 @@ def write_batchfile(run_dir: Path,
 
     llcmd_path = run_dir / '.llcmd'
 
-    rjettov_path = run_dir / 'rjettov'
+    rjettov_path = (run_dir / 'rjettov').resolve()
     rel_path = run_dir.resolve().relative_to(Locations().jruns_path.resolve())
 
     build_name = jset['JobProcessingPanel.name']
