@@ -37,8 +37,8 @@ def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
     jobs: list[Job] = []
 
     for dir in dirs:
-        config_file = dir / "duqtools.yaml")
-        cfg.parse_file(config_files)
+        config_file = dir / 'duqtools.yaml'
+        cfg.parse_file(config_file)
 
         if not cfg.submit:
             raise SubmitError(
