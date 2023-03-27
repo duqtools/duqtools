@@ -132,22 +132,25 @@ class BaseJettoSystem(AbstractSystem):
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
 
     @staticmethod
-    def submit_array(jobs: Sequence[Job], max_jobs: int):
+    def submit_array(jobs: Sequence[Job],
+                     max_jobs: int,
+                     max_array_size: int = 100):
         if jobs[0].cfg.submit.submit_system == 'slurm':
-            JettoSystem.submit_array_slurm(jobs, max_jobs)
+            JettoSystem.submit_array_slurm(jobs, max_jobs, max_array_size)
         else:
             raise NotImplementedError(
-                'array submission type {jobs[0].cfg.submit.submit_system}'
+                f'array submission type {jobs[0].cfg.submit.submit_system}'
                 ' not implemented')
 
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
-    def submit_array_slurm(jobs: Sequence[Job], max_jobs: int):
+    def submit_array_slurm(jobs: Sequence[Job], max_jobs: int,
+                           max_array_size: int):
         for job in jobs:
             job.lockfile.touch()
 
         logger.info('writing duqtools_slurm_array.sh file')
-        _write_array_batchfile(jobs, max_jobs)
+        _write_array_batchfile(jobs, max_jobs, max_array_size)
 
         submit_cmd = jobs[0].cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']

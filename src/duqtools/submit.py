@@ -38,7 +38,7 @@ def _submit_job(job: Job, *, delay: float = 0):
     job.submit()
 
 
-def job_submitter(jobs: Sequence[Job], *, max_jobs):
+def job_submitter(jobs: Sequence[Job], *, max_jobs, **kwargs):
     for n, job in enumerate(jobs):
         if max_jobs and (n >= max_jobs):
             info(f'Max jobs ({max_jobs}) reached.')
@@ -48,7 +48,7 @@ def job_submitter(jobs: Sequence[Job], *, max_jobs):
 
 
 @add_to_op_queue('Start job scheduler')
-def job_scheduler(queue: Deque[Job], max_jobs=10):
+def job_scheduler(queue: Deque[Job], max_jobs=10, **kwargs):
     interval = 1.0
 
     s = Spinner()
@@ -79,7 +79,8 @@ def job_scheduler(queue: Deque[Job], max_jobs=10):
         )
 
 
-def job_array_submitter(jobs: Sequence[Job], *, max_jobs):
+def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
+                        **kwargs):
     if len(jobs) == 0:
         duqlog_screen.error('No jobs to submit, not creating array ...')
         return
@@ -93,7 +94,7 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs):
         logger.info('Max jobs not specified, defaulting to 10')
         max_jobs = 10
 
-    get_system().submit_array(jobs, max_jobs)
+    get_system().submit_array(jobs, max_jobs, max_array_size)
 
 
 def submission_script_ok(job):
@@ -159,6 +160,7 @@ def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> list[Job]:
 def submit(*,
            force: bool,
            max_jobs: int,
+           max_array_size: int,
            schedule: bool,
            array: bool,
            resubmit: Sequence[Path] = (),
@@ -173,6 +175,8 @@ def submit(*,
         Force the submission even in the presence of lockfiles
     max_jobs : int
         Maximum number of jobs to submit at once
+    max_array_size : int
+        Maximum array size for slurm (usually 1001, default = 100)
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
@@ -221,4 +225,4 @@ def submit(*,
 
     submitter = job_scheduler if schedule else job_submitter
     submitter = job_array_submitter if array else submitter
-    submitter(job_queue, max_jobs=max_jobs)
+    submitter(job_queue, max_jobs=max_jobs, max_array_size=max_array_size)

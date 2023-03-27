@@ -293,10 +293,17 @@ def cli_recreate(**kwargs):
     '--schedule',
     is_flag=True,
     help='Schedule and submit jobs automatically. `max_jobs` must be defined.')
-@click.option('-j',
-              '--max_jobs',
-              type=int,
-              help='Maximum number of jobs to submit.')
+@click.option(
+    '-j',
+    '--max_jobs',
+    type=int,
+    help=
+    'Maximum number of jobs to submit (simultaneously for array submission).')
+@click.option(
+    '--max_array_size',
+    type=int,
+    default=100,
+    help='Maximum array size for slurm (usually 1001, default = 100).')
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
 @click.option('-r',
               '--resubmit',
