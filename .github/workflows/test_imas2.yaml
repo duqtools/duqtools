@@ -44,8 +44,8 @@ jobs:
         run: |
           mkdir saxon9he
           cd saxon9he
-          curl -L https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download -o saxonhe9.zip
-          unzip saxonhe9.zip
+          curl -L https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download -o saxon9he.zip
+          unzip saxon9he.zip
 
       - name: Download blitz
         run: |
@@ -53,7 +53,7 @@ jobs:
           cd blitz
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_INSTALL_PREFIX=../local/ ..
           make lib
           make install
           cd ../..
@@ -61,11 +61,11 @@ jobs:
       - name: Build imas
         run: |
           cd imas
-          mv ../saxon9he.jar .
+          mv ../xaxon9he/saxon9he.jar .
           ln -s ../testing/build_imas_script.sh .
           .  build_imas_script.sh
           cd ..
 
-      - name: Build imas
+      - name: Test imas import
         run: |
           python -c 'import imas'
