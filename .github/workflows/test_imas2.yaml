@@ -61,7 +61,7 @@ jobs:
       - name: Build imas
         run: |
           cd imas
-          mv ../xaxon9he/saxon9he.jar .
+          mv ../saxon9he/saxon9he.jar .
           ln -s ../testing/build_imas_script.sh .
           .  build_imas_script.sh
           cd ..
