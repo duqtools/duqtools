@@ -45,7 +45,7 @@ jobs:
           mkdir saxon9he
           cd saxon9he
           curl -L https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download -o saxonhe9.zip
-          unzip saxon9he.zip
+          unzip saxonhe9.zip
 
       - name: Download blitz
         run: |
