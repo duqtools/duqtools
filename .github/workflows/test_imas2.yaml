@@ -33,7 +33,6 @@ jobs:
           git clone https://smeetss:${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
 
       - name: Download access-layer
-        uses: actions/checkout@v3
         run: |
           git clone https://smeetss:${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}@git.iter.org/scm/imas/access-layer.git imas/access-layer
 
