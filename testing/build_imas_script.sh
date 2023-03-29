@@ -72,5 +72,5 @@ echo IMAS_VERSION=$IMAS_VERSION\
     IMAS_PREFIX=$IMAS_PREFIX\
     LIBRARY_PATH=$LIBRARY_PATH\
     LD_LIBRARY_PATH=$LD_LIBRARY_PATH\
-    python > python.sh
+    python $@ > python.sh
 chmod +x python.sh

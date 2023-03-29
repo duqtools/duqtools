@@ -68,12 +68,14 @@ jobs:
           mv ../saxon9he/saxon9he.jar .
           ln -s ../testing/build_imas_script.sh .
           . build_imas_script.sh
+          ./python.sh -c 'import imas'
           cd ..
 
       - name: Test imas import
         run: |
           pip freeze
           pip show imas
+
 
       - name: Test imas import
         run: |
