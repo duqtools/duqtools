@@ -28,7 +28,6 @@ make
 cd ..
 # INSTALL the access layer locally (this might take a while)
 cd access-layer
-git checkout "$1"
 if [ ! -L xml ]; then
     ln -s ../data-dictionary/ xml
 fi
