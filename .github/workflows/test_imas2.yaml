@@ -29,18 +29,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download data-dictionary
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}
-          repository: https://smeetss@git.iter.org/scm/imas/access-layer.git
-          path: imas/data-dictionary
+        run: |
+          git clone https://smeetss:${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
 
       - name: Download access-layer
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}
-          repository: https://smeetss@git.iter.org/scm/imas/access-layer.git
-          path: imas/access-layer
+        run: |
+          git clone https://smeetss:${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}@git.iter.org/scm/imas/access-layer.git imas/access-layer
 
       - name: Download saxon9he.jar
         run: |
