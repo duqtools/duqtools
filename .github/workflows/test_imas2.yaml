@@ -69,12 +69,23 @@ jobs:
           ln -s ../testing/build_imas_script.sh .
           . build_imas_script.sh
           ./python.sh -c 'import imas'
+          echo $IMAS_VERSION
+          echo $UAL_VERSION
+          echo $IMAS_PREFIX
+          echo $LIBRARY_PATH
+          echo $LD_LIBRARY_PATH
           cd ..
 
       - name: Test imas import
         run: |
           pip freeze
           pip show imas
+          ./imas/python.sh -c 'import imas'
+          echo $IMAS_VERSION
+          echo $UAL_VERSION
+          echo $IMAS_PREFIX
+          echo $LIBRARY_PATH
+          echo $LD_LIBRARY_PATH
 
 
       - name: Test imas import
