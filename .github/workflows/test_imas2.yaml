@@ -1,0 +1,73 @@
+name: Tests in Imas Container
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: github.event.pull_request.draft == false
+    name: ${{ matrix.os }}, ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: ['3.9']
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download data-dictionary
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}
+          repository: https://smeetss@git.iter.org/scm/imas/access-layer.git
+          path: imas/data-dictionary
+
+      - name: Download access-layer
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}
+          repository: https://smeetss@git.iter.org/scm/imas/access-layer.git
+          path: imas/access-layer
+
+      - name: Download saxon9he.jar
+        run: |
+          mkdir saxon9he
+          cd saxon9he
+          curl -L https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download -o saxonhe9.zip
+          unzip saxon9he.zip
+
+      - name: Download blitz
+        run: |
+          git clone https://github.com/blitzpp/blitz
+          cd blitz
+          mkdir build
+          cd build
+          cmake ..
+          make lib
+          make install
+          cd ../..
+
+      - name: Build imas
+        run: |
+          cd imas
+          mv ../saxon9he.jar .
+          ln -s ../testing/build_imas_script.sh .
+          .  build_imas_script.sh
+          cd ..
+
+      - name: Build imas
+        run: |
+          python -c 'import imas'
