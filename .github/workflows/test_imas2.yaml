@@ -31,13 +31,13 @@ jobs:
       - name: Download data-dictionary
         run: |
           username="smeetss"
-          password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}""
+          password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
           git clone https://$username:$password@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
 
       - name: Download access-layer
         run: |
-          username=smeetss
-          password=${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}
+          username="smeetss"
+          password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
           git clone https://$username:$password@it.iter.org/scm/imas/access-layer.git imas/access-layer
 
       - name: Download saxon9he.jar
