@@ -66,11 +66,7 @@ python -c 'import imas'
 
 cd ../../
 
-# create a shell script to start python with the right environment variables
-echo IMAS_VERSION=$IMAS_VERSION\
-    UAL_VERSION=$UAL_VERSION\
-    IMAS_PREFIX=$IMAS_PREFIX\
-    LIBRARY_PATH=$LIBRARY_PATH\
-    LD_LIBRARY_PATH=$LD_LIBRARY_PATH\
-    python $@ > python.sh
-chmod +x python.sh
+echo "export UAL_VERSION=$UAL_VERSION" >> source_me.sh
+echo "export IMAS_PREFIX=$IMAS_PREFIX" >> source_me.sh
+echo "export LIBRARY_PATH=$LIBRARY_PATH" >> source_me.sh
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> source_me.sh
