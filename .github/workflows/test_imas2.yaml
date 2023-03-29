@@ -72,4 +72,9 @@ jobs:
 
       - name: Test imas import
         run: |
+          pip freeze
+          pip show imas
+
+      - name: Test imas import
+        run: |
           python -c 'import imas'
