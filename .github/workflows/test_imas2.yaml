@@ -38,7 +38,7 @@ jobs:
         run: |
           username="smeetss"
           password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
-          git clone https://$username:$password@it.iter.org/scm/imas/access-layer.git imas/access-layer
+          git clone https://$username:$password@git.iter.org/scm/imas/access-layer.git imas/access-layer
 
       - name: Download saxon9he.jar
         run: |
