@@ -32,7 +32,7 @@ jobs:
         run: |
           username="smeetss"
           password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
-          git clone --depth=1 https://$username:$password@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
+          git clone https://$username:$password@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
 
       - name: Download access-layer
         run: |
