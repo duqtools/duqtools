@@ -28,23 +28,33 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: actions/cache@v3
+        id: cache-imas
+        with:
+          path: imas
+          key: imas-install-123
+
       - name: Install libraries
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           sudo apt-get install -y xsltproc
 
       - name: Download data-dictionary
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           username="smeetss"
           password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
           git clone https://$username:$password@git.iter.org/scm/imas/data-dictionary.git imas/data-dictionary
 
       - name: Download access-layer
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           username="smeetss"
           password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
           git clone --depth=1 https://$username:$password@git.iter.org/scm/imas/access-layer.git imas/access-layer
 
       - name: Download saxon9he.jar
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           mkdir saxon9he
           cd saxon9he
@@ -52,6 +62,7 @@ jobs:
           unzip saxon9he.zip
 
       - name: Download blitz
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           git clone https://github.com/blitzpp/blitz
           cd blitz
@@ -63,6 +74,7 @@ jobs:
           cd ../..
 
       - name: Build imas
+        if: steps.cache-imas.outputs.cache-hit != true
         run: |
           cd imas
           mv ../saxon9he/saxon9he.jar .
