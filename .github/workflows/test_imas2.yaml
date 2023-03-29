@@ -30,7 +30,7 @@ jobs:
 
       - name: Install libraries
         run: |
-          sudo apt-get install -y xlstproc
+          sudo apt-get install -y xsltproc
 
       - name: Download data-dictionary
         run: |
