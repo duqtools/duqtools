@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..config import cfg
-from ..schema.runs import Run, Runs
+from ._run import Run, Runs
 
 
 class Locations:

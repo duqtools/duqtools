@@ -11,9 +11,8 @@ from .cleanup import remove_run
 from .config import Config, cfg
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
-from .models import Locations
+from .models import Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
-from .schema.runs import Run, Runs
 from .system import get_system
 
 logger = logging.getLogger(__name__)

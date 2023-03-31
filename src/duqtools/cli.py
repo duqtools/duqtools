@@ -510,19 +510,5 @@ def cli_version(**kwargs):
     click.echo(string)
 
 
-@click.option('-o', '--output', type=click.Path(), help='path to output file')
-@click.argument('script', type=click.Path(exists=True))
-@cli.command('fitness')
-def cli_fitness(**kwargs):
-    """A wrapper to execute a SCRIPT for every output.
-
-    The user needs to provide a fitness function (SCRIPT) in
-    script/executable form. Outputs the fitness in csv format to stdout,
-    or a file with the `-o` option.
-    """
-    from .fitness import fitness
-    fitness(**kwargs)
-
-
 if __name__ == '__main__':
     cli()
