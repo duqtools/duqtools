@@ -32,7 +32,7 @@ jobs:
         python -m pip freeze > requirements_full.txt
         pipreqs . --print > requirements.txt
         git add requirements_full.txt requirements.txt
-        git commit -m "Added requirements.txt files"
+        git commit -m "Updated requirements.txt files" || true
 
     - name: Bump version to new tag
       run: |
@@ -41,10 +41,10 @@ jobs:
 
     - name: Push back changes to main and tag
       run: |
-          git tag --force $GITHUB_REF_NAME HEAD
-          git push --force --tags
-          git switch -C main
-          git push --set-upstream -f origin main
+        git tag --force $GITHUB_REF_NAME HEAD
+        git push --force --tags
+        git switch -C main
+        git push --set-upstream -f origin main
 
   deploy:
     needs: fix_release_deps
@@ -52,6 +52,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref_name }}
+
     - uses: actions/setup-python@v4
       with:
         python-version: '3.9'
