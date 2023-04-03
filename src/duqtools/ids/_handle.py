@@ -30,6 +30,9 @@ GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
                                                        _FILENAME))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
 
+BACKEND = imasdef.MDSPLUS_BACKEND
+BACKEND = imasdef.ASCII_BACKEND
+
 SUFFIXES = (
     '.datafile',
     '.characteristics',
@@ -310,7 +313,7 @@ class ImasHandle(ImasBaseModel):
 
         return ds
 
-    def entry(self, backend=imasdef.MDSPLUS_BACKEND):
+    def entry(self, backend=BACKEND):
         """Return reference to `imas.DBEntry.`
 
         Parameters
@@ -326,7 +329,7 @@ class ImasHandle(ImasBaseModel):
         return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
 
     @contextmanager
-    def open(self, backend=imasdef.MDSPLUS_BACKEND, create: bool = False):
+    def open(self, backend=BACKEND, create: bool = False):
         """Context manager to open database entry.
 
         Parameters
