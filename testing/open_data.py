@@ -25,6 +25,7 @@ ret = entry.close()
 print(ret)
 
 h = ImasHandle(user=user, db=db, shot=shot, run=run)
+h._backend = imasdef.ASCII_BACKEND
 
 m = h.get(ids)
 print(m)
