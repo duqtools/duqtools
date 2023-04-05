@@ -34,6 +34,7 @@ def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
 
 
 def duqmap(function: Callable[[Any], Any],
+           *,
            runs: Optional[List[Any]] = None,
            **kwargs) -> List[Any]:
     try:
@@ -51,6 +52,6 @@ def duqmap(function: Callable[[Any], Any],
         map_fun = duqmap_imas
     else:
         raise NotImplementedError('Dont know how to map function signature:'
-                                  ' {function.__name__}{signature(function)}')
+                                  f' {function.__name__}{signature(function)}')
 
     return map_fun(function, runs=runs, **kwargs)  # type: ignore

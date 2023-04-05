@@ -23,17 +23,19 @@ from .duqmap import duqmap
 from .ids import (
     IDSMapping,
     ImasHandle,
+    rebase_all_coords,
     rebase_on_grid,
     rebase_on_time,
     standardize_grid_and_time,
 )
-from .models import Run
+from .models import Run, Runs
 from .schema import IDSVariableModel as Variable
 
 __all__ = [
     'duqmap',
     'rebase_on_grid',
     'rebase_on_time',
+    'rebase_all_coords',
     'standardize_grid_and_time',
     'ImasHandle',
     'IDSMapping',
@@ -41,4 +43,5 @@ __all__ = [
     'alt_line_chart',
     'alt_errorband_chart',
     'Run',
+    'Runs',
 ]
