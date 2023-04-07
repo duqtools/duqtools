@@ -32,7 +32,7 @@ class Run(BaseModel):
         return handle
 
     @staticmethod
-    def from_Path(path: Path):
+    def from_path(path: Path):
         return Run(shortname=path, dirname=path.resolve())
 
 
