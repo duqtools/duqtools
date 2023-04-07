@@ -24,7 +24,7 @@ class Run(BaseModel):
             root['shortname'] = root['dirname'].name
         return root
 
-    def to_ImasHandle(self) -> ImasHandle:
+    def to_imas_handle(self) -> ImasHandle:
         if not self.data_out:
             raise NotImplementedError(
                 'Run has no data_out, necessary for mapping')
