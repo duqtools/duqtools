@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from inspect import signature
 from pathlib import Path
 from typing import Any, Callable, List, Optional
