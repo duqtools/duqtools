@@ -63,7 +63,8 @@ cd {run_dir}
     llcmd_path.chmod(llcmd_path.stat().st_mode | stat.S_IXUSR)
 
 
-def write_array_batchfile(jobs: Sequence[Job], max_jobs: int):
+def write_array_batchfile(jobs: Sequence[Job], max_jobs: int,
+                          max_array_size: int):
     """Write array batchfile to start jetto runs.
 
     Parameters
@@ -90,18 +91,26 @@ def write_array_batchfile(jobs: Sequence[Job], max_jobs: int):
 
     scripts = '\n'.join(f'    {job.submit_script}' for job in jobs)
 
+    # Calculate array size
+    array_size = min(len(jobs), max_array_size)
+
     string = f"""#!/bin/sh
 {options}
 #SBATCH -o {out_file}
 #SBATCH -e {err_file}
-#SBATCH --array=0-{len(jobs)-1}%{max_jobs}
+#SBATCH --array=0-{array_size-1}%{max_jobs}
 #SBATCH -J duqtools-array
 
 scripts=(
 {scripts}
 )
-echo executing ${{scripts[$SLURM_ARRAY_TASK_ID]}}
-${{scripts[$SLURM_ARRAY_TASK_ID]}} || true
+i=$SLURM_ARRAY_TASK_ID
+while [ $i -le {len(jobs)} ]; do
+    echo executing ${{scripts[$i]}}
+    ${{scripts[$i]}} || true
+    i=$((i+{array_size}))
+done
+
 """
 
     with open('duqtools_slurm_array.sh', 'w') as f:
