@@ -17,7 +17,7 @@ def _duqmap(function: Callable[[Any], Any],
         if isinstance(run, Run):
             pass
         elif isinstance(run, Path):
-            run = Run.from_Path(run)
+            run = Run.from_path(run)
         else:
             raise NotImplementedError(
                 f'Dont know how to convert: {type(run)} {run}, to Run')
@@ -26,7 +26,7 @@ def _duqmap(function: Callable[[Any], Any],
 
 
 def duqmap_run(function: Callable[[Run], Any], **kwargs) -> List[Any]:
-    return _duqmap(function, lambda x: x, **kwargs)
+    return _duqmap(function, lambda x: x, **kwargs)  # Identity
 
 
 def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
@@ -35,9 +35,9 @@ def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
     return _duqmap(function, to_imas_handle, **kwargs)
 
 
-def duqmap(function: Callable[[Any], Any],
+def duqmap(function: Callable[[Run | ImasHandle], Any],
            *,
-           runs: Optional[List[Any]] = None,
+           runs: Optional[List[Run | Path]] = None,
            **kwargs) -> List[Any]:
     try:
         # Gets the type of the first argument to the function, if it exists
@@ -48,9 +48,9 @@ def duqmap(function: Callable[[Any], Any],
 
     argument_type = argument.annotation
 
-    if argument_type == Run:
+    if issubclass(argument_type, Run):
         map_fun: Callable[[Any], Any] = duqmap_run
-    elif argument_type == ImasHandle:
+    elif issubclass(argument_type, ImasHandle):
         map_fun = duqmap_imas
     else:
         raise NotImplementedError('Dont know how to map function signature:'

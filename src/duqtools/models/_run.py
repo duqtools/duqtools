@@ -31,9 +31,9 @@ class Run(BaseModel):
         handle = ImasHandle.parse_obj(self.data_out)
         return handle
 
-    @staticmethod
-    def from_path(path: Path):
-        return Run(shortname=path, dirname=path.resolve())
+    @classmethod
+    def from_path(cls, path: Path):
+        return cls(shortname=path, dirname=path.resolve())
 
 
 class Runs(BaseModel):
