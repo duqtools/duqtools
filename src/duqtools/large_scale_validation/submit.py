@@ -32,11 +32,12 @@ def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
     """
     cwd = Path.cwd()
 
-    config_files = cwd.glob('**/duqtools.yaml')
+    dirs = [file.parent for file in cwd.glob('**/runs.yaml')]
 
     jobs: list[Job] = []
 
-    for config_file in config_files:
+    for dir in dirs:
+        config_file = dir / 'duqtools.yaml'
         cfg.parse_file(config_file)
 
         if not cfg.submit:
