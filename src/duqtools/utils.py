@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
 from ._types import PathLike
-from .schema.runs import Runs
 
 if TYPE_CHECKING:
     from .ids import ImasHandle
@@ -66,6 +65,7 @@ def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
     import csv
 
     from .ids import ImasHandle
+    from .models import Runs
 
     inp = Path(inp)
 

@@ -28,6 +28,7 @@ nav:
     - examples/demo_lsv_run.ipynb
     - examples/duqtools_on_prominence.ipynb
     - examples/duqtools_in_docker.ipynb
+    - examples/duqmap.ipynb
   - Scripts:
     - Overview: scripts/index.md
     - scripts/modify_imas_data.md

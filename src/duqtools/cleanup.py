@@ -6,9 +6,8 @@ import shutil
 from pathlib import Path
 
 from .ids import ImasHandle
-from .models import Locations
+from .models import Locations, Run
 from .operations import op_queue
-from .schema.runs import Run
 
 logger = logging.getLogger(__name__)
 

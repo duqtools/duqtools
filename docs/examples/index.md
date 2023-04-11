@@ -9,4 +9,5 @@ This section contains example notebooks explaining in detail how the duqtools AP
 5. [CLI demo single run](demo_single_run)
 5. [CLI demo large scale validation](demo_lsv_run)
 6. [Running duqtools with docker](duqtools_in_docker)
-6. [Running duqtools on prominence](duqtools_on_prominence)
+7. [Running duqtools on prominence](duqtools_on_prominence)
+8. [Mapping over runs in duqtools](duqmap)
