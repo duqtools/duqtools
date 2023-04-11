@@ -30,7 +30,9 @@ def duqmap_run(function: Callable[[Run], Any], **kwargs) -> List[Any]:
 
 
 def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
-    return _duqmap(function, Run.to_ImasHandle, **kwargs)
+    def to_imas_handle(run):
+        return run.to_imas_handle()
+    return _duqmap(function, to_imas_handle, **kwargs)
 
 
 def duqmap(function: Callable[[Any], Any],
