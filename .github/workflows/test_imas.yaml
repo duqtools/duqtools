@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test2:
+  test:
     if: github.event.pull_request.draft == false
     name: ${{ matrix.os }}, ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
