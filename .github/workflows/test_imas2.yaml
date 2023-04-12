@@ -30,7 +30,7 @@ jobs:
 
       - name: Install libraries
         run: |
-          sudo apt-get install -y xsltproc libhdf5-dev saxonhe libblitz0-dev
+          sudo apt-get install -y xsltproc libhdf5-dev libsaxonhe-java libblitz0-dev
 
       - name: Download data-dictionary
         run: |
