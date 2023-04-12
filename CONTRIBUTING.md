@@ -39,7 +39,7 @@ One of the code owners will review your code and request changes if needed. Once
 
 ### Setup
 
-*Duqtools* targets Python 3.7, which is the version available on [eufus](https://wiki.eufus.eu/doku.php).
+*Duqtools* targets Python 3.9 or newer and is compatible with python 3.10, which is the version available on [eufus](https://wiki.eufus.eu/doku.php).
 
 Clone the repository into the `duqtools` directory:
 
@@ -60,14 +60,14 @@ Alternatively, install using Conda:
 
 ```console
 cd duqtools
-conda create -n duqtools python=3.7
+conda create -n duqtools python=3.10
 conda activate duqtools
 pip install -e .[develop]
 ```
 
 ### Running tests
 
-Duqtools uses [pytest](https://docs.pytest.org/en/7.1.x/) to run the tests. You can run the tests for yourself using:
+Duqtools uses [pytest](https://docs.pytest.org/en/latest/) to run the tests. You can run the tests for yourself using:
 
 ```console
 pytest
@@ -77,8 +77,8 @@ To check coverage:
 
 ```console
 coverage run -m pytest
-coverage report  # terminal
-coverage html    # html report
+coverage report  # to output to terminal
+coverage html    # to generate html report
 ```
 
 
@@ -98,12 +98,10 @@ If you are adding new pages, make sure to update the listing in the [`mkdocs.yml
 
 ### Making a release
 
-The versioning scheme we use is [SemVer](http://semver.org/).
+1. Make a new [release](https://github.com/duqtools/duqtools/releases).
 
-1. Bump the version (`major`/`minor`/`patch` as needed)
+2. Under 'Choose a tag', set the tag to the new version. The versioning scheme we use is [SemVer](http://semver.org/), so bump the version (*major*/*minor*/*patch*) as needed. Bumping the version is handled transparently by `bumpversion` in [this workflow](https://github.com/duqtools/duqtools/blob/main/.github/workflows/publish.yaml).
 
-```console
-bumpversion minor
-```
+3. The [upload to pypi](https://pypi.org/project/duqtools) is triggered when a release is published and handled by [this workflow](https://github.com/duqtools/duqtools/actions/workflows/publish.yaml).
 
-2. Make a new [release](https://github.com/duqtools/duqtools/releases). The [upload to pypi](https://github.com/duqtools/duqtools/actions/workflows/publish.yaml) is triggered when a release is published.
+4. The [upload to zenodo](https://zenodo.org/record/7817160) is triggered when a release is published.
