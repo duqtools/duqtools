@@ -3,6 +3,8 @@
 # Derived from
 # https://git.iter.org/projects/IMAS/repos/imaspy/browse/envs/common/25_build_imas_git.sh
 
+export CLASSPATH=`pwd`/../saxon9he/saxon9he.jar
+
 cd data-dictionary
 # use the latest tagged version
 export IMAS_VERSION=`git tag | sort -V | tail -n 1`
@@ -44,7 +46,7 @@ pip uninstall --yes imas || true
 
 pip install -e package
 
-cd ../../
+rd ../../
 
 echo "export UAL_VERSION=$UAL_VERSION" >> source_me.sh
 echo "export IMAS_PREFIX=$IMAS_PREFIX" >> source_me.sh

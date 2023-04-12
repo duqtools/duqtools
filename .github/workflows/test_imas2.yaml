@@ -30,7 +30,7 @@ jobs:
 
       - name: Install libraries
         run: |
-          sudo apt-get install -y xsltproc libhdf5-dev libsaxonhe-java libblitz0-dev
+          sudo apt-get install -y xsltproc libhdf5-dev libblitz0-dev
 
       - name: Download data-dictionary
         run: |
@@ -43,6 +43,13 @@ jobs:
           username="smeetss"
           password="${{ secrets.GIT_ITER_ORG_HTTPS_KEY }}"
           git clone --depth=1 https://$username:$password@git.iter.org/scm/imas/access-layer.git imas/access-layer
+
+      - name: Download saxon9he.jar
+        run: |
+          mkdir saxon9he
+          cd saxon9he
+          curl -L https://sourceforge.net/projects/saxon/files/Saxon-HE/9.9/SaxonHE9-9-1-7J.zip/download -o saxon9he.zip
+          unzip saxon9he.zip
 
       - name: Build imas
         run: |
