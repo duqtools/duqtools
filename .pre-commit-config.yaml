@@ -47,5 +47,7 @@ repos:
     hooks:
       - id: nbqa-yapf
         additional_dependencies: [toml, yapf]
+        types_or: [jupyter]
       - id: nbqa-ruff
         args: [--fix]
+        types_or: [jupyter]
