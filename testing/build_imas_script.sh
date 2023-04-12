@@ -56,6 +56,7 @@ pip install -e package
 
 cd ../../
 
+rm source_me.sh
 echo "export UAL_VERSION=$UAL_VERSION" >> source_me.sh
 echo "export IMAS_PREFIX=$IMAS_PREFIX" >> source_me.sh
 echo "export LIBRARY_PATH=$LIBRARY_PATH" >> source_me.sh

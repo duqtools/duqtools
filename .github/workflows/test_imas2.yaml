@@ -67,5 +67,6 @@ jobs:
 
       - name: Test imas import
         run: |
+          cat ./imas/source_me.sh
           . ./imas/source_me.sh
           python -c 'import imas'
