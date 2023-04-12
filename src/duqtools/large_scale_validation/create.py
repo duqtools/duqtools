@@ -5,10 +5,10 @@ from ..create import create as duqtools_create
 from ..utils import work_directory
 
 
-def create(**kwargs):
+def create(*, pattern='**', **kwargs):
     cwd = Path.cwd()
 
-    config_files = cwd.glob('**/duqtools.yaml')
+    config_files = cwd.glob(f'{pattern}/duqtools.yaml')
 
     for config_file in config_files:
         cfg.parse_file(config_file)
