@@ -28,7 +28,9 @@ export IMAS_UDA=no \
 export IMAS_PREFIX=`pwd`
 export LIBRARY_PATH=`pwd`/lowlevel:${LIBRARY_PATH:=}
 export C_INCLUDE_PATH=`pwd`/lowlevel:${C_INCLUDE_PATH:=}
+export C_INCLUDE_PATH=`pkg-config hdf5-serial --cflags`:${C_INCLUDE_PATH:=}
 export LD_LIBRARY_PATH=`pwd`/lowlevel:`pwd`/cppinterface/lib:${LD_LIBRARY_PATH:=}
+export LD_LIBRARY_PATH=`pkg-config hdf5-serial --libs`:${LD_LIBRARY_PATH:=}
 
 cd lowlevel
 make -j`nproc`
@@ -46,7 +48,7 @@ pip uninstall --yes imas || true
 
 pip install -e package
 
-rd ../../
+cd ../../
 
 echo "export UAL_VERSION=$UAL_VERSION" >> source_me.sh
 echo "export IMAS_PREFIX=$IMAS_PREFIX" >> source_me.sh
