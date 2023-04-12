@@ -5,7 +5,7 @@ from ..create import create as duqtools_create
 from ..utils import work_directory
 
 
-def create(*, pattern: str = '**', **kwargs):
+def create(*, input_file: str, pattern: str = '**', **kwargs):
     """Create runs for large scale validation.
 
     Parameters
@@ -16,6 +16,10 @@ def create(*, pattern: str = '**', **kwargs):
     cwd = Path.cwd()
 
     config_files = cwd.glob(f'{pattern}/duqtools.yaml')
+
+    breakpoint()
+    ## Load list of imas handles
+    ## match run.data_in to list of imas handles
 
     for config_file in config_files:
         cfg.parse_file(config_file)
