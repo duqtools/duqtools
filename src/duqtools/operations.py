@@ -216,8 +216,6 @@ class Operations(deque):
         if cfg.quiet:
             return self._apply_all()
 
-        print(self.n_actions)
-
         with tqdm(total=self.n_actions, position=1) as pbar:
             pbar.set_description('Progress')
 
