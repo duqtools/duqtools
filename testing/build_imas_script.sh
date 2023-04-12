@@ -4,7 +4,7 @@
 # https://git.iter.org/projects/IMAS/repos/imaspy/browse/envs/common/25_build_imas_git.sh
 set -e
 
-export CLASSPATH=`pwd`/saxon9he/saxon9he.jar
+export CLASSPATH=`pwd`/../saxon9he/saxon9he.jar
 
 cd data-dictionary
 # use the latest tagged version
