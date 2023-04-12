@@ -28,7 +28,7 @@ export IMAS_UDA=no \
 export IMAS_PREFIX=`pwd`
 export LIBRARY_PATH=`pwd`/lowlevel:${LIBRARY_PATH:=}
 export C_INCLUDE_PATH=`pwd`/lowlevel:${C_INCLUDE_PATH:=}
-export C_INCLUDE_PATH=`pkg-config hdf5-serial --cflags`:${C_INCLUDE_PATH:=}
+export CPLUS_INCLUDE_PATH=`pkg-config hdf5-serial --cflags`:${CPLUS_INCLUDE_PATH:=}
 export LD_LIBRARY_PATH=`pwd`/lowlevel:`pwd`/cppinterface/lib:${LD_LIBRARY_PATH:=}
 export LD_LIBRARY_PATH=`pkg-config hdf5-serial --libs`:${LD_LIBRARY_PATH:=}
 
