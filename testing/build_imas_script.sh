@@ -3,8 +3,6 @@
 # Derived from
 # https://git.iter.org/projects/IMAS/repos/imaspy/browse/envs/common/25_build_imas_git.sh
 
-export CLASSPATH=`pwd`/saxon9he.jar
-
 cd data-dictionary
 # use the latest tagged version
 export IMAS_VERSION=`git tag | sort -V | tail -n 1`
@@ -20,7 +18,7 @@ fi
 export UAL_VERSION=`git tag | sort -V | tail -n 1`
 export IMAS_UDA=no \
     IMAS_MDSPLUS=no \
-    IMAS_HDF5=no \
+    IMAS_HDF5=yes \
     IMAS_MATLAB=no \
     IMAS_MEX=no \
     IMAS_JAVA=no
@@ -45,8 +43,6 @@ sed -e 's/imas_[^/."]*/imas/g' -i package/setup.py
 pip uninstall --yes imas || true
 
 pip install -e package
-
-python -c 'import imas'
 
 cd ../../
 
