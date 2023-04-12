@@ -2,14 +2,16 @@
 
 # Derived from
 # https://git.iter.org/projects/IMAS/repos/imaspy/browse/envs/common/25_build_imas_git.sh
+set -e
 
-export CLASSPATH=`pwd`/../saxon9he/saxon9he.jar
+export CLASSPATH=`pwd`/saxon9he/saxon9he.jar
 
 cd data-dictionary
 # use the latest tagged version
 export IMAS_VERSION=`git tag | sort -V | tail -n 1`
 git checkout "$IMAS_VERSION"
 make
+
 
 cd ..
 cd access-layer
@@ -28,12 +30,14 @@ export IMAS_UDA=no \
 export IMAS_PREFIX=`pwd`
 export LIBRARY_PATH=`pwd`/lowlevel:${LIBRARY_PATH:=}
 export C_INCLUDE_PATH=`pwd`/lowlevel:${C_INCLUDE_PATH:=}
-export CPLUS_INCLUDE_PATH=`pkg-config hdf5-serial --cflags`:${CPLUS_INCLUDE_PATH:=}
+# Hard patch hdf5 to the correct directories
+export CPLUS_INCLUDE_PATH=`pkg-config hdf5-serial --cflags | cut -dI -f2`:${CPLUS_INCLUDE_PATH}
 export LD_LIBRARY_PATH=`pwd`/lowlevel:`pwd`/cppinterface/lib:${LD_LIBRARY_PATH:=}
-export LD_LIBRARY_PATH=`pkg-config hdf5-serial --libs`:${LD_LIBRARY_PATH:=}
+export LIBRARY_PATH=`pkg-config hdf5-serial --libs-only-L | cut -dL -f2`:${LIBRARY_PATH}
+export LIBRARY_PATH=`pkg-config boost --libs-only-L | cut -dL -f2`:${LIBRARY_PATH}
 
 cd lowlevel
-make -j`nproc`
+make -j `nproc`
 cd ..
 
 pip install numpy cython

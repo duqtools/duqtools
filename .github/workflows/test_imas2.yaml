@@ -30,7 +30,7 @@ jobs:
 
       - name: Install libraries
         run: |
-          sudo apt-get install -y xsltproc libhdf5-dev libblitz0-dev
+          sudo apt-get install -y xsltproc libhdf5-dev libblitz0-dev default-jre libboost-filesystem-dev
 
       - name: Download data-dictionary
         run: |
@@ -55,7 +55,7 @@ jobs:
         run: |
           cd imas
           ln -s ../testing/build_imas_script.sh .
-          . build_imas_script.sh
+          ./build_imas_script.sh
           cd ..
 
       - name: Test imas import
