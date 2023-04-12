@@ -5,7 +5,14 @@ from ..create import create as duqtools_create
 from ..utils import work_directory
 
 
-def create(*, pattern='**', **kwargs):
+def create(*, pattern: str = '**', **kwargs):
+    """Create runs for large scale validation.
+
+    Parameters
+    ----------
+    pattern : str
+        Find runs.yaml files only in subdirectories matching this glob pattern
+    """
     cwd = Path.cwd()
 
     config_files = cwd.glob(f'{pattern}/duqtools.yaml')

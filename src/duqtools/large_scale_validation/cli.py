@@ -97,6 +97,12 @@ def cli_create(**kwargs):
               type=str,
               multiple=True,
               help='Only submit jobs with this status.')
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    help=
+    'Only submit jobs for runs in subdirectories matching this glob pattern.')
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_submit(**kwargs):

@@ -14,7 +14,13 @@ from ..submit import (
 )
 
 
-def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
+def submit(*,
+           array,
+           force,
+           max_jobs,
+           schedule,
+           status_filter: Sequence[str],
+           pattern: str = '**',
            **kwargs):
     """Submit nested duqtools configs.
 
@@ -29,10 +35,12 @@ def submit(*, array, force, max_jobs, schedule, status_filter: Sequence[str],
         finished.
     status_filter : list[str]
         Only submit jobs with this status.
+    pattern : str
+        Find runs.yaml files only in subdirectories matching this glob pattern
     """
     cwd = Path.cwd()
 
-    dirs = [file.parent for file in cwd.glob('**/runs.yaml')]
+    dirs = [file.parent for file in cwd.glob(f'{pattern}/runs.yaml')]
 
     jobs: list[Job] = []
 
