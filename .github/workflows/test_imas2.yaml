@@ -58,6 +58,13 @@ jobs:
           ./build_imas_script.sh
           cd ..
 
+      - name: Install mdsplus
+        run: |
+          curl -fsSL http://www.mdsplus.org/dist/mdsplus.gpg.key | sudo apt-key add -
+          sudo sh -c "echo 'deb [arch=amd64] http://www.mdsplus.org/dist/Ubuntu22/repo MDSplus stable' > /etc/apt/sources.list.d/mdsplus.list"
+          sudo apt-get update
+          sudo apt-get install -y mdsplus
+
       - name: Test imas import
         run: |
           . ./imas/source_me.sh
