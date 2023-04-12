@@ -34,6 +34,7 @@ export C_INCLUDE_PATH=`pwd`/lowlevel:${C_INCLUDE_PATH:=}
 export CPLUS_INCLUDE_PATH=`pkg-config hdf5-serial --cflags | cut -dI -f2`:${CPLUS_INCLUDE_PATH}
 export CPLUS_INCLUDE_PATH=/usr/local/mdsplus/include:${CPLUS_INCLUDE_PATH}
 export LD_LIBRARY_PATH=`pwd`/lowlevel:`pwd`/cppinterface/lib:${LD_LIBRARY_PATH:=}
+export LD_LIBRARY_PATH=/usr/local/mdsplus/lib:${LD_LIBRARY_PATH}
 export LIBRARY_PATH=`pkg-config hdf5-serial --libs-only-L | cut -dL -f2`:${LIBRARY_PATH}
 export LIBRARY_PATH=`pkg-config boost --libs-only-L | cut -dL -f2`:${LIBRARY_PATH}
 export LIBRARY_PATH=/usr/local/mdsplus/lib:${LIBRARY_PATH}

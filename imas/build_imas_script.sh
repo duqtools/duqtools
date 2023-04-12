@@ -1,1 +1,0 @@
-../testing/build_imas_script.sh
