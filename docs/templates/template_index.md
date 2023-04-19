@@ -13,9 +13,10 @@ To help initialize a starting config to modify, you can run [`duqtools init`](..
 
 Check out the different subpages of this section that explain the different parts of the config.
 
-- [create](../create)
-- [submit](../submit)
-- [status](../status)
+- [setup](../config/setup)
+- [create](../config/create)
+- [submit](../config/submit)
+- [status](../config/status)
 - [system](#defining-the-system)
 - [variables](#extra-variables)
 

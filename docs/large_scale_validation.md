@@ -23,6 +23,8 @@ Then, run the programs in the intended sequence:
 4. [`duqduq status`](#duqduq-status)
 5. [`duqduq merge`](#duqduq-merge)
 
+Each of these commands mimick the `duqtools` equivalent, for example, `duqduq create` is the large scale quivalent of `duqtools create`.
+
 ## Input data
 
 `data.csv` contains a list of IMAS handles pointing. For more info on this file, click [here](../dash/#from-a-csv-file). `duqduq setup` will loop over the entries in this file, and create a new directory (named after the index column) in the current directory with input for duqtools.
@@ -40,7 +42,9 @@ Each column will be exposed through the `handle` dataclass in the config templat
 
 ## Config template
 
-`duqtools.template.yaml` is a template for the [duqtools create config](../config/create/#the-create-config). It contains a few placeholders for variable data (see [below](#placeholder-variables)).
+`duqtools.template.yaml` is a template for the [duqtools create config](../config/create/#the-create-config). It contains a few placeholders for variable data (see [the documentation for `setup`](../config/setup/#placeholder-variables)).
+
+The template uses [jinja2 as a templating language](../config/setup/#jinja2-quickstart).
 
 ```yaml title="duqtools.template.yaml"
 create:
@@ -73,51 +77,9 @@ create:
     - variable: t_end
       operator: copyto
       values: [ {{ (variables.t_start + 0.01) | round(4) }} ]
-system: jetto-v220922
+system: jetto
 ```
 
-### Placeholder variables
-
-The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/latest/) as the templating engine. Jinja2 is widely used in the Python ecosystem and outside.
-
-`run`
-: This contains attributes related to the current run. You can access the run name (`run.name`).
-
-`handle` (`ImasHandle`)
-: The handle corresponds to the entry from the Imas location in the `data.csv`. This means you have access to all attributes from [duqtools.api.ImasHandle][], such as `handle.user`, `handle.db`, `handle.run`, and `handle.shot`.
-
-`variables`
-: These variable corresponds to pre-defined values in the IDS data. They are defined via as variables with the type `IDS2jetto-variable`. Essentially, each variable of this type is accessible as an attribute of `variables`. These are grabbed from the IDS data on-the-fly in the current IMAS handle.
-: For more information on how to set this up, see the section on [variables](../variables/#ids2jetto-variables).
-
-### Jetto V210921
-
-For compatibility with Jintrac v210921 distributions (`system: jetto-v210921`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
-
-```
-  data:
-    imasdb: {{ handle.db }}
-    run_in_start_at: {{ run.data_in_start }}
-    run_out_start_at: {{ run.data_out_start }}
-```
-
-### Jinja2 quickstart
-
-Jinja2 allows expressions everywhere. Anything between `{{` and  `}}` is evaluated as an [expression](https://jinja.palletsprojects.com/en/latest/templates/#expressions). This means that:
-
-`shot: {{ handle.shot }}` gets expanded to `shot: 12345`
-
-But, it is also possible to perform some operations inside the expression. In the example above we used this to calculate `t_end` from `t_start`.
-
-For example, if `t_start = 10`:
-
-`values: [ {{ variables.t_start + 0.01 }} ]` gets expanded to `values: [ 10.01 ]`.
-
-Another useful feature of jinja2 is [filters](https://jinja.palletsprojects.com/en/latest/templates/#builtin-filters). These are functions that can be used inside expressions to modify the variables. Let's say `t_start = 10.123`, and we want to round to the nearest tenth:
-
-`values: [ {{ variables.t_start | round(1) }} ]` becomes `values: [ 10.1 ]`.
-
-For more information, have a look at the [jinja2 documentation](https://jinja.palletsprojects.com/en/latest/).
 
 ::: mkdocs-click
     :module: duqtools.large_scale_validation.cli
