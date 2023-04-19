@@ -60,9 +60,28 @@ def cli_setup(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    help=
+    'Only create data for configs in subdirectories matching this glob pattern.'
+)
+@click.option(
+    '-i',
+    '--input',
+    'input_file',
+    type=str,
+    help=
+    'Only create data for configs where `template_data` matches a handle in this data.csv.'
+)
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_create(**kwargs):
-    """Create data sets for large scale validation."""
+    """Create data sets for large scale validation.
+
+    Example to only match config files in subdirectories matching jet*:
+    `duqduq create --pattern 'jet*/**'`
+    """
     from .create import create
     with op_queue_context():
         create(**kwargs)
@@ -86,6 +105,20 @@ def cli_create(**kwargs):
               type=str,
               multiple=True,
               help='Only submit jobs with this status.')
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    help=
+    'Only submit jobs for runs in subdirectories matching this glob pattern.')
+@click.option(
+    '-i',
+    '--input',
+    'input_file',
+    type=str,
+    help=
+    'Only submit jobs for configs where `template_data` matches a handle in this data.csv.'
+)
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_submit(**kwargs):
