@@ -145,6 +145,32 @@ class Operations(deque):
         """Return number of actions (no no-op)."""
         return sum(op.action is not None for op in self)
 
+    def apply_async(self):
+        from concurrent.futures import ThreadPoolExecutor
+
+        import tqdm
+
+        grouped = {}
+        for op in self:
+            desc = op.description
+            if desc not in grouped:
+                grouped[desc] = []
+            grouped[desc].append(op)
+
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            for group, ops in grouped.items():
+                futures = []
+
+                for op in ops:
+                    futures.append(executor.submit(op))
+
+                with tqdm.tqdm(total=len(futures)) as pbar:
+                    pbar.set_description(group)
+
+                    for future in futures:
+                        future.result()
+                        pbar.update()
+
     def add(self, **kwargs) -> None:
         """Convenience Operation wrapper around .append().
 
@@ -268,7 +294,8 @@ class Operations(deque):
             default=False)
 
         if is_confirmed:
-            self.apply_all()
+            self.apply_async()
+            # self.apply_all()
 
         return is_confirmed
 
