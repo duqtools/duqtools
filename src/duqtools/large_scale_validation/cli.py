@@ -67,11 +67,14 @@ def cli_setup(**kwargs):
     help=
     'Only create data for configs in subdirectories matching this glob pattern.'
 )
-@click.option('-i',
-              '--input',
-              'input_file',
-              type=str,
-              help='Only create data for imas handles in this data.csv file.')
+@click.option(
+    '-i',
+    '--input',
+    'input_file',
+    type=str,
+    help=
+    'Only create data for configs where `template_data` matches a handle in this data.csv.'
+)
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_create(**kwargs):
     """Create data sets for large scale validation.
