@@ -18,8 +18,9 @@ def create(*, input_file: str, pattern: str, **kwargs):
     if pattern is None:
         pattern = '**'
 
-    handles = read_imas_handles_from_file(
-        input_file).values() if input_file else None
+    handles = None
+    if input_file:
+        handles = read_imas_handles_from_file(input_file).values()
 
     cwd = Path.cwd()
 

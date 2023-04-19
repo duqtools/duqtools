@@ -12,16 +12,11 @@ from ..submit import (
     lockfile_ok,
     status_file_ok,
 )
+from ..utils import read_imas_handles_from_file
 
 
-def submit(*,
-           array,
-           force,
-           max_jobs,
-           schedule,
-           status_filter: Sequence[str],
-           pattern: str = '**',
-           **kwargs):
+def submit(*, array, force, max_jobs, schedule, input_file: str, pattern: str,
+           status_filter: Sequence[str], **kwargs):
     """Submit nested duqtools configs.
 
     Parameters
@@ -33,11 +28,20 @@ def submit(*,
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
-    status_filter : list[str]
-        Only submit jobs with this status.
+    input_file : str
+        Only submit jobs for configs where template_data matches a handle in the data.csv
     pattern : str
         Find runs.yaml files only in subdirectories matching this glob pattern
+    status_filter : list[str]
+        Only submit jobs with this status.
     """
+    if pattern is None:
+        pattern = '**'
+
+    handles = None
+    if input_file:
+        handles = read_imas_handles_from_file(input_file).values()
+
     cwd = Path.cwd()
 
     dirs = [file.parent for file in cwd.glob(f'{pattern}/runs.yaml')]
@@ -47,6 +51,9 @@ def submit(*,
     for dir in dirs:
         config_file = dir / 'duqtools.yaml'
         cfg.parse_file(config_file)
+
+        if handles and (cfg.create.template_data not in handles):
+            continue
 
         if not cfg.submit:
             raise SubmitError(
