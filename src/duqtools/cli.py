@@ -209,6 +209,18 @@ def cli(**kwargs):
     """For more information, check out the documentation:
 
     https://duqtools.readthedocs.io
+
+    \b
+    Example:
+    ```
+    duqtools init
+    duqtools create
+    duqtools submit --array --max_jobs 5
+    duqtools status
+    duqtools merge -i data.csv -t user1/jet/90123/1 -o user2/jet/90123/100
+    duqtools dash
+    ```
+    \f
     """
     pass
 
