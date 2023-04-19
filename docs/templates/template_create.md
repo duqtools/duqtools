@@ -29,18 +29,14 @@ create:
     run_in_start_at: 7000
     run_out_start_at: 8000
   dimensions:
-  - operator: multiply
+  - variable: t_e
+    operator: multiply
+    values: [0.9, 1.0, 1.1]
     scale_to_error: false
-    values: [1.1, 1.2, 1.3]
-    variable: t_i_ave
-  - operator: multiply
+  - variable: zeff
+    operator: multiply
+    values: [0.9, 1.0, 1.1]
     scale_to_error: false
-    values: [1.1, 1.2, 1.3]
-    variable: zeff
-  - operator: copyto
-    scale_to_error: false
-    values: [296.0, 297.0]
-    variable: major_radius
   sampler:
     method: latin-hypercube
     n_samples: 3

@@ -8,6 +8,7 @@ nav:
   - Usage: command-line-interface.md
   - Configuration:
     - Getting Started: config/index.md
+    - config/setup.md
     - config/create.md
     - config/submit.md
     - config/status.md
