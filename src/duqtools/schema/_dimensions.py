@@ -145,6 +145,7 @@ class Operation(OperatorMixin, BaseModel):
     value: float
 
     def convert(self):
+        """Expand variable and convert to correct type."""
         from duqtools.config import var_lookup
         variable = var_lookup[self.variable]
 

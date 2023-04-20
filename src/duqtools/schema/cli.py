@@ -15,6 +15,13 @@ from .variables import VariableConfigModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
+    operations: list[Operation] = Field(default=[],
+                                        description="""
+        These `operations` are always applied to the data.
+        They can be used to, for example, set the start time for an experiment
+        or update some physical parameters.
+        """)
+
     dimensions: list[Union[CoupledDim, OperationDim]] = Field(default=[],
                                                               description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
@@ -25,10 +32,6 @@ class CreateConfigModel(BaseModel):
         of all operations. By specifying a different `sampler`, a subset of
         this hypercube can be efficiently sampled.
         """))
-    operations: list[Operation] = Field(default=[],
-                                        description="""
-        Apply these operations to the data.
-        """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
