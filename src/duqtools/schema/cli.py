@@ -5,7 +5,7 @@ from pydantic import DirectoryPath, Field, validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import CoupledDim, OperationDim
+from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
@@ -15,7 +15,8 @@ from .variables import VariableConfigModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    dimensions: list[Union[CoupledDim, OperationDim]] = Field(description=f("""
+    dimensions: list[Union[CoupledDim, OperationDim]] = Field(default=[],
+                                                              description=f("""
         The `dimensions` specifies the dimensions of the matrix to sample
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
@@ -24,6 +25,10 @@ class CreateConfigModel(BaseModel):
         of all operations. By specifying a different `sampler`, a subset of
         this hypercube can be efficiently sampled.
         """))
+    operations: list[Operation] = Field(default=[],
+                                        description="""
+        Apply these operations to the data.
+        """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
                    CartesianProduct] = Field(default=CartesianProduct(),
