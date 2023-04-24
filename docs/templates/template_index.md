@@ -114,3 +114,12 @@ extra_variables:
       file: jetto.in
       section: NLIST1
 ```
+
+### Top level
+
+These are the top level keywords in the config. See the specific sections for more information.
+
+{% for name, prop in schema_ConfigModel['properties'].items() %}
+`{{ name }}`
+: {{ prop['description'] }}
+{% endfor %}

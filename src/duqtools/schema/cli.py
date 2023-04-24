@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-from pydantic import DirectoryPath, Field, validator
+from pydantic import DirectoryPath, Field
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -172,34 +172,27 @@ class ConfigModel(BaseModel):
 
     submit: SubmitConfigModel = Field(
         SubmitConfigModel(),
-        description='Configuration for the submit subcommand')
+        description=
+        'Configuration for the submit subcommand. See model for more info.')
 
     create: Optional[CreateConfigModel] = Field(
-        description='Configuration for the create subcommand')
+        description=
+        'Configuration for the create subcommand. See model for more info.')
 
     status: StatusConfigModel = Field(
         StatusConfigModel(),
-        description='Configuration for the status subcommand')
-
-    workspace: Optional[str] = Field(description='Old field, currently unused')
+        description=
+        'Configuration for the status subcommand. See model for more info.')
 
     extra_variables: Optional[VariableConfigModel] = Field(
         description='Specify extra variables for this run.')
 
-    system: Literal['jetto', 'dummy', 'jetto-v210921',
-                    'jetto-v220922'] = Field(
-                        'jetto', description='backend system to use')
+    system: Literal[
+        'jetto', 'dummy', 'jetto-v210921', 'jetto-v220922'] = Field(
+            'jetto',
+            description='Backend system to use. See model for more info.')
 
     quiet: bool = Field(
         False,
-        description='dont output to stdout, except for mandatory prompts')
-
-    @validator('workspace', pre=True)
-    def workspace_deprecated(cls, v):
-        if not v:
-            from warnings import warn
-            warn(f("""workspace key is Deprecated and unused, use create->jruns
-            and create->runs_dir to control where runs end up"""),
-                 DeprecationWarning,
-                 stacklevel=2)
-        return None
+        description=
+        'If true, do not output to stdout, except for mandatory prompts.')
