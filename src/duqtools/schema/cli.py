@@ -15,40 +15,12 @@ from .variables import VariableConfigModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    operations: list[Operation] = Field(default=[],
-                                        description="""
-        These `operations` are always applied to the data.
-        All operations specified here are added to any operations sampled
-        from the dimensions.
-        They can be used to, for example, set the start time for an experiment
-        or update some physical parameters.
-        This parameter is optional.
-        """)
+    runs_dir: Optional[Path] = Field(description=f(
+        """Relative location from the workspace, which specifies the folder where to
+        store all the created runs.
 
-    dimensions: list[Union[CoupledDim, OperationDim]] = Field(default=[],
-                                                              description=f("""
-        The `dimensions` specifies the dimensions of the matrix to sample
-        from. Each dimension is a compound set of operations to apply.
-        From this, a matrix all possible combinations is generated.
-        Essentially, it generates the
-        [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
-        of all operations. By specifying a different `sampler`, a subset of
-        this hypercube can be efficiently sampled. This paramater is optional.
-        """))
-
-    sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default=CartesianProduct(),
-                                             discriminator='method',
-                                             description=f("""
-        For efficient UQ, it may not be necessary to sample the entire matrix
-        or hypercube. By default, the cartesian product is taken
-        (`method: cartesian-product`). For more efficient sampling of the space,
-        the following `method` choices are available:
-        [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling),
-        [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
-        [`halton`](en.wikipedia.org/wiki/Halton_sequence).
-        Where `n_samples` gives the number of samples to extract.
-        """))
+        This defaults to `workspace/duqtools_experiment_x`
+        where `x` is a not yet existing integer."""))
 
     template: DirectoryPath = Field(description=f("""
         Template directory to modify. Duqtools copies and updates the settings
@@ -65,8 +37,62 @@ class CreateConfigModel(BaseModel):
         directory.
         """))
 
+    operations: list[Operation] = Field(default=[],
+                                        description="""
+        These `operations` are always applied to the data.
+        All operations specified here are added to any operations sampled
+        from the dimensions.
+        They can be used to, for example, set the start time for an experiment
+        or update some physical parameters.
+        This parameter is optional.
+        """)
+
+    sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
+                   CartesianProduct] = Field(default=CartesianProduct(),
+                                             discriminator='method',
+                                             description=f("""
+        For efficient UQ, it may not be necessary to sample the entire matrix
+        or hypercube. By default, the cartesian product is taken
+        (`method: cartesian-product`). For more efficient sampling of the space,
+        the following `method` choices are available:
+        [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling),
+        [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
+        [`halton`](en.wikipedia.org/wiki/Halton_sequence).
+        Where `n_samples` gives the number of samples to extract.
+        """))
+
+    dimensions: list[Union[CoupledDim, OperationDim]] = Field(default=[],
+                                                              description=f("""
+        The `dimensions` specifies the dimensions of the matrix to sample
+        from. Each dimension is a compound set of operations to apply.
+        From this, a matrix all possible combinations is generated.
+        Essentially, it generates the
+        [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
+        of all operations. By specifying a different `sampler`, a subset of
+        this hypercube can be efficiently sampled. This paramater is optional.
+        """))
+
+    jruns: Optional[DirectoryPath] = Field(description=f(
+        """`jruns` defines the the root directory where all simulations are
+        run for the jetto system. Because the jetto system works with relative
+        directories from some root directory.
+
+        This variable is optional. If this variable is not specified,
+        duqtools will look for the `$JRUNS` environment variable,
+        and set it to that. If that fails, `jruns` is set to the current directory `./`
+
+        In this way, duqtools can ensure that the current work directory is
+        a subdirectory of the given root directory. All subdirectories are
+        calculated as relative to the root directory.
+
+        For example, for `rjettov`, the root directory must be set to
+        `/pfs/work/$USER/jetto/runs/`. Any UQ runs must therefore be
+        a subdirectory.
+
+        """))
+
     data: Optional[DataLocation] = Field(description=f("""
-        Required for `system: jetto-v210921`, irrelevant for other systems.
+        Required for `system: jetto-v210921`, ignored for other systems.
 
         Where to store the in/output IDS data.
         The data key specifies the machine or imas
@@ -76,31 +102,6 @@ class CreateConfigModel(BaseModel):
         starting by the run number given by `run_out_start_at`.
 
         """))
-
-    jruns: Optional[DirectoryPath] = Field(description=f(
-        """`jruns` defines the the root directory where all simulations are
-    run for the jetto system. Because the jettos system works with relative
-    directories from some root directory.
-
-    If this variable is not specified, duqtools will look for the `$JRUNS` environment
-    variable, and set it to that. If that fails, `jruns` is set to the current directory `./`
-
-    In this way, duqtools can ensure that the current work directory is
-    a subdirectory of the given root directory. All subdirectories are
-    calculated as relative to the root directory.
-
-    For example, for `rjettov`, the root directory must be set to
-    `/pfs/work/$USER/jetto/runs/`. Any UQ runs must therefore be
-    a subdirectory.
-
-    """))
-
-    runs_dir: Optional[Path] = Field(description=f(
-        """Relative location from the workspace, which specifies the folder where to
-    store all the created runs.
-
-    This defaults to `workspace/duqtools_experiment_x`
-    where `x` is a not yet existing integer."""))
 
 
 class SubmitConfigModel(BaseModel):
