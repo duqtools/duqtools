@@ -111,16 +111,16 @@ class SubmitConfigModel(BaseModel):
     The config describes the commands to start the UQ runs.
     """
 
+    submit_system: Literal['prominence', 'slurm', 'docker'] = Field(
+        'slurm',
+        description='System to submit jobs to '
+        '[slurm (default), prominence, docker]')
     submit_script_name: str = Field(
         '.llcmd', description='Name of the submission script.')
     submit_command: str = Field('sbatch',
                                 description='Submission command for slurm.')
     docker_image: str = Field('jintrac-imas',
                               description='Docker image used for submission')
-    submit_system: Literal['prominence', 'slurm', 'docker'] = Field(
-        'slurm',
-        description='System to submit jobs to '
-        '[slurm (default), prominence, docker]')
 
 
 class StatusConfigModel(BaseModel):
@@ -129,9 +129,6 @@ class StatusConfigModel(BaseModel):
 
     These only need to be changed if the modeling software changes.
     """
-
-    status_file: str = Field('jetto.status',
-                             description='Name of the status file.')
     in_file: str = Field('jetto.in',
                          description=f("""
             Name of the modelling input file, will be used to check
@@ -143,6 +140,9 @@ class StatusConfigModel(BaseModel):
             Name of the modelling output file, will be used to
             check if the software is running.
             """))
+
+    status_file: str = Field('jetto.status',
+                             description='Name of the status file.')
 
     msg_completed: str = Field('Status : Completed successfully',
                                description=f("""
