@@ -1,10 +1,10 @@
 import itertools
-from typing import Optional
+from typing import Any, Optional
 
 from scipy.stats import qmc
 
 
-def cartesian_product(*iterables, **kwargs):
+def cartesian_product(*iterables, **kwargs) -> list[Any]:
     """Return cartesian product of input iterables.
 
     Uses `itertools.product`
@@ -22,7 +22,7 @@ def cartesian_product(*iterables, **kwargs):
     return list(itertools.product(*iterables))
 
 
-def _sampler(func, *iterables, n_samples: int, **kwargs):
+def _sampler(func, *iterables, n_samples: int, **kwargs) -> list[Any]:
     """Generic sampler."""
     bounds = tuple(len(iterable) for iterable in iterables)
 
@@ -39,7 +39,7 @@ def _sampler(func, *iterables, n_samples: int, **kwargs):
 def latin_hypercube(*iterables,
                     n_samples: int,
                     seed: Optional[int] = None,
-                    **kwargs):
+                    **kwargs) -> list[Any]:
     """Sample input iterables using Latin hypercube sampling (LHS).
 
     Uses `scipy.stats.qmc.LatinHyperCube`.
@@ -64,7 +64,10 @@ def latin_hypercube(*iterables,
                     seed=seed)
 
 
-def sobol(*iterables, n_samples: int, seed: Optional[int] = None, **kwargs):
+def sobol(*iterables,
+          n_samples: int,
+          seed: Optional[int] = None,
+          **kwargs) -> list[Any]:
     """Sample input iterables using the Sobol sampling method for generating
     low discrepancy sequences.
 
@@ -89,7 +92,10 @@ def sobol(*iterables, n_samples: int, seed: Optional[int] = None, **kwargs):
     return _sampler(qmc.Sobol, *iterables, n_samples=n_samples, seed=seed)
 
 
-def halton(*iterables, n_samples: int, seed: Optional[int] = None, **kwargs):
+def halton(*iterables,
+           n_samples: int,
+           seed: Optional[int] = None,
+           **kwargs) -> list[Any]:
     """Sample input iterables using the Halton sampling method.
 
     Uses `scipy.stats.qmc.Halton`.

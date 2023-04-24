@@ -53,26 +53,37 @@ class CreateManager:
 
         return source
 
+    def get_base_ops(self) -> list[Any]:
+        """Generate base operations that are always applied."""
+        base_ops = [op.convert() for op in self.options.operations]
+        return base_ops
+
     def generate_ops_lists(self) -> list[Any]:
         """Generate set of operations for a run."""
-        dimensions = self.options.dimensions
-        base_ops = tuple(op.convert() for op in self.options.operations)
-
+        matrix = tuple(model.expand() for model in self.options.dimensions)
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
-        matrix = tuple(model.expand() for model in dimensions)
 
         ops_lists = matrix_sampler(*matrix, **dict(self.options.sampler))
-        ops_lists = [base_ops + sampled_ops for sampled_ops in ops_lists]
+        ops_lists = [sampled_ops for sampled_ops in ops_lists]
 
         return ops_lists
 
-    def make_run_models(self, ops_list: Sequence[Any],
+    def make_run_models(self, *, base_ops: Sequence[Any],
+                        ops_list: Sequence[Any],
                         absolute_dirpath: bool) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
 
+        ops_dict = {
+            'base': list(base_ops),
+        }
+
         for i, operations in enumerate(ops_list):
-            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
+            name = f'{RUN_PREFIX}{i:04d}'
+            ops_dict[name] = list(operations)
+
+        for i, (name, operations) in enumerate(ops_dict.items()):
+            dirname = self.runs_dir / name
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
@@ -89,7 +100,7 @@ class CreateManager:
             )
 
             model = Run(dirname=dirname,
-                        shortname=dirname.name,
+                        shortname=name,
                         data_in=data_in,
                         data_out=data_out,
                         operations=operations)
@@ -227,8 +238,13 @@ def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
     create_mgr = CreateManager()
 
     ops_lists = create_mgr.generate_ops_lists()
+    base_ops = create_mgr.get_base_ops()
 
-    runs = create_mgr.make_run_models(ops_lists, absolute_dirpath)
+    runs = create_mgr.make_run_models(
+        ops_list=ops_lists,
+        base_ops=base_ops,
+        absolute_dirpath=absolute_dirpath,
+    )
 
     if not force:
 
