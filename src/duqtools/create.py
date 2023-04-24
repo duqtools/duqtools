@@ -58,29 +58,32 @@ class CreateManager:
         base_ops = [op.convert() for op in self.options.operations]
         return base_ops
 
-    def generate_ops_lists(self) -> list[Any]:
+    def generate_ops_dict(self,
+                          *,
+                          base_only: bool = False) -> dict[str, list[Any]]:
         """Generate set of operations for a run."""
+        base_ops = self.get_base_ops()
+
+        if base_only:
+            return {'base': base_ops}
+
         matrix = tuple(model.expand() for model in self.options.dimensions)
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
 
-        ops_lists = matrix_sampler(*matrix, **dict(self.options.sampler))
-        ops_lists = [sampled_ops for sampled_ops in ops_lists]
+        sampled_ops_lists = matrix_sampler(*matrix,
+                                           **dict(self.options.sampler))
 
-        return ops_lists
+        ops_dict = {}
+        for i, ops_list in enumerate(sampled_ops_lists):
+            name = f'{RUN_PREFIX}{i:04d}'
+            ops_dict[name] = [*base_ops, *ops_list]
 
-    def make_run_models(self, *, base_ops: Sequence[Any],
-                        ops_list: Sequence[Any],
+        return ops_dict
+
+    def make_run_models(self, *, ops_dict: dict[str, list[Any]],
                         absolute_dirpath: bool) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
-
-        ops_dict = {
-            'base': list(base_ops),
-        }
-
-        for i, operations in enumerate(ops_list):
-            name = f'{RUN_PREFIX}{i:04d}'
-            ops_dict[name] = list(operations)
 
         for i, (name, operations) in enumerate(ops_dict.items()):
             dirname = self.runs_dir / name
@@ -244,12 +247,10 @@ def create(*,
     """
     create_mgr = CreateManager()
 
-    ops_lists = create_mgr.generate_ops_lists()
-    base_ops = create_mgr.get_base_ops()
+    ops_dict = create_mgr.generate_ops_dict(base_only=base)
 
     runs = create_mgr.make_run_models(
-        ops_list=ops_lists,
-        base_ops=base_ops,
+        ops_dict=ops_dict,
         absolute_dirpath=absolute_dirpath,
     )
 
