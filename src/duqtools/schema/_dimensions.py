@@ -56,18 +56,14 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
         variable = var_lookup[self.variable]
 
         if isinstance(variable, JettoVariableModel):
-            return JettoOperationDim.expand(self,
-                                            *args,
-                                            variable=variable,
-                                            **kwargs)
+            expand_func = JettoOperationDim.expand
         elif isinstance(variable, IDSVariableModel):
-            return IDSOperationDim.expand(self,
-                                          *args,
-                                          variable=variable,
-                                          **kwargs)
+            expand_func = IDSOperationDim.expand
         else:
             raise NotImplementedError(
                 f'{self.variable} expand not implemented')
+
+        return expand_func(self, *args, variable=variable, **kwargs)
 
 
 class CoupledDim(BaseModel):
@@ -101,7 +97,7 @@ class IDSOperation(IDSPathMixin, OperatorMixin, BaseModel):
     """Apply arithmetic operation to IDS."""
 
     value: float = Field(description=f("""
-        Values to use with operator on field to create sampling
+        Value to use with operator on field to create sampling
         space."""))
 
 
@@ -128,7 +124,7 @@ class JettoPathMixin(BaseModel):
 
 class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
     value: float = Field(description=f("""
-        Values to use with operator on field to create sampling
+        Value to use with operator on field to create sampling
         space."""))
 
 
@@ -142,3 +138,26 @@ class JettoOperationDim(JettoPathMixin, OperatorMixin, DimMixin, BaseModel):
                            value=value,
                            scale_to_error=self.scale_to_error)
             for value in self.values)
+
+
+class Operation(OperatorMixin, BaseModel):
+    variable: str
+    value: float
+
+    def convert(self):
+        """Expand variable and convert to correct type."""
+        from duqtools.config import var_lookup
+        variable = var_lookup[self.variable]
+
+        if isinstance(variable, JettoVariableModel):
+            cls = JettoOperation
+        elif isinstance(variable, IDSVariableModel):
+            cls = IDSOperation
+        else:
+            raise NotImplementedError(
+                f'{self.variable} convert not implemented')
+
+        mapping = self.dict()
+        mapping['variable'] = variable
+
+        return cls(**mapping)

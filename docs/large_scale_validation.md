@@ -55,6 +55,19 @@ create:
     db: {{ handle.db }}
     shot: {{ handle.shot }}
     run: {{ handle.run }}
+  operations:
+    - variable: major_radius
+      operator: copyto
+      value: {{ variables.major_radius | round(4) }}
+    - variable: b_field
+      operator: copyto
+      value: {{ variables.b_field | round(4) }}
+    - variable: t_start
+      operator: copyto
+      value: {{ variables.t_start | round(4) }}
+    - variable: t_end
+      operator: copyto
+      value: {{ (variables.t_start + 0.01) | round(4) }}
   sampler:
     method: latin-hypercube
     n_samples: 3
@@ -65,18 +78,6 @@ create:
     - variable: t_e
       operator: multiply
       values: [0.8, 1.0, 1.2]
-    - variable: major_radius
-      operator: copyto
-      values: [ {{ variables.major_radius | round(4) }} ]
-    - variable: b_field
-      operator: copyto
-      values: [ {{ variables.b_field | round(4) }} ]
-    - variable: t_start
-      operator: copyto
-      values: [ {{ variables.t_start | round(4) }} ]
-    - variable: t_end
-      operator: copyto
-      values: [ {{ (variables.t_start + 0.01) | round(4) }} ]
 system: jetto
 ```
 

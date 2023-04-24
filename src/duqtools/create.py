@@ -53,14 +53,18 @@ class CreateManager:
 
         return source
 
-    def generate_ops_list(self) -> list[Any]:
+    def generate_ops_lists(self) -> list[Any]:
         """Generate set of operations for a run."""
         dimensions = self.options.dimensions
+        base_ops = tuple(op.convert() for op in self.options.operations)
+
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
         matrix = tuple(model.expand() for model in dimensions)
-        ops_list = matrix_sampler(*matrix, **dict(self.options.sampler))
 
-        return ops_list
+        ops_lists = matrix_sampler(*matrix, **dict(self.options.sampler))
+        ops_lists = [base_ops + sampled_ops for sampled_ops in ops_lists]
+
+        return ops_lists
 
     def make_run_models(self, ops_list: Sequence[Any],
                         absolute_dirpath: bool) -> list[Run]:
@@ -222,9 +226,9 @@ def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
     """
     create_mgr = CreateManager()
 
-    ops_list = create_mgr.generate_ops_list()
+    ops_lists = create_mgr.generate_ops_lists()
 
-    runs = create_mgr.make_run_models(ops_list, absolute_dirpath)
+    runs = create_mgr.make_run_models(ops_lists, absolute_dirpath)
 
     if not force:
 
