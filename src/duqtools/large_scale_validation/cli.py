@@ -75,6 +75,9 @@ def cli_setup(**kwargs):
     help=
     'Only create data for configs where `template_data` matches a handle in this data.csv.'
 )
+@click.option('--base',
+              is_flag=True,
+              help='Create base runs (ignores `dimensions`/`sampler`).')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_create(**kwargs):
     """Create data sets for large scale validation.
