@@ -18,8 +18,11 @@ class CreateConfigModel(BaseModel):
     operations: list[Operation] = Field(default=[],
                                         description="""
         These `operations` are always applied to the data.
+        All operations specified here are added to any operations sampled
+        from the dimensions.
         They can be used to, for example, set the start time for an experiment
         or update some physical parameters.
+        This parameter is optional.
         """)
 
     dimensions: list[Union[CoupledDim, OperationDim]] = Field(default=[],
@@ -30,7 +33,7 @@ class CreateConfigModel(BaseModel):
         Essentially, it generates the
         [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
         of all operations. By specifying a different `sampler`, a subset of
-        this hypercube can be efficiently sampled.
+        this hypercube can be efficiently sampled. This paramater is optional.
         """))
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,

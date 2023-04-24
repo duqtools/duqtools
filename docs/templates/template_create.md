@@ -23,20 +23,24 @@ For example:
 
 ```yaml title="duqtools.yaml"
 create:
+  runs_dir: /pfs/work/username/jetto/runs/run_1
   template: /pfs/work/username/jetto/runs/duqtools_template
-  data:
-    imasdb: test
-    run_in_start_at: 7000
-    run_out_start_at: 8000
+  operations:
+    - variable: t_start
+      operator: copyto
+      value: 2.875
+    - variable: t_end
+      operator: copyto
+      value: 2.885
   dimensions:
-  - variable: t_e
-    operator: multiply
-    values: [0.9, 1.0, 1.1]
-    scale_to_error: false
-  - variable: zeff
-    operator: multiply
-    values: [0.9, 1.0, 1.1]
-    scale_to_error: false
+    - variable: t_e
+      operator: multiply
+      values: [0.9, 1.0, 1.1]
+      scale_to_error: false
+    - variable: zeff
+      operator: multiply
+      values: [0.9, 1.0, 1.1]
+      scale_to_error: false
   sampler:
     method: latin-hypercube
     n_samples: 3
