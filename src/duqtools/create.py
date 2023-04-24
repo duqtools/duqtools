@@ -222,7 +222,12 @@ class CreateManager:
                                           out=model.data_out)
 
 
-def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
+def create(*,
+           force,
+           config,
+           base: bool,
+           absolute_dirpath: bool = False,
+           **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -231,6 +236,8 @@ def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
         Override protection if data and directories already exist.
     config : Path
         Config file location
+    base : bool
+        If true, create base run by ignoring `sampler`/`dimensions`.
 
     **kwargs
         Unused.
