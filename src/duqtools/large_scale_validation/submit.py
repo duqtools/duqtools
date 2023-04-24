@@ -15,8 +15,9 @@ from ..submit import (
 from ..utils import read_imas_handles_from_file
 
 
-def submit(*, array, force, max_jobs, schedule, input_file: str, pattern: str,
-           status_filter: Sequence[str], **kwargs):
+def submit(*, array, force, max_jobs, schedule, max_array_size: int,
+           input_file: str, pattern: str, status_filter: Sequence[str],
+           **kwargs):
     """Submit nested duqtools configs.
 
     Parameters
@@ -28,6 +29,8 @@ def submit(*, array, force, max_jobs, schedule, input_file: str, pattern: str,
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
+    max_array_size : int
+        Maximum array size for slurm (usually 1001, default = 100)
     input_file : str
         Only submit jobs for configs where template_data matches a handle in the data.csv
     pattern : str
@@ -78,4 +81,4 @@ def submit(*, array, force, max_jobs, schedule, input_file: str, pattern: str,
 
     submitter = job_scheduler if schedule else job_submitter
     submitter = job_array_submitter if array else submitter
-    submitter(job_queue, max_jobs=max_jobs)
+    submitter(job_queue, max_jobs=max_jobs, max_array_size=max_array_size)
