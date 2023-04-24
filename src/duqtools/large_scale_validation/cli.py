@@ -48,6 +48,7 @@ def cli(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run config directories')
+@click.option('--base', is_flag=True, help='Set up base runs')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_setup(**kwargs):
     """Set up large scale validation."""

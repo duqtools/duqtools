@@ -2,7 +2,7 @@ from ..setup import substitute_templates
 from ..utils import read_imas_handles_from_file
 
 
-def setup(*, template_file, input_file, force, **kwargs):
+def setup(*, template_file, input_file, force: bool, base: bool, **kwargs):
     """Setup large scale validation runs for template."""
     if not input_file:
         raise OSError('Input file not defined.')
@@ -11,4 +11,5 @@ def setup(*, template_file, input_file, force, **kwargs):
 
     substitute_templates(handles=handles,
                          template_file=template_file,
-                         force=force)
+                         force=force,
+                         base=base)

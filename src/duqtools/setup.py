@@ -150,8 +150,11 @@ class Variables:
         return value
 
 
-def substitute_templates(*, handles: dict[str, ImasHandle], template_file: str,
-                         force: bool):
+def substitute_templates(*,
+                         handles: dict[str, ImasHandle],
+                         template_file: str,
+                         force: bool,
+                         base: bool = False):
     """Handle template substitution.
 
     Parameters
@@ -162,6 +165,8 @@ def substitute_templates(*, handles: dict[str, ImasHandle], template_file: str,
         Path to template file.
     force : bool
         Overwrite files if set to true.
+    base : bool
+        Set up base run
     """
     cwd = Path.cwd()
 
@@ -173,7 +178,7 @@ def substitute_templates(*, handles: dict[str, ImasHandle], template_file: str,
         add_system_attrs = no_op  # default to no-op
 
     for name, handle in handles.items():
-        run = SimpleNamespace(name=name)
+        run = SimpleNamespace(name=name, is_base=base)
 
         add_system_attrs(run=run, handle=handle)
 
@@ -184,6 +189,9 @@ def substitute_templates(*, handles: dict[str, ImasHandle], template_file: str,
         Config.parse_raw(cfg)  # make sure config is valid
 
         out_drc = cwd / name
+
+        if base:
+            out_drc = out_drc / 'base'
 
         if out_drc.exists() and not force:
             op_queue.add_no_op(description='Directory exists',
