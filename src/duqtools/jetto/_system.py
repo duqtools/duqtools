@@ -32,6 +32,28 @@ lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 jetto_lookup = lookup.from_file(lookup_file)
 
 
+def _get_jetto_extra(filenames: List[str], *, jset):
+    jetto_extra: List[str] = []
+    for regex in _EXTRA_FILE_REGEXES:
+        jetto_extra.extend(filter(regex.match, filenames))
+
+    if not jset.restart:
+        for fname in ('jetto.restart', 'jetto.srestart'):
+            try:
+                jetto_extra.remove(fname)
+            except ValueError:
+                pass
+    else:
+        if 'jetto.restart' in jetto_extra or 'jetto.srestart' in jetto_extra:
+            raise OSError(
+                'Template contains `jetto.restart` and/or `jetto.srestart` files. '
+                'Please remove these or turn "restart off" in JAMS'
+                'before running duqtools again.'
+                'More info: https://github.com/duqtools/duqtools/issues/498')
+
+    return jetto_extra
+
+
 class BaseJettoSystem(AbstractSystem):
     """System that can be used to create runs for jetto.
 
@@ -183,15 +205,7 @@ class BaseJettoSystem(AbstractSystem):
 
         all_files = os.listdir(source_drc)
 
-        jetto_extra: List[str] = []
-        for regex in _EXTRA_FILE_REGEXES:
-            jetto_extra.extend(filter(regex.match, all_files))
-
-        if 'jetto.restart' in jetto_extra or 'jetto.srestart' in jetto_extra:
-            raise OSError(
-                'Template contains `jetto.restart` and/or `jetto.srestart` files. '
-                'Please remove these before running duqtools again. '
-                'More info: https://github.com/duqtools/duqtools/issues/498')
+        jetto_extra = _get_jetto_extra(all_files, jset=jetto_jset)
 
         jetto_extra = [str(source_drc / file) for file in jetto_extra]
 
