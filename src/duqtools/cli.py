@@ -273,6 +273,9 @@ def cli_setup(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run directories and IDS data.')
+@click.option('--base',
+              is_flag=True,
+              help='Create base run (ignores `dimensions`/`sampler`).')
 @common_options(*all_options)
 def cli_create(**kwargs):
     """Create the UQ run files."""

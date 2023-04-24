@@ -53,26 +53,40 @@ class CreateManager:
 
         return source
 
-    def generate_ops_lists(self) -> list[Any]:
+    def get_base_ops(self) -> list[Any]:
+        """Generate base operations that are always applied."""
+        base_ops = [op.convert() for op in self.options.operations]
+        return base_ops
+
+    def generate_ops_dict(self,
+                          *,
+                          base_only: bool = False) -> dict[str, list[Any]]:
         """Generate set of operations for a run."""
-        dimensions = self.options.dimensions
-        base_ops = tuple(op.convert() for op in self.options.operations)
+        base_ops = self.get_base_ops()
 
+        if base_only:
+            return {'base': base_ops}
+
+        matrix = tuple(model.expand() for model in self.options.dimensions)
         matrix_sampler = get_matrix_sampler(self.options.sampler.method)
-        matrix = tuple(model.expand() for model in dimensions)
 
-        ops_lists = matrix_sampler(*matrix, **dict(self.options.sampler))
-        ops_lists = [base_ops + sampled_ops for sampled_ops in ops_lists]
+        sampled_ops_lists = matrix_sampler(*matrix,
+                                           **dict(self.options.sampler))
 
-        return ops_lists
+        ops_dict = {}
+        for i, ops_list in enumerate(sampled_ops_lists):
+            name = f'{RUN_PREFIX}{i:04d}'
+            ops_dict[name] = [*base_ops, *ops_list]
 
-    def make_run_models(self, ops_list: Sequence[Any],
+        return ops_dict
+
+    def make_run_models(self, *, ops_dict: dict[str, list[Any]],
                         absolute_dirpath: bool) -> list[Run]:
         """Take list of operations and create run models."""
         run_models = []
 
-        for i, operations in enumerate(ops_list):
-            dirname = self.runs_dir / f'{RUN_PREFIX}{i:04d}'
+        for i, (name, operations) in enumerate(ops_dict.items()):
+            dirname = self.runs_dir / name
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
@@ -89,7 +103,7 @@ class CreateManager:
             )
 
             model = Run(dirname=dirname,
-                        shortname=dirname.name,
+                        shortname=name,
                         data_in=data_in,
                         data_out=data_out,
                         operations=operations)
@@ -211,7 +225,12 @@ class CreateManager:
                                           out=model.data_out)
 
 
-def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
+def create(*,
+           force,
+           config,
+           base: bool,
+           absolute_dirpath: bool = False,
+           **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -220,15 +239,20 @@ def create(*, force, config, absolute_dirpath: bool = False, **kwargs):
         Override protection if data and directories already exist.
     config : Path
         Config file location
+    base : bool
+        If true, create base run by ignoring `sampler`/`dimensions`.
 
     **kwargs
         Unused.
     """
     create_mgr = CreateManager()
 
-    ops_lists = create_mgr.generate_ops_lists()
+    ops_dict = create_mgr.generate_ops_dict(base_only=base)
 
-    runs = create_mgr.make_run_models(ops_lists, absolute_dirpath)
+    runs = create_mgr.make_run_models(
+        ops_dict=ops_dict,
+        absolute_dirpath=absolute_dirpath,
+    )
 
     if not force:
 
