@@ -123,6 +123,11 @@ def cli_create(**kwargs):
     'Only submit jobs for configs where `template_data` matches a handle in this data.csv.'
 )
 @click.option('-a', '--array', is_flag=True, help='Submit jobs as array.')
+@click.option(
+    '--max_array_size',
+    type=int,
+    default=100,
+    help='Maximum array size for slurm (usually 1001, default = 100).')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_submit(**kwargs):
     """Submit large scale validation runs."""
