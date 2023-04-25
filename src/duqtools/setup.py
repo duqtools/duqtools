@@ -197,8 +197,9 @@ def substitute_templates(
             out_drc = cwd / name
 
         if out_drc.exists() and not force:
-            op_queue.add_no_op(description='Directory exists',
-                               extra_description=f'name ({out_drc})')
+            op_queue.add_no_op(
+                description='Directory exists',
+                extra_description=f'{name} ({out_drc.relative_to(cwd)})')
             op_queue.warning(description='Warning',
                              extra_description='Some targets already exist, '
                              'use --force to override')
@@ -211,7 +212,7 @@ def substitute_templates(
                     'force': force
                 },
                 description='Setup run',
-                extra_description=f'{name} ({out_drc})',
+                extra_description=f'{name} ({out_drc.relative_to(cwd)})',
             )
 
 

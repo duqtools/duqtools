@@ -43,11 +43,11 @@ def status(*, progress: bool, detailed: bool, pattern: str, **kwargs):
         jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
         all_jobs.extend(jobs)
 
-        name = config_file.parent.name
+        dirname = config_file.parent.relative_to(cwd)
         tag = cfg.tag
         status = ''.join(job.status_symbol for job in jobs)
 
-        click.echo(f'{name} ({tag}): {status}')
+        click.echo(f'{dirname} ({tag}): {status}')
 
     click.echo()
 
