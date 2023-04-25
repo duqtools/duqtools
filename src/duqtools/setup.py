@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -150,11 +150,14 @@ class Variables:
         return value
 
 
-def substitute_templates(*,
-                         handles: dict[str, ImasHandle],
-                         template_file: str,
-                         force: bool,
-                         base: bool = False):
+def substitute_templates(
+    *,
+    handles: dict[str, ImasHandle],
+    template_file: str,
+    force: bool,
+    base: bool = False,
+    output: Optional[str] = None,
+):
     """Handle template substitution.
 
     Parameters
@@ -165,8 +168,8 @@ def substitute_templates(*,
         Path to template file.
     force : bool
         Overwrite files if set to true.
-    base : bool
-        Set up base run
+    output : str
+        Output subdirectory.
     """
     cwd = Path.cwd()
 
@@ -178,7 +181,7 @@ def substitute_templates(*,
         add_system_attrs = no_op  # default to no-op
 
     for name, handle in handles.items():
-        run = SimpleNamespace(name=name, is_base=base)
+        run = SimpleNamespace(name=name, output=output)
 
         add_system_attrs(run=run, handle=handle)
 
@@ -188,14 +191,14 @@ def substitute_templates(*,
 
         Config.parse_raw(cfg)  # make sure config is valid
 
-        out_drc = cwd / name
-
-        if base:
-            out_drc = out_drc / 'base'
+        if output:
+            out_drc = cwd / output / name
+        else:
+            out_drc = cwd / name
 
         if out_drc.exists() and not force:
             op_queue.add_no_op(description='Directory exists',
-                               extra_description=name)
+                               extra_description=f'name ({out_drc})')
             op_queue.warning(description='Warning',
                              extra_description='Some targets already exist, '
                              'use --force to override')
@@ -208,7 +211,7 @@ def substitute_templates(*,
                     'force': force
                 },
                 description='Setup run',
-                extra_description=name,
+                extra_description=f'name ({out_drc})',
             )
 
 
