@@ -140,6 +140,12 @@ def cli_submit(**kwargs):
 @cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    help=
+    'Show status only for runs in subdirectories matching this glob pattern.')
 @common_options(*logging_options)
 def cli_status(**kwargs):
     """Check status large scale validation runs."""

@@ -7,7 +7,7 @@ from ..models import Job, Locations
 from ..status import Status, StatusError
 
 
-def status(*, progress: bool, detailed: bool, **kwargs):
+def status(*, progress: bool, detailed: bool, pattern: str, **kwargs):
     """Show status of nested runs.
 
     Parameters
@@ -16,11 +16,15 @@ def status(*, progress: bool, detailed: bool, **kwargs):
         Show progress bar.
     detailed : bool
         Show detailed progress for every job.
+    pattern : str
+        Show status only for subdirectories matching this glob pattern
     """
+    if pattern is None:
+        pattern = '**'
 
     cwd = Path.cwd()
 
-    config_files = cwd.glob('**/duqtools.yaml')
+    config_files = cwd.glob(f'{pattern}/duqtools.yaml')
 
     all_jobs: list[Job] = []
 
