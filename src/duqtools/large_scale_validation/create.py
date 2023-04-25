@@ -5,12 +5,12 @@ from ..create import create as duqtools_create
 from ..utils import read_imas_handles_from_file, work_directory
 
 
-def create(*, base: bool, input_file: str, pattern: str, **kwargs):
+def create(*, no_sampling: bool, input_file: str, pattern: str, **kwargs):
     """Create runs for large scale validation.
 
     Parameters
     ----------
-    base : bool
+    no_sampling : bool
         If true, create base runs by ignoring `sampler`/`dimensions`.
     input_file : str
         Only create for configs where template_data matches a handle in the data.csv
@@ -39,5 +39,5 @@ def create(*, base: bool, input_file: str, pattern: str, **kwargs):
         with work_directory(config_dir):
             duqtools_create(config=config_file,
                             absolute_dirpath=True,
-                            base=base,
+                            no_sampling=no_sampling,
                             **kwargs)
