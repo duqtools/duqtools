@@ -48,6 +48,7 @@ def cli(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Overwrite existing run config directories')
+@click.option('-o', '--output', type=str, help='Output subdirectory')
 @common_options(*logging_options, yes_option, dry_run_option)
 def cli_setup(**kwargs):
     """Set up large scale validation."""
@@ -75,7 +76,7 @@ def cli_setup(**kwargs):
     help=
     'Only create data for configs where `template_data` matches a handle in this data.csv.'
 )
-@click.option('--base',
+@click.option('--no-sampling',
               is_flag=True,
               help='Create base runs (ignores `dimensions`/`sampler`).')
 @common_options(*logging_options, yes_option, dry_run_option)
@@ -139,6 +140,12 @@ def cli_submit(**kwargs):
 @cli.command('status')
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    help=
+    'Show status only for runs in subdirectories matching this glob pattern.')
 @common_options(*logging_options)
 def cli_status(**kwargs):
     """Check status large scale validation runs."""

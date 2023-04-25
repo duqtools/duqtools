@@ -51,8 +51,8 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
 
     jobs: list[Job] = []
 
-    for dir in dirs:
-        config_file = dir / 'duqtools.yaml'
+    for drc in dirs:
+        config_file = drc / 'duqtools.yaml'
         cfg.parse_file(config_file)
 
         if handles and (cfg.create.template_data not in handles):

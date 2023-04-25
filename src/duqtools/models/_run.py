@@ -35,6 +35,10 @@ class Run(BaseModel):
     def from_path(cls, path: Path):
         return cls(shortname=path, dirname=path.resolve())
 
+    @property
+    def is_base(self):
+        return self.shortname == 'base'
+
 
 class Runs(BaseModel):
     __root__: list[Run] = []

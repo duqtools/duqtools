@@ -228,7 +228,7 @@ class CreateManager:
 def create(*,
            force,
            config,
-           base: bool,
+           no_sampling: bool = False,
            absolute_dirpath: bool = False,
            **kwargs):
     """Create input for jetto and IDS data structures.
@@ -239,7 +239,7 @@ def create(*,
         Override protection if data and directories already exist.
     config : Path
         Config file location
-    base : bool
+    no_sampling : bool
         If true, create base run by ignoring `sampler`/`dimensions`.
 
     **kwargs
@@ -247,7 +247,7 @@ def create(*,
     """
     create_mgr = CreateManager()
 
-    ops_dict = create_mgr.generate_ops_dict(base_only=base)
+    ops_dict = create_mgr.generate_ops_dict(base_only=no_sampling)
 
     runs = create_mgr.make_run_models(
         ops_dict=ops_dict,
