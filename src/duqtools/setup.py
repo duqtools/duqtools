@@ -211,7 +211,7 @@ def substitute_templates(
                     'force': force
                 },
                 description='Setup run',
-                extra_description=f'name ({out_drc})',
+                extra_description=f'{name} ({out_drc})',
             )
 
 
