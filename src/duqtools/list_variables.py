@@ -1,7 +1,7 @@
 import click
 from pydantic import ValidationError
 
-from duqtools.config import cfg, var_lookup
+from duqtools.config import load_config, var_lookup
 
 cs = click.style
 
@@ -38,7 +38,7 @@ def list_variables(*, config, **kwargs):
         Unused.
     """
     try:
-        cfg.parse_file(config)
+        cfg = load_config(config)
     except FileNotFoundError:
         print(f'Could not find: {config}')
     except ValidationError as e:

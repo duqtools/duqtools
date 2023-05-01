@@ -2,7 +2,7 @@ from pathlib import Path
 
 import click
 
-from ..config import cfg
+from ..config import load_config
 from ..models import Job, Locations
 from ..status import Status, StatusError
 
@@ -32,7 +32,7 @@ def status(*, progress: bool, detailed: bool, pattern: str, **kwargs):
     click.echo()
 
     for config_file in config_files:
-        cfg.parse_file(config_file)
+        cfg = load_config(config_file)
 
         if not cfg.status:
             raise StatusError(

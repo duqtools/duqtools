@@ -6,7 +6,7 @@ import pandas as pd
 
 from duqtools.api import ImasHandle
 
-from ..config import cfg
+from ..config import load_config
 from ..merge import _merge, _resolve_variables
 from ..models import Job, Locations
 from ..operations import add_to_op_queue, op_queue
@@ -33,7 +33,10 @@ def merge(force: bool, var_names: Sequence[str], **kwargs):
     for config_file in config_files:
         run_name = config_file.parent.name
 
-        cfg.parse_file(config_file)
+        cfg = load_config(config_file)
+
+        assert cfg.create
+        assert cfg.create.runs_dir
 
         config_dir = config_file.parent
 

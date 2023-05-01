@@ -2,10 +2,9 @@ from collections import deque
 from pathlib import Path
 from typing import Deque, Sequence
 
-from ..config import cfg
+from ..config import load_config
 from ..models import Job, Locations
 from ..submit import (
-    SubmitError,
     job_array_submitter,
     job_scheduler,
     job_submitter,
@@ -53,14 +52,13 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
 
     for drc in dirs:
         config_file = drc / 'duqtools.yaml'
-        cfg.parse_file(config_file)
+        cfg = load_config(config_file)
+
+        assert cfg.create
+        assert cfg.submit
 
         if handles and (cfg.create.template_data not in handles):
             continue
-
-        if not cfg.submit:
-            raise SubmitError(
-                f'Submit field required in config file: {config_file}')
 
         config_dir = config_file.parent
 
