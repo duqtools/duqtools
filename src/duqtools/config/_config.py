@@ -1,32 +1,40 @@
+"""Config class containing all configs, can be used with:
+
+    from duqtools.config import cfg
+    cfg.<variable you want>
+
+To update the config:
+
+    load_config('duqtools.yaml')
+"""
+
 from __future__ import annotations
+
+from pathlib import Path
+from typing import Union
 
 from ..schema.cli import ConfigModel
 
 
 class Config(ConfigModel):
-    """Config class containing all configs, can be used with:
+    ...
 
-        from duqtools.config import cfg
-        cfg.<variable you want>
 
-    To update the config:
+def load_config(path: Union[str, Path]) -> Config:
+    global cfg
 
-        cfg.parse_file('duqtools.yaml')
-    """
-    _instance = None
+    new_cfg = Config.parse_file(path)
 
-    def __new__(cls, *args, **kwargs):
-        # Make it a singleton
-        if not Config._instance:
-            Config._instance = object.__new__(cls)
-        return Config._instance
+    from ._variables import var_lookup
 
-    def parse_file(self, *args, **kwargs):
-        """Add extra variables to variable lookup table."""
-        super().parse_file(*args, **kwargs)
-        from ._variables import var_lookup
-        if self.extra_variables:
-            var_lookup.update(self.extra_variables.to_variable_dict())
+    if new_cfg.extra_variables:
+        var_lookup.update(new_cfg.extra_variables.to_variable_dict())
+
+    new_cfg._path = path
+
+    cfg.__dict__.update(new_cfg.__dict__)
+
+    return new_cfg
 
 
 cfg = Config.construct()
