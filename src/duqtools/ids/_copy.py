@@ -14,17 +14,15 @@ if TYPE_CHECKING:
     from .ids import ImasHandle
 
 
-def get_imas_ual_version():
+def get_imas_version():
     """Get imas/ual versions.
 
-    Parsed from a string like: `imas_3_34_0_ual_4_9_3`
+    Changed in 3.10.6, find new ways to find this info
     """
-    vsplit = imas.names[0].split('_')
 
-    imas_version = version.parse('.'.join(vsplit[1:4]))
-    ual_version = version.parse('.'.join(vsplit[5:8]))
+    imas_version = imas._ual_lowlevel.sys.version_info
 
-    return imas_version, ual_version
+    return imas_version
 
 
 def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
@@ -86,7 +84,7 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """
     target.validate()
 
-    imas_version, _ = get_imas_ual_version()
+    imas_version = get_imas_version()
 
     idss_in = imas.ids(source.shot, source.run)
     op = idss_in.open_env(source.user, source.db, str(imas_version.major))
