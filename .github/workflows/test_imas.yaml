@@ -122,6 +122,7 @@ jobs:
 
       - name: Test with pytest
         run: |
+          . ./imas/source_me.sh
           coverage run -p -m pytest
 
       - name: Upload coverage data
