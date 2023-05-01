@@ -19,6 +19,7 @@ Plotting:
 """
 
 from ._plot_utils import alt_errorband_chart, alt_line_chart
+from .create import create_api as create
 from .duqmap import duqmap
 from .ids import (
     IDSMapping,
@@ -32,6 +33,7 @@ from .models import Run, Runs
 from .schema import IDSVariableModel as Variable
 
 __all__ = [
+    'create',
     'duqmap',
     'rebase_on_grid',
     'rebase_on_time',

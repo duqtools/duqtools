@@ -1,10 +1,12 @@
 import logging
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 import click
 
-from ..config import cfg
+from ..config import Config
+from ..config import cfg as global_cfg
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -42,8 +44,12 @@ class JobStatus(str, Enum):
 
 class Job:
 
-    def __init__(self, dir: Path):
+    def __init__(self, dir: Path, cfg: Optional[Config] = None):
         self.dir = Path(dir).resolve()
+
+        if cfg is None:
+            cfg = global_cfg
+
         self.cfg = cfg
 
     def __repr__(self):

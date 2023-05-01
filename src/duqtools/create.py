@@ -11,7 +11,7 @@ from .cleanup import remove_run
 from .config import Config
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
-from .models import Locations, Run, Runs
+from .models import Job, Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
 
@@ -193,8 +193,11 @@ class CreateManager:
         if self._is_runs_dir_different_from_config_dir():
             df.to_csv(self.runs_dir / fname)
 
-    @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
+    @add_to_op_queue('Copying config to run directory', quiet=True)
     def copy_config(self):
+        if self.cfg._path is None:
+            return
+
         if self._is_runs_dir_different_from_config_dir():
             shutil.copyfile(Path.cwd() / self.cfg._path,
                             self.runs_dir / 'duqtools.yaml')
@@ -228,8 +231,8 @@ class CreateManager:
 
 
 def create(*,
-           force,
            cfg: Config,
+           force: bool = False,
            no_sampling: bool = False,
            absolute_dirpath: bool = False,
            **kwargs):
@@ -280,6 +283,14 @@ def create_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
     from .config import cfg
     return create(cfg=cfg, *args, **kwargs)
+
+
+def create_api(config: dict, **kwargs):
+    """Wrapper around create for python api."""
+    cfg = Config.from_dict(config)
+    create(cfg=cfg, **kwargs)
+    job = Job(cfg.create.runs_dir / 'run_0000')
+    return job
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):
