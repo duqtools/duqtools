@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-from pydantic import DirectoryPath, Field
+from pydantic import DirectoryPath, Field, PrivateAttr
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -196,3 +196,5 @@ class ConfigModel(BaseModel):
         False,
         description=
         'If true, do not output to stdout, except for mandatory prompts.')
+
+    _path: Union[Path, str] = PrivateAttr(None)

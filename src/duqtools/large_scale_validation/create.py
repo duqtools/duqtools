@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from ..config import cfg
-from ..create import create as duqtools_create
+from ..config import load_config
+from ..create import create as create_entry
 from ..utils import read_imas_handles_from_file, work_directory
 
 
@@ -29,7 +29,9 @@ def create(*, no_sampling: bool, input_file: str, pattern: str, **kwargs):
     config_files = cwd.glob(f'{pattern}/duqtools.yaml')
 
     for config_file in config_files:
-        cfg.parse_file(config_file)
+        cfg = load_config(config_file)
+
+        assert cfg.create
 
         if handles and (cfg.create.template_data not in handles):
             continue
@@ -37,7 +39,7 @@ def create(*, no_sampling: bool, input_file: str, pattern: str, **kwargs):
         config_dir = config_file.parent
 
         with work_directory(config_dir):
-            duqtools_create(config=config_file,
-                            absolute_dirpath=True,
-                            no_sampling=no_sampling,
-                            **kwargs)
+            create_entry(cfg=cfg,
+                         absolute_dirpath=True,
+                         no_sampling=no_sampling,
+                         **kwargs)
