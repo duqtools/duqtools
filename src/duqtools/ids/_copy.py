@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from packaging import version
-
 from .._logging_utils import LoggingContext
 from ..operations import add_to_op_queue
 from ._imas import Parser, imas
