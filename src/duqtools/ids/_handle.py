@@ -8,7 +8,7 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
-from pydantic import PrivateAttr, validator
+from pydantic import validator
 
 from ..config import lookup_vars, var_lookup
 from ..operations import add_to_op_queue
@@ -30,15 +30,11 @@ GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
                                                        _FILENAME))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
 
-BACKEND = imasdef.MDSPLUS_BACKEND
-SUFFIXES = {
-    imasdef.MDSPLUS_BACKEND: (
-        '.datafile',
-        '.characteristics',
-        '.tree',
-    ),
-    imasdef.MDSPLUS_BACKEND: ('.ids', )
-}
+SUFFIXES = (
+    '.datafile',
+    '.characteristics',
+    '.tree',
+)
 
 IMAS_PATTERN = re.compile(
     r'^((?P<user>\w+)/)?(?P<db>\w+)/(?P<shot>\d+)/(?P<run>\d+)$')
@@ -59,7 +55,6 @@ def _patch_str_repr(obj: object):
 
 
 class ImasHandle(ImasBaseModel):
-    _backend: int = PrivateAttr(BACKEND)
 
     def __str__(self):
         return f'{self.user}/{self.db}/{self.shot}/{self.run}'
@@ -140,14 +135,12 @@ class ImasHandle(ImasBaseModel):
         else:
             template = GLOBAL_PATH_TEMPLATE
 
-        suffixes = SUFFIXES[self._backend]
-
         return Path(
             template.format(user=self.user,
                             db=self.db,
                             shot=self.shot,
                             run=self.run,
-                            suffix=suffixes[0]))
+                            suffix=SUFFIXES[0]))
 
     def imasdb_path(self) -> Path:
         """Return path to imasdb."""
@@ -161,8 +154,7 @@ class ImasHandle(ImasBaseModel):
         bool
         """
         path = self.path()
-        suffixes = SUFFIXES[self._backend]
-        return all(path.with_suffix(sf).exists() for sf in suffixes)
+        return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
     def copy_data_to(self, destination: ImasHandle):
         """Copy ids entry to given destination.
@@ -184,7 +176,6 @@ class ImasHandle(ImasBaseModel):
         """Remove data from entry."""
         # ERASE_PULSE operation is yet supported by IMAS as of June 2022
         path = self.path()
-        SUFFIXES[self._backend]
         for suffix in SUFFIXES:
             to_delete = path.with_suffix(suffix)
             logger.debug('Removing %s', to_delete)
@@ -319,7 +310,7 @@ class ImasHandle(ImasBaseModel):
 
         return ds
 
-    def entry(self):
+    def entry(self, backend=imasdef.MDSPLUS_BACKEND):
         """Return reference to `imas.DBEntry.`
 
         Parameters
@@ -332,11 +323,10 @@ class ImasHandle(ImasBaseModel):
         entry : `imas.DBEntry`
             IMAS database entry
         """
-        return imas.DBEntry(self._backend, self.db, self.shot, self.run,
-                            self.user)
+        return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
 
     @contextmanager
-    def open(self, create: bool = False):
+    def open(self, backend=imasdef.MDSPLUS_BACKEND, create: bool = False):
         """Context manager to open database entry.
 
         Parameters
@@ -351,7 +341,7 @@ class ImasHandle(ImasBaseModel):
         entry : `imas.DBEntry`
             Opened IMAS database entry
         """
-        entry = self.entry()
+        entry = self.entry(backend=backend)
         opcode, _ = entry.open()
 
         if opcode == 0:
