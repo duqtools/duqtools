@@ -197,4 +197,4 @@ class ConfigModel(BaseModel):
         description=
         'If true, do not output to stdout, except for mandatory prompts.')
 
-    _path: Union[Path, str] = PrivateAttr()
+    _path: Union[Path, str] = PrivateAttr(None)

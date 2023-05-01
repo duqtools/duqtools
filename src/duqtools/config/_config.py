@@ -30,9 +30,10 @@ def load_config(path: Union[str, Path]) -> Config:
     if new_cfg.extra_variables:
         var_lookup.update(new_cfg.extra_variables.to_variable_dict())
 
-    new_cfg._path = path
-
     cfg.__dict__.update(new_cfg.__dict__)
+
+    for obj in (cfg, new_cfg):
+        obj._path = path
 
     return new_cfg
 
