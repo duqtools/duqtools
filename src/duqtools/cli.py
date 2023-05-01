@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from ._click_opt_groups import GroupCmd, GroupOpt
 from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen
-from .config import cfg
+from .config import cfg, load_config
 from .operations import op_queue, op_queue_context
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class OptionParser:
 
     def parse_config(self, *, config, **kwargs):
         try:
-            cfg.parse_file(config)
+            load_config(config)
         except ValidationError as e:
             exit(e)
 
@@ -279,9 +279,9 @@ def cli_setup(**kwargs):
 @common_options(*all_options)
 def cli_create(**kwargs):
     """Create the UQ run files."""
-    from .create import create
+    from .create import create_entry
     with op_queue_context():
-        create(**kwargs)
+        create_entry(**kwargs)
 
 
 @cli.command('recreate', cls=GroupCmd)

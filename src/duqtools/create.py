@@ -2,13 +2,13 @@ import logging
 import shutil
 import warnings
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Sequence, Union
 
 import pandas as pd
 
 from .apply_model import apply_model
 from .cleanup import remove_run
-from .config import Config, cfg
+from .config import Config
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models import Locations, Run, Runs
@@ -27,12 +27,14 @@ class CreateError(Exception):
 class CreateManager:
     """Docstring for CreateManager."""
 
-    def __init__(self):
-        self.options = cfg.create
+    def __init__(self, cfg: Config):
+        self.cfg = cfg
 
-        if not self.options:
+        if not self.cfg.create:
             logger.warning('No create options specified.')
             raise CreateError('No create options specified in config.')
+
+        self.options = self.cfg.create
 
         self.template_drc = self.options.template
         self.system = get_system()
@@ -176,10 +178,10 @@ class CreateManager:
                     runs.yaml(stream=f)
 
     @add_to_op_queue('Writing csv', quiet=True)
-    def write_runs_csv(self, runs: Sequence[Run], cfg: Config):
+    def write_runs_csv(self, runs: Sequence[Run]):
         fname = self.data_csv
 
-        prefix = f'{cfg.tag}.' if cfg.tag else ''
+        prefix = f'{self.cfg.tag}.' if self.cfg.tag else ''
 
         run_map = {
             f'{prefix}{run.shortname}': run.data_out.dict()
@@ -192,9 +194,9 @@ class CreateManager:
             df.to_csv(self.runs_dir / fname)
 
     @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
-    def copy_config(self, config):
+    def copy_config(self):
         if self._is_runs_dir_different_from_config_dir():
-            shutil.copyfile(Path.cwd() / config,
+            shutil.copyfile(Path.cwd() / self.cfg._path,
                             self.runs_dir / 'duqtools.yaml')
 
     def _is_runs_dir_different_from_config_dir(self) -> bool:
@@ -218,7 +220,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname, cfg)
+        self.system.write_batchfile(model.dirname, self.cfg)
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
@@ -227,7 +229,7 @@ class CreateManager:
 
 def create(*,
            force,
-           config,
+           cfg: Config,
            no_sampling: bool = False,
            absolute_dirpath: bool = False,
            **kwargs):
@@ -237,15 +239,15 @@ def create(*,
     ----------
     force : bool
         Override protection if data and directories already exist.
-    config : Path
-        Config file location
+    cfg : Config
+        Duqtools config
     no_sampling : bool
         If true, create base run by ignoring `sampler`/`dimensions`.
 
     **kwargs
         Unused.
     """
-    create_mgr = CreateManager()
+    create_mgr = CreateManager(cfg)
 
     ops_dict = create_mgr.generate_ops_dict(base_only=no_sampling)
 
@@ -270,8 +272,14 @@ def create(*,
         create_mgr.create_run(model, force=force)
 
     create_mgr.write_runs_file(runs)
-    create_mgr.write_runs_csv(runs, cfg)
-    create_mgr.copy_config(config)
+    create_mgr.write_runs_csv(runs)
+    create_mgr.copy_config()
+
+
+def create_entry(config_file: Union[str, Path], *args, **kwargs):
+    """Entry point for duqtools cli."""
+    from ..config import cfg
+    return create(cfg=cfg, *args, **kwargs)
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):
@@ -284,7 +292,8 @@ def recreate(*, runs: Sequence[Path], **kwargs):
     **kwargs
         Unused.
     """
-    create_mgr = CreateManager()
+    from ..config import cfg
+    create_mgr = CreateManager(cfg)
 
     run_dict = {run.shortname: run for run in Locations().runs}
 
