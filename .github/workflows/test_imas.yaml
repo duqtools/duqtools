@@ -98,11 +98,6 @@ jobs:
           echo `pwd`/containerized_runs/imasdb
           echo ${HOME}/public/imasdb
 
-      - uses: actions/cache@v3
-        with:
-          path: /home/v
-          key: ${{ hashFiles('setup.cfg') }}
-
       - name: Create venv and setup duqtools
         run: |
           if ! test -d ".imasenv"; then
@@ -118,11 +113,6 @@ jobs:
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
           echo "PATH=${PATH}" >> $GITHUB_ENV
 
-      - name: Test if IMAS is really available
-        run: |
-          . /docker-entrypoint.sh
-          python -m imas
-
       - name: Test paths
         shell: python
         run: |
@@ -132,7 +122,6 @@ jobs:
 
       - name: Test with pytest
         run: |
-          . /docker-entrypoint.sh
           coverage run -p -m pytest
 
       - name: Upload coverage data
