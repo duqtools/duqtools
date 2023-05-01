@@ -2,7 +2,7 @@ import logging
 import shutil
 import warnings
 from pathlib import Path
-from typing import Any, Sequence, Union
+from typing import Any, Sequence
 
 import pandas as pd
 
@@ -276,9 +276,9 @@ def create(*,
     create_mgr.copy_config()
 
 
-def create_entry(config_file: Union[str, Path], *args, **kwargs):
+def create_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
-    from ..config import cfg
+    from .config import cfg
     return create(cfg=cfg, *args, **kwargs)
 
 
