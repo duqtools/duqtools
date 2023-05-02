@@ -123,6 +123,7 @@ jobs:
       - name: Test with pytest
         run: |
           . ./imas/source_me.sh
+          export IMAS_HOME=${HOME}
           coverage run -p -m pytest
 
       - name: Upload coverage data
