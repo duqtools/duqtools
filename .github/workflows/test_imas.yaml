@@ -94,7 +94,6 @@ jobs:
           mkdir -p /opt/imas/shared
           ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/imasdb
           echo `pwd`/containerized_runs/imasdb
-          echo ${HOME}/public/imasdb
 
       - name: Create venv and setup duqtools
         run: |
@@ -110,6 +109,7 @@ jobs:
 
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
           echo "PATH=${PATH}" >> $GITHUB_ENV
+          echo "IMAS_HOME=/opt/imas" >> $GITHUB_ENV
 
       - name: Test paths
         shell: python
@@ -121,7 +121,6 @@ jobs:
       - name: Test with pytest
         run: |
           . ./imas/source_me.sh
-          export IMAS_HOME=/opt/imas
           coverage run -p -m pytest
 
       - name: Upload coverage data
