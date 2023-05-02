@@ -92,9 +92,7 @@ jobs:
       - name: Put the IMAS db in the right location
         run: |
           mkdir -p /opt/imas/shared
-          mkdir -p ${HOME}/public/
-          ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/
-          ln -s `pwd`/containerized_runs/imasdb ${HOME}/public/imasdb
+          ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/imasdb
           echo `pwd`/containerized_runs/imasdb
           echo ${HOME}/public/imasdb
 
@@ -123,7 +121,7 @@ jobs:
       - name: Test with pytest
         run: |
           . ./imas/source_me.sh
-          export IMAS_HOME=${HOME}
+          export IMAS_HOME=/opt/imas
           coverage run -p -m pytest
 
       - name: Upload coverage data
