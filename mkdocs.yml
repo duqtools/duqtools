@@ -25,6 +25,7 @@ nav:
     - examples/xarray.ipynb
     - examples/xarray-2D.ipynb
     - examples/xarray-ions.ipynb
+    - examples/create_api.ipynb
     - examples/demo_single_run.ipynb
     - examples/demo_lsv_run.ipynb
     - examples/duqtools_on_prominence.ipynb
