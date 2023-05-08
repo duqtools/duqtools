@@ -193,14 +193,20 @@ class CreateManager:
         if self._is_runs_dir_different_from_config_dir():
             df.to_csv(self.runs_dir / fname)
 
-    @add_to_op_queue('Copying config to run directory', quiet=True)
     def copy_config(self):
         if self.cfg._path is None:
             return
 
         if self._is_runs_dir_different_from_config_dir():
-            shutil.copyfile(Path.cwd() / self.cfg._path,
-                            self.runs_dir / 'duqtools.yaml')
+            op_queue.add(
+                shutil.copyfile,
+                args=(
+                    Path.cwd() / self.cfg._path,
+                    self.runs_dir / 'duqtools.yaml',
+                ),
+                description='Copying config to run directory',
+                quiet=True,
+            )
 
     def _is_runs_dir_different_from_config_dir(self) -> bool:
         """Return True if the runs dir is different from the duqtools config
