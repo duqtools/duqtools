@@ -74,7 +74,7 @@ def write_array_batchfile(jobs: Sequence[Job], max_jobs: int,
     max_jobs : int
         Maximum number of jobs to run at the same time.
     """
-    common_dir = Path(commonpath(job.dir for job in jobs))  # type: ignore
+    common_dir = Path(commonpath(job.path for job in jobs))  # type: ignore
     logs_dir = common_dir / 'logs'
     logs_dir.mkdir(exist_ok=True)
 
