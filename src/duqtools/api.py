@@ -29,7 +29,7 @@ from .ids import (
     rebase_on_time,
     standardize_grid_and_time,
 )
-from .models import Run, Runs
+from .models import Job, Run, Runs
 from .schema import IDSVariableModel as Variable
 
 __all__ = [
@@ -41,6 +41,7 @@ __all__ = [
     'standardize_grid_and_time',
     'ImasHandle',
     'IDSMapping',
+    'Job',
     'Variable',
     'alt_line_chart',
     'alt_errorband_chart',

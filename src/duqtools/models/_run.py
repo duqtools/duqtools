@@ -48,3 +48,6 @@ class Runs(BaseModel):
 
     def __getitem__(self, index: int):
         return self.__root__[index]
+
+    def __len__(self):
+        return len(self.__root__)

@@ -241,7 +241,7 @@ def create(*,
            force: bool = False,
            no_sampling: bool = False,
            absolute_dirpath: bool = False,
-           **kwargs):
+           **kwargs) -> list[Run]:
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -275,7 +275,7 @@ def create(*,
 
         if target_exists:
             create_mgr.warn_no_create_runs()
-            return
+            return []
 
     for model in runs:
         create_mgr.create_run(model, force=force)
@@ -284,23 +284,29 @@ def create(*,
     create_mgr.write_runs_csv(runs)
     create_mgr.copy_config()
 
+    return runs
+
 
 def create_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
     from .config import CFG
-    return create(cfg=CFG, *args, **kwargs)
+    create(cfg=CFG, *args, **kwargs)
 
 
-def create_api(config: dict, **kwargs):
+def create_api(config: dict, **kwargs) -> tuple[Job, Run]:
     """Wrapper around create for python api."""
     cfg = Config.from_dict(config)
-    create(cfg=cfg, **kwargs)
+    runs = create(cfg=cfg, **kwargs)
 
-    assert cfg.create
-    assert cfg.create.runs_dir
-    job = Job(cfg.create.runs_dir / 'run_0000')
+    if len(runs) == 0:
+        raise CreateError('No runs were created, check logs for errors.')
+    elif len(runs) > 1:
+        raise NotImplementedError('Multiple runs in single call not supported')
 
-    return job
+    run = runs[0]
+    job = Job(run.dirname, cfg=cfg)
+
+    return job, run
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):
