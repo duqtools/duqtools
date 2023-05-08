@@ -6,7 +6,7 @@ from typing import Sequence
 
 from jetto_tools import config, template
 
-from .config import cfg
+from .config import CFG
 from .jetto._system import jetto_lookup
 from .models import Job, JobStatus, Locations
 
@@ -193,7 +193,7 @@ def status(*, progress: bool, detailed: bool, **kwargs):
     detailed : bool
         Show detailed progress for every job.
     """
-    debug('Submit config: %s', cfg.submit)
+    debug('Submit config: %s', CFG.submit)
 
     runs = Locations().runs
     jobs = [Job(run.dirname) for run in runs]

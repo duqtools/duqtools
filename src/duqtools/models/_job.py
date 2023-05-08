@@ -5,8 +5,7 @@ from typing import Optional
 
 import click
 
-from ..config import Config
-from ..config import cfg as global_cfg
+from ..config import CFG, Config
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -47,10 +46,7 @@ class Job:
     def __init__(self, dir: Path, cfg: Optional[Config] = None):
         self.dir = Path(dir).resolve()
 
-        if cfg is None:
-            cfg = global_cfg
-
-        self.cfg = cfg
+        self.cfg = cfg if cfg is not None else CFG
 
     def __repr__(self):
         run = str(self.dir)

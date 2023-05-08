@@ -281,15 +281,19 @@ def create(*,
 
 def create_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
-    from .config import cfg
-    return create(cfg=cfg, *args, **kwargs)
+    from .config import CFG
+    return create(cfg=CFG, *args, **kwargs)
 
 
 def create_api(config: dict, **kwargs):
     """Wrapper around create for python api."""
     cfg = Config.from_dict(config)
     create(cfg=cfg, **kwargs)
+
+    assert cfg.create
+    assert cfg.create.runs_dir
     job = Job(cfg.create.runs_dir / 'run_0000')
+
     return job
 
 
@@ -303,8 +307,8 @@ def recreate(*, runs: Sequence[Path], **kwargs):
     **kwargs
         Unused.
     """
-    from ..config import cfg
-    create_mgr = CreateManager(cfg)
+    from .config import CFG
+    create_mgr = CreateManager(CFG)
 
     run_dict = {run.shortname: run for run in Locations().runs}
 

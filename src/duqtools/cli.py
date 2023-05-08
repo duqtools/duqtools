@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from ._click_opt_groups import GroupCmd, GroupOpt
 from ._logging_utils import TermEscapeCodeFormatter, duqlog_screen, initialize_duqlog_screen
-from .config import cfg, load_config
+from .config import CFG, load_config
 from .operations import op_queue, op_queue_context
 
 logging.basicConfig(level=logging.INFO)
@@ -165,7 +165,7 @@ class OptionParser:
     def parse_quiet(self, *, quiet, **kwargs):
         if quiet:
             duqlog_screen.handlers = []  # remove output methods
-            cfg.quiet = True
+            CFG.quiet = True
 
     def parse_dry_run(self, *, dry_run, **kwargs):
         op_queue.dry_run = dry_run

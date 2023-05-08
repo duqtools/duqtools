@@ -2,7 +2,7 @@ from os import getenv
 from pathlib import Path
 from typing import Optional
 
-from ..config import cfg
+from ..config import CFG
 from ._run import Run, Runs
 
 
@@ -55,8 +55,8 @@ class Locations:
         Path
         """
 
-        if cfg.create.jruns:  # type: ignore
-            return cfg.create.jruns  # type: ignore
+        if CFG.create.jruns:  # type: ignore
+            return CFG.create.jruns  # type: ignore
         elif getenv('JRUNS'):
             return Path(getenv('JRUNS'))  # type: ignore
         else:

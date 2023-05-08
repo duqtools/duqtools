@@ -12,7 +12,7 @@ from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..config import Config, cfg
+from ..config import CFG, Config
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
@@ -64,7 +64,7 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def get_runs_dir() -> Path:
         path = Locations().jruns_path
-        runs_dir = cfg.create.runs_dir  # type: ignore
+        runs_dir = CFG.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
             abs_jruns = str(path.resolve())

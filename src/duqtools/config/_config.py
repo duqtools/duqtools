@@ -1,7 +1,7 @@
 """Config class containing all configs, can be used with:
 
-    from duqtools.config import cfg
-    cfg.<variable you want>
+    from duqtools.config import CFG
+    CFG.<variable you want>
 
 To update the config:
 
@@ -17,37 +17,60 @@ from ..schema.cli import ConfigModel
 
 
 class Config(ConfigModel):
-    ...
 
     @staticmethod
-    def _update_global_config(new_cfg: Config):
+    def _update_global_config(cfg: Config):
         from ._variables import var_lookup
 
-        if new_cfg.extra_variables:
-            var_lookup.update(new_cfg.extra_variables.to_variable_dict())
+        if cfg.extra_variables:
+            var_lookup.update(cfg.extra_variables.to_variable_dict())
 
-        cfg.__dict__.update(new_cfg.__dict__)
-
-    @classmethod
-    def from_dict(cls, mapping: dict):
-        new_cfg = cls.parse_obj(mapping)
-        cls._update_global_config(new_cfg)
-        return new_cfg
+        CFG.__dict__.update(cfg.__dict__)
 
     @classmethod
-    def from_file(cls, path: Union[str, Path]):
-        new_cfg = cls.parse_file(path)
+    def from_dict(cls, mapping: dict) -> Config:
+        """Parse config from dictionary and update global config (CFG).
 
-        cls._update_global_config(new_cfg)
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path to config.
 
-        for obj in (cfg, new_cfg):
+        Returns
+        -------
+        cfg : Config
+            Return instance of Config class.
+        """
+        cfg = cls.parse_obj(mapping)
+        cls._update_global_config(cfg)
+        return cfg
+
+    @classmethod
+    def from_file(cls, path: Union[str, Path]) -> Config:
+        """Read config from file and update global config (CFG).
+
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path to config.
+
+        Returns
+        -------
+        cfg : Config
+            Return instance of Config class.
+        """
+        cfg = cls.parse_file(path)
+
+        cls._update_global_config(cfg)
+
+        for obj in (CFG, cfg):
             obj._path = path
 
-        return new_cfg
+        return cfg
 
 
 def load_config(path: Union[str, Path]) -> Config:
     return Config.from_file(path)
 
 
-cfg = Config.construct()
+CFG = Config.construct()

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Deque, Sequence
 
 from ._logging_utils import duqlog_screen
-from .config import cfg
+from .config import CFG
 from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
@@ -189,10 +189,10 @@ def submit(*,
     status_filter : list[str]
         Only submit jobs with this status.
     """
-    if not cfg.submit:
+    if not CFG.submit:
         raise SubmitError('Submit field required in config file')
 
-    debug('Submit config: %s', cfg.submit)
+    debug('Submit config: %s', CFG.submit)
 
     if resubmit:
         jobs = get_resubmit_jobs(resubmit)

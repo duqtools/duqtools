@@ -11,7 +11,7 @@ import click
 from pydantic import Field, validator
 
 from ._logging_utils import duqlog_screen
-from .config import cfg
+from .config import CFG
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -213,7 +213,7 @@ class Operations(deque):
         from tqdm import tqdm
         loginfo(style('Applying Operations', **HEADER_STYLE))  # type: ignore
 
-        if cfg.quiet:
+        if CFG.quiet:
             return self._apply_all()
 
         with tqdm(total=self.n_actions, position=1) as pbar:
