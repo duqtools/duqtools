@@ -39,7 +39,9 @@ with st.sidebar:
 
     st.header('Merging options')
 
-    merge_all = st.checkbox('Merge all', help='Try to merge all variables.', value=True)
+    merge_all = st.checkbox('Merge all',
+                            help='Try to merge all variables.',
+                            value=True)
 
     var_names = st.multiselect('Select variables to merge',
                                tuple(ids_variables),
@@ -94,17 +96,12 @@ with st.form('merge_form'):
     cols = st.columns((20, 20, 30, 30))
 
     target = {
-        'user':
-        cols[0].text_input('User',
-                           value=getuser(),
-                           key='user_target',
-                           disabled=True),
-        'db':
-        cols[1].text_input('Machine', value=a_run.db, key='db_target'),
-        'shot':
-        cols[2].number_input('Shot', value=a_run.shot, key='shot_target'),
-        'run':
-        cols[3].number_input('Run', step=1, key='run_target'),
+        'user': cols[0].text_input('User', value=getuser(), key='user_target'),
+        'db': cols[1].text_input('Machine', value=a_run.db, key='db_target'),
+        'shot': cols[2].number_input('Shot',
+                                     value=a_run.shot,
+                                     key='shot_target'),
+        'run': cols[3].number_input('Run', step=1, key='run_target'),
     }
 
     target = ImasHandle(**target)
