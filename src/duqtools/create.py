@@ -199,7 +199,7 @@ class CreateManager:
 
         if self._is_runs_dir_different_from_config_dir():
             op_queue.add(
-                shutil.copyfile,
+                action=shutil.copyfile,
                 args=(
                     Path.cwd() / self.cfg._path,
                     self.runs_dir / 'duqtools.yaml',
