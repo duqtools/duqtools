@@ -1,10 +1,12 @@
 import logging
+import time
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 import click
 
-from ..config import cfg
+from ..config import CFG, Config
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -42,12 +44,22 @@ class JobStatus(str, Enum):
 
 class Job:
 
-    def __init__(self, dir: Path):
-        self.dir = Path(dir).resolve()
-        self.cfg = cfg
+    def __init__(self, path: Path, *, cfg: Optional[Config] = None):
+        """Summary.
+
+        Parameters
+        ----------
+        path : Path
+            Directory for simulation or model run.
+        cfg : Optional[Config], optional
+            Duqtools config, defaults to global config if unspecified.
+        """
+        self.path = Path(path).resolve()
+
+        self.cfg = cfg if cfg is not None else CFG
 
     def __repr__(self):
-        run = str(self.dir)
+        run = str(self.path)
         return f'{self.__class__.__name__}({run!r})'
 
     @staticmethod
@@ -62,17 +74,21 @@ class Job:
 
     @property
     def has_submit_script(self) -> bool:
+        """Return true if directory has submit script."""
         return self.submit_script.exists()
 
     @property
     def has_status(self) -> bool:
+        """Return true if a status file exists."""
         return self.status_file.exists()
 
     @property
     def is_submitted(self) -> bool:
-        return (self.dir / 'duqtools.submit.lock').exists()
+        """Return true if the job has been submitted."""
+        return (self.path / 'duqtools.submit.lock').exists()
 
     def status(self) -> str:
+        """Return the status of the job."""
         if not self.has_status:
             return JobStatus.NOSTATUS
 
@@ -93,37 +109,51 @@ class Job:
 
     @property
     def is_completed(self) -> bool:
+        """Return true if the job has been completed succesfully."""
         return self.status() == JobStatus.COMPLETED
 
     @property
     def is_failed(self) -> bool:
+        """Return true if the job has failed."""
         return self.status() == JobStatus.FAILED
 
     @property
     def is_running(self) -> bool:
+        """Return true if the job is running."""
         return self.status() == JobStatus.RUNNING
 
     @property
+    def is_done(self) -> bool:
+        """Return true if the job is done (completed or failed)."""
+        return self.status() in (JobStatus.COMPLETED or JobStatus.FAILED)
+
+    @property
     def in_file(self) -> Path:
-        return self.dir / self.cfg.status.in_file
+        """Return path to the input file for the job."""
+        return self.path / self.cfg.status.in_file
 
     @property
     def out_file(self) -> Path:
-        return self.dir / self.cfg.status.out_file
+        """Return path to the output file for the job."""
+        return self.path / self.cfg.status.out_file
 
     @property
     def status_file(self) -> Path:
-        return self.dir / self.cfg.status.status_file
+        """Return the path of the status file."""
+        return self.path / self.cfg.status.status_file
 
     @property
     def submit_script(self) -> Path:
-        return self.dir / self.cfg.submit.submit_script_name
+        """Return the path of the submit script."""
+        return self.path / self.cfg.submit.submit_script_name
 
     @property
     def lockfile(self) -> Path:
-        return self.dir / 'duqtools.submit.lock'
+        """Return the path of the lockfile."""
+        return self.path / 'duqtools.submit.lock'
 
     def submit(self):
+        """Submit job."""
         from ..system import get_system
         debug(f'Put lockfile in place for {self.lockfile}')
         self.lockfile.touch()
@@ -131,11 +161,21 @@ class Job:
         get_system().submit_job(self)
 
     def start(self):
+        """Submit job and return generate that raises StopIteration when
+        done."""
         click.echo(f'Submitting {self}\033[K')
         self.submit()
 
-        while not self.has_status:
+        while self.status() in (JobStatus.RUNNING, JobStatus.NOSTATUS):
             yield
 
-        while self.is_running:
-            yield
+    def wait_until_done(self, time_step: float = 1.0):
+        """Submit task and wait until done.
+
+        Parameters
+        ----------
+        time_step : float, optional
+            Time in seconds step between status updates.
+        """
+        while self.status() in (JobStatus.RUNNING, JobStatus.NOSTATUS):
+            time.sleep(time_step)

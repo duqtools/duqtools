@@ -11,7 +11,7 @@ from .cleanup import remove_run
 from .config import Config
 from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
-from .models import Locations, Run, Runs
+from .models import Job, Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
 
@@ -193,11 +193,20 @@ class CreateManager:
         if self._is_runs_dir_different_from_config_dir():
             df.to_csv(self.runs_dir / fname)
 
-    @add_to_op_queue('Storing duqtools.yaml inside runs_dir', quiet=True)
     def copy_config(self):
+        if self.cfg._path is None:
+            return
+
         if self._is_runs_dir_different_from_config_dir():
-            shutil.copyfile(Path.cwd() / self.cfg._path,
-                            self.runs_dir / 'duqtools.yaml')
+            op_queue.add(
+                action=shutil.copyfile,
+                args=(
+                    Path.cwd() / self.cfg._path,
+                    self.runs_dir / 'duqtools.yaml',
+                ),
+                description='Copying config to run directory',
+                quiet=True,
+            )
 
     def _is_runs_dir_different_from_config_dir(self) -> bool:
         """Return True if the runs dir is different from the duqtools config
@@ -228,11 +237,11 @@ class CreateManager:
 
 
 def create(*,
-           force,
            cfg: Config,
+           force: bool = False,
            no_sampling: bool = False,
            absolute_dirpath: bool = False,
-           **kwargs):
+           **kwargs) -> list[Run]:
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -266,7 +275,7 @@ def create(*,
 
         if target_exists:
             create_mgr.warn_no_create_runs()
-            return
+            return []
 
     for model in runs:
         create_mgr.create_run(model, force=force)
@@ -275,11 +284,29 @@ def create(*,
     create_mgr.write_runs_csv(runs)
     create_mgr.copy_config()
 
+    return runs
+
 
 def create_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
-    from .config import cfg
-    return create(cfg=cfg, *args, **kwargs)
+    from .config import CFG
+    create(cfg=CFG, *args, **kwargs)
+
+
+def create_api(config: dict, **kwargs) -> tuple[Job, Run]:
+    """Wrapper around create for python api."""
+    cfg = Config.from_dict(config)
+    runs = create(cfg=cfg, **kwargs)
+
+    if len(runs) == 0:
+        raise CreateError('No runs were created, check logs for errors.')
+    elif len(runs) > 1:
+        raise NotImplementedError('Multiple runs in single call not supported')
+
+    run = runs[0]
+    job = Job(run.dirname, cfg=cfg)
+
+    return job, run
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):
@@ -292,8 +319,8 @@ def recreate(*, runs: Sequence[Path], **kwargs):
     **kwargs
         Unused.
     """
-    from ..config import cfg
-    create_mgr = CreateManager(cfg)
+    from .config import CFG
+    create_mgr = CreateManager(CFG)
 
     run_dict = {run.shortname: run for run in Locations().runs}
 

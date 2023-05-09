@@ -62,6 +62,3 @@ def initialize_duqlog_screen():
     stream = logging.StreamHandler()
     stream.setFormatter(logging.Formatter('%(message)s'))
     duqlog_screen.addHandler(stream)
-
-
-initialize_duqlog_screen()

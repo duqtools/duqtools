@@ -12,7 +12,7 @@ from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..config import Config, cfg
+from ..config import CFG, Config
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
@@ -64,7 +64,7 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def get_runs_dir() -> Path:
         path = Locations().jruns_path
-        runs_dir = cfg.create.runs_dir  # type: ignore
+        runs_dir = CFG.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
             abs_jruns = str(path.resolve())
@@ -89,8 +89,8 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def submit_job(job: Job):
         # Make sure we get a new correct status
-        if (job.dir / 'jetto.status').exists():
-            os.remove(job.dir / 'jetto.status')
+        if (job.path / 'jetto.status').exists():
+            os.remove(job.path / 'jetto.status')
 
         submit_system = job.cfg.submit.submit_system
 
@@ -123,11 +123,11 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_docker(job: Job):
-        jetto_template = template.from_directory(job.dir)
+        jetto_template = template.from_directory(job.path)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
         extra_volumes = {
-            job.dir.parent / 'imasdb': {
+            job.path.parent / 'imasdb': {
                 'bind': '/opt/imas/shared/imasdb',
                 'mode': 'rw'
             },
@@ -137,7 +137,7 @@ class BaseJettoSystem(AbstractSystem):
         os.environ['JINTRAC_IMAS_BACKEND'] = 'MDSPLUS'
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
-            job.dir,
+            job.path,
             image=job.cfg.submit.docker_image,
             extra_volumes=extra_volumes)
         job.lockfile.touch()
@@ -146,12 +146,12 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     def submit_prominence(job: Job):
-        jetto_template = template.from_directory(job.dir)
+        jetto_template = template.from_directory(job.path)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
         os.environ['RUNS_HOME'] = os.getcwd()
-        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.dir)
+        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.path)
 
     @staticmethod
     def submit_array(jobs: Sequence[Job],

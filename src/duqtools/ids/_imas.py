@@ -55,4 +55,5 @@ except (ModuleNotFoundError, ImportError):
 
     Parser = Mock()  # type: ignore
 
-    logger.warning('Could not import IMAS:', exc_info=True)
+if imas_mocked:
+    logger.info('Could not import IMAS, using mocks instead.')

@@ -21,8 +21,6 @@ __version__ = '1.7.0'
 import logging  # noqa
 import warnings  # noqa
 
-logging.basicConfig(level=logging.INFO)
-
 # https://github.com/duqtools/duqtools/issues/264
 warnings.filterwarnings(
     'ignore',
