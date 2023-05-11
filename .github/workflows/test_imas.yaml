@@ -59,7 +59,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: .imasenv
-          key: ${{ hashFiles('setup.cfg') }}
+          key: ${{ hashFiles('pyproject.toml') }}
 
       - name: Create venv and setup duqtools
         run: |

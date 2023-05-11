@@ -36,7 +36,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Python info
         run: |
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.pythonLocation }}
-          key: docs-${{ env.pythonLocation }}-${{ hashFiles('setup.cfg') }}
+          key: docs-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Python info
         run: |
