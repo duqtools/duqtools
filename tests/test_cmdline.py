@@ -13,7 +13,8 @@ from duqtools.utils import work_directory
 imas = pytest.importorskip('imas',
                            reason='No way of testing this without IMAS')
 
-pytest.mark.xfail('https://github.com/duqtools/duqtools/issues/609')
+pytestmark = pytest.mark.xfail(
+    reason='https://github.com/duqtools/duqtools/issues/609')
 
 config_file_name = 'config_jetto.yaml'
 systems = ['jetto-v220922', 'jetto-v210921']
