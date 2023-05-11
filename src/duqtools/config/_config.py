@@ -1,11 +1,15 @@
 """Config class containing all configs, can be used with:
 
-    from duqtools.config import CFG
-    CFG.<variable you want>
+```
+from duqtools.config import CFG
+CFG.<variable you want>
+```
 
 To update the config:
 
-    load_config('duqtools.yaml')
+```
+load_config('duqtools.yaml')
+```
 """
 
 from __future__ import annotations

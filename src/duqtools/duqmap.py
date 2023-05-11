@@ -32,6 +32,7 @@ def duqmap_run(function: Callable[[Run], Any], **kwargs) -> List[Any]:
 
 
 def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
+
     def to_imas_handle(run):
         return run.to_imas_handle()
 
@@ -42,7 +43,7 @@ def duqmap(function: Callable[[Run | ImasHandle], Any],
            *,
            runs: Optional[List[Run | Path]] = None,
            **kwargs) -> List[Any]:
-    """duqmap is a mapping function which can be used to map a user defined
+    """Duqmap is a mapping function which can be used to map a user defined
     function `function` over either the runs created by duqtools, or the runs
     specified by the user in `runs`.
 

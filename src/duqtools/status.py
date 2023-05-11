@@ -52,7 +52,7 @@ class Status():
         self.n_unknown = counter[JobStatus.UNKNOWN]
 
     def simple_status(self):
-        """stateless status."""
+        """Stateless status."""
         self.update_status()
 
         msg = 'Total number of directories with %-17s : %i'
@@ -136,7 +136,8 @@ class Monitor():
         output in `job.out_file` does not contain the output that is grepped
         for the progress.
 
-        More info: https://github.com/duqtools/duqtools/issues/337
+        More info:
+        https://github.com/duqtools/duqtools/issues/337
         """
         msg = ('Cannot show detailed status, `nlist2.KWMAIN` flag'
                ' is not set to 1 in `{self.job.status_file}`')

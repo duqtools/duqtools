@@ -26,7 +26,7 @@ class GroupCmd(click.Command):
         """Writes all the options into the formatter if they exist.
 
         Implementation based on:
-            https://github.com/pallets/click/issues/373#issuecomment-515293746
+        https://github.com/pallets/click/issues/373#issuecomment-515293746
         """
         sections = defaultdict(list)
 

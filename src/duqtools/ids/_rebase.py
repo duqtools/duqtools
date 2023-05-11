@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 def rezero_time(ds: xr.Dataset, *, start: int = 0) -> None:
-    """Standardize the time within a dataset by setting the first timestep to 0.
+    """Standardize the time within a dataset by setting the first timestep to
+    0.
 
     Simply subtracts time[0] from all time entries and adds `start`
     Note: this does not interpolate the times between different datasets

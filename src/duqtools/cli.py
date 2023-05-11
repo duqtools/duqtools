@@ -339,12 +339,14 @@ def cli_recreate(**kwargs):
 def cli_submit(**kwargs):
     """Submit the UQ runs.
 
-    This subcommand will read `runs.yaml`, and start all runs which are not yet
-    running. By default, It will not re-submit running or finished jobs.
+    This subcommand will read `runs.yaml`, and start all runs which are
+    not yet running. By default, It will not re-submit running or
+    finished jobs.
 
-    There is a scheduler that will continue to submit jobs until the specified
-    maximum number of jobs is running. Once a job has completed, a new job will
-    be submitted from the queue to fill the spot.
+    There is a scheduler that will continue to submit jobs until the
+    specified maximum number of jobs is running. Once a job has
+    completed, a new job will be submitted from the queue to fill the
+    spot.
     """
     from .submit import submit
     with op_queue_context():
