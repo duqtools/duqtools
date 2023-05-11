@@ -52,10 +52,6 @@ dependencies = [
     "streamlit >= 1.12;python_full_version!='3.9.7'",
 ]
 
-[project.readme]
-file = "README.md"
-content-type = "text/markdown"
-
 [project.urls]
 homepage = "https://github.com/duqtools/duqtools"
 issues = "https://github.com/duqtools/duqtools/issues"
