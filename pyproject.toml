@@ -2,8 +2,25 @@
 requires = ["setuptools>=61.2"]
 build-backend = "setuptools.build_meta"
 
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
-authors = [{name = "Stef Smeets", email = "s.smeets@esciencecenter.nl"}]
+name = "duqtools"
+version = "1.8.0"
+description = "Dynamic uncertainty quantification for Tokamak reactor simulations modelling"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+	{name = "Stef Smeets", email = "s.smeets@esciencecenter.nl"},
+	{name = "Victor Azizi"},
+	{name = "Aaron Ho"},
+]
+keywords = [
+    "modelling",
+    "uncertainty-quantification",
+    "tokamak",
+    "fusion-reactor",
+]
+license = {text = "Apache 2.0 License"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -17,15 +34,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
 ]
-description = "Dynamic uncertainty quantification for Tokamak reactor simulations modelling"
-keywords = [
-    "modelling",
-    "uncertainty-quantification",
-    "tokamak",
-    "fusion-reactor",
-]
-name = "duqtools"
-version = "1.8.0"
 dependencies = [
     "altair",
     "click",
@@ -49,9 +57,10 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.urls]
-Homepage = "https://github.com/duqtools/duqtools"
-"Bug Tracker" = "https://github.com/duqtools/duqtools/issues"
-Documentation = "https://duqtools.readthedocs.io"
+homepage = "https://github.com/duqtools/duqtools"
+issues = "https://github.com/duqtools/duqtools/issues"
+documentation = "https://duqtools.readthedocs.io"
+changelog = "https://github.com/duqtools/duqtools/releases"
 
 [project.optional-dependencies]
 develop = [
