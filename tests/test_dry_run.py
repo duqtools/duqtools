@@ -14,7 +14,7 @@ config_file = 'config_jetto.yaml'
 @pytest.fixture(scope='session', autouse=True)
 def extra_env():
     # Add required coverage env variable to each test
-    os.environ['COVERAGE_PROCESS_START'] = str(Path.cwd() / 'setup.cfg')
+    os.environ['COVERAGE_PROCESS_START'] = str(Path.cwd() / 'pyproject.toml')
 
 
 @pytest.fixture(scope='session', autouse=True)

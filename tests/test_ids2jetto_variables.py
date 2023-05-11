@@ -8,6 +8,7 @@ from duqtools.setup import Variables
 
 @pytest.fixture
 def var():
+
     class t0:
         time = np.array((10, 20, 30))
 

@@ -179,7 +179,7 @@ class Operations(deque):
                     extra_description=extra_description))
 
     def put(self, item: Operation):
-        """synonym for append."""
+        """Synonym for append."""
         self.append(item)
 
     def append(self, item: Operation):  # type: ignore

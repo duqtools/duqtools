@@ -34,17 +34,18 @@ class IDSPath(BaseModel):
 class IDSVariableModel(IDSPath):
     """Variable for describing data within a IMAS database.
 
-    The variable can be given a name, which will be used in the rest of the config
-    to reference the variable. It will also be used as the column labels or
-    on plots.
+    The variable can be given a name, which will be used in the rest of
+    the config to reference the variable. It will also be used as the
+    column labels or on plots.
 
-    The dimensions for each variable must be specified. This ensures the the data
-    will be self-consistent. For example for 1D data, you can use `[x]` and for 2D data,
-    `[x, y]`.
+    The dimensions for each variable must be specified. This ensures the
+    the data will be self-consistent. For example for 1D data, you can
+    use `[x]` and for 2D data, `[x, y]`.
 
-    The IDS path may contain indices. You can point to a single index, by simply giving the
-    complete path (i.e. `profiles_1d/0/t_i_ave` for the 0th time slice).
-    To retrieve all time slices, you can use `profiles_1d/*/t_i_ave`.
+    The IDS path may contain indices. You can point to a single index,
+    by simply giving the complete path (i.e. `profiles_1d/0/t_i_ave` for
+    the 0th time slice). To retrieve all time slices, you can use
+    `profiles_1d/*/t_i_ave`.
     """
     type: str = Field('IDS-variable',
                       description='discriminator for the variable type')

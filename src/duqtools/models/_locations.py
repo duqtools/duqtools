@@ -46,7 +46,7 @@ class Locations:
 
     @property
     def jruns_path(self) -> Path:
-        """return the Path specified in the create->jruns config variable, or,
+        """Return the Path specified in the create->jruns config variable, or,
         if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS`
         does not exists, return the current directory `./`.
 

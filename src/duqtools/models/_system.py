@@ -48,7 +48,7 @@ class AbstractSystem(ABC, BaseModel):
     @staticmethod
     @abstractmethod
     def submit_job(job: Job):
-        """submit the job specified by `job` to the system.
+        """Submit the job specified by `job` to the system.
 
         Parameters
         ----------
@@ -60,7 +60,7 @@ class AbstractSystem(ABC, BaseModel):
     @staticmethod
     @abstractmethod
     def copy_from_template(source_drc: Path, target_drc: Path):
-        """copy from template directory `source_drc` to target directory
+        """Copy from template directory `source_drc` to target directory
         `target_drc`
 
         Parameters

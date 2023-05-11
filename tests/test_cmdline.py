@@ -20,7 +20,7 @@ systems = ['jetto-v220922', 'jetto-v210921']
 @pytest.fixture(scope='session', autouse=True)
 def extra_env():
     # Add required coverage env variable to each test
-    os.environ['COVERAGE_PROCESS_START'] = str(Path.cwd() / 'setup.cfg')
+    os.environ['COVERAGE_PROCESS_START'] = str(Path.cwd() / 'pyproject.toml')
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -66,8 +66,7 @@ def test_example_create(cmdline_workdir, system):
         for i in range(2):
             if system == 'jetto-v210921':
                 p = Path(
-                    f'/opt/imas/shared/imasdb/jet/3/0/ids_123070{i}.datafile'
-                )
+                    f'/opt/imas/shared/imasdb/jet/3/0/ids_123070{i}.datafile')
             else:
                 p = Path(cmdline_workdir,
                          f'run_000{i}/imasdb/jet/3/0/ids_1230001.datafile')
