@@ -287,7 +287,7 @@ def create(*,
     return runs
 
 
-def create_entry(*args, **kwargs):
+def create_cli_entry(*args, **kwargs):
     """Entry point for duqtools cli."""
     from .config import CFG
     create(cfg=CFG, *args, **kwargs)
@@ -310,7 +310,7 @@ def create_api(config: dict, **kwargs) -> tuple[Job, Run]:
         return [Job(run.dirname, cfg=cfg) for run in runs], runs
 
 
-def recreate(*, runs: Sequence[Path], **kwargs):
+def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
@@ -320,8 +320,7 @@ def recreate(*, runs: Sequence[Path], **kwargs):
     **kwargs
         Unused.
     """
-    from .config import CFG
-    create_mgr = CreateManager(CFG)
+    create_mgr = CreateManager(cfg)
 
     run_dict = {run.shortname: run for run in Locations().runs}
 
@@ -341,3 +340,29 @@ def recreate(*, runs: Sequence[Path], **kwargs):
 
     for model in run_models:
         create_mgr.create_run(model)
+
+    return run_models
+
+
+def recreate_cli_entry(*args, **kwargs):
+    """Entry point for duqtools cli."""
+    from .config import CFG
+    recreate(cfg=CFG, *args, **kwargs)
+
+
+def recreate_api(config: dict, runs: Sequence[Path],
+                 **kwargs) -> tuple[Job, Run]:
+    """Wrapper around create for python api."""
+    cfg = Config.from_dict(config)
+    runs = recreate(cfg=cfg, runs=runs, **kwargs)
+
+    if len(runs) == 0:
+        raise CreateError('No runs were recreated, check logs for errors.')
+
+    if len(runs) == 1:
+        run = runs[0]
+        job = Job(run.dirname, cfg=cfg)
+        return job, run
+    else:
+        # raise NotImplementedError('Multiple runs in single call not supported')
+        return [Job(run.dirname, cfg=cfg) for run in runs], runs

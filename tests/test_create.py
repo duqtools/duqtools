@@ -1,10 +1,11 @@
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from duqtools.api import create
+from duqtools.api import create, recreate
 
 imas = pytest.importorskip('imas',
                            reason='No way of testing this without IMAS')
@@ -49,17 +50,40 @@ config = {
 }
 
 
-def test_create():
+@pytest.fixture(scope='module')
+def tmpworkdir():
     jruns = os.environ.get('JRUNS', '.')
 
     with tempfile.TemporaryDirectory(dir=jruns) as workdir:
         config['create']['runs_dir'] = workdir
+        yield workdir
 
-        jobs, runs = create(config, force=True)
 
-        for job in jobs:
-            assert job.in_file.exists()
-            job.submit()
+@pytest.mark.dependency()
+def test_create(tmpworkdir):
+    jobs, runs = create(config, force=True)
 
-        for run in runs:
-            assert run.data_in.exists()
+    for job in jobs:
+        assert job.in_file.exists()
+        job.submit()
+
+    for run in runs:
+        assert run.data_in.exists()
+
+
+@pytest.mark.dependency(depends=['test_create'])
+def test_recreate(tmpworkdir):
+    dirname = 'run_0000'
+
+    run_path = Path(tmpworkdir, dirname)
+
+    shutil.rmtree(run_path)
+
+    assert not run_path.exists()
+
+    job, run = recreate(config, runs=[Path(dirname)])
+
+    # assert len(runs) == 1
+    # assert len(jobs) == 1
+    assert run_path.exists()
+    assert run.data_in.exists()

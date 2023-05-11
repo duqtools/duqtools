@@ -282,9 +282,9 @@ def cli_setup(**kwargs):
 @common_options(*all_options)
 def cli_create(**kwargs):
     """Create the UQ run files."""
-    from .create import create_entry
+    from .create import create_cli_entry
     with op_queue_context():
-        create_entry(**kwargs)
+        create_cli_entry(**kwargs)
 
 
 @cli.command('recreate', cls=GroupCmd)
@@ -298,9 +298,9 @@ def cli_recreate(**kwargs):
 
     - `duqtools recreate run_0003 run_0004 --force`
     """
-    from .create import recreate
+    from .create import recreate_cli_entry
     with op_queue_context():
-        recreate(**kwargs)
+        recreate_cli_entry(**kwargs)
 
 
 @cli.command('submit', cls=GroupCmd)
