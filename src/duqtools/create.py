@@ -37,7 +37,7 @@ class CreateManager:
         self.options = self.cfg.create
 
         self.template_drc = self.options.template
-        self.system = get_system()
+        self.system = get_system(cfg=cfg)
         self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
 
@@ -229,7 +229,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname, self.cfg)
+        self.system.write_batchfile(model.dirname)
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
@@ -300,13 +300,14 @@ def create_api(config: dict, **kwargs) -> tuple[Job, Run]:
 
     if len(runs) == 0:
         raise CreateError('No runs were created, check logs for errors.')
-    elif len(runs) > 1:
-        raise NotImplementedError('Multiple runs in single call not supported')
 
-    run = runs[0]
-    job = Job(run.dirname, cfg=cfg)
-
-    return job, run
+    if len(runs) == 1:
+        run = runs[0]
+        job = Job(run.dirname, cfg=cfg)
+        return job, run
+    else:
+        # raise NotImplementedError('Multiple runs in single call not supported')
+        return [Job(run.dirname, cfg=cfg) for run in runs], runs
 
 
 def recreate(*, runs: Sequence[Path], **kwargs):

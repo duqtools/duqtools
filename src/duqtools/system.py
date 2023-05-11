@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .config import CFG, Config
+from .config import CFG
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
@@ -18,7 +18,7 @@ class DummySystem(AbstractSystem):
         return Path()
 
     @staticmethod
-    def write_batchfile(run_dir: Path, cfg: Config):
+    def write_batchfile(run_dir: Path):
         pass
 
     @staticmethod
@@ -47,10 +47,10 @@ def get_system(cfg=None):
         cfg = CFG
 
     if (cfg.system in ['jetto', 'jetto-v220922']):
-        return JettoSystemV220922
+        return JettoSystemV220922(cfg=cfg)
     elif (cfg.system in ['jetto-v210921']):
-        return JettoSystemV210921
+        return JettoSystemV210921(cfg=cfg)
     elif (cfg.system == 'dummy'):
-        return DummySystem
+        return DummySystem(cfg=cfg)
     else:
         raise NotImplementedError(f'system {cfg.system} is not implemented')

@@ -48,6 +48,8 @@ jobs:
           echo `pwd`/containerized_runs/imasdb
           echo ${HOME}/public/imasdb
 
+          echo "CONTAINERIZED_RUNS_DIR=`pwd`/containerized_runs/imasdb" >> $GITHUB_ENV
+
       - name: Python and Environment info
         run: |
           whoami

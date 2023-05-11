@@ -12,7 +12,6 @@ from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..config import CFG, Config
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job, Locations
 from ..operations import add_to_op_queue
@@ -61,10 +60,9 @@ class BaseJettoSystem(AbstractSystem):
     and the gateway.
     """
 
-    @staticmethod
-    def get_runs_dir() -> Path:
+    def get_runs_dir(self) -> Path:
         path = Locations().jruns_path
-        runs_dir = CFG.create.runs_dir  # type: ignore
+        runs_dir = self.cfg.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
             abs_jruns = str(path.resolve())
@@ -80,38 +78,35 @@ class BaseJettoSystem(AbstractSystem):
                     count = count + 1
         return path / runs_dir
 
-    @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
-    def write_batchfile(run_dir: Path, cfg: Config):
+    def write_batchfile(self, run_dir: Path):
         jetto_jset = jset.read(run_dir / 'jetto.jset')
-        _write_batchfile(run_dir, jetto_jset, tag=cfg.tag)
+        _write_batchfile(run_dir, jetto_jset, tag=self.cfg.tag)
 
-    @staticmethod
-    def submit_job(job: Job):
+    def submit_job(self, job: Job):
         # Make sure we get a new correct status
         if (job.path / 'jetto.status').exists():
             os.remove(job.path / 'jetto.status')
 
-        submit_system = job.cfg.submit.submit_system
+        submit_system = self.cfg.submit.submit_system
 
         if submit_system == 'slurm':
-            submit = JettoSystem.submit_slurm
+            submit = self.submit_slurm
         elif submit_system == 'docker':
-            submit = JettoSystem.submit_docker
+            submit = self.submit_docker
         elif submit_system == 'prominence':
-            submit = JettoSystem.submit_prominence
+            submit = self.submit_prominence
         else:
             raise NotImplementedError(f'submission type {submit_system}'
                                       ' not implemented')
 
         submit(job)
 
-    @staticmethod
-    def submit_slurm(job: Job):
+    def submit_slurm(self, job: Job):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = job.cfg.submit.submit_command.split()
+        submit_cmd = self.cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting script via slurm {cmd}')
@@ -121,8 +116,7 @@ class BaseJettoSystem(AbstractSystem):
         with open(job.lockfile, 'wb') as f:
             f.write(ret.stdout)
 
-    @staticmethod
-    def submit_docker(job: Job):
+    def submit_docker(self, job: Job):
         jetto_template = template.from_directory(job.path)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
@@ -138,14 +132,13 @@ class BaseJettoSystem(AbstractSystem):
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
             job.path,
-            image=job.cfg.submit.docker_image,
+            image=self.cfg.submit.docker_image,
             extra_volumes=extra_volumes)
         job.lockfile.touch()
         with open(job.lockfile, 'w') as f:
             f.write(container.name)
 
-    @staticmethod
-    def submit_prominence(job: Job):
+    def submit_prominence(self, job: Job):
         jetto_template = template.from_directory(job.path)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
@@ -153,20 +146,19 @@ class BaseJettoSystem(AbstractSystem):
         os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.path)
 
-    @staticmethod
-    def submit_array(jobs: Sequence[Job],
+    def submit_array(self,
+                     jobs: Sequence[Job],
                      max_jobs: int,
                      max_array_size: int = 100):
-        if jobs[0].cfg.submit.submit_system == 'slurm':
+        if self.cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_array_slurm(jobs, max_jobs, max_array_size)
         else:
             raise NotImplementedError(
-                f'array submission type {jobs[0].cfg.submit.submit_system}'
+                f'array submission type {self.cfg.submit.submit_system}'
                 ' not implemented')
 
-    @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
-    def submit_array_slurm(jobs: Sequence[Job], max_jobs: int,
+    def submit_array_slurm(self, jobs: Sequence[Job], max_jobs: int,
                            max_array_size: int):
         for job in jobs:
             job.lockfile.touch()
@@ -174,7 +166,7 @@ class BaseJettoSystem(AbstractSystem):
         logger.info('writing duqtools_slurm_array.sh file')
         _write_array_batchfile(jobs, max_jobs, max_array_size)
 
-        submit_cmd = jobs[0].cfg.submit.submit_command.split()
+        submit_cmd = self.cfg.submit.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
@@ -186,16 +178,14 @@ class BaseJettoSystem(AbstractSystem):
             with open(job.lockfile, 'wb') as f:
                 f.write(ret.stdout)
 
-    @staticmethod
-    def _apply_patches_to_template(jetto_template: template.Template):
+    def _apply_patches_to_template(self, jetto_template: template.Template):
         """Apply settings that are necessary for duqtools to function."""
         # Force output of IDS data
         # https://github.com/duqtools/duqtools/issues/343
         jetto_template.jset._settings['JobProcessingPanel.selIdsRunid'] = True
 
-    @staticmethod
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
-    def copy_from_template(source_drc: Path, target_drc: Path):
+    def copy_from_template(self, source_drc: Path, target_drc: Path):
         jetto_jset = jset.read(source_drc / 'jetto.jset')
         jetto_namelist = namelist.read(source_drc / 'jetto.in')
 
@@ -215,7 +205,7 @@ class BaseJettoSystem(AbstractSystem):
                                            sanco_namelist=jetto_sanco,
                                            extra_files=jetto_extra)
 
-        JettoSystem._apply_patches_to_template(jetto_template)
+        self._apply_patches_to_template(jetto_template)
 
         jetto_config = config.RunConfig(jetto_template)
 
@@ -232,8 +222,7 @@ class BaseJettoSystem(AbstractSystem):
             shutil.copyfile(src, dst)
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
-    @staticmethod
-    def imas_from_path(template_drc: Path) -> ImasHandle:
+    def imas_from_path(self, template_drc: Path) -> ImasHandle:
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return ImasHandle(
@@ -242,9 +231,9 @@ class BaseJettoSystem(AbstractSystem):
             run=jetto_jset['SetUpPanel.idsIMASDBRunid'],  # type: ignore
             shot=jetto_jset['SetUpPanel.idsIMASDBShot'])  # type: ignore
 
-    @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
+    def update_imas_locations(self, run: Path, inp: ImasHandle,
+                              out: ImasHandle):
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 
@@ -259,8 +248,8 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config.export(run)  # Just overwrite the poor files
 
-    @staticmethod
-    def set_jetto_variable(run: Path,
+    def set_jetto_variable(self,
+                           run: Path,
                            key: str,
                            value,
                            variable: Optional[JettoVar] = None):
@@ -297,8 +286,8 @@ class JettoSystemV210921(BaseJettoSystem):
     ```
     """
 
-    @staticmethod
     def get_data_in_handle(
+        self,
         *,
         dirname: Path,
         source: ImasHandle,
@@ -313,8 +302,8 @@ class JettoSystemV210921(BaseJettoSystem):
             run=options.run_in_start_at + seq_number,
         )
 
-    @staticmethod
     def get_data_out_handle(
+        self,
         *,
         dirname: Path,
         source: ImasHandle,
@@ -347,8 +336,8 @@ class JettoSystemV220922(BaseJettoSystem):
     ```
     """
 
-    @staticmethod
     def get_data_in_handle(
+        self,
         *,
         dirname: Path,
         source: ImasHandle,
@@ -367,8 +356,8 @@ class JettoSystemV220922(BaseJettoSystem):
                           run=1,
                           relative_location=relative_location)
 
-    @staticmethod
     def get_data_out_handle(
+        self,
         *,
         dirname: Path,
         source: ImasHandle,

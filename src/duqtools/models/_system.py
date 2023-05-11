@@ -18,9 +18,10 @@ logger = logging.getLogger(__name__)
 
 class AbstractSystem(ABC, BaseModel):
 
-    @staticmethod
+    cfg: Config
+
     @abstractmethod
-    def get_runs_dir() -> Path:
+    def get_runs_dir(self, ) -> Path:
         """Get the directory where the runs should be stored.
 
         Parameters
@@ -32,9 +33,8 @@ class AbstractSystem(ABC, BaseModel):
         """
         pass
 
-    @staticmethod
     @abstractmethod
-    def write_batchfile(run_dir: Path, cfg: Config):
+    def write_batchfile(self, run_dir: Path):
         """Write the batchfile used to submit the job inside run directory
         `run_dir`.
 
@@ -45,9 +45,8 @@ class AbstractSystem(ABC, BaseModel):
         """
         pass
 
-    @staticmethod
     @abstractmethod
-    def submit_job(job: Job):
+    def submit_job(self, job: Job):
         """Submit the job specified by `job` to the system.
 
         Parameters
@@ -57,9 +56,8 @@ class AbstractSystem(ABC, BaseModel):
         """
         pass
 
-    @staticmethod
     @abstractmethod
-    def copy_from_template(source_drc: Path, target_drc: Path):
+    def copy_from_template(self, source_drc: Path, target_drc: Path):
         """Copy from template directory `source_drc` to target directory
         `target_drc`
 
@@ -72,9 +70,8 @@ class AbstractSystem(ABC, BaseModel):
         """
         pass
 
-    @staticmethod
     @abstractmethod
-    def imas_from_path(template_drc: Path) -> ImasHandle:
+    def imas_from_path(self, template_drc: Path) -> ImasHandle:
         """It takes a path, and finds out the IMAS entry associated with it.
 
         Parameters
@@ -88,9 +85,8 @@ class AbstractSystem(ABC, BaseModel):
         """
         pass
 
-    @staticmethod
     @abstractmethod
-    def update_imas_locations(run: Path, inp: ImasBaseModel,
+    def update_imas_locations(self, run: Path, inp: ImasBaseModel,
                               out: ImasBaseModel):
         """Set the imas entries for the run, both input imas file `in` and
         output imas file `out`.
