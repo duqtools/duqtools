@@ -1,6 +1,127 @@
 [build-system]
-requires = ["setuptools>=40.6.0", "wheel"]
+requires = ["setuptools>=61.2"]
 build-backend = "setuptools.build_meta"
+
+[project]
+authors = [{name = "Stef Smeets", email = "s.smeets@esciencecenter.nl"}]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+description = "Dynamic uncertainty quantification for Tokamak reactor simulations modelling"
+keywords = [
+    "modelling",
+    "uncertainty-quantification",
+    "tokamak",
+    "fusion-reactor",
+]
+name = "duqtools"
+version = "1.8.0"
+dependencies = [
+    "altair",
+    "click",
+    "gitpython",
+    "jinja2 >= 3.0",
+    "importlib_resources;python_version<'3.10'",
+    "numpy",
+    "pandas",
+    "pydantic !=1.10.3, !=1.10.4, !=1.10.5",
+    "pydantic-yaml",
+    "scipy >= 1.09",
+    "tqdm",
+    "xarray",
+    "jetto-tools >= 1.8.8",
+    "streamlit == 1.11;python_full_version=='3.9.7'",
+    "streamlit >= 1.12;python_full_version!='3.9.7'",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/duqtools/duqtools"
+"Bug Tracker" = "https://github.com/duqtools/duqtools/issues"
+Documentation = "https://duqtools.readthedocs.io"
+
+[project.optional-dependencies]
+develop = [
+    "bump2version",
+    "ruff",
+    "pre-commit",
+    "yapf",
+    "mypy",
+    "coverage",
+    "nbmake",
+    "pytest",
+    "pytest-dependency",
+    "pycodestyle",
+]
+docs = [
+    "matplotlib",
+    "jinja2",
+    "markdown-include",
+    "mkdocs",
+    "mkdocs-click",
+    "mkdocs-jupyter",
+    "mkdocs-gen-files",
+    "mkdocs-material",
+    "mkdocstrings[python]",
+]
+publishing = [
+    "twine",
+    "wheel",
+    "build",
+]
+imas = ["imas"]
+
+[project.scripts]
+duqtools = "duqtools.cli:cli_entry"
+duqduq = "duqtools.large_scale_validation.cli:cli_entry"
+
+[tool.setuptools]
+zip-safe = false
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.coverage.run]
+branch = true
+source = ["duqtools"]
+concurrency = ["multiprocessing"]
+data_file = ".coverage"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["tests/helpers"]
+
+[tool.mypy]
+ignore_missing_imports = true
+files = ["duqtools", "tests"]
+allow_redefinition = true
+
+[[tool.mypy.overrides]]
+module = ["yaml.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["pkg_resources.*"]
+ignore_missing_imports = true
+
+[tool.yapf]
+blank_line_before_nested_class_or_def = "True"
 
 [tool.ruff]
 # Enable Pyflakes `E` and `F` codes by default.
