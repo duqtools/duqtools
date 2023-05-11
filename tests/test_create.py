@@ -2,7 +2,12 @@ import os
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from duqtools.api import create
+
+imas = pytest.importorskip('imas',
+                           reason='No way of testing this without IMAS')
 
 TEMPLATE_MODEL = Path(
     __file__).parent.resolve() / 'test_data' / 'template_model'
@@ -45,7 +50,7 @@ config = {
 
 
 def test_create():
-    jruns = os.environ['JRUNS']
+    jruns = os.environ.get('JRUNS', '.')
 
     with tempfile.TemporaryDirectory(dir=jruns) as workdir:
         config['create']['runs_dir'] = workdir
