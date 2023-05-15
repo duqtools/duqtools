@@ -158,7 +158,7 @@ class Job:
         debug(f'Put lockfile in place for {self.lockfile}')
         self.lockfile.touch()
 
-        get_system().submit_job(self)
+        get_system(self.cfg).submit_job(self)
 
     def start(self):
         """Submit job and return generate that raises StopIteration when

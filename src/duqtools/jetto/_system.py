@@ -148,10 +148,13 @@ class BaseJettoSystem(AbstractSystem):
 
     def submit_array(self,
                      jobs: Sequence[Job],
-                     max_jobs: int,
+                     *,
+                     max_jobs: int = 10,
                      max_array_size: int = 100):
         if self.cfg.submit.submit_system == 'slurm':
-            JettoSystem.submit_array_slurm(jobs, max_jobs, max_array_size)
+            self.submit_array_slurm(jobs,
+                                    max_jobs=max_jobs,
+                                    max_array_size=max_array_size)
         else:
             raise NotImplementedError(
                 f'array submission type {self.cfg.submit.submit_system}'

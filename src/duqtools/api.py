@@ -32,10 +32,12 @@ from .ids import (
 )
 from .models import Job, Run, Runs
 from .schema import IDSVariableModel as Variable
+from .submit import submit_api as submit
 
 __all__ = [
     'create',
     'recreate',
+    'submit',
     'duqmap',
     'rebase_on_grid',
     'rebase_on_time',

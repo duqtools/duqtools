@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from duqtools.api import create, recreate
+from duqtools.api import create, recreate, submit
+
+# from duqtools.api import status
 
 imas = pytest.importorskip('imas',
                            reason='No way of testing this without IMAS')
@@ -92,17 +94,37 @@ def test_recreate(tmpworkdir):
 
 @pytest.mark.dependency(depends=['test_recreate'])
 def test_submit(tmpworkdir):
-    pass
+    for path in Path(tmpworkdir).glob('run_*/duqtools.submit.lock'):
+        path.unlink()
+
+    job_queue = submit(config, parent_dir=Path(tmpworkdir))
+
+    assert len(job_queue) == 3
+
+    for job in job_queue:
+        assert job.lockfile.exists()
 
 
-@pytest.mark.dependency(depends=['test_recreate'])
+@pytest.mark.dependency(depends=['test_submit'])
 def test_resubmit(tmpworkdir):
-    pass
+    path = Path(tmpworkdir, 'run_0000', 'duqtools.submit.lock')
+    path.unlink()
+
+    resubmit = (Path(tmpworkdir, 'run_0000'), )
+
+    job_queue = submit(config, resubmit=resubmit, parent_dir=Path(tmpworkdir))
+
+    assert len(job_queue) == 1
+
+    for job in job_queue:
+        assert job.lockfile.exists()
 
 
 @pytest.mark.dependency(depends=['test_recreate'])
 def test_submit_array(tmpworkdir):
-    pass
+    submit(config, array=True, parent_dir=Path(tmpworkdir), force=True)
+
+    assert Path('duqtools_slurm_array.sh').exists()
 
 
 @pytest.mark.dependency(depends=['test_recreate'])

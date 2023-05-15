@@ -3,10 +3,10 @@ import time
 from collections import deque
 from itertools import cycle
 from pathlib import Path
-from typing import Deque, Sequence
+from typing import Deque, Optional, Sequence
 
 from ._logging_utils import duqlog_screen
-from .config import CFG
+from .config import Config
 from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
@@ -38,7 +38,7 @@ def _submit_job(job: Job, *, delay: float = 0):
     job.submit()
 
 
-def job_submitter(jobs: Sequence[Job], *, max_jobs, **kwargs):
+def job_submitter(jobs: Sequence[Job], *, max_jobs):
     for n, job in enumerate(jobs):
         if max_jobs and (n >= max_jobs):
             info(f'Max jobs ({max_jobs}) reached.')
@@ -48,7 +48,7 @@ def job_submitter(jobs: Sequence[Job], *, max_jobs, **kwargs):
 
 
 @add_to_op_queue('Start job scheduler')
-def job_scheduler(queue: Deque[Job], max_jobs=10, **kwargs):
+def job_scheduler(queue: Deque[Job], *, max_jobs: int = 10):
     interval = 1.0
 
     s = Spinner()
@@ -79,8 +79,13 @@ def job_scheduler(queue: Deque[Job], max_jobs=10, **kwargs):
         )
 
 
-def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
-                        **kwargs):
+def job_array_submitter(
+    jobs: Sequence[Job],
+    *,
+    max_jobs: int = 10,
+    max_array_size: int = 100,
+    cfg: Config,
+):
     if len(jobs) == 0:
         duqlog_screen.error('No jobs to submit, not creating array ...')
         return
@@ -90,14 +95,12 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
                      description='Adding to array',
                      extra_description=f'{job}')
 
-    if not max_jobs:
-        logger.info('Max jobs not specified, defaulting to 10')
-        max_jobs = 10
-
-    get_system().submit_array(jobs, max_jobs, max_array_size)
+    get_system(cfg=cfg).submit_array(jobs,
+                                     max_jobs=max_jobs,
+                                     max_array_size=max_array_size)
 
 
-def submission_script_ok(job):
+def submission_script_ok(job) -> bool:
     submission_script = job.submit_script
     if not submission_script.is_file():
         info('Did not found submission script %s ; Skipping directory...',
@@ -107,7 +110,7 @@ def submission_script_ok(job):
     return True
 
 
-def status_file_ok(job, *, force):
+def status_file_ok(job, *, force: bool) -> bool:
     status_file = job.status_file
     if job.has_status and not force:
         if not status_file.is_file():
@@ -123,7 +126,7 @@ def status_file_ok(job, *, force):
     return True
 
 
-def lockfile_ok(job, *, force):
+def lockfile_ok(job: Job, *, force: bool) -> bool:
     lockfile = job.lockfile
     if lockfile.exists() and not force:
         op_queue.add_no_op(
@@ -134,40 +137,48 @@ def lockfile_ok(job, *, force):
     return True
 
 
-def get_resubmit_jobs(resubmit_names: Sequence[Path]) -> list[Job]:
-    """get_resubmit_jobs.
+def get_resubmit_jobs(cfg: Config, *, resubmit_names: Sequence[Path],
+                      locations: Locations) -> list[Job]:
+    """Get list of jobs to resubmit.
 
     Parameters
     ----------
+    cfg: Config
+        Duqtools config.
     resubmit_names : Sequence[Path]
         The names (short or full path) of the jobs that need to be resubmitted
+    locations : Locations
+        Instance of Locations, use these to search for jobs
 
     Returns
     -------
     list[Job]
     """
     jobs: list[Job] = []
-    run_dict = {run.shortname: run for run in Locations().runs}
+    run_dict = {run.shortname: run for run in locations.runs}
     for name in resubmit_names:
         if name in run_dict:  # check for shortname
-            jobs.append(Job(run_dict[name].dirname))
+            name = run_dict[name].dirname
         else:
             # It's not a short name, use the argument as the full path to the job
-            jobs.append(Job(Path(name)))
+            name = Path(name)
+
+        jobs.append(Job(name, cfg=cfg))
     return jobs
 
 
 def submit(*,
-           force: bool,
-           max_jobs: int,
-           max_array_size: int,
-           schedule: bool,
-           array: bool,
+           cfg: Config,
+           force: bool = False,
+           max_jobs: int = 10,
+           max_array_size: int = 100,
+           schedule: bool = False,
+           array: bool = False,
            resubmit: Sequence[Path] = (),
-           status_filter: Sequence[str],
+           status_filter: Sequence[str] = (),
+           parent_dir: Optional[Path] = None,
            **kwargs):
-    """submit. Function which implements the functionality to submit jobs to
-    the cluster.
+    """Submit jobs to the cluster.
 
     Parameters
     ----------
@@ -188,21 +199,35 @@ def submit(*,
         that needs to be resubmitted, or the shortname
     status_filter : list[str]
         Only submit jobs with this status.
+    parent_dir : Path
+        Search for jobs in this directory.
     """
-    if not CFG.submit:
+    if not cfg.submit:
         raise SubmitError('Submit field required in config file')
 
-    debug('Submit config: %s', CFG.submit)
+    debug('Submit config: %s', cfg.submit)
+
+    locations = Locations(parent_dir=parent_dir, cfg=cfg)
 
     if resubmit:
-        jobs = get_resubmit_jobs(resubmit)
+        jobs = get_resubmit_jobs(cfg=cfg,
+                                 resubmit_names=resubmit,
+                                 locations=locations)
         force = True
     else:
-        jobs = [Job(run.dirname) for run in Locations().runs]
+        jobs = [Job(run.dirname, cfg=cfg) for run in locations.runs]
 
     debug('Case directories: %s', jobs)
 
     job_queue: Deque[Job] = deque()
+
+    if array and Path('./duqtools_slurm_array.sh').exists() and not force:
+        op_queue.add_no_op(
+            description='Not Creating Array',
+            extra_description='(reason: duqtools_slurm_array.sh exists)')
+        op_queue.add_no_op(description='Not Submitting Array',
+                           extra_description='use --force to override')
+        return job_queue
 
     for job in jobs:
         status = job.status()
@@ -215,14 +240,26 @@ def submit(*,
             continue
         job_queue.append(job)
 
-    if array and Path('./duqtools_slurm_array.sh').exists() and not force:
-        op_queue.add_no_op(
-            description='Not Creating Array',
-            extra_description='(reason: duqtools_slurm_array.sh exists)')
-        op_queue.add_no_op(description='Not Submitting Array',
-                           extra_description='use --force to override')
-        return
+    if schedule:
+        job_scheduler(job_queue, max_jobs=max_jobs)
+    elif array:
+        job_array_submitter(job_queue,
+                            max_jobs=max_jobs,
+                            max_array_size=max_array_size,
+                            cfg=cfg)
+    else:
+        job_submitter(job_queue, max_jobs=max_jobs)
 
-    submitter = job_scheduler if schedule else job_submitter
-    submitter = job_array_submitter if array else submitter
-    submitter(job_queue, max_jobs=max_jobs, max_array_size=max_array_size)
+    return job_queue
+
+
+def submit_cli_entry(*args, **kwargs):
+    """Entry point for duqtools cli."""
+    from .config import CFG
+    submit(cfg=CFG, *args, **kwargs)
+
+
+def submit_api(config: dict, **kwargs):
+    """Wrapper around submit for python api."""
+    cfg = Config.from_dict(config)
+    return submit(cfg=cfg, **kwargs)
