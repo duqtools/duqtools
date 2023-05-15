@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from .config import CFG
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
@@ -44,6 +43,7 @@ def get_system(cfg=None):
     TODO make it a variable, not a function
     """
     if cfg is None:
+        from .config import CFG
         cfg = CFG
 
     if (cfg.system in ['jetto', 'jetto-v220922']):

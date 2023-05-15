@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from duqtools.api import create, recreate, submit
+from duqtools.api import create, get_status, recreate, submit
 
 # from duqtools.api import status
 
@@ -129,4 +129,24 @@ def test_submit_array(tmpworkdir):
 
 @pytest.mark.dependency(depends=['test_recreate'])
 def test_status():
-    pass
+    tracker = get_status(config)
+    assert len(tracker.jobs) == 3
+
+
+def test_example_plot():
+    pytest.xfail('`duqtools plot` is not compatible with local imasdb, '
+                 'so we no way of testing this currently')
+
+    import subprocess as sp
+
+    from duqtools.ids import imas_mocked
+    from duqtools.utils import work_directory
+    if imas_mocked:
+        pytest.xfail('Imas needed for plotting Imas data')
+
+    cmd = ('duqtools plot -h public/jet/123/1 -v zeff').split()
+
+    with work_directory('.'):
+        result = sp.run(cmd)
+        assert (result.returncode == 0)
+        assert (Path('./chart_rho_tor_norm-zeff.html').exists())

@@ -1,0 +1,6 @@
+extra_variables:
+  - name: my_extra_var
+    ids: core_profiles
+    path: profiles_1d/*/t_i_average
+    dims: [time, x]
+    type: IDS-variable

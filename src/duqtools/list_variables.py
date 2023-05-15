@@ -41,9 +41,10 @@ def list_variables(*, config, **kwargs):
         cfg = load_config(config)
     except FileNotFoundError:
         print(f'Could not find: {config}')
-    except ValidationError as e:
-        exit(e)
+        return
+    except ValidationError:
         print(f'*: defined by {config}')
+        return
     finally:
         extra_variables = cfg.extra_variables.to_variable_dict(
         ) if cfg.extra_variables else {}
