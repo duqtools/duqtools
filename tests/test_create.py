@@ -61,13 +61,13 @@ def tmpworkdir():
 
 @pytest.mark.dependency()
 def test_create(tmpworkdir):
-    jobs, runs = create(config, force=True)
+    ret = create(config, force=True)
 
-    for job in jobs:
+    for job, _ in ret.values():
         assert job.in_file.exists()
         job.submit()
 
-    for run in runs:
+    for _, run in ret.values():
         assert run.data_in.exists()
 
 
@@ -81,9 +81,30 @@ def test_recreate(tmpworkdir):
 
     assert not run_path.exists()
 
-    job, run = recreate(config, runs=[Path(dirname)])
+    ret = recreate(config, runs=[Path(dirname)])
 
-    # assert len(runs) == 1
-    # assert len(jobs) == 1
+    job, run = ret[dirname]
+
+    assert run_path == run.dirname
     assert run_path.exists()
     assert run.data_in.exists()
+
+
+@pytest.mark.dependency(depends=['test_recreate'])
+def test_submit(tmpworkdir):
+    pass
+
+
+@pytest.mark.dependency(depends=['test_recreate'])
+def test_resubmit(tmpworkdir):
+    pass
+
+
+@pytest.mark.dependency(depends=['test_recreate'])
+def test_submit_array(tmpworkdir):
+    pass
+
+
+@pytest.mark.dependency(depends=['test_recreate'])
+def test_status():
+    pass
