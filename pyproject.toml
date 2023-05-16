@@ -48,8 +48,7 @@ dependencies = [
     "tqdm",
     "xarray",
     "jetto-tools >= 1.8.8",
-    "streamlit == 1.11;python_full_version=='3.9.7'",
-    "streamlit >= 1.12;python_full_version!='3.9.7'",
+    "streamlit >= 1.12",
 ]
 
 [project.urls]

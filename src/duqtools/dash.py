@@ -12,11 +12,7 @@ logger = logging.getLogger(__name__)
 
 def dash(**kwargs):
     """Start streamlit dashboard."""
-    try:
-        from streamlit.web import cli as stcli
-    except ImportError:
-        # versions <= (1.11)
-        from streamlit import cli as stcli
+    from streamlit.web import cli as stcli
 
     dashboard_path = files('duqtools.data') / 'dash' / 'dash.py'
 
