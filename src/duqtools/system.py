@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from .config import Config
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
@@ -37,15 +38,8 @@ class DummySystem(AbstractSystem):
         pass
 
 
-def get_system(cfg=None):
-    """Get the system to do operations with.
-
-    TODO make it a variable, not a function
-    """
-    if cfg is None:
-        from .config import CFG
-        cfg = CFG
-
+def get_system(cfg: Config):
+    """Get the system to do operations with."""
     if (cfg.system in ['jetto', 'jetto-v220922']):
         return JettoSystemV220922(cfg=cfg)
     elif (cfg.system in ['jetto-v210921']):

@@ -2,7 +2,7 @@ from os import getenv
 from pathlib import Path
 from typing import Optional
 
-from ..config import CFG, Config
+from ..config import Config
 from ._run import Run, Runs
 
 
@@ -21,7 +21,7 @@ class Locations:
             parent_dir = Path.cwd()
 
         self.parent_dir = parent_dir
-        self.cfg = cfg if cfg is not None else CFG
+        self.cfg = cfg
 
     @property
     def data_csv(self):
@@ -58,8 +58,7 @@ class Locations:
         -------
         Path
         """
-
-        if self.cfg.create.jruns:  # type: ignore
+        if self.cfg and self.cfg.create.jruns:  # type: ignore
             return self.cfg.create.jruns  # type: ignore
         elif getenv('JRUNS'):
             return Path(getenv('JRUNS'))  # type: ignore

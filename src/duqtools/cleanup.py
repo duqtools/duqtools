@@ -5,6 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
+from .config import Config
 from .ids import ImasHandle
 from .models import Locations, Run
 from .operations import op_queue
@@ -31,21 +32,27 @@ def remove_run(model: Run):
         )
 
 
-def cleanup(out, force, **kwargs):
+def cleanup(*, cfg: Config, out: bool, force: bool, **kwargs):
     """Read runs.yaml and clean the current directory.
 
     Parameters
     ----------
+    cfg : Config
+        Duqtools config.
     out : bool
         Remove output IDS.
+    force : bool
+        Force overwriting of old files.
     """
+    locations = Locations(cfg=cfg)
+
     try:
-        runs = Locations().runs
+        runs = locations.runs
     except OSError:
-        runs = ()
+        runs = []
     else:
-        if Locations().runs_yaml.exists() and not force:
-            if Locations().runs_yaml_old.exists():
+        if locations.runs_yaml.exists() and not force:
+            if locations.runs_yaml_old.exists():
                 raise OSError(
                     '`runs.yaml.old` exists, use --force to overwrite anyway')
 
@@ -65,9 +72,9 @@ def cleanup(out, force, **kwargs):
 
     op_queue.add(
         action=shutil.move,
-        args=(Locations().runs_yaml, Locations().runs_yaml_old),
+        args=(locations.runs_yaml, locations.runs_yaml_old),
         description='Moving runs.yaml',
-        extra_description=f'{Locations().runs_yaml_old}',
+        extra_description=f'{locations.runs_yaml_old}',
     )
 
     op_queue.add(

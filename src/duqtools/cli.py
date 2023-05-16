@@ -122,6 +122,7 @@ class OptionParser:
         user defined order."""
 
         def callback(**kwargs):
+            print('callback')
             for parse in (
                     self.parse_config,
                     self.parse_logfile,
@@ -282,9 +283,9 @@ def cli_setup(**kwargs):
 @common_options(*all_options)
 def cli_create(**kwargs):
     """Create the UQ run files."""
-    from .create import create_cli_entry
+    from .create import create
     with op_queue_context():
-        create_cli_entry(**kwargs)
+        create(cfg=CFG, **kwargs)
 
 
 @cli.command('recreate', cls=GroupCmd)
@@ -298,9 +299,9 @@ def cli_recreate(**kwargs):
 
     - `duqtools recreate run_0003 run_0004 --force`
     """
-    from .create import recreate_cli_entry
+    from .create import recreate
     with op_queue_context():
-        recreate_cli_entry(**kwargs)
+        recreate(cfg=CFG, **kwargs)
 
 
 @cli.command('submit', cls=GroupCmd)
@@ -350,7 +351,7 @@ def cli_submit(**kwargs):
     """
     from .submit import submit
     with op_queue_context():
-        submit(**kwargs)
+        submit(cfg=CFG, **kwargs)
 
 
 @cli.command('status', cls=GroupCmd)
@@ -360,7 +361,7 @@ def cli_submit(**kwargs):
 def cli_status(**kwargs):
     """Print the status of the UQ runs."""
     from .status import status
-    status(**kwargs)
+    status(cfg=CFG, **kwargs)
 
 
 @cli.command('plot')
@@ -405,7 +406,7 @@ def cli_clean(**kwargs):
     """Delete generated IDS data and the run dir."""
     from .cleanup import cleanup
     with op_queue_context():
-        cleanup(**kwargs)
+        cleanup(cfg=CFG, **kwargs)
 
 
 @cli.command('go', cls=GroupCmd)
@@ -421,9 +422,10 @@ def cli_go(**kwargs):
     from .status import status
     from .submit import submit
     with op_queue_context():
-        create(**kwargs)
+        create(cfg=CFG, **kwargs)
     with op_queue_context():
-        submit(max_jobs=None,
+        submit(cfg=CFG,
+               max_jobs=None,
                array=True,
                schedule=None,
                resubmit=tuple(),
@@ -432,7 +434,7 @@ def cli_go(**kwargs):
     skwargs = kwargs.copy()
     skwargs['detailed'] = True
     skwargs['progress'] = False
-    status(**skwargs)
+    status(cfg=CFG, **skwargs)
 
     dash(**kwargs)
 
@@ -507,14 +509,19 @@ def cli_merge(**kwargs):
 
 @cli.command('list-variables')
 @config_option
-def cli_list_variables(**kwargs):
+def cli_list_variables(config, **kwargs):
     """List available variables.
 
     Picks up variables from `duqtools.yaml` if it exists in the local
     directory.
     """
     from .list_variables import list_variables
-    list_variables(**kwargs)
+    try:
+        cfg = load_config(config)
+    except FileNotFoundError:
+        print(f'Cannot find `{config}`.')
+        cfg = CFG
+    list_variables(cfg=cfg, **kwargs)
 
 
 @cli.command('version')

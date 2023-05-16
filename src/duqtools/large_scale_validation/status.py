@@ -40,7 +40,10 @@ def status(*, progress: bool, detailed: bool, pattern: str, **kwargs):
 
         config_dir = config_file.parent
 
-        jobs = [Job(run.dirname) for run in Locations(config_dir).runs]
+        jobs = [
+            Job(run.dirname, cfg=cfg)
+            for run in Locations(parent_dir=config_dir, cfg=cfg).runs
+        ]
         all_jobs.extend(jobs)
 
         dirname = config_file.parent.relative_to(cwd)

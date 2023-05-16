@@ -61,7 +61,7 @@ class BaseJettoSystem(AbstractSystem):
     """
 
     def get_runs_dir(self) -> Path:
-        path = Locations().jruns_path
+        path = Locations(cfg=self.cfg).jruns_path
         runs_dir = self.cfg.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
@@ -81,7 +81,7 @@ class BaseJettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
         jetto_jset = jset.read(run_dir / 'jetto.jset')
-        _write_batchfile(run_dir, jetto_jset, tag=self.cfg.tag)
+        _write_batchfile(run_dir, jetto_jset, cfg=self.cfg)
 
     def submit_job(self, job: Job):
         # Make sure we get a new correct status

@@ -2,11 +2,10 @@ import logging
 import time
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 import click
 
-from ..config import CFG, Config
+from ..config import Config
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -44,7 +43,7 @@ class JobStatus(str, Enum):
 
 class Job:
 
-    def __init__(self, path: Path, *, cfg: Optional[Config] = None):
+    def __init__(self, path: Path, *, cfg: Config):
         """Summary.
 
         Parameters
@@ -55,8 +54,7 @@ class Job:
             Duqtools config, defaults to global config if unspecified.
         """
         self.path = Path(path).resolve()
-
-        self.cfg = cfg if cfg is not None else CFG
+        self.cfg = cfg
 
     def __repr__(self):
         run = str(self.path)

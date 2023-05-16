@@ -253,12 +253,6 @@ def submit(*,
     return job_queue
 
 
-def submit_cli_entry(*args, **kwargs):
-    """Entry point for duqtools cli."""
-    from .config import CFG
-    submit(cfg=CFG, *args, **kwargs)
-
-
 def submit_api(config: dict, **kwargs):
     """Wrapper around submit for python api."""
     cfg = Config.from_dict(config)

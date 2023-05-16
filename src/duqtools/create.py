@@ -41,7 +41,7 @@ class CreateManager:
         self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
 
-        locations = Locations()
+        locations = Locations(cfg=cfg)
         self.runs_yaml = locations.runs_yaml
         self.data_csv = locations.data_csv
 
@@ -161,7 +161,10 @@ class CreateManager:
     def apply_operations(self, data_in: ImasHandle, run_dir: Path,
                          operations: list[Any]):
         for model in operations:
-            apply_model(model, run_dir=run_dir, ids_mapping=data_in)
+            apply_model(model,
+                        run_dir=run_dir,
+                        ids_mapping=data_in,
+                        system=self.system)
 
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
@@ -287,12 +290,6 @@ def create(*,
     return runs
 
 
-def create_cli_entry(*args, **kwargs):
-    """Entry point for duqtools cli."""
-    from .config import CFG
-    create(cfg=CFG, *args, **kwargs)
-
-
 def create_api(config: dict, **kwargs) -> dict[str, tuple[Job, Run]]:
     """Wrapper around create for python api."""
     cfg = Config.from_dict(config)
@@ -312,6 +309,8 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
 
     Parameters
     ----------
+    cfg : Config
+        Duqtools config.
     runs : Sequence[Path]
         Run names to recreate.
     **kwargs
@@ -319,7 +318,7 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
     """
     create_mgr = CreateManager(cfg)
 
-    run_dict = {run.shortname: run for run in Locations().runs}
+    run_dict = {run.shortname: run for run in Locations(cfg=cfg).runs}
 
     run_models = []
     for run in runs:
@@ -339,12 +338,6 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
         create_mgr.create_run(model)
 
     return run_models
-
-
-def recreate_cli_entry(*args, **kwargs):
-    """Entry point for duqtools cli."""
-    from .config import CFG
-    recreate(cfg=CFG, *args, **kwargs)
 
 
 def recreate_api(config: dict, runs: Sequence[Path],

@@ -201,7 +201,7 @@ def status(*,
     debug('Submit config: %s', cfg.submit)
 
     runs = Locations(cfg=cfg).runs
-    jobs = [Job(run.dirname) for run in runs]
+    jobs = [Job(run.dirname, cfg=cfg) for run in runs]
 
     tracker = Status(jobs)
 
@@ -213,12 +213,6 @@ def status(*,
         tracker.simple_status()
 
     return tracker
-
-
-def status_cli_entry(*args, **kwargs):
-    """Entry point for duqtools cli."""
-    from .config import CFG
-    status(cfg=CFG, *args, **kwargs)
 
 
 def status_api(config: dict, **kwargs):

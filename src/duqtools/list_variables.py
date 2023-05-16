@@ -1,7 +1,6 @@
 import click
-from pydantic import ValidationError
 
-from duqtools.config import load_config, var_lookup
+from duqtools.config import Config, var_lookup
 
 cs = click.style
 
@@ -26,28 +25,19 @@ def list_group(group: list, extra_variables: dict):
         click.echo(f'    - {star}{name} {sub}')
 
 
-def list_variables(*, config, **kwargs):
+def list_variables(*, cfg: Config, **kwargs):
     """List variables in `variables.yaml` and config/`duqtools.yaml` if
     present.
 
     Parameters
     ----------
-    config : str
-        Name of the config file to use
+    config : Config
+        Duqtools config.
     **kwargs
         Unused.
     """
-    try:
-        cfg = load_config(config)
-    except FileNotFoundError:
-        print(f'Could not find: {config}')
-        return
-    except ValidationError:
-        print(f'*: defined by {config}')
-        return
-    finally:
-        extra_variables = cfg.extra_variables.to_variable_dict(
-        ) if cfg.extra_variables else {}
+    extra_variables = cfg.extra_variables.to_variable_dict(
+    ) if cfg.extra_variables else {}
 
     grouped_ids_vars = var_lookup.groupby_ids()
 
