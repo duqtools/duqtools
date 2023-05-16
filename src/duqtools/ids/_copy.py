@@ -21,8 +21,11 @@ def get_imas_ual_version():
     """
     vsplit = imas.names[0].split('_')
 
-    imas_version = version.parse('.'.join(vsplit[1:4]))
-    ual_version = version.parse('.'.join(vsplit[5:8]))
+    ual_start = vsplit.index('ual')
+    imas_start = vsplit.index('imas')
+
+    imas_version = version.parse('.'.join(vsplit[imas_start + 1:ual_start]))
+    ual_version = version.parse('.'.join(vsplit[ual_start + 1:]))
 
     return imas_version, ual_version
 
