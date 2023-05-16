@@ -48,7 +48,7 @@ jobs:
           echo `pwd`/containerized_runs/imasdb
           echo ${HOME}/public/imasdb
 
-          echo "CONTAINERIZED_RUNS_DIR=`pwd`/containerized_runs/imasdb" >> $GITHUB_ENV
+          echo "CONTAINERIZED_RUNS_DIR=`pwd`/containerized_runs" >> $GITHUB_ENV
 
       - name: Python and Environment info
         run: |
@@ -82,13 +82,6 @@ jobs:
         run: |
           . /docker-entrypoint.sh
           python -m imas
-
-      - name: Test paths
-        shell: python
-        run: |
-          from duqtools.api import ImasHandle
-          print(ImasHandle.from_string('root/test/11111/6666').path())
-          print(ImasHandle.from_string('test/11111/4444').path())
 
       - name: Test with pytest
         run: |
