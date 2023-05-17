@@ -29,6 +29,9 @@ GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
                                                        'imasdb', *_IMASDB,
                                                        _FILENAME))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
+PUBLIC_PATH_TEMPLATE = str(
+    Path(os.environ['IMAS_HOME']) /
+    Path('shared', 'imasdb', *_IMASDB, _FILENAME))
 
 SUFFIXES = (
     '.datafile',
@@ -132,6 +135,8 @@ class ImasHandle(ImasBaseModel):
         """Return location as Path."""
         if self.is_local_db:
             template = LOCAL_PATH_TEMPLATE
+        elif self.user == 'public':
+            template = PUBLIC_PATH_TEMPLATE
         else:
             template = GLOBAL_PATH_TEMPLATE
 
