@@ -134,7 +134,8 @@ class ImasHandle(ImasBaseModel):
         if self.is_local_db:
             template = LOCAL_PATH_TEMPLATE
         elif self.user == 'public':
-            template = str(os.environ['IMAS_HOME'] + PUBLIC_PATH_TEMPLATE)
+            template = str(os.environ['IMAS_HOME'] + '/' +
+                           PUBLIC_PATH_TEMPLATE)
         else:
             template = GLOBAL_PATH_TEMPLATE
 
