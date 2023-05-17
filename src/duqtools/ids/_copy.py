@@ -1,30 +1,26 @@
 from __future__ import annotations
 
-import logging
+import os
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from packaging import version
-
-from .._logging_utils import LoggingContext
 from ..operations import add_to_op_queue
-from ._imas import Parser, imas
+from ._imas import imas
 
 if TYPE_CHECKING:
     from .ids import ImasHandle
 
 
-def get_imas_ual_version():
+def get_imas_version():
     """Get imas/ual versions.
 
-    Parsed from a string like: `imas_3_34_0_ual_4_9_3`
+    Changed in 3.10.6, find new ways to find this info
     """
-    vsplit = imas.names[0].split('_')
 
-    imas_version = version.parse('.'.join(vsplit[1:4]))
-    ual_version = version.parse('.'.join(vsplit[5:8]))
+    imas_version = imas._ual_lowlevel.sys.version_info
 
-    return imas_version, ual_version
+    return imas_version
 
 
 def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
@@ -86,39 +82,11 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """
     target.validate()
 
-    imas_version, _ = get_imas_ual_version()
+    imas_version = get_imas_version()
+    os.environ[
+        'IMAS_VERSION'] = f'{imas_version.major}.{imas_version.minor},{imas_version.micro}'
 
-    idss_in = imas.ids(source.shot, source.run)
-    op = idss_in.open_env(source.user, source.db, str(imas_version.major))
-
-    ids_not_found = op[0] < 0
-    if ids_not_found:
-        raise KeyError('The entry you are trying to copy does not exist')
-
-    idss_out = imas.ids(target.shot, target.run)
-
-    idss_out.create_env(target.user, target.db, str(imas_version.major))
-    idx = idss_out.expIdx
-
-    parser = Parser.load_idsdef()
-
-    # Temporarily hide warnings, because this loop is very spammy
-    with LoggingContext(level=logging.CRITICAL):
-
-        for ids_info in parser.idss:
-            name = ids_info['name']
-            maxoccur = int(ids_info['maxoccur'])
-
-            if name in ('ec_launchers', 'numerics', 'sdn'):
-                continue
-
-            for i in range(maxoccur + 1):
-                ids = idss_in.__dict__[name]
-                ids.get(i)
-                ids.setExpIdx(idx)  # this line sets the index to the output
-                ids.put(i)
-
-    idss_in.close()
-    idss_out.close()
+    for src_file, dst_file in zip(source.paths(), target.paths()):
+        shutil.copyfile(src_file, dst_file)
 
     add_provenance_info(handle=target)
