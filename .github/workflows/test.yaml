@@ -45,7 +45,9 @@ jobs:
           python -m pip install -e .[develop]
 
       - name: Test with pytest
-        run: coverage run -p -m pytest
+        run: |
+          export DUQTOOLS_LEGACY_IDS_COPY="1" # Todo, remove
+          coverage run -p -m pytest
 
   docs:
     name: Test Docs
