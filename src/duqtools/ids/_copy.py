@@ -19,12 +19,17 @@ if TYPE_CHECKING:
 def get_imas_ual_version():
     """Get imas/ual versions.
 
-    Parsed from a string like: `imas_3_34_0_ual_4_9_3`
+    Parsed from a string like:
+    - `imas_3_34_0_ual_4_9_3`
+    - `imas_3_38_0_dev1_ual_4_11_0`
     """
     vsplit = imas.names[0].split('_')
 
-    imas_version = version.parse('.'.join(vsplit[1:4]))
-    ual_version = version.parse('.'.join(vsplit[5:8]))
+    ual_start = vsplit.index('ual')
+    imas_start = vsplit.index('imas')
+
+    imas_version = version.parse('.'.join(vsplit[imas_start + 1:ual_start]))
+    ual_version = version.parse('.'.join(vsplit[ual_start + 1:]))
 
     return imas_version, ual_version
 
