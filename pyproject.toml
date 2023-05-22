@@ -65,7 +65,7 @@ develop = [
     "pre-commit",
     "yapf",
     "mypy",
-    "coverage",
+    "coverage[toml]",
     "nbmake",
     "pytest",
     "pytest-dependency",

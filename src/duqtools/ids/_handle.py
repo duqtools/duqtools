@@ -6,7 +6,7 @@ import re
 from contextlib import contextmanager
 from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, List, Sequence
 
 from pydantic import validator
 
@@ -29,6 +29,7 @@ GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
                                                        'imasdb', *_IMASDB,
                                                        _FILENAME))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB, _FILENAME))
+PUBLIC_PATH_TEMPLATE = str(Path('shared', 'imasdb', *_IMASDB, _FILENAME))
 
 SUFFIXES = (
     '.datafile',
@@ -128,10 +129,14 @@ class ImasHandle(ImasBaseModel):
         """Return True if the handle points to a local imas database."""
         return self.user.startswith('/')
 
-    def path(self) -> Path:
+    def path(self, suffix=SUFFIXES[0]) -> Path:
         """Return location as Path."""
+        imas_home = os.environ.get('IMAS_HOME')
+
         if self.is_local_db:
             template = LOCAL_PATH_TEMPLATE
+        elif imas_home and self.user == 'public':
+            template = imas_home + '/' + PUBLIC_PATH_TEMPLATE
         else:
             template = GLOBAL_PATH_TEMPLATE
 
@@ -140,7 +145,11 @@ class ImasHandle(ImasBaseModel):
                             db=self.db,
                             shot=self.shot,
                             run=self.run,
-                            suffix=SUFFIXES[0]))
+                            suffix=suffix))
+
+    def paths(self) -> List[Path]:
+        """Return location of all files as a list of Paths."""
+        return [self.path(suffix) for suffix in SUFFIXES]
 
     def imasdb_path(self) -> Path:
         """Return path to imasdb."""

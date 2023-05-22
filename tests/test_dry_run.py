@@ -6,6 +6,7 @@ import pytest
 from pytest import TEST_DATA
 
 from duqtools.cli import cli_clean, cli_create, cli_init, cli_plot, cli_submit
+from duqtools.ids._imas import imas_mocked
 from duqtools.utils import work_directory
 
 config_file = 'config_jetto.yaml'
@@ -36,6 +37,7 @@ def cmdline_workdir(tmp_path_factory, request):
     return workdir
 
 
+@pytest.mark.skipif(imas_mocked, reason='No way of testing this without IMAS')
 @pytest.mark.dependency()
 def test_clean_database(cmdline_workdir):
     with work_directory(cmdline_workdir):
@@ -65,6 +67,7 @@ def test_create(cmdline_workdir):
         assert (not Path('./runs.yaml').exists())
 
 
+@pytest.mark.skipif(imas_mocked, reason='No way of testing this without IMAS')
 @pytest.mark.dependency(depends=['test_create'])
 @pytest.mark.dependency()
 def test_real_create(cmdline_workdir):

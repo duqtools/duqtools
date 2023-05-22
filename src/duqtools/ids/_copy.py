@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -17,12 +19,17 @@ if TYPE_CHECKING:
 def get_imas_ual_version():
     """Get imas/ual versions.
 
-    Parsed from a string like: `imas_3_34_0_ual_4_9_3`
+    Parsed from a string like:
+    - `imas_3_34_0_ual_4_9_3`
+    - `imas_3_38_0_dev1_ual_4_11_0`
     """
     vsplit = imas.names[0].split('_')
 
-    imas_version = version.parse('.'.join(vsplit[1:4]))
-    ual_version = version.parse('.'.join(vsplit[5:8]))
+    ual_start = vsplit.index('ual')
+    imas_start = vsplit.index('imas')
+
+    imas_version = version.parse('.'.join(vsplit[imas_start + 1:ual_start]))
+    ual_version = version.parse('.'.join(vsplit[ual_start + 1:]))
 
     return imas_version, ual_version
 
@@ -68,9 +75,10 @@ def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
         entry.put(db_entry=data_entry_target)
 
 
-@add_to_op_queue('Copy ids from template to', '{target}', quiet=True)
-def copy_ids_entry(source: ImasHandle, target: ImasHandle):
-    """Copies the ids entry to a new location.
+def copy_ids_entry_complex(source: ImasHandle, target: ImasHandle):
+    """Old way of copying by reading and writing via IMAS.
+
+    Copies the ids entry to a new location.
 
     Parameters
     ----------
@@ -84,8 +92,6 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     KeyError
         If the IDS entry you are trying to copy does not exist.
     """
-    target.validate()
-
     imas_version, _ = get_imas_ual_version()
 
     idss_in = imas.ids(source.shot, source.run)
@@ -120,5 +126,30 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
 
     idss_in.close()
     idss_out.close()
+
+
+@add_to_op_queue('Copy ids from template to', '{target}', quiet=True)
+def copy_ids_entry(source: ImasHandle, target: ImasHandle):
+    """Copies the ids entry to a new location.
+
+    Parameters
+    ----------
+    source : ImasHandle
+        Source ids entry
+    target : ImasHandle
+        Target ids entry
+
+    Raises
+    ------
+    KeyError
+        If the IDS entry you are trying to copy does not exist.
+    """
+    target.validate()
+
+    if os.environ.get('SIMPLE_IDS_COPY'):
+        for src_file, dst_file in zip(source.paths(), target.paths()):
+            shutil.copyfile(src_file, dst_file)
+    else:
+        copy_ids_entry_complex(source, target)
 
     add_provenance_info(handle=target)
