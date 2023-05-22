@@ -141,10 +141,10 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     """
     target.validate()
 
-    if os.environ.get('DUQTOOLS_LEGACY_IDS_COPY'):
-        copy_ids_entry_complex(source, target)
-    else:
+    if os.environ.get('SIMPLE_IDS_COPY'):
         for src_file, dst_file in zip(source.paths(), target.paths()):
             shutil.copyfile(src_file, dst_file)
+    else:
+        copy_ids_entry_complex(source, target)
 
     add_provenance_info(handle=target)
