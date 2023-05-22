@@ -71,8 +71,9 @@ def add_provenance_info(handle: ImasHandle, ids: str = 'core_profiles'):
 
 
 def copy_ids_entry_complex(source: ImasHandle, target: ImasHandle):
-    """Old way of copying by reading and writing via IMAS."""
-    """Copies the ids entry to a new location.
+    """Old way of copying by reading and writing via IMAS.
+
+    Copies the ids entry to a new location.
 
     Parameters
     ----------
@@ -86,8 +87,6 @@ def copy_ids_entry_complex(source: ImasHandle, target: ImasHandle):
     KeyError
         If the IDS entry you are trying to copy does not exist.
     """
-    target.validate()
-
     imas_version, _ = get_imas_ual_version()
 
     idss_in = imas.ids(source.shot, source.run)
@@ -123,8 +122,6 @@ def copy_ids_entry_complex(source: ImasHandle, target: ImasHandle):
     idss_in.close()
     idss_out.close()
 
-    add_provenance_info(handle=target)
-
 
 @add_to_op_queue('Copy ids from template to', '{target}', quiet=True)
 def copy_ids_entry(source: ImasHandle, target: ImasHandle):
@@ -142,13 +139,12 @@ def copy_ids_entry(source: ImasHandle, target: ImasHandle):
     KeyError
         If the IDS entry you are trying to copy does not exist.
     """
-
-    if os.environ.get('DUQTOOLS_LEGACY_IDS_COPY'):
-        return copy_ids_entry_complex(source, target)
-
     target.validate()
 
-    for src_file, dst_file in zip(source.paths(), target.paths()):
-        shutil.copyfile(src_file, dst_file)
+    if os.environ.get('DUQTOOLS_LEGACY_IDS_COPY'):
+        copy_ids_entry_complex(source, target)
+    else:
+        for src_file, dst_file in zip(source.paths(), target.paths()):
+            shutil.copyfile(src_file, dst_file)
 
     add_provenance_info(handle=target)
