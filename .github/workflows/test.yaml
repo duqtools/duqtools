@@ -46,7 +46,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          export DUQTOOLS_LEGACY_IDS_COPY="1" # Todo, remove
+          export SIMPLE_IDS_COPY="1"
           coverage run -p -m pytest
 
   docs:
