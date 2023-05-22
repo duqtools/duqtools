@@ -131,8 +131,7 @@ class ImasHandle(ImasBaseModel):
 
     def path(self, suffix=SUFFIXES[0]) -> Path:
         """Return location as Path."""
-        # imas_home = os.environ.get('IMAS_HOME')
-        imas_home = None
+        imas_home = os.environ.get('IMAS_HOME')
 
         if self.is_local_db:
             template = LOCAL_PATH_TEMPLATE
