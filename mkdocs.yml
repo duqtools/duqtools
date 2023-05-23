@@ -49,16 +49,7 @@ theme:
   accent: red
   custom_dir: docs/overrides
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      toggle:
-        name: Switch to dark mode
-        icon: material/lightbulb
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      toggle:
-        name: Switch to light mode
-        icon: material/lightbulb-outline
+    accent: indigo
 
 extra_css:
   - stylesheets/extra.css
