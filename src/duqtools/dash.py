@@ -12,17 +12,20 @@ logger = logging.getLogger(__name__)
 
 def dash(**kwargs):
     """Start streamlit dashboard."""
-    try:
-        from streamlit.web import cli as stcli
-    except ImportError:
-        # versions <= (1.11)
-        from streamlit import cli as stcli
+    from streamlit.web import cli as stcli
 
     dashboard_path = files('duqtools.data') / 'dash' / 'dash.py'
 
     workdir = Path('.').resolve()
 
-    sys.argv = ['streamlit', 'run', str(dashboard_path), '--', str(workdir)]
+    sys.argv = [
+        *('streamlit', 'run', str(dashboard_path)),
+        *('--theme.base', 'light'),
+        *('--theme.primaryColor', 'be5108'),
+        *('--theme.secondaryBackgroundColor', 'ddedf8'),
+        *('--browser.gatherUsageStats', 'false'),
+        *('--', str(workdir)),
+    ]
 
     logger.debug('Streamlit arguments %s', sys.argv)
 

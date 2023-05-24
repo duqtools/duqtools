@@ -2,11 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from _shared import default_workdir, get_dataset
+from _shared import add_sidebar_logo, default_workdir, get_dataset
 
 from duqtools._plot_utils import alt_errorband_chart, alt_line_chart
 from duqtools.config import var_lookup
 from duqtools.utils import read_imas_handles_from_file
+
+add_sidebar_logo()
 
 st.title('Plot IDS')
 
