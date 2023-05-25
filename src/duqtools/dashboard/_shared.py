@@ -9,6 +9,13 @@ import xarray as xr
 from duqtools.api import ImasHandle, standardize_grid_and_time
 from duqtools.config import var_lookup
 
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+
+data_directory = files('duqtools.data')
+
 try:
     default_workdir = sys.argv[1]
 except IndexError:
@@ -107,7 +114,7 @@ def build_markup_for_logo(
 
 def add_sidebar_logo():
     """Based on: https://stackoverflow.com/a/73278825."""
-    png_file = Path(__file__).parents[4] / 'docs' / 'logo.png'
+    png_file = data_directory / 'logo.png'
     logo_markup = build_markup_for_logo(png_file)
     st.markdown(
         logo_markup,
