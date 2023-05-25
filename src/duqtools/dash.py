@@ -14,7 +14,7 @@ def dash(**kwargs):
     """Start streamlit dashboard."""
     from streamlit.web import cli as stcli
 
-    dashboard_path = files('duqtools.data') / 'dash' / 'dash.py'
+    dashboard_path = files('duqtools.data') / 'dash' / 'Plotting.py'
 
     workdir = Path('.').resolve()
 
