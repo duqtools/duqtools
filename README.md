@@ -7,7 +7,7 @@
 [![DOI](https://zenodo.org/badge/492734189.svg)](https://zenodo.org/badge/latestdoi/492734189)
 
 
-![Duqtools banner](https://github.com/duqtools/duqtools/raw/main/docs/logo.png)
+![Duqtools banner](https://raw.githubusercontent.com/duqtools/duqtools/main/src/duqtools/data/logo.png)
 
 # Duqtools
 
