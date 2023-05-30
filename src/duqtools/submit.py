@@ -19,6 +19,10 @@ class SubmitError(Exception):
     ...
 
 
+class CreateError(Exception):
+    ...
+
+
 def Spinner(frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'):
     """Simple spinner animation."""
     yield from cycle(frames)
@@ -94,7 +98,11 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
         logger.info('Max jobs not specified, defaulting to 10')
         max_jobs = 10
 
-    get_system().submit_array(jobs, max_jobs, max_array_size, cfg.create.template.name)
+    if not CFG.create:
+        raise CreateError('create field required in config file')
+
+    get_system().submit_array(jobs, max_jobs, max_array_size,
+                              CFG.create.template.name)
 
 
 def submission_script_ok(job):

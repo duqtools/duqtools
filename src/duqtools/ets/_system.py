@@ -29,11 +29,11 @@ class Ets6System(AbstractSystem):
     def write_array_batchfile(jobs: Sequence[Job], max_jobs: int,
                               cfg_filename):
         scripts = '\n'.join(
-                f'kepler -runwf -nogui -redirectgui {job.dir} ' \
-                        f'-paramFile {job.dir / cfg_filename } ' \
+                f'kepler -runwf -nogui -redirectgui {job.path} ' \
+                        f'-paramFile {job.path / cfg_filename } ' \
                         '$ITMWORK/ets6wf/ETS6.xml ' \
-                        f'> {job.dir}/ets6.out ' \
-                        f'2> {job.dir}/ets6.err' for job in jobs)
+                        f'> {job.path}/ets6.out ' \
+                        f'2> {job.path}/ets6.err' for job in jobs)
 
         batchfile = f"""#!/bin/sh
 module purge
