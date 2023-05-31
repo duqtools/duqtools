@@ -145,7 +145,7 @@ class Job:
     @property
     def submit_script(self) -> Path:
         """Return the path of the submit script."""
-        return self.path / self.cfg.system_options.submit_script_name
+        return self.path / self.cfg.system.submit_script_name
 
     @property
     def lockfile(self) -> Path:

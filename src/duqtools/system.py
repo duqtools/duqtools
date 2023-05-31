@@ -47,13 +47,14 @@ def get_system(cfg=None):
     if cfg is None:
         cfg = CFG
 
-    if (cfg.system in ['jetto', 'jetto-v220922']):
+    if (cfg.system.name in ['jetto', 'jetto-v220922']):
         return JettoSystemV220922
-    elif (cfg.system in ['jetto-v210921']):
+    elif (cfg.system.name in ['jetto-v210921']):
         return JettoSystemV210921
-    elif (cfg.system == 'ets6'):
+    elif (cfg.system.name == 'ets6'):
         return Ets6System
-    elif (cfg.system == 'dummy'):
+    elif (cfg.system.name == 'dummy'):
         return DummySystem
     else:
-        raise NotImplementedError(f'system {cfg.system} is not implemented')
+        raise NotImplementedError(
+            f'system {cfg.system.name} is not implemented')

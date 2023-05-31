@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-from pydantic import DirectoryPath, Field, PrivateAttr, root_validator
+from pydantic import DirectoryPath, Field, PrivateAttr
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
-from ._system_options import DefaultOptionsModel, Ets6OptionsModel, JettoOptionsModel
+from ._systems import DummySystemModel, Ets6SystemModel, JettoSystemModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel
@@ -186,15 +186,10 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[VariableConfigModel] = Field(
         description='Specify extra variables for this run.')
 
-    system: Literal[
-        'jetto', 'dummy', 'jetto-v210921', 'jetto-v220922', 'ets6'] = Field(
-            'jetto',
-            description='Backend system to use. See model for more info.')
-
-    system_options: Union[
-        Ets6OptionsModel, DefaultOptionsModel, JettoOptionsModel] = Field(
-            description='Options specific to the system used',
-            discriminator='system')
+    system: Union[DummySystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+        JettoSystemModel(),
+        description='Options specific to the system used',
+        discriminator='name')
 
     quiet: bool = Field(
         False,
@@ -202,13 +197,3 @@ class ConfigModel(BaseModel):
         'If true, do not output to stdout, except for mandatory prompts.')
 
     _path: Union[Path, str] = PrivateAttr(None)
-
-    @root_validator(pre=True)
-    def set_system_options_system(cls, values):
-        options = values.get('system_options')
-        if isinstance(options, dict):
-            values['system_options']['system'] = values['system']
-        else:
-            values['system_options'] = {'system': values['system']}
-
-        return values

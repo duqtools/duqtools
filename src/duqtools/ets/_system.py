@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 SCRIPT_TEMPLATE = 'kepler -runwf -nogui -redirectgui {job.path} ' \
     '-paramFile {job.path}/{cfg.create.template.name} ' \
-    '{cfg.system_options.ets_xml} ' \
+    '{cfg.system.ets_xml} ' \
     '> {job.path}/ets6.out ' \
     '2> {job.path}/ets6.err'
 
 BATCH_TEMPLATE = '\n'.join([
     'module purge', 'module load cineca', 'module load ets6',
-    'module switch {cfg.system_options.kepler_module}',
-    'kepler_load {cfg.system_options.kepler_load}', '{scripts}'
+    'module switch {cfg.system.kepler_module}',
+    'kepler_load {cfg.system.kepler_load}', '{scripts}'
 ])
 
 
