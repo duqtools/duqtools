@@ -156,7 +156,8 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     def submit_array(jobs: Sequence[Job],
                      max_jobs: int,
-                     max_array_size: int = 100):
+                     max_array_size: int = 100,
+                     **kwargs):
         if jobs[0].cfg.submit.submit_system == 'slurm':
             JettoSystem.submit_array_slurm(jobs, max_jobs, max_array_size)
         else:
@@ -167,7 +168,7 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
     def submit_array_slurm(jobs: Sequence[Job], max_jobs: int,
-                           max_array_size: int):
+                           max_array_size: int, **kwargs):
         for job in jobs:
             job.lockfile.touch()
 
@@ -244,7 +245,8 @@ class BaseJettoSystem(AbstractSystem):
 
     @staticmethod
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle):
+    def update_imas_locations(run: Path, inp: ImasHandle, out: ImasHandle,
+                              **kwargs):
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 

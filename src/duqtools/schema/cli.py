@@ -7,6 +7,7 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
+from ._systems import DummySystemModel, Ets6SystemModel, JettoSystemModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel
@@ -22,7 +23,7 @@ class CreateConfigModel(BaseModel):
         This defaults to `workspace/duqtools_experiment_x`
         where `x` is a not yet existing integer."""))
 
-    template: DirectoryPath = Field(description=f("""
+    template: Path = Field(description=f("""
         Template directory to modify. Duqtools copies and updates the settings
         required for the specified system from this directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
@@ -115,8 +116,6 @@ class SubmitConfigModel(BaseModel):
         'slurm',
         description='System to submit jobs to '
         '[slurm (default), prominence, docker]')
-    submit_script_name: str = Field(
-        '.llcmd', description='Name of the submission script.')
     submit_command: str = Field('sbatch',
                                 description='Submission command for slurm.')
     docker_image: str = Field('jintrac-imas',
@@ -187,10 +186,10 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[VariableConfigModel] = Field(
         description='Specify extra variables for this run.')
 
-    system: Literal[
-        'jetto', 'dummy', 'jetto-v210921', 'jetto-v220922'] = Field(
-            'jetto',
-            description='Backend system to use. See model for more info.')
+    system: Union[DummySystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+        JettoSystemModel(),
+        description='Options specific to the system used',
+        discriminator='name')
 
     quiet: bool = Field(
         False,

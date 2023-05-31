@@ -29,7 +29,6 @@ class CreateManager:
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-
         if not self.cfg.create:
             logger.warning('No create options specified.')
             raise CreateError('No create options specified in config.')
@@ -223,7 +222,7 @@ class CreateManager:
                      description='Creating run',
                      extra_description=f'{model.dirname}')
 
-        self.source.copy_data_to(model.data_in)
+        self.source.copy_data_to(ImasHandle.parse_obj(model.data_in))
 
         self.system.copy_from_template(self.template_drc, model.dirname)
 
@@ -233,7 +232,8 @@ class CreateManager:
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
-                                          out=model.data_out)
+                                          out=model.data_out,
+                                          cfg_filename=self.template_drc.name)
 
 
 def create(*,

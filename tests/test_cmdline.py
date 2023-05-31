@@ -45,7 +45,7 @@ def cmdline_workdir(tmp_path_factory, system):
     with open(TEST_DATA / config_file_name) as fi:
         with open(workdir / 'config.yaml', 'w') as fo:
             fo.write(fi.read())
-            fo.write(f'\nsystem: {system}')
+            fo.write(f'\nsystem:\n  name: {system}')
     yield workdir
 
     if system == 'v210921':
