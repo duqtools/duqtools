@@ -55,7 +55,8 @@ kepler_load test_duq
 
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_array.sh')
-    def submit_array(jobs: Sequence[Job], max_jobs: int, cfg_filename):
+    def submit_array(jobs: Sequence[Job], max_jobs: int, cfg_filename,
+                     **kwargs):
         for job in jobs:
             job.lockfile.touch()
 

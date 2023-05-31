@@ -168,7 +168,7 @@ class BaseJettoSystem(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
     def submit_array_slurm(jobs: Sequence[Job], max_jobs: int,
-                           max_array_size: int):
+                           max_array_size: int, **kwargs):
         for job in jobs:
             job.lockfile.touch()
 
