@@ -4,6 +4,7 @@ import stat
 import subprocess as sp
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 from ..config import Config
 from ..ids import ImasHandle
@@ -11,6 +12,18 @@ from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
 
 logger = logging.getLogger(__name__)
+
+SCRIPT_TEMPLATE = 'kepler -runwf -nogui -redirectgui {job.path} ' \
+    '-paramFile {job.path}/{cfg.create.template.name} ' \
+    '{cfg.system_options.ets_xml} ' \
+    '> {job.path}/ets6.out ' \
+    '2> {job.path}/ets6.err'
+
+BATCH_TEMPLATE = '\n'.join([
+    'module purge', 'module load cineca', 'module load ets6',
+    'module switch {cfg.system_options.kepler_module}',
+    'kepler_load {cfg.system_options.kepler_load}', '{scripts}'
+])
 
 
 class Ets6System(AbstractSystem):
@@ -23,26 +36,28 @@ class Ets6System(AbstractSystem):
     @staticmethod
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(run_dir: Path, cfg: Config):
-        pass
+        job = Job(run_dir)
+        script = SCRIPT_TEMPLATE.format(job=job, cfg=cfg)
+        batchfile = '\n'.join([
+            '#!/bin/sh', f'#SBATCH -J duqtools.ets6.{run_dir.name}',
+            f'#SBATCH -o {run_dir}/slurm.out',
+            f'#SBATCH -e {run_dir}/slurm.err', '#SBATCH -p gw', '#SBATCH -N 1',
+            '#SBATCH -n 1', '#SBATCH -t 1:00:00', ''
+        ]) + BATCH_TEMPLATE.format(cfg=cfg, scripts=script)
+
+        run_ets6 = Path(run_dir / 'run.sh')
+        with open(run_ets6, 'w') as f:
+            f.write(batchfile)
 
     @staticmethod
     def write_array_batchfile(jobs: Sequence[Job], max_jobs: int,
-                              cfg_filename):
+                              max_array_size: int, cfg: Config):
         scripts = '\n'.join(
-                f'kepler -runwf -nogui -redirectgui {job.path} ' \
-                        f'-paramFile {job.path / cfg_filename } ' \
-                        '$ITMWORK/ets6wf/ETS6.xml ' \
-                        f'> {job.path}/ets6.out ' \
-                        f'2> {job.path}/ets6.err' for job in jobs)
+            [SCRIPT_TEMPLATE.format(job=job, cfg=cfg) for job in jobs])
 
-        batchfile = f"""#!/bin/sh
-module purge
-module load cineca
-module load ets6
-module switch kepler/2.5p5-3.1.1_ETS_6.6.0_3.31.0
-kepler_load test_duq
+        batchfile = '#!/bin/sh\n' + BATCH_TEMPLATE.format(cfg=cfg,
+                                                          scripts=scripts)
 
-{scripts}"""
         array = Path('duqtools_array.sh')
         with open(array, 'w') as f:
             f.write(batchfile)
@@ -50,18 +65,31 @@ kepler_load test_duq
 
     @staticmethod
     def submit_job(job: Job):
-        # Make sure we get a new correct status
-        raise NotImplementedError('submission not implemented')
+        if not job.has_submit_script:
+            raise FileNotFoundError(job.submit_script)
+
+        submit_cmd = job.cfg.submit.submit_command.split()
+        cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
+
+        logger.info(f'submitting via {cmd}')
+
+        ret = sp.run(cmd, check=True, capture_output=True)
+        logger.info('submission returned: ' + str(ret.stdout))
+        with open(job.lockfile, 'wb') as f:
+            f.write(ret.stdout)
 
     @staticmethod
     @add_to_op_queue('Submit single array job', 'duqtools_array.sh')
-    def submit_array(jobs: Sequence[Job], max_jobs: int, cfg_filename,
-                     **kwargs):
+    def submit_array(jobs: Sequence[Job], max_jobs: int, max_array_size: int,
+                     cfg: Config, **kwargs):
         for job in jobs:
             job.lockfile.touch()
 
         logger.info('writing duqtools_slurm_array.sh file')
-        Ets6System.write_array_batchfile(jobs, max_jobs, cfg_filename)
+        Ets6System.write_array_batchfile(jobs,
+                                         max_jobs,
+                                         max_array_size,
+                                         cfg=cfg)
 
         jobs[0].cfg.submit.submit_command.split()
         cmd: list[str] = ['./duqtools_array.sh']

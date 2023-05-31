@@ -101,10 +101,7 @@ def job_array_submitter(jobs: Sequence[Job], *, max_jobs, max_array_size,
     if not CFG.create:
         raise CreateError('create field required in config file')
 
-    get_system().submit_array(jobs,
-                              max_jobs,
-                              max_array_size,
-                              cfg_filename=CFG.create.template.name)
+    get_system().submit_array(jobs, max_jobs, max_array_size, cfg=CFG)
 
 
 def submission_script_ok(job):
