@@ -9,18 +9,13 @@ on:
 jobs:
   test:
     if: github.event.pull_request.draft == false
-    name: ${{ matrix.os }}, ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: Tests in IMAS container
+    runs-on: ubuntu-latest
     container:
       image: gitlab.eufus.psnc.pl:5050/containerization/imas/imas-installer/rockylinux8.6/ual
       credentials:
         password: ${{ secrets.GITLAB_PSNC_TOKEN }}
         username: ${{ secrets.GITLAB_PSNC_USERNAME }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.9']
 
     steps:
       - uses: actions/checkout@v3
@@ -72,13 +67,6 @@ jobs:
         run: |
           . /docker-entrypoint.sh
           python -m imas
-
-      - name: Test paths
-        shell: python
-        run: |
-          from duqtools.api import ImasHandle
-          print(ImasHandle.from_string('root/test/11111/6666').path())
-          print(ImasHandle.from_string('test/11111/4444').path())
 
       - name: Test with pytest
         run: |
