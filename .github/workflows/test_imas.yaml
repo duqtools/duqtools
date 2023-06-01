@@ -1,34 +1,21 @@
 name: Tests in Imas Container
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
-  push:
-    branches:
-      - main
+  schedule:
+    # At 05:34 on Sunday
+    - cron: "34 5 * * 0"
   workflow_dispatch:
 
 jobs:
   test:
     if: github.event.pull_request.draft == false
-    name: ${{ matrix.os }}, ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: Tests in IMAS container
+    runs-on: ubuntu-latest
     container:
       image: gitlab.eufus.psnc.pl:5050/containerization/imas/imas-installer/rockylinux8.6/ual
       credentials:
         password: ${{ secrets.GITLAB_PSNC_TOKEN }}
         username: ${{ secrets.GITLAB_PSNC_USERNAME }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.9']
 
     steps:
       - uses: actions/checkout@v3
@@ -80,13 +67,6 @@ jobs:
         run: |
           . /docker-entrypoint.sh
           python -m imas
-
-      - name: Test paths
-        shell: python
-        run: |
-          from duqtools.api import ImasHandle
-          print(ImasHandle.from_string('root/test/11111/6666').path())
-          print(ImasHandle.from_string('test/11111/4444').path())
 
       - name: Test with pytest
         run: |
@@ -162,20 +142,3 @@ jobs:
           minColorRange: 50
           maxColorRange: 90
           valColorRange: ${{ env.total }}
-
-  sonar:
-    name: SonarCloud Upload
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event.pull_request.draft == false
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Shallow clones should be disabled for a better relevancy of analysis
-          fetch-depth: 0
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
