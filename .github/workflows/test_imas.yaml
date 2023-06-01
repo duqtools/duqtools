@@ -1,17 +1,9 @@
 name: Tests in Imas Container
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
-  push:
-    branches:
-      - main
+  schedule:
+    # At 05:34 on Sunday
+    - cron: "34 5 * * 0"
   workflow_dispatch:
 
 jobs:
