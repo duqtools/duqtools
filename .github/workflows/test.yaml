@@ -34,21 +34,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - uses: actions/cache@v3
+        id: cache-virtualenv
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
-      - name: Python info
-        run: |
-          which python
-          python --version
-
       - name: Install dependencies
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           python -m pip install -e .[develop]
 
       - name: Test with pytest
-        run: coverage run -p -m pytest
+        run: |
+          export SIMPLE_IDS_COPY="1"
+          coverage run -p -m pytest
 
   docs:
     name: Test Docs
@@ -70,12 +69,8 @@ jobs:
           path: ${{ env.pythonLocation }}
           key: docs-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
 
-      - name: Python info
-        run: |
-          which python
-          python --version
-
       - name: Install dependencies
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           python -m pip install -e .[docs]
 

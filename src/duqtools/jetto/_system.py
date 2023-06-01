@@ -146,11 +146,14 @@ class BaseJettoSystem(AbstractSystem):
         os.environ['RUNS_HOME'] = os.getcwd()
         _ = jetto_manager.submit_job_to_prominence(jetto_config, job.path)
 
-    def submit_array(self,
-                     jobs: Sequence[Job],
-                     *,
-                     max_jobs: int = 10,
-                     max_array_size: int = 100):
+    def submit_array(
+        self,
+        jobs: Sequence[Job],
+        *,
+        max_jobs: int = 10,
+        max_array_size: int = 100,
+        **kwargs,
+    ):
         if self.cfg.submit.submit_system == 'slurm':
             self.submit_array_slurm(jobs,
                                     max_jobs=max_jobs,
@@ -161,8 +164,13 @@ class BaseJettoSystem(AbstractSystem):
                 ' not implemented')
 
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
-    def submit_array_slurm(self, jobs: Sequence[Job], max_jobs: int,
-                           max_array_size: int):
+    def submit_array_slurm(
+        self,
+        jobs: Sequence[Job],
+        max_jobs: int,
+        max_array_size: int,
+        **kwargs,
+    ):
         for job in jobs:
             job.lockfile.touch()
 
@@ -235,8 +243,13 @@ class BaseJettoSystem(AbstractSystem):
             shot=jetto_jset['SetUpPanel.idsIMASDBShot'])  # type: ignore
 
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(self, run: Path, inp: ImasHandle,
-                              out: ImasHandle):
+    def update_imas_locations(
+        self,
+        run: Path,
+        inp: ImasHandle,
+        out: ImasHandle,
+        **kwargs,
+    ):
         jetto_template = template.from_directory(run)
         jetto_config = config.RunConfig(jetto_template)
 

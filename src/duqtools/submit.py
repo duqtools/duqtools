@@ -7,6 +7,7 @@ from typing import Deque, Optional, Sequence
 
 from ._logging_utils import duqlog_screen
 from .config import Config
+from .create import CreateError
 from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
 from .system import get_system
@@ -94,6 +95,9 @@ def job_array_submitter(
         op_queue.add(action=lambda: None,
                      description='Adding to array',
                      extra_description=f'{job}')
+
+    if not cfg.create:
+        raise CreateError('Create field required in config file')
 
     get_system(cfg=cfg).submit_array(jobs,
                                      max_jobs=max_jobs,

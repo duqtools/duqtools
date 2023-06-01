@@ -39,3 +39,8 @@ def _apply_jetto(model: JettoOperation, run_dir: Path, system: AbstractSystem,
                  **kwargs):
     system.set_jetto_variable(run_dir, model.variable.name, model.value,
                               model.variable.lookup)
+
+
+#@apply_model.register
+#def _apply_ets6(model: JettoOperation, run_dir: Path, **kwargs):
+#    pass

@@ -14,11 +14,18 @@ def dash(**kwargs):
     """Start streamlit dashboard."""
     from streamlit.web import cli as stcli
 
-    dashboard_path = files('duqtools.data') / 'dash' / 'dash.py'
+    dashboard_path = files('duqtools.dashboard') / 'Plotting.py'
 
     workdir = Path('.').resolve()
 
-    sys.argv = ['streamlit', 'run', str(dashboard_path), '--', str(workdir)]
+    sys.argv = [
+        *('streamlit', 'run', str(dashboard_path)),
+        *('--theme.base', 'light'),
+        *('--theme.primaryColor', 'be5108'),
+        *('--theme.secondaryBackgroundColor', 'ddedf8'),
+        *('--browser.gatherUsageStats', 'false'),
+        *('--', str(workdir)),
+    ]
 
     logger.debug('Streamlit arguments %s', sys.argv)
 

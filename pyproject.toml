@@ -46,6 +46,9 @@ dependencies = [
     "pydantic-yaml",
     "scipy >= 1.09",
     "tqdm",
+    # 4.6.0  breaks duqtools on python 3.9 using pydantic <=1.10.7
+    # https://github.com/duqtools/duqtools/issues/616
+    "typing-extensions!=4.6.0",
     "xarray",
     "jetto-tools >= 1.8.8",
     "streamlit >= 1.12",
@@ -64,7 +67,7 @@ develop = [
     "pre-commit",
     "yapf",
     "mypy",
-    "coverage",
+    "coverage[toml]",
     "nbmake",
     "pytest",
     "pytest-dependency",

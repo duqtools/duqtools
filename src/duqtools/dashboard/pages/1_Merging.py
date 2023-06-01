@@ -11,8 +11,10 @@ from duqtools.utils import read_imas_handles_from_file
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from _shared import get_var_options  # noqa
+from _shared import get_var_options, add_sidebar_logo  # noqa
 from _shared import default_workdir, get_ids_options, get_variables  # noqa
+
+add_sidebar_logo()
 
 st.markdown('# Merge IMAS data')
 
