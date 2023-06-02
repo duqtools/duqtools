@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 
 from pydantic import DirectoryPath, Field, PrivateAttr
 
@@ -105,63 +105,6 @@ class CreateConfigModel(BaseModel):
         """))
 
 
-class SubmitConfigModel(BaseModel):
-    """The options of the `submit` subcommand are stored under the `submit` key
-    in the config.
-
-    The config describes the commands to start the UQ runs.
-    """
-
-    submit_system: Literal['prominence', 'slurm', 'docker'] = Field(
-        'slurm',
-        description='System to submit jobs to '
-        '[slurm (default), prominence, docker]')
-    submit_command: str = Field('sbatch',
-                                description='Submission command for slurm.')
-    docker_image: str = Field('jintrac-imas',
-                              description='Docker image used for submission')
-
-
-class StatusConfigModel(BaseModel):
-    """The options of the `status` subcommand are stored under the `status` key
-    in the config.
-
-    These only need to be changed if the modeling software changes.
-    """
-    in_file: str = Field('jetto.in',
-                         description=f("""
-            Name of the modelling input file, will be used to check
-            if the subprocess has started.
-            """))
-
-    out_file: str = Field('jetto.out',
-                          description=f("""
-            Name of the modelling output file, will be used to
-            check if the software is running.
-            """))
-
-    status_file: str = Field('jetto.status',
-                             description='Name of the status file.')
-
-    msg_completed: str = Field('Status : Completed successfully',
-                               description=f("""
-            Parse `status_file` for this message to check for
-            completion.
-            """))
-
-    msg_failed: str = Field('Status : Failed',
-                            description=f("""
-            Parse `status_file` for this message to check for
-            failures.
-            """))
-
-    msg_running: str = Field('Status : Running',
-                             description=f("""
-            Parse `status_file` for this message to check for
-            running status.
-            """))
-
-
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
     tag: str = Field(
@@ -169,19 +112,9 @@ class ConfigModel(BaseModel):
         description=
         'Create a tag for the runs to identify them in slurm or `data.csv`')
 
-    submit: SubmitConfigModel = Field(
-        SubmitConfigModel(),
-        description=
-        'Configuration for the submit subcommand. See model for more info.')
-
     create: Optional[CreateConfigModel] = Field(
         description=
         'Configuration for the create subcommand. See model for more info.')
-
-    status: StatusConfigModel = Field(
-        StatusConfigModel(),
-        description=
-        'Configuration for the status subcommand. See model for more info.')
 
     extra_variables: Optional[VariableConfigModel] = Field(
         description='Specify extra variables for this run.')

@@ -1,4 +1,3 @@
-from os import getenv
 from pathlib import Path
 from typing import Optional
 
@@ -47,20 +46,3 @@ class Locations:
             raise OSError(f'Cannot find {runs_yaml}.')
 
         return Runs.parse_file(runs_yaml)
-
-    @property
-    def jruns_path(self) -> Path:
-        """Return the Path specified in the create->jruns config variable, or,
-        if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS`
-        does not exists, return the current directory `./`.
-
-        Returns
-        -------
-        Path
-        """
-        if self.cfg and self.cfg.create.jruns:  # type: ignore
-            return self.cfg.create.jruns  # type: ignore
-        elif getenv('JRUNS'):
-            return Path(getenv('JRUNS'))  # type: ignore
-        else:
-            return Path()
