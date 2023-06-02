@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 from .config import Config
 from .ets import Ets6System
@@ -39,16 +40,19 @@ class DummySystem(AbstractSystem):
         pass
 
 
-def get_system(cfg: Config):
+def get_system(cfg: Config) -> AbstractSystem:
     """Get the system to do operations with."""
+    System: Any = None  # Shut up mypy
+
     if (cfg.system.name in ['jetto', 'jetto-v220922', 'jetto-v230123']):
-        return JettoSystemV220922
+        System = JettoSystemV220922
     elif (cfg.system.name in ['jetto-v210921']):
-        return JettoSystemV210921
+        System = JettoSystemV210921
     elif (cfg.system.name == 'ets6'):
-        return Ets6System
+        System = Ets6System
     elif (cfg.system.name == 'dummy'):
-        return DummySystem
+        System = DummySystem
     else:
         raise NotImplementedError(
             f'system {cfg.system.name} is not implemented')
+    return System.parse_obj({'cfg': cfg})
