@@ -122,7 +122,6 @@ class OptionParser:
         user defined order."""
 
         def callback(**kwargs):
-            print('callback')
             for parse in (
                     self.parse_config,
                     self.parse_logfile,

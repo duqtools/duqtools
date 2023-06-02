@@ -6,7 +6,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from ..config import Config
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
@@ -33,8 +32,8 @@ class Ets6System(AbstractSystem):
         return Path()
 
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
-    def write_batchfile(self, run_dir: Path, cfg: Config):
-        job = Job(run_dir, cfg=cfg)
+    def write_batchfile(self, run_dir: Path):
+        job = Job(run_dir, cfg=self.cfg)
         script = SCRIPT_TEMPLATE.format(job=job, cfg=self.cfg)
         batchfile = '\n'.join([
             '#!/bin/sh', f'#SBATCH -J duqtools.ets6.{run_dir.name}',
@@ -75,7 +74,7 @@ class Ets6System(AbstractSystem):
             f.write(ret.stdout)
 
     @add_to_op_queue('Submit single array job', 'duqtools_array.sh')
-    def submit_array(self, jobs: Sequence[Job], max_jobs: int,
+    def submit_array(self, jobs: Sequence[Job], *, max_jobs: int,
                      max_array_size: int, **kwargs):
         for job in jobs:
             job.lockfile.touch()

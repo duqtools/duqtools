@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
     from duqtools.api import IDSMapping
 
+    from .schema import IDS2JettoVariableModel
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,7 +127,8 @@ class Variables:
 
     def __getattr__(self, key: str):
         try:
-            spec = self.lookup[f'ids-{key}']
+            spec: IDS2JettoVariableModel = self.lookup[
+                f'ids-{key}']  # type: ignore
         except KeyError as exc:
             msg = f'Cannot find {key!r} in your variable listing (i.e. `variables.yaml`).'
             raise AttributeError(msg) from exc

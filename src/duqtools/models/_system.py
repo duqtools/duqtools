@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from ..config import Config
 from ..schema import BaseModel, ImasBaseModel
@@ -104,5 +104,82 @@ class AbstractSystem(ABC, BaseModel):
             Imas entry to use as input
         out : ImasBaseModel
             Imas entry to use as output
+        """
+        pass
+
+    @abstractmethod
+    def get_data_in_handle(
+        self,
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ) -> ImasHandle:
+        """Get handle for data input. This method is used to copy the template
+        data to wherever the system expects the input data to be.
+
+        Parameters
+        ----------
+        dirname : Path
+            run directory
+        source : ImasHandle
+            template Imas data
+        seq_number : int
+            sequential number, used by some systems
+        options :
+            create.data key from the config
+        """
+        pass
+
+    @abstractmethod
+    def get_data_out_handle(
+        self,
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ) -> ImasHandle:
+        """Get handle for data output. This method is used to set the locations
+        in the system correct (later on), in a sense this method is
+        superfluous.
+
+        Parameters
+        ----------
+        dirname : Path
+            run directory
+        source : ImasHandle
+            template Imas data
+        seq_number : int
+            sequential number, used by some systems
+        options :
+            create.data key from the config
+        """
+        pass
+
+    @abstractmethod
+    def submit_array(
+        self,
+        jobs: Sequence[Job],
+        *,
+        max_jobs: int = 10,
+        max_array_size: int = 100,
+        **kwargs,
+    ):
+        """submit_array method used for submitting the jobs in an array
+        fashion, its perfectly fine to just throw an error if the system does
+        not support it.
+
+        Parameters
+        ----------
+        jobs : Sequence[Job]
+            jobs
+        max_jobs : int
+            max_jobs
+        max_array_size : int
+            max_array_size
+        kwargs :
+            optional arguments
         """
         pass

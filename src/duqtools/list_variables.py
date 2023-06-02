@@ -1,3 +1,5 @@
+import typing
+
 import click
 
 from duqtools.config import Config, var_lookup
@@ -9,6 +11,7 @@ ST_HEADER = {'fg': 'red', 'bold': True}
 ST_INFO = {'fg': 'white', 'bold': False}
 
 
+@typing.no_type_check
 def list_group(group: list, extra_variables: dict):
     group = sorted(group, key=lambda var: var.name)
 
@@ -25,6 +28,7 @@ def list_group(group: list, extra_variables: dict):
         click.echo(f'    - {star}{name} {sub}')
 
 
+@typing.no_type_check
 def list_variables(*, cfg: Config, **kwargs):
     """List variables in `variables.yaml` and config/`duqtools.yaml` if
     present.
