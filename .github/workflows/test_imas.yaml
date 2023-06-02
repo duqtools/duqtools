@@ -26,14 +26,9 @@ jobs:
           repository: duqtools/containerized_runs
           path: containerized_runs
 
-      - name: Put the IMAS db in the right location
+      - name: Set up containerized runs directory
         run: |
-          mkdir /opt/imas/shared
-          mkdir -p ${HOME}/public/
-          ln -s `pwd`/containerized_runs/imasdb /opt/imas/shared/
-          ln -s `pwd`/containerized_runs/imasdb ${HOME}/public/imasdb
-          echo `pwd`/containerized_runs/imasdb
-          echo ${HOME}/public/imasdb
+          echo "CONTAINERIZED_RUNS_DIR=`pwd`/containerized_runs" >> $GITHUB_ENV
 
       - name: Python and Environment info
         run: |
@@ -57,7 +52,6 @@ jobs:
             python -m pip install -e .[develop]
           else
             . .imasenv/bin/activate
-            python -m pip install -e .[develop]
           fi
 
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV

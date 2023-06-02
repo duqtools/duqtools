@@ -36,11 +36,11 @@ class CreateManager:
         self.options = self.cfg.create
 
         self.template_drc = self.options.template
-        self.system = get_system()
+        self.system = get_system(cfg=cfg)
         self.runs_dir = self.system.get_runs_dir()
         self.source = self._get_source_handle()
 
-        locations = Locations()
+        locations = Locations(cfg=cfg)
         self.runs_yaml = locations.runs_yaml
         self.data_csv = locations.data_csv
 
@@ -160,7 +160,10 @@ class CreateManager:
     def apply_operations(self, data_in: ImasHandle, run_dir: Path,
                          operations: list[Any]):
         for model in operations:
-            apply_model(model, run_dir=run_dir, ids_mapping=data_in)
+            apply_model(model,
+                        run_dir=run_dir,
+                        ids_mapping=data_in,
+                        system=self.system)
 
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
@@ -228,7 +231,7 @@ class CreateManager:
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname, self.cfg)
+        self.system.write_batchfile(model.dirname)
 
         self.system.update_imas_locations(run=model.dirname,
                                           inp=model.data_in,
@@ -287,42 +290,35 @@ def create(*,
     return runs
 
 
-def create_entry(*args, **kwargs):
-    """Entry point for duqtools cli."""
-    from .config import CFG
-    create(cfg=CFG, *args, **kwargs)
-
-
-def create_api(config: dict, **kwargs) -> tuple[Job, Run]:
+def create_api(config: dict, **kwargs) -> dict[str, tuple[Job, Run]]:
     """Wrapper around create for python api."""
     cfg = Config.from_dict(config)
     runs = create(cfg=cfg, **kwargs)
 
     if len(runs) == 0:
         raise CreateError('No runs were created, check logs for errors.')
-    elif len(runs) > 1:
-        raise NotImplementedError('Multiple runs in single call not supported')
 
-    run = runs[0]
-    job = Job(run.dirname, cfg=cfg)
-
-    return job, run
+    return {
+        str(run.shortname): (Job(run.dirname, cfg=cfg), run)
+        for run in runs
+    }
 
 
-def recreate(*, runs: Sequence[Path], **kwargs):
+def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
     """Create input for jetto and IDS data structures.
 
     Parameters
     ----------
+    cfg : Config
+        Duqtools config.
     runs : Sequence[Path]
         Run names to recreate.
     **kwargs
         Unused.
     """
-    from .config import CFG
-    create_mgr = CreateManager(CFG)
+    create_mgr = CreateManager(cfg)
 
-    run_dict = {run.shortname: run for run in Locations().runs}
+    run_dict = {run.shortname: run for run in Locations(cfg=cfg).runs}
 
     run_models = []
     for run in runs:
@@ -340,3 +336,20 @@ def recreate(*, runs: Sequence[Path], **kwargs):
 
     for model in run_models:
         create_mgr.create_run(model)
+
+    return run_models
+
+
+def recreate_api(config: dict, runs: Sequence[Path],
+                 **kwargs) -> dict[str, tuple[Job, Run]]:
+    """Wrapper around create for python api."""
+    cfg = Config.from_dict(config)
+    runs = recreate(cfg=cfg, runs=runs, **kwargs)
+
+    if len(runs) == 0:
+        raise CreateError('No runs were recreated, check logs for errors.')
+
+    return {
+        str(run.shortname): (Job(run.dirname, cfg=cfg), run)
+        for run in runs
+    }

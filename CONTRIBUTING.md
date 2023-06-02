@@ -81,6 +81,20 @@ coverage report  # to output to terminal
 coverage html    # to generate html report
 ```
 
+### Running IMAS tests
+
+Tests that require IMAS make use of the [containerized_runs](https://github.com/duqtools/containerized_runs) repository.
+
+You can run the tests following the instructions in the repo, or locally.
+Clone the repository and set the `CONTAINERIZED_RUNS_DIR` environment variable.
+For example, on Gateway:
+
+```console
+cd $JRUNS
+git clone git@github.com:duqtools/containerized_runs
+export CONTAINERIZED_RUNS_DIR="$JRUNS/containerized_runs"
+```
+
 
 ### Building the documentation
 

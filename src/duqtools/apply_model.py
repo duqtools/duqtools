@@ -4,6 +4,7 @@ from collections import abc
 from functools import singledispatch
 from pathlib import Path
 
+from .jetto import BaseJettoSystem
 from .schema import BaseModel, JettoOperation
 
 
@@ -34,9 +35,8 @@ from .ids._apply_model import _apply_ids  # noqa: E402, F401
 
 
 @apply_model.register
-def _apply_jetto(model: JettoOperation, run_dir: Path, **kwargs):
-    from .system import get_system
-    system = get_system()
+def _apply_jetto(model: JettoOperation, run_dir: Path, system: BaseJettoSystem,
+                 **kwargs):
     system.set_jetto_variable(run_dir, model.variable.name, model.value,
                               model.variable.lookup)
 

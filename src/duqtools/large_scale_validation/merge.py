@@ -40,8 +40,8 @@ def merge(force: bool, var_names: Sequence[str], **kwargs):
 
         config_dir = config_file.parent
 
-        runs = Locations(config_dir).runs
-        runs = (run for run in runs if Job(run.dirname).is_completed)
+        runs = Locations(parent_dir=config_dir, cfg=cfg).runs
+        runs = (run for run in runs if Job(run.dirname, cfg=cfg).is_completed)
         handles = (ImasHandle.parse_obj(run.data_out) for run in runs)
         handles = [handle for handle in handles if handle.exists()]
 

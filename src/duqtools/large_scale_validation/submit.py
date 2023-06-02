@@ -62,7 +62,9 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
 
         config_dir = config_file.parent
 
-        jobs.extend(Job(run.dirname) for run in Locations(config_dir).runs)
+        jobs.extend(
+            Job(run.dirname, cfg=cfg)
+            for run in Locations(parent_dir=config_dir, cfg=cfg).runs)
 
     job_queue: Deque[Job] = deque()
 

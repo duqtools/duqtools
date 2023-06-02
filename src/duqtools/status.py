@@ -6,7 +6,7 @@ from typing import Sequence
 
 from jetto_tools import config, template
 
-from .config import CFG
+from .config import Config
 from .jetto._system import jetto_lookup
 from .models import Job, JobStatus, Locations
 
@@ -184,7 +184,11 @@ class Monitor():
         self.pbar.refresh()
 
 
-def status(*, progress: bool, detailed: bool, **kwargs):
+def status(*,
+           cfg: Config,
+           progress: bool = False,
+           detailed: bool = False,
+           **kwargs):
     """Show status of runs.
 
     Parameters
@@ -194,10 +198,10 @@ def status(*, progress: bool, detailed: bool, **kwargs):
     detailed : bool
         Show detailed progress for every job.
     """
-    debug('Submit config: %s', CFG.submit)
+    debug('Submit config: %s', cfg.submit)
 
-    runs = Locations().runs
-    jobs = [Job(run.dirname) for run in runs]
+    runs = Locations(cfg=cfg).runs
+    jobs = [Job(run.dirname, cfg=cfg) for run in runs]
 
     tracker = Status(jobs)
 
@@ -207,3 +211,11 @@ def status(*, progress: bool, detailed: bool, **kwargs):
         tracker.progress_status()
     else:
         tracker.simple_status()
+
+    return tracker
+
+
+def status_api(config: dict, **kwargs):
+    """Wrapper around status for python api."""
+    cfg = Config.from_dict(config)
+    return status(cfg=cfg, **kwargs)
