@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Sequence
 import jetto_tools
 
 from ..config import Config
-from ..models import Locations
 
 if TYPE_CHECKING:
     from ..models import Job
@@ -39,7 +38,6 @@ def write_batchfile(
 
     llcmd_path = run_dir / '.llcmd'
 
-    Locations(cfg=cfg)
     rjettov_path = (run_dir / 'rjettov').resolve()
     rel_path = run_dir.resolve().relative_to(jruns_path.resolve())
 

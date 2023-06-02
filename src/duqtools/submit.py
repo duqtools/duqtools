@@ -206,10 +206,6 @@ def submit(*,
     parent_dir : Path
         Search for jobs in this directory.
     """
-    if not cfg.submit:
-        raise SubmitError('Submit field required in config file')
-
-    debug('Submit config: %s', cfg.submit)
 
     locations = Locations(parent_dir=parent_dir, cfg=cfg)
 
