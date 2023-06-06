@@ -1,7 +1,6 @@
 # Check out the documentation for more info:
 # https://duqtools.readthedocs.io/en/latest/config/
 tag: duqtools
-system: jetto
 create:
   runs_dir: ./runs_dir # change to output directory
   template: ./template # change to directory with template
@@ -17,6 +16,5 @@ create:
   sampler:
     method: latin-hypercube
     n_samples: 3
-submit:
-  submit_command: sbatch
-  submit_script_name: .llcmd
+system:
+  name: jetto

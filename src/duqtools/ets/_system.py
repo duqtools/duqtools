@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import stat
 import subprocess as sp
@@ -9,6 +10,7 @@ from typing import Any
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
+from ..schema import Ets6SystemModel
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +27,29 @@ BATCH_TEMPLATE = '\n'.join([
 ])
 
 
-class Ets6System(AbstractSystem):
+class Ets6System(AbstractSystem, Ets6SystemModel):
     """System that can be used to create runs for ets."""
 
     def get_runs_dir(self) -> Path:
-        return Path()
+        runs_dir = self.cfg.create.runs_dir  # type: ignore
+        if not runs_dir:
+            if os.getenv('ITMWORK'):
+                runs_dir = Path(os.getenv('ITMWORK'))  # type: ignore
+            else:
+                runs_dir = Path()
+            abs_cwd = str(Path.cwd().resolve())
+            abs_runs_dir = str(runs_dir.resolve())
+            # Check if work dir is parent dir of current dir
+            if abs_cwd.startswith(abs_runs_dir):
+                runs_dir = Path()
+            else:  # work_dir is somewhere else
+                count = 0
+                while True:  # find the next free folder
+                    experiment = f'duqtools_experiment_{count:04d}'
+                    if not (runs_dir / experiment).exists():
+                        break
+                    count = count + 1
+        return runs_dir / experiment
 
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
@@ -63,7 +83,7 @@ class Ets6System(AbstractSystem):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = self.cfg.submit.submit_command.split()
+        submit_cmd = self.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting via {cmd}')
@@ -82,7 +102,7 @@ class Ets6System(AbstractSystem):
         logger.info('writing duqtools_slurm_array.sh file')
         self.write_array_batchfile(jobs, max_jobs, max_array_size)
 
-        self.cfg.submit.submit_command.split()
+        self.submit_command.split()
         cmd: list[str] = ['./duqtools_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')

@@ -93,11 +93,11 @@ class Job:
         sf = self.status_file
         with open(sf) as f:
             content = f.read()
-            if self.cfg.status.msg_completed in content:
+            if self.cfg.system.msg_completed in content:
                 return JobStatus.COMPLETED
-            elif self.cfg.status.msg_failed in content:
+            elif self.cfg.system.msg_failed in content:
                 return JobStatus.FAILED
-            elif self.cfg.status.msg_running in content:
+            elif self.cfg.system.msg_running in content:
                 return JobStatus.RUNNING
 
         if self.is_submitted:
@@ -128,17 +128,17 @@ class Job:
     @property
     def in_file(self) -> Path:
         """Return path to the input file for the job."""
-        return self.path / self.cfg.status.in_file
+        return self.path / self.cfg.system.in_file
 
     @property
     def out_file(self) -> Path:
         """Return path to the output file for the job."""
-        return self.path / self.cfg.status.out_file
+        return self.path / self.cfg.system.out_file
 
     @property
     def status_file(self) -> Path:
         """Return the path of the status file."""
-        return self.path / self.cfg.status.status_file
+        return self.path / self.cfg.system.status_file
 
     @property
     def submit_script(self) -> Path:

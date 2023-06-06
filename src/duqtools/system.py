@@ -6,9 +6,10 @@ from .ets import Ets6System
 from .ids import ImasHandle
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .models import AbstractSystem, Job
+from .schema import DummySystemModel
 
 
-class DummySystem(AbstractSystem):
+class DummySystem(AbstractSystem, DummySystemModel):
     """This is a dummy system that implements the basic interfaces.
 
     It exists for testing purposes in absence of actual modelling
@@ -55,4 +56,4 @@ def get_system(cfg: Config) -> AbstractSystem:
     else:
         raise NotImplementedError(
             f'system {cfg.system.name} is not implemented')
-    return System.parse_obj({'cfg': cfg})
+    return System.parse_obj({'cfg': cfg, **cfg.system.dict()})

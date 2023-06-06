@@ -34,6 +34,5 @@ extra_variables:
     path: profiles_1d/*/t_i_average
     dims: [time, x]
     type: IDS-variable
-submit:
-  submit_system: docker
-system: jetto-v220922
+system:
+  name: jetto-v220922

@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Sequence
 import jetto_tools
 
 from ..config import Config
-from ..models import Locations
 
 if TYPE_CHECKING:
     from ..models import Job
@@ -20,6 +19,7 @@ def write_batchfile(
     jset: jetto_tools.jset.JSET,
     *,
     cfg: Config,
+    jruns_path: Path,
 ):
     """Write batchfile (`.llcmd`) to start jetto.
 
@@ -31,14 +31,15 @@ def write_batchfile(
         Jetto settings object (from jetto-pythontools)
     cfg : Config
         Duqtools config.
+    jruns_path : Path
+        Path where runs can be run with slurm
     """
     tag = cfg.tag if cfg.tag else 'jetto'
 
     llcmd_path = run_dir / '.llcmd'
 
-    locations = Locations(cfg=cfg)
     rjettov_path = (run_dir / 'rjettov').resolve()
-    rel_path = run_dir.resolve().relative_to(locations.jruns_path.resolve())
+    rel_path = run_dir.resolve().relative_to(jruns_path.resolve())
 
     build_name = jset['JobProcessingPanel.name']
     build_user_name = jset['JobProcessingPanel.userid']

@@ -10,9 +10,7 @@ Check out [the command-line interface](../command-line-interface.md#status) for 
 
 <script id="asciicast-7XzFEahphaZdewNw7LBE2IuZc" src="https://asciinema.org/a/7XzFEahphaZdewNw7LBE2IuZc.js" async></script>
 
-## The `status` config
-
-{{ schema_StatusConfigModel['description'] }}
+## System specific `status` config variables
 
 {% for name, prop in schema_StatusConfigModel['properties'].items() %}
 `{{ name }}`
@@ -26,7 +24,8 @@ Check out [the command-line interface](../command-line-interface.md#status) for 
 ### Example
 
 ```yaml title="duqtools.yaml"
-status:
+system:
+  name: jetto
   in_file: jetto.in
   msg_completed: 'Status : Completed successfully'
   msg_failed: 'Status : Failed'

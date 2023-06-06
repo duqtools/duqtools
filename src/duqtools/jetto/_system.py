@@ -13,9 +13,9 @@ from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..ids import ImasHandle
-from ..models import AbstractSystem, Job, Locations
+from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
-from ..schema import JettoVar
+from ..schema import JettoSystemModel, JettoVar
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
@@ -53,15 +53,32 @@ def _get_jetto_extra(filenames: List[str], *, jset):
     return jetto_extra
 
 
-class BaseJettoSystem(AbstractSystem):
+class BaseJettoSystem(AbstractSystem, JettoSystemModel):
     """System that can be used to create runs for jetto.
 
     This system can submit to various backends like docker, prominence
     and the gateway.
     """
 
+    @property
+    def jruns_path(self) -> Path:
+        """Return the Path specified in the create->jruns config variable, or,
+        if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS`
+        does not exists, return the current directory `./`.
+
+        Returns
+        -------
+        Path
+        """
+        if self.cfg and self.cfg.create.jruns:  # type: ignore
+            return self.cfg.create.jruns  # type: ignore
+        elif os.getenv('JRUNS'):
+            return Path(os.getenv('JRUNS'))  # type: ignore
+        else:
+            return Path()
+
     def get_runs_dir(self) -> Path:
-        path = Locations(cfg=self.cfg).jruns_path
+        path = self.jruns_path
         runs_dir = self.cfg.create.runs_dir  # type: ignore
         if not runs_dir:
             abs_cwd = str(Path.cwd().resolve())
@@ -81,14 +98,17 @@ class BaseJettoSystem(AbstractSystem):
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
         jetto_jset = jset.read(run_dir / 'jetto.jset')
-        _write_batchfile(run_dir, jetto_jset, cfg=self.cfg)
+        _write_batchfile(run_dir,
+                         jetto_jset,
+                         cfg=self.cfg,
+                         jruns_path=self.jruns_path)
 
     def submit_job(self, job: Job):
         # Make sure we get a new correct status
         if (job.path / 'jetto.status').exists():
             os.remove(job.path / 'jetto.status')
 
-        submit_system = self.cfg.submit.submit_system
+        submit_system = self.submit_system
 
         if submit_system == 'slurm':
             submit = self.submit_slurm
@@ -106,7 +126,7 @@ class BaseJettoSystem(AbstractSystem):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = self.cfg.submit.submit_command.split()
+        submit_cmd = self.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting script via slurm {cmd}')
@@ -132,7 +152,7 @@ class BaseJettoSystem(AbstractSystem):
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
             job.path,
-            image=self.cfg.submit.docker_image,
+            image=self.docker_image,
             extra_volumes=extra_volumes)
         job.lockfile.touch()
         with open(job.lockfile, 'w') as f:
@@ -154,13 +174,13 @@ class BaseJettoSystem(AbstractSystem):
         max_array_size: int = 100,
         **kwargs,
     ):
-        if self.cfg.submit.submit_system == 'slurm':
+        if self.submit_system == 'slurm':
             self.submit_array_slurm(jobs,
                                     max_jobs=max_jobs,
                                     max_array_size=max_array_size)
         else:
             raise NotImplementedError(
-                f'array submission type {self.cfg.submit.submit_system}'
+                f'array submission type {self.submit_system}'
                 ' not implemented')
 
     @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
@@ -177,7 +197,7 @@ class BaseJettoSystem(AbstractSystem):
         logger.info('writing duqtools_slurm_array.sh file')
         _write_array_batchfile(jobs, max_jobs, max_array_size)
 
-        submit_cmd = self.cfg.submit.submit_command.split()
+        submit_cmd = self.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
