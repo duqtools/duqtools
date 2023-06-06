@@ -6,11 +6,20 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 
 
-class SystemModel(BaseModel):
+class SubmitConfigModel(BaseModel):
+    """Options that can be set for each different system to change the way of
+    submitting it to systems.
 
-    submit_script_name: str = '.llcmd'
+    These options can be set under the `system` key
+    """
+
+    submit_script_name: str = Field(
+        '.llcmd', description='Script for each run that needs to be submitted')
     submit_command: str = Field('sbatch',
                                 description='Submission command for slurm.')
+
+
+class StatusConfigModel(BaseModel):
 
     in_file: str = Field('jetto.in',
                          description=f("""
@@ -44,6 +53,10 @@ class SystemModel(BaseModel):
             Parse `status_file` for this message to check for
             running status.
             """))
+
+
+class SystemModel(StatusConfigModel, SubmitConfigModel):
+    pass
 
 
 class Ets6SystemModel(SystemModel):
