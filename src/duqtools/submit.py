@@ -39,7 +39,7 @@ def _submit_job(job: Job, *, delay: float = 0):
     job.submit()
 
 
-def job_submitter(jobs: Sequence[Job], *, max_jobs):
+def job_submitter(jobs: Sequence[Job], *, max_jobs: int, **kwargs):
     for n, job in enumerate(jobs):
         if max_jobs and (n >= max_jobs):
             info(f'Max jobs ({max_jobs}) reached.')
@@ -49,7 +49,7 @@ def job_submitter(jobs: Sequence[Job], *, max_jobs):
 
 
 @add_to_op_queue('Start job scheduler')
-def job_scheduler(queue: Deque[Job], *, max_jobs: int = 10):
+def job_scheduler(queue: Deque[Job], *, max_jobs: int = 10, **kwargs):
     interval = 1.0
 
     s = Spinner()

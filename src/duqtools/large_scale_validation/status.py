@@ -34,7 +34,7 @@ def status(*, progress: bool, detailed: bool, pattern: str, **kwargs):
     for config_file in config_files:
         cfg = load_config(config_file)
 
-        if not cfg.status:
+        if not cfg.system:
             raise StatusError(
                 f'Status field required in config file: {config_file}')
 
