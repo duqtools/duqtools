@@ -78,7 +78,8 @@ create:
     - variable: t_e
       operator: multiply
       values: [0.8, 1.0, 1.2]
-system: jetto
+system:
+  name: jetto
 ```
 
 

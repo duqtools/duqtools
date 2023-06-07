@@ -316,8 +316,8 @@ class JettoSystemV210921(BaseJettoSystem):
     and the gateway.
 
     ```yaml title="duqtools.yaml"
-    system: jetto-v210921
-    submit:
+    system:
+      name: jetto-v210921
       submit_system: prominence
     ```
     """
@@ -366,8 +366,8 @@ class JettoSystemV220922(BaseJettoSystem):
     and the gateway.
 
     ```yaml title="duqtools.yaml"
-    system: jetto-v220922
-    submit:
+    system:
+      name: jetto-v220922
       submit_system: docker
     ```
     """
