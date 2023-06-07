@@ -87,7 +87,7 @@ system:
 
 With duqtools you can generate a base run (no sampling), and use the results of the base run as the template for subsequent uq runs.
 
-There are different ways this can be achieved. Below is an example of how this can be achieved using a single template. This uses the `run.output` attribute to control where to read the jetto template from.
+There are different ways this can be achieved. Below is an variation of the config above to show how this can be achieved using a single template. This uses the `run.output` attribute and jinja2 statements to control where to read the jetto template from.
 
 ```yaml title="duqtools.template.yaml"
 tag: {{ run.name }}
@@ -99,33 +99,13 @@ create:
   template: /pfs/work/username/jetto/runs/duqduq/{{ run.name }}/base
   {% endif -%}
   template_data:
-    user: {{ handle.user }}
-    db: {{ handle.db }}
-    shot: {{ handle.shot }}
-    run: {{ handle.run }}
+    ...
   operations:
-    - variable: major_radius
-      operator: copyto
-      value: {{ variables.major_radius | round(4) }}
-    - variable: b_field
-      operator: copyto
-      value: {{ variables.b_field | round(4) }}
-    - variable: t_start
-      operator: copyto
-      value: {{ variables.t_start | round(4) }}
-    - variable: t_end
-      operator: copyto
-      value: {{ (variables.t_start + 0.01) | round(4) }}
+    ...
   sampler:
-    method: latin-hypercube
-    n_samples: 3
+    ...
   dimensions:
-    - variable: zeff
-      operator: add
-      values: [0.01, 0.02, 0.03]
-    - variable: t_e
-      operator: multiply
-      values: [0.8, 1.0, 1.2]
+    ...
 system:
   name: jetto
 ```
