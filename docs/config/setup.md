@@ -78,7 +78,7 @@ The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/
 
 ### Jetto V210921
 
-For compatibility with Jintrac v210921 distributions (`system: jetto-v210921`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
+For compatibility with Jintrac v210921 distributions (`name: jetto-v210921` under `system`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
 
 ```
   data:

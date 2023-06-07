@@ -47,6 +47,7 @@ Each column will be exposed through the `handle` dataclass in the config templat
 The template uses [jinja2 as a templating language](../config/setup/#jinja2-quickstart).
 
 ```yaml title="duqtools.template.yaml"
+tag: {{ run.name }}
 create:
   runs_dir: /pfs/work/username/jetto_runs/duqduq/{{ run.name }}
   template: /pfs/work/username/jetto/runs/path/to/template/
@@ -78,7 +79,57 @@ create:
     - variable: t_e
       operator: multiply
       values: [0.8, 1.0, 1.2]
-system: jetto
+system:
+  name: jetto
+```
+
+## Split base and UQ directories
+
+With duqtools you can generate a base run (no sampling), and use the results of the base run as the template for subsequent uq runs.
+
+There are different ways this can be achieved. Below is an variation of the config above to show how this can be achieved using a single template. This uses the `run.output` attribute and jinja2 statements to control where to read the jetto template from.
+
+```yaml title="duqtools.template.yaml"
+tag: {{ run.name }}
+create:
+  runs_dir: /pfs/work/username/jetto_runs/duqduq/{{ run.name }}
+  {% if run.output == 'base' -%}
+  template: /pfs/work/username/jetto/runs/path/to/template
+  {% else -%}
+  template: /pfs/work/username/jetto/runs/duqduq/{{ run.name }}/base
+  {% endif -%}
+  template_data:
+    ...
+  operations:
+    ...
+  sampler:
+    ...
+  dimensions:
+    ...
+system:
+  name: jetto
+```
+
+### Create and submit base runs
+
+The first step is to setup, create and run the base runs. `--no-sampling` means that duqtools performs the runs with *just* the operations. Anything under `dimensions` is skipped. `-p` is a filter that tells duqtools where to load the instructions from.
+
+```console
+duqduq setup --output base
+duqduq create --no-sampling -p 'base/**'
+duqduq submit -p 'base/**'
+duqduq status -p 'base/**'
+```
+
+### Create and submit UQ runs
+
+Setup and perform the full UQ run.
+
+```console
+duqduq setup --output uq
+duqduq create -p 'uq/**'
+duqduq submit -p 'uq/**'
+duqduq status -p 'uq/**'
 ```
 
 

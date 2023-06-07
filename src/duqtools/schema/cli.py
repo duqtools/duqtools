@@ -93,7 +93,7 @@ class CreateConfigModel(BaseModel):
         """))
 
     data: Optional[DataLocation] = Field(description=f("""
-        Required for `system: jetto-v210921`, ignored for other systems.
+        Required for system `jetto-v210921`, ignored for other systems.
 
         Where to store the in/output IDS data.
         The data key specifies the machine or imas
