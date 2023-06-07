@@ -73,6 +73,13 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
         npfunc(data, value, out=data)
+
+        if model.ceil is not None:
+            np.where(data < model.ceil, data, model.ceil, out=data)
+
+        if model.floor is not None:
+            np.where(data > model.floor, data, model.floor, out=data)
+
         logger.debug('data range after: %s - %s', data.min(), data.max())
 
     if target_in:
