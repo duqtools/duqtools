@@ -55,7 +55,7 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
         cfg = load_config(config_file)
 
         assert cfg.create
-        assert cfg.submit
+        assert cfg.system
 
         if handles and (cfg.create.template_data not in handles):
             continue
