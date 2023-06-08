@@ -42,7 +42,18 @@ class OperatorMixin(BaseModel):
         Uses `np.clip`.
         """))
 
-    slope: Optional[tuple[float, float]] = Field(None, description='rawr')
+    linear_ramp: Optional[tuple[float, float]] = Field(None,
+                                                       description=f("""
+        Linearly ramp the operation using the start and stop value given.
+        The first value (start) corresponds to multiplier at the beginning of the
+        data range, the second value (stop) to the multiplier at the end.
+        The ramp is linearly interpolated between the start and stop values.
+
+        The linear ramp acts as a multiplier of the specified `value`.
+
+        For example, for 'operator': 'add'`:
+        `new_data = data + np.linspace(start, stop, len(data)) * value`
+        """))
 
     _upper_suffix: str = '_error_upper'
     _lower_suffix: str = '_error_lower'
