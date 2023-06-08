@@ -164,10 +164,10 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_manager = jetto_job.JobManager()
 
         # Jetto tools decided to be weird, be weird too
-        (job.path / 'jetto/runs').mkdir(parents=True, exist_ok=True)
-        shutil.copytree(job.path, job.path / 'jetto/runs')
+        Path('./jetto/runs').mkdir(parents=True, exist_ok=True)
+        shutil.copytree(job.path, './jetto/runs' / job.path)
 
-        os.environ['RUNS_HOME'] = str(job.path)
+        os.environ['RUNS_HOME'] = os.getcwd()
 
         _ = jetto_manager.submit_job_to_prominence(
             jetto_config,
