@@ -21,7 +21,7 @@ Check out [the command-line interface](../command-line-interface.md#clean) for m
 
 !!! note
 
-    In addition, `submit` uses `status.status_file` to prevent re-submitting a running job.
+    In addition, `submit` uses `system.status_file` to prevent re-submitting a running job.
 
 ### Example
 
