@@ -30,14 +30,16 @@ class OperatorMixin(BaseModel):
         for values > 0.
         """))
 
-    ceil: Optional[float] = Field(None,
-                                  description=f("""
-        If set, this value specifies the ceiling value (upper bound) of the data.
+    clip_min: Optional[float] = Field(None,
+                                      description=f("""
+        If set, clip (limit) data at this value (upper bound).
+        Uses `np.clip`.
         """))
 
-    floor: Optional[float] = Field(None,
-                                   description=f("""
-        If set, this value specifies the floor value (lower bound) of the data.
+    clip_max: Optional[float] = Field(None,
+                                      description=f("""
+        If set, clip (limit) data at this value (lower bound).
+        Uses `np.clip`.
         """))
 
     _upper_suffix: str = '_error_upper'

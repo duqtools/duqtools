@@ -71,6 +71,18 @@ TEST_INPUT = (
         'value': -3.0,
         'scale_to_error': True,
     },
+    {
+        'operator': 'multiply',
+        'variable': get_test_var('data/0/x'),
+        'value': 1.0,
+        'clip_min': 20,
+    },
+    {
+        'operator': 'multiply',
+        'variable': get_test_var('data/0/x'),
+        'value': 1.0,
+        'clip_max': 20,
+    },
 )
 
 TEST_OUTPUT = (
@@ -80,6 +92,8 @@ TEST_OUTPUT = (
     (95, 190, 285),
     (13, 26, 39),
     (4, 8, 12),
+    (20, 20, 30),
+    (10, 20, 20),
 )
 
 
