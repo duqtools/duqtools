@@ -45,8 +45,8 @@ config = {
             },
         ],
     },
-    'system': 'jetto',
-    'submit': {
+    'system': {
+        'name': 'jetto',
         'submit_command': 'true',
     },
 }
