@@ -186,6 +186,19 @@ values: [0.8, 0.9, 1.0, 1.1, 1.2]
 clip_min: 1
 ```
 
+#### Linear ramps
+
+Before applying the operator, the given value can be ramped along the horizontal axis (rho) by specifying the `linear_ramp` keyword.
+
+The two values represent the start and stop value of a linear ramp. For each value in `values`, the data at rho = 0 are multiplied by 1 * value, data at rho = 1 are multiplied by 2 * value. All values inbetween get multiplied based on a linear interpolation betwen those 2 values.
+
+```yaml
+variable: t_e
+operator: multiply
+values: [0.8, 1.0, 1.2]
+linear_ramp: [1, 2]
+```
+
 ### Variables
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.
