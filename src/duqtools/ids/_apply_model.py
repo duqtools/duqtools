@@ -73,6 +73,10 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
         npfunc(data, value, out=data)
+
+        if model.clip_max is not None or model.clip_min is not None:
+            np.clip(data, a_min=model.clip_min, a_max=model.clip_max, out=data)
+
         logger.debug('data range after: %s - %s', data.min(), data.max())
 
     if target_in:

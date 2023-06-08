@@ -175,6 +175,17 @@ With the default `sampler: latin-hypercube`, this means 9 new data files will be
     If you want to copy all time ranges, you can use `path: profiles_1d/*/t_i_ave`. The `*` substring will
     duqtools to apply the operation to all available time slices.
 
+#### Clipping profiles
+
+Values can be clipped to a lower or upper bound by specifying `clip_min` or `clip_max`. This can be helpful to guard against unphysical values. The example below will clip the profile for Zeff at 1 (lower bound):
+
+```yaml
+variable: zeff
+operator: multiply
+values: [0.8, 0.9, 1.0, 1.1, 1.2]
+clip_min: 1
+```
+
 ### Variables
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.

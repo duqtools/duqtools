@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 from pydantic import Field, validator
 
@@ -28,6 +28,18 @@ class OperatorMixin(BaseModel):
         With asymmetric errors (i.e. both lower/upper error nodes are available),
         scale to the lower error node for values < 0, and to the upper error node
         for values > 0.
+        """))
+
+    clip_min: Optional[float] = Field(None,
+                                      description=f("""
+        If set, clip (limit) data at this value (upper bound).
+        Uses `np.clip`.
+        """))
+
+    clip_max: Optional[float] = Field(None,
+                                      description=f("""
+        If set, clip (limit) data at this value (lower bound).
+        Uses `np.clip`.
         """))
 
     _upper_suffix: str = '_error_upper'
