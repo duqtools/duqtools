@@ -71,6 +71,10 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.info('Apply %s', model)
 
+        if model.linear_ramp is not None:
+            a, b = model.linear_ramp
+            value = np.linspace(a, b, len(data)) * value
+
         logger.debug('data range before: %s - %s', data.min(), data.max())
         npfunc(data, value, out=data)
 
