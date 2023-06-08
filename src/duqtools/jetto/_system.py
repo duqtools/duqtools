@@ -70,8 +70,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         -------
         Path
         """
-        if self.cfg and self.cfg.system.jruns:  # type: ignore
-            return self.cfg.system.jruns  # type: ignore
+        if self.jruns:  # type: ignore
+            return self.jruns  # type: ignore
         elif os.getenv('JRUNS'):
             return Path(os.getenv('JRUNS'))  # type: ignore
         else:
@@ -164,7 +164,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_manager = jetto_job.JobManager()
 
         # Jetto tools decided to be weird, be weird too
-        (job.path / 'jetto/runs').mkdir(exist_ok=True)
+        (job.path / 'jetto/runs').mkdir(parents=True, exist_ok=True)
         shutil.copytree(job.path, job.path / 'jetto/runs')
 
         os.environ['RUNS_HOME'] = str(job.path)
