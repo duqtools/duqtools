@@ -42,6 +42,8 @@ class OperatorMixin(BaseModel):
         Uses `np.clip`.
         """))
 
+    slope: Optional[tuple[float, float]] = Field(None, description='rawr')
+
     _upper_suffix: str = '_error_upper'
     _lower_suffix: str = '_error_lower'
 

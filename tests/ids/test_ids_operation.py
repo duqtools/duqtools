@@ -83,6 +83,18 @@ TEST_INPUT = (
         'value': 1.0,
         'clip_max': 20,
     },
+    {
+        'operator': 'add',
+        'variable': get_test_var('data/0/x'),
+        'value': 1.0,
+        'slope': (1, 2),
+    },
+    {
+        'operator': 'add',
+        'variable': get_test_var('data/0/x'),
+        'value': 1.0,
+        'slope': (100, 0),
+    },
 )
 
 TEST_OUTPUT = (
@@ -94,6 +106,8 @@ TEST_OUTPUT = (
     (4, 8, 12),
     (20, 20, 30),
     (10, 20, 20),
+    (11, 21.5, 32),
+    (110, 70, 30),
 )
 
 

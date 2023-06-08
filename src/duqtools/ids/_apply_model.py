@@ -71,6 +71,10 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.info('Apply %s', model)
 
+        if model.slope is not None:
+            a, b = model.slope
+            value = np.linspace(a, b, len(data)) * value
+
         logger.debug('data range before: %s - %s', data.min(), data.max())
         npfunc(data, value, out=data)
 
