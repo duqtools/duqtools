@@ -198,7 +198,7 @@ def status(*,
     detailed : bool
         Show detailed progress for every job.
     """
-    debug('Submit config: %s', cfg.submit)
+    debug('Submit config: %s', cfg.system)
 
     runs = Locations(cfg=cfg).runs
     jobs = [Job(run.dirname, cfg=cfg) for run in runs]
