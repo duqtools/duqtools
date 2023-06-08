@@ -23,13 +23,15 @@ Check out [the command-line interface](../command-line-interface.md#status) for 
 
 ### Example
 
+Parameters for retrieving the status are defined in the system settings. Below shows an example for `jetto`:
+
 ```yaml title="duqtools.yaml"
 system:
   name: jetto
   in_file: jetto.in
+  out_file: jetto.out
+  status_file: jetto.status
   msg_completed: 'Status : Completed successfully'
   msg_failed: 'Status : Failed'
   msg_running: 'Status : Running'
-  out_file: jetto.out
-  status_file: jetto.status
 ```

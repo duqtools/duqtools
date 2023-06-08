@@ -57,7 +57,9 @@ If you do not specify anything, the jetto output location depends on the locatio
 You can override the `$JRUNS` directory by setting the `jruns` variable. This must be a directory that `rjettov` can write to.
 
 ```yaml title="duqtools.yaml"
-jruns: /pfs/work/username/jetto/runs/
+system:
+  name: jetto
+  jruns: /pfs/work/username/jetto/runs/
 ```
 
 You can modify the duqtools output directory via `runs_dir`:

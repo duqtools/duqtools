@@ -62,7 +62,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
 
     @property
     def jruns_path(self) -> Path:
-        """Return the Path specified in the create->jruns config variable, or,
+        """Return the Path specified in the system>jruns config variable, or,
         if that is empty, the `$JRUNS` environment variable, or, if `$JRUNS`
         does not exists, return the current directory `./`.
 
@@ -70,8 +70,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         -------
         Path
         """
-        if self.cfg and self.cfg.create.jruns:  # type: ignore
-            return self.cfg.create.jruns  # type: ignore
+        if self.cfg and self.cfg.system.jruns:  # type: ignore
+            return self.cfg.system.jruns  # type: ignore
         elif os.getenv('JRUNS'):
             return Path(os.getenv('JRUNS'))  # type: ignore
         else:

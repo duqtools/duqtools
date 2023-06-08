@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Literal, Optional
 
-from pydantic import Field
+from pydantic import DirectoryPath, Field
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -124,3 +124,22 @@ class JettoSystemModel(SystemModel):
             Parse `status_file` for this message to check for
             running status.
             """))
+
+    jruns: Optional[DirectoryPath] = Field(description=f(
+        """`jruns` defines the the root directory where all simulations are
+        run for the jetto system. Because the jetto system works with relative
+        directories from some root directory.
+
+        This variable is optional. If this variable is not specified,
+        duqtools will look for the `$JRUNS` environment variable,
+        and set it to that. If that fails, `jruns` is set to the current directory `./`
+
+        In this way, duqtools can ensure that the current work directory is
+        a subdirectory of the given root directory. All subdirectories are
+        calculated as relative to the root directory.
+
+        For example, for `rjettov`, the root directory must be set to
+        `/pfs/work/$USER/jetto/runs/`. Any UQ runs must therefore be
+        a subdirectory.
+
+        """))
