@@ -163,8 +163,16 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
-        os.environ['RUNS_HOME'] = os.getcwd()
-        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.path)
+        # Jetto tools decided to be weird, be weird too
+        (job.path / 'jetto/runs').mkdir(exist_ok=True)
+        shutil.copytree(job.path, job.path / 'jetto/runs')
+
+        os.environ['RUNS_HOME'] = str(job.path)
+
+        _ = jetto_manager.submit_job_to_prominence(
+            jetto_config,
+            job.path,
+        )
 
     def submit_array(
         self,
