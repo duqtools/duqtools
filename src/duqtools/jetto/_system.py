@@ -70,8 +70,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         -------
         Path
         """
-        if self.cfg and self.cfg.system.jruns:  # type: ignore
-            return self.cfg.system.jruns  # type: ignore
+        if self.jruns:  # type: ignore
+            return self.jruns  # type: ignore
         elif os.getenv('JRUNS'):
             return Path(os.getenv('JRUNS'))  # type: ignore
         else:
@@ -160,11 +160,22 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
 
     def submit_prominence(self, job: Job):
         jetto_template = template.from_directory(job.path)
-        jetto_config = config.RunConfig(jetto_template)
-        jetto_manager = jetto_job.JobManager()
+        config.RunConfig(jetto_template)
+        jetto_job.JobManager()
+        jetto_jset = jset.read(job.path / 'jetto.jset')
 
-        os.environ['RUNS_HOME'] = os.getcwd()
-        _ = jetto_manager.submit_job_to_prominence(jetto_config, job.path)
+        # Jetto tools decided to be weird, so we use jams/prom-submit.py
+        cmd = [
+            'prom-submit.py', '--rundir',
+            str(job.path), '--image', self.prominence_image, '--cpus',
+            str(jetto_jset['JobProcessingPanel.numProcessors']), '--walltime',
+            '24.0', '--name', f'duqtools_{job.path.name}', '--cmd',
+            '/docker-entrypoint.sh rjettov -I -xmpi -x64'
+        ]
+
+        ret = sp.run(cmd, check=True, capture_output=True)
+        with open(job.lockfile, 'wb') as f:
+            f.write(ret.stdout)
 
     def submit_array(
         self,

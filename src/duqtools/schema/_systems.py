@@ -92,6 +92,10 @@ class JettoSystemModel(SystemModel):
     docker_image: str = Field('jintrac-imas',
                               description='Docker image used for submission')
 
+    prominence_image: str = Field(
+        'CCFE/JINTRAC/ci:latest-imas.sif',
+        description='prominence image used for submission')
+
     in_file: str = Field('jetto.in',
                          description=f("""
             Name of the modelling input file, will be used to check
