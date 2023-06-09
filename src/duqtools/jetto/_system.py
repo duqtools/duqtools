@@ -163,16 +163,18 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
 
-        # Jetto tools decided to be weird, be weird too
-        Path('./jetto/runs').mkdir(parents=True, exist_ok=True)
-        shutil.copytree(job.path, './jetto/runs' / job.path)
+        # Jetto tools decided to be weird, so just circumvent it mostly
+        import prominence
+        client = prominence.client.ProminenceClient(authenticated=True)
+        tarball_path = jetto_manager._prom_create_tarball(
+            self.get_runs_dir(), job.path.name, 1)
 
-        os.environ['RUNS_HOME'] = os.getcwd()
-
-        _ = jetto_manager.submit_job_to_prominence(
-            jetto_config,
-            job.path,
-        )
+        jetto_manager._prom_upload_tarball(tarball_path, client)
+        id = jetto_manager._prom_submit_job(jetto_config, self.get_runs_dir(),
+                                            job.path.name, tarball_path,
+                                            client)
+        with open(job.lockfile, 'w') as f:
+            f.write(f'Job submitted with id {id}')
 
     def submit_array(
         self,
