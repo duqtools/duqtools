@@ -170,11 +170,12 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
             self.get_runs_dir(), job.path.name, 1)
 
         jetto_manager._prom_upload_tarball(tarball_path, client)
-        id = jetto_manager._prom_submit_job(jetto_config, self.get_runs_dir(),
+        id = jetto_manager._prom_submit_job(jetto_config,
+                                            str(self.get_runs_dir()),
                                             job.path.name, tarball_path,
                                             client)
         with open(job.lockfile, 'w') as f:
-            f.write(f'Job submitted with id {id}')
+            f.write(f'Job submitted with id {id}\n')
 
     def submit_array(
         self,
