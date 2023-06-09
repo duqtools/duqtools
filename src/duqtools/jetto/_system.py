@@ -162,20 +162,20 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_template = template.from_directory(job.path)
         jetto_config = config.RunConfig(jetto_template)
         jetto_manager = jetto_job.JobManager()
+        jetto_jset = jset.read(job.path / 'jetto.jset')
 
-        # Jetto tools decided to be weird, so just circumvent it mostly
-        import prominence
-        client = prominence.client.ProminenceClient(authenticated=True)
-        tarball_path = jetto_manager._prom_create_tarball(
-            self.get_runs_dir(), job.path.name, 1)
+        # Jetto tools decided to be weird, so we use jams/prom-submit.py
+        cmd = ['prom-submit.py', 
+                '--rundir', str(job.path),
+                '--image', self.prominence_image,
+                '--cpus', str(jetto_jset['JobProcessingPanel.numProcessors']),
+                '--walltime', '24.0',
+                '--name', f'duqtools_{job.path.name}',
+                '--cmd', '/docker-entrypoint.sh rjettov -I -xmpi -x64']
 
-        jetto_manager._prom_upload_tarball(tarball_path, client)
-        id = jetto_manager._prom_submit_job(jetto_config,
-                                            str(self.get_runs_dir()),
-                                            job.path.name, tarball_path,
-                                            client)
-        with open(job.lockfile, 'w') as f:
-            f.write(f'Job submitted with id {id}\n')
+        ret = sp.run(cmd, check=True, capture_output=True)
+        with open(job.lockfile, 'wb') as f:
+            f.write(ret.stdout)
 
     def submit_array(
         self,
