@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import partial
 from typing import Union
 
 import numpy as np
@@ -12,6 +13,10 @@ from ._handle import ImasHandle
 from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
+
+
+def _custom_function(*, data: np.ndarray, value, out: np.ndarray, code: str):
+    out[:] = eval(code)
 
 
 @apply_model.register  # type: ignore
@@ -38,7 +43,10 @@ def _apply_ids(model: IDSOperation, *,
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
 
-    npfunc = getattr(np, model.operator)
+    if model.operator == 'custom':
+        npfunc = partial(_custom_function, code=model.custom_function)
+    else:
+        npfunc = getattr(np, model.operator)
 
     data_map = ids_mapping.findall(model.variable.path)
 
@@ -76,6 +84,7 @@ def _apply_ids(model: IDSOperation, *,
             value = np.linspace(a, b, len(data)) * value
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
+
         npfunc(data, value, out=data)
 
         if model.clip_max is not None or model.clip_min is not None:
