@@ -79,6 +79,14 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
             continue
         job_queue.append(job)
 
-    submitter = job_scheduler if schedule else job_submitter
-    submitter = job_array_submitter if array else submitter
-    submitter(job_queue, max_jobs=max_jobs, max_array_size=max_array_size)
+    if schedule:
+        job_scheduler(job_queue, max_jobs=max_jobs)
+    elif array:
+        job_array_submitter(job_queue,
+                            max_jobs=max_jobs,
+                            max_array_size=max_array_size,
+                            cfg=cfg)
+    else:
+        job_submitter(job_queue, max_jobs=max_jobs)
+
+    return job_queue
