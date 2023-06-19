@@ -201,6 +201,22 @@ values: [0.8, 1.0, 1.2]
 linear_ramp: [1, 2]
 ```
 
+#### Custom functions
+
+If the standard operators are not suitable for your use-case, you can define your own functions using the `custom` operator.
+
+This can be any custom Python code. Two variables are accessible. `data` corresponds to the variable data, and `value` to one of the specified values in the `values` field. The only restriction is that the output of the code *must* have the same dimensions as the input.
+
+The example shows an implementation of `operator: multiply` with [lower and upper bounds](#clipping-profiles) using a custom function.
+
+```yaml
+variable: t_e
+operator: custom
+values: [0.8, 1.0, 1.2]
+custom_code: 'np.clip(data * value, a_min=0, a_max=100)'
+```
+
+
 ### Variables
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.

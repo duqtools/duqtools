@@ -52,22 +52,22 @@ class OperatorMixin(BaseModel):
 
         The linear ramp acts as a multiplier of the specified `value`.
 
-        For example, for 'operator': 'add'`:
+        For example, for `operator: add`:
         `new_data = data + np.linspace(start, stop, len(data)) * value`
         """))
 
     custom_code: Optional[str] = Field(None,
                                        description=f("""
-            Custom python code to apply for the `custom` operator.
-            This will be evaluated as if it were inline Python code.
-            Two variables are accessible: `data` corresponds
-            to the variable data, and `value` corresponds to pass value.
+        Custom python code to apply for the `custom` operator.
+        This will be evaluated as if it were inline Python code.
+        Two variables are accessible: `data` corresponds
+        to the variable data, and `value` corresponds to pass value.
 
-            For example:
+        For example, an implementation of `operator: multiply`:
 
-            `custom_code: 'value * data**2'`
+        `custom_code: 'value * data'`
 
-            The resulting data must be of the same shape.
+        The resulting data must be of the same shape.
             """))
 
     _upper_suffix: str = '_error_upper'
