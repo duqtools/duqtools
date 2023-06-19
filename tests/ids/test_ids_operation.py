@@ -101,6 +101,25 @@ TEST_INPUT = (
         'value': 1.0,
         'linear_ramp': (1, 1),
     },
+    # custom
+    {
+        'operator': 'custom',
+        'variable': get_test_var('data/0/x'),
+        'value': 2.0,
+        'custom_code': 'data * value',
+    },
+    {
+        'operator': 'custom',
+        'variable': get_test_var('data/0/x'),
+        'value': 2.0,
+        'custom_code': 'data**value',
+    },
+    {
+        'operator': 'custom',
+        'variable': get_test_var('data/0/x'),
+        'value': 2.0,
+        'custom_code': 'np.arange(3) * value',
+    },
 )
 
 TEST_OUTPUT = (
@@ -115,6 +134,10 @@ TEST_OUTPUT = (
     (11, 21.5, 32),
     (110, 70, 30),
     (11, 21, 31),
+    # custom
+    (20, 40, 60),
+    (100, 400, 900),
+    (0, 2, 4),
 )
 
 

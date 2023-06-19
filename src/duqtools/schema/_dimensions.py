@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import ast
 from typing import Literal, Optional, Union
 
-from pydantic import Field, validator
+from pydantic import Field, root_validator, validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -12,9 +13,9 @@ from ._variable import IDSVariableModel, JettoVariableModel
 
 class OperatorMixin(BaseModel):
     operator: Literal['add', 'multiply', 'divide', 'power', 'subtract',
-                      'floor_divide', 'mod', 'copyto',
-                      'remainder'] = Field('multiply',
-                                           description=f("""
+                      'floor_divide', 'mod', 'copyto', 'remainder',
+                      'custom'] = Field('multiply',
+                                        description=f("""
         Which operator to apply to the data in combination with any of the
         given values below. This can be any of the basic numpy arithmetic
         operations. Available choices: `add`, `multiply`, `divide`, `power`,
@@ -51,12 +52,40 @@ class OperatorMixin(BaseModel):
 
         The linear ramp acts as a multiplier of the specified `value`.
 
-        For example, for 'operator': 'add'`:
+        For example, for `operator: add`:
         `new_data = data + np.linspace(start, stop, len(data)) * value`
         """))
 
+    custom_code: Optional[str] = Field(None,
+                                       description=f("""
+        Custom python code to apply for the `custom` operator.
+        This will be evaluated as if it were inline Python code.
+        Two variables are accessible: `data` corresponds
+        to the variable data, and `value` corresponds to pass value.
+
+        For example, an implementation of `operator: multiply`:
+
+        `custom_code: 'value * data'`
+
+        The resulting data must be of the same shape.
+            """))
+
     _upper_suffix: str = '_error_upper'
     _lower_suffix: str = '_error_lower'
+
+    @validator('custom_code')
+    def check_ast(cls, custom_code):
+        if custom_code:
+            ast.parse(custom_code)
+        return custom_code
+
+    @root_validator
+    def check_custom(cls, values):
+        if values.get(
+                'operator') == 'custom' and not values.get('custom_code'):
+            raise ValueError(
+                'Missing `custom_code` field for `operator: custom`.')
+        return values
 
 
 class DimMixin(BaseModel):
