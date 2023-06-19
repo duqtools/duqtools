@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: nbcheckorder
   - repo: https://github.com/google/yapf
-    rev: v0.44.0
+    rev: v0.40.0
     hooks:
       - id: yapf
         additional_dependencies:
