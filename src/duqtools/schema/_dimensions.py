@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from typing import Literal, Optional, Union
 
-from pydantic import Field, validator
+from pydantic import Field, root_validator, validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -81,8 +81,10 @@ class OperatorMixin(BaseModel):
 
     @root_validator
     def check_custom(cls, values):
-        if values.get('operator') == 'custom' and not values.get('custom_code'):
-            raise ValueError('Missing `custom_code` field for `operator: custom`.')
+        if values.get(
+                'operator') == 'custom' and not values.get('custom_code'):
+            raise ValueError(
+                'Missing `custom_code` field for `operator: custom`.')
         return values
 
 

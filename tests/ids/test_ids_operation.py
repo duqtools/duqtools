@@ -107,7 +107,7 @@ TEST_INPUT = (
         'variable': get_test_var('data/0/x'),
         'value': 2.0,
         'custom_code': 'data * value',
-        },
+    },
     {
         'operator': 'custom',
         'variable': get_test_var('data/0/x'),
