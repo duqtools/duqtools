@@ -15,7 +15,8 @@ from ._mapping import IDSMapping
 logger = logging.getLogger(__name__)
 
 
-def _custom_function(*, data: np.ndarray, value, out: np.ndarray, code: str):
+def _custom_function(data: np.ndarray, value, *, out: np.ndarray, code: str):
+    """Mimick np.ufunc for custom functions."""
     out[:] = eval(code)
 
 
@@ -44,7 +45,7 @@ def _apply_ids(model: IDSOperation, *,
         raise TypeError('`model.variable` must have a `path` attribute.')
 
     if model.operator == 'custom':
-        npfunc = partial(_custom_function, code=model.custom_function)
+        npfunc = partial(_custom_function, code=model.custom_code)
     else:
         npfunc = getattr(np, model.operator)
 

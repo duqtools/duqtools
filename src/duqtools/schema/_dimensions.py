@@ -59,14 +59,15 @@ class OperatorMixin(BaseModel):
     custom_code: Optional[str] = Field(None,
                                        description=f("""
             Custom python code to apply for the `custom` operator.
+            This will be evaluated as if it were inline Python code.
             Two variables are accessible: `data` corresponds
             to the variable data, and `value` corresponds to pass value.
 
             For example:
 
-            `custom_code: "data * value**2"`
+            `custom_code: 'value * data**2'`
 
-            Resulting data must be of the same shape.
+            The resulting data must be of the same shape.
             """))
 
     _upper_suffix: str = '_error_upper'
@@ -77,6 +78,12 @@ class OperatorMixin(BaseModel):
         if custom_code:
             ast.parse(custom_code)
         return custom_code
+
+    @root_validator
+    def check_custom(cls, values):
+        if values.get('operator') == 'custom' and not values.get('custom_code'):
+            raise ValueError('Missing `custom_code` field for `operator: custom`.')
+        return values
 
 
 class DimMixin(BaseModel):
