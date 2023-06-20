@@ -1,6 +1,7 @@
+import logging
 from collections import deque
 from pathlib import Path
-from typing import Deque, Sequence
+from typing import Deque, Optional, Sequence
 
 from ..config import load_config
 from ..models import Job, Locations
@@ -13,8 +14,12 @@ from ..submit import (
 )
 from ..utils import read_imas_handles_from_file
 
+logger = logging.getLogger(__name__)
+info = logger.info
 
-def submit(*, array, force, max_jobs, schedule, max_array_size: int,
+
+def submit(*, array: bool, array_script: bool, limit: Optional[int],
+           force: bool, max_jobs: int, schedule: bool, max_array_size: int,
            input_file: str, pattern: str, status_filter: Sequence[str],
            **kwargs):
     """Submit nested duqtools configs.
@@ -28,8 +33,14 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
     schedule : bool
         Schedule `max_jobs` to run at once, keeps the process alive until
         finished.
+    array : bool
+        Submit the jobs as a single array
+    array_script : bool
+        Create script to submit the jobs as a single array
     max_array_size : int
         Maximum array size for slurm (usually 1001, default = 100)
+    limit : Optional[int]
+        Limit total number of jobs
     input_file : str
         Only submit jobs for configs where template_data matches a handle in the data.csv
     pattern : str
@@ -79,12 +90,17 @@ def submit(*, array, force, max_jobs, schedule, max_array_size: int,
             continue
         job_queue.append(job)
 
+        if len(job_queue) == limit:
+            info('Limiting total number of jobs to: %d', len(job_queue))
+            break
+
     if schedule:
         job_scheduler(job_queue, max_jobs=max_jobs)
-    elif array:
+    elif array or array_script:
         job_array_submitter(job_queue,
                             max_jobs=max_jobs,
                             max_array_size=max_array_size,
+                            create_only=array_script,
                             cfg=cfg)
     else:
         job_submitter(job_queue, max_jobs=max_jobs)

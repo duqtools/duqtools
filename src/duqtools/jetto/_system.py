@@ -183,30 +183,41 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         *,
         max_jobs: int = 10,
         max_array_size: int = 100,
+        create_only=False,
         **kwargs,
     ):
         if self.submit_system == 'slurm':
-            self.submit_array_slurm(jobs,
+            self.create_array_slurm(jobs,
                                     max_jobs=max_jobs,
                                     max_array_size=max_array_size)
+            if not create_only:
+                self.submit_array_slurm(jobs)
+
         else:
             raise NotImplementedError(
                 f'array submission type {self.submit_system}'
                 ' not implemented')
 
-    @add_to_op_queue('Submit single array job', 'duqtools_slurm_array.sh')
-    def submit_array_slurm(
+    @add_to_op_queue('Create array job',
+                     'Submit using `sbatch duqtools_slurm_array.sh`')
+    def create_array_slurm(
         self,
         jobs: Sequence[Job],
         max_jobs: int,
         max_array_size: int,
         **kwargs,
     ):
-        for job in jobs:
-            job.lockfile.touch()
-
         logger.info('writing duqtools_slurm_array.sh file')
         _write_array_batchfile(jobs, max_jobs, max_array_size)
+
+    @add_to_op_queue('Submit array job', 'duqtools_slurm_array.sh')
+    def submit_array_slurm(
+        self,
+        jobs: Sequence[Job],
+        **kwargs,
+    ):
+        for job in jobs:
+            job.lockfile.touch()
 
         submit_cmd = self.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
