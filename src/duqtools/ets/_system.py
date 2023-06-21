@@ -66,8 +66,11 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         with open(run_ets6, 'w') as f:
             f.write(batchfile)
 
+    @add_to_op_queue('Create single array job', 'duqtools_array.sh')
     def write_array_batchfile(self, jobs: Sequence[Job], max_jobs: int,
                               max_array_size: int):
+        logger.info('Writing duqtools_array.sh file')
+
         scripts = '\n'.join(
             [SCRIPT_TEMPLATE.format(job=job, cfg=self.cfg) for job in jobs])
 
@@ -93,17 +96,26 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         with open(job.lockfile, 'wb') as f:
             f.write(ret.stdout)
 
+    def submit_array(self,
+                     jobs: Sequence[Job],
+                     *,
+                     max_jobs: int = 10,
+                     max_array_size: int = 100,
+                     create_only: bool = False,
+                     **kwargs):
+        self.write_array_batchfile(jobs,
+                                   max_jobs=max_jobs,
+                                   max_array_size=max_array_size)
+        if not create_only:
+            self._submit_array(jobs)
+
     @add_to_op_queue('Submit single array job', 'duqtools_array.sh')
-    def submit_array(self, jobs: Sequence[Job], *, max_jobs: int,
-                     max_array_size: int, **kwargs):
+    def _submit_array(self, jobs: Sequence[Job], *, max_jobs: int,
+                      max_array_size: int, **kwargs):
         for job in jobs:
             job.lockfile.touch()
 
-        logger.info('writing duqtools_slurm_array.sh file')
-        self.write_array_batchfile(jobs, max_jobs, max_array_size)
-
-        self.submit_command.split()
-        cmd: list[str] = ['./duqtools_array.sh']
+        cmd = ['./duqtools_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
 

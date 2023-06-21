@@ -85,6 +85,7 @@ def job_array_submitter(
     *,
     max_jobs: int = 10,
     max_array_size: int = 100,
+    create_only: bool = False,
     cfg: Config,
 ):
     if len(jobs) == 0:
@@ -99,9 +100,12 @@ def job_array_submitter(
     if not cfg.create:
         raise CreateError('Create field required in config file')
 
-    get_system(cfg=cfg).submit_array(jobs,
-                                     max_jobs=max_jobs,
-                                     max_array_size=max_array_size)
+    system = get_system(cfg=cfg)
+
+    system.submit_array(jobs,
+                        max_jobs=max_jobs,
+                        max_array_size=max_array_size,
+                        create_only=create_only)
 
 
 def submission_script_ok(job) -> bool:
@@ -178,6 +182,8 @@ def submit(*,
            max_array_size: int = 100,
            schedule: bool = False,
            array: bool = False,
+           array_script: bool = False,
+           limit: Optional[int] = None,
            resubmit: Sequence[Path] = (),
            status_filter: Sequence[str] = (),
            parent_dir: Optional[Path] = None,
@@ -197,6 +203,10 @@ def submit(*,
         finished.
     array : bool
         Submit the jobs as a single array
+    array_script : bool
+        Create script to submit the jobs as a single array
+    limit : Optional[int]
+        Limit total number of jobs
     resubmit : Sequence[Path]
         If any jobs need to be resubmitted, this is has a nonzero length, and
         contains a Sequence of Paths which either are the full Path to the run
@@ -240,12 +250,17 @@ def submit(*,
             continue
         job_queue.append(job)
 
+        if len(job_queue) == limit:
+            info('Limiting total number of jobs to: %d', len(job_queue))
+            break
+
     if schedule:
         job_scheduler(job_queue, max_jobs=max_jobs)
-    elif array:
+    elif array or array_script:
         job_array_submitter(job_queue,
                             max_jobs=max_jobs,
                             max_array_size=max_array_size,
+                            create_only=array_script,
                             cfg=cfg)
     else:
         job_submitter(job_queue, max_jobs=max_jobs)

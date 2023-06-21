@@ -165,11 +165,12 @@ class AbstractSystem(ABC, BaseModel):
         *,
         max_jobs: int = 10,
         max_array_size: int = 100,
+        create_only: bool = False,
         **kwargs,
     ):
-        """submit_array method used for submitting the jobs in an array
-        fashion, its perfectly fine to just throw an error if the system does
-        not support it.
+        """Submit method used for submitting the jobs in an array fashion, its
+        perfectly fine to just throw an error if the system does not support
+        it.
 
         Parameters
         ----------
@@ -179,7 +180,9 @@ class AbstractSystem(ABC, BaseModel):
             max_jobs
         max_array_size : int
             max_array_size
+        create_only : bool
+            If true, create array script, but do not submit
         kwargs :
-            optional arguments
+            Optional arguments
         """
         pass

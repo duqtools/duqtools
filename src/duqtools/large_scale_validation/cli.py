@@ -95,17 +95,13 @@ def cli_create(**kwargs):
 @click.option('--force',
               is_flag=True,
               help='Re-submit running or completed jobs.')
-@click.option(
-    '--schedule',
-    is_flag=True,
-    help=(
-        'Schedule and submit jobs automatically. '
-        '`max_jobs` defines the total number of jobs running simultaneiously.'
-    ))
+@click.option('--schedule',
+              is_flag=True,
+              help=('Schedule and submit jobs automatically. '))
 @click.option('-j',
               '--max_jobs',
               type=int,
-              help='Maximum number of running jobs.',
+              help='Maximum number of jobs running simultaneously.',
               default=10)
 @click.option('-s',
               '--status',
@@ -127,14 +123,14 @@ def cli_create(**kwargs):
     help=
     'Only submit jobs for configs where `template_data` matches a handle in this data.csv.'
 )
-@click.option(
-    '-a',
-    '--array',
-    is_flag=True,
-    help=(
-        'Submit jobs as array. '
-        '`max_jobs` defines the total number of jobs running simultaneiously.'
-    ))
+@click.option('-a', '--array', is_flag=True, help=('Submit jobs as array. '))
+@click.option('--array-script',
+              is_flag=True,
+              help=('Create script to submit jobs as array. '
+                    'Like --array, but does not submit.'))
+@click.option('--limit',
+              type=int,
+              help=('Limits total number of jobs to submit.'))
 @click.option(
     '--max_array_size',
     type=int,
