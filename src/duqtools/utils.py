@@ -35,7 +35,7 @@ def work_directory(path: PathLike):
         os.chdir(prev_cwd)
 
 
-def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
+def read_imas_handles_from_file(inp: PathLike) -> dict[str, ImasHandle]:
     """Read a collection of imas paths from a file.
 
     Input can be a `Runs.yaml` file `data.csv` file.
@@ -49,12 +49,10 @@ def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
     ----------
     inp : PathLike
         Name of the file to read.
-    as_dataframe : bool, optional
-        Return imas handles in a dataframe instead.
 
     Returns
     -------
-    Union[dict[str, ImasHandle], 'pd.DataFrame']
+    dict[str, ImasHandle]
         Returns a dict with the Imas handles.
 
     Raises
@@ -72,7 +70,7 @@ def read_imas_handles_from_file(inp: PathLike, ) -> dict[str, ImasHandle]:
     if inp.suffix == '.csv':
         handles = {}
         with open(inp) as f:
-            has_header = csv.Sniffer().has_header(f.read(1024))
+            has_header = csv.Sniffer().has_header(''.join(f.readlines(3)))
             f.seek(0)
 
             if not has_header:
