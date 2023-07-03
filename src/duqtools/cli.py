@@ -357,6 +357,16 @@ def cli_submit(**kwargs):
     with op_queue_context():
         submit(cfg=CFG, **kwargs)
 
+@cli.command('sync_prominence', cls=GroupCmd)
+@click.option('--force',
+              is_flag=True,
+              help='Overwrite data if necessary')
+@common_options(*all_options)
+def cli_sync_prominence(**kwargs):
+    from .sync_prominence import sync_prominence
+    with op_queue_context():
+        sync_prominence(cfg=CFG, **kwargs)
+
 
 @cli.command('status', cls=GroupCmd)
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
