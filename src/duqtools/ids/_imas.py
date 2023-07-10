@@ -11,7 +11,7 @@ try:
     import xml.sax.handler
 
     import imas
-    from imas import imasdef
+    from imas import imasdef  # type: ignore
 
     IMAS_PREFIX = os.getenv('IMAS_PREFIX', '')
     PATH_IDSDEF = f'{IMAS_PREFIX}/include/IDSDef.xml'

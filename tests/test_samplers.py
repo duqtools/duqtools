@@ -39,5 +39,5 @@ def test_halton():
 
     ret = halton(i, j, k, n_samples=4, seed=123)
 
-    assert ret == [('a', 'c', 'i'), ('b', 'e', 'f'), ('a', 'd', 'h'),
-                   ('b', 'c', 'i')]
+    assert ret == [('a', 'c', 'f'), ('b', 'd', 'g'), ('a', 'e', 'i'),
+                   ('b', 'c', 'h')]

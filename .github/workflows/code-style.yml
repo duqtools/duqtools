@@ -12,21 +12,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  codestyle:
-
+  pre-commit:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
           python-version: '3.11'
+    - run: pip install -e . # Necessary to check types of dependencies as well
 
-      - name: Install additional dependencies
-        run: |
-          pip install ruff
-
-      - name: Check code style
-        run: |
-          ruff src/duqtools tests
+    - uses: pre-commit/action@v3.0.0

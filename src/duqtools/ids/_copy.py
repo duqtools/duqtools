@@ -94,14 +94,14 @@ def copy_ids_entry_complex(source: ImasHandle, target: ImasHandle):
     """
     imas_version, _ = get_imas_ual_version()
 
-    idss_in = imas.ids(source.shot, source.run)
+    idss_in = imas.ids(source.shot, source.run)  # type: ignore
     op = idss_in.open_env(source.user, source.db, str(imas_version.major))
 
     ids_not_found = op[0] < 0
     if ids_not_found:
         raise KeyError('The entry you are trying to copy does not exist')
 
-    idss_out = imas.ids(target.shot, target.run)
+    idss_out = imas.ids(target.shot, target.run)  # type: ignore
 
     idss_out.create_env(target.user, target.db, str(imas_version.major))
     idx = idss_out.expIdx

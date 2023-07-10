@@ -14,7 +14,7 @@ class ImasBaseModel(BaseModel):
         None,
         description='Set as the relative location to the'
         ' imasdb location if a local imasdb is used')
-    user: str = Field(None, description='Username.')
+    user: Optional[str] = Field(None, description='Username.')
     db: str = Field(description='IMAS db/machine name.')
     shot: int = Field(description='IMAS Shot number.')
     run: int = Field(description='IMAS Run number.')

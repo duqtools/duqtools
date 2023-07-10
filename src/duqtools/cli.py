@@ -358,6 +358,23 @@ def cli_submit(**kwargs):
         submit(cfg=CFG, **kwargs)
 
 
+@cli.command('sync_prominence', cls=GroupCmd)
+@click.option('--force', is_flag=True, help='Overwrite data if necessary')
+@common_options(*all_options)
+def cli_sync_proinence(**kwargs):
+    """Sync data back from prominence.
+
+    This subcommand is meant to be used in combination with the
+    prominence submission system. After the jobs are completed on
+    prominence this command can be used to retrieve and extract the
+    completed runs from prominence to the local machine, so that they
+    can be used in further analysis.
+    """
+    from .sync_prominence import sync_prominence
+    with op_queue_context():
+        sync_prominence(cfg=CFG, **kwargs)
+
+
 @cli.command('status', cls=GroupCmd)
 @click.option('--detailed', is_flag=True, help='Detailed info on progress')
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
