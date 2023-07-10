@@ -8,8 +8,8 @@ from ._basemodel import BaseModel
 
 
 class LHSSampler(BaseModel):
-    """Select the Latin Hypercube sampler by specifying
-    `method: latin-hypercube`."""
+    """Select the Latin Hypercube sampler by specifying `method: latin-
+    hypercube`."""
 
     method: Literal['latin-hypercube'] = 'latin-hypercube'
 
@@ -33,7 +33,7 @@ class SobolSampler(BaseModel):
 
 
 class CartesianProduct(BaseModel):
-    """Select the Cartesian product sampler by specifying
-    `method: cartesian-product`."""
+    """Select the Cartesian product sampler by specifying `method: cartesian-
+    product`."""
 
     method: Literal['cartesian-product'] = 'cartesian-product'

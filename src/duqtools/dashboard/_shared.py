@@ -61,8 +61,8 @@ def _get_dataset(handles, variable, *, include_error: bool = False):
         ds = handle.get_variables(variables=variables)
         datasets.append(ds)
 
-    grid_var_norm = var_lookup.normalize(grid_var)
-    time_var_norm = var_lookup.normalize(time_var)
+    grid_var_norm = str(var_lookup.normalize(grid_var))
+    time_var_norm = str(var_lookup.normalize(time_var))
 
     datasets = standardize_grid_and_time(
         datasets,
