@@ -187,7 +187,7 @@ class CreateManager:
 
         run_map = {
             f'{prefix}{run.shortname}': run.data_out.dict()
-            for run in runs
+            for run in runs if run.data_out
         }
         df = pd.DataFrame.from_dict(run_map, orient='index')
         df.to_csv(fname)
@@ -233,10 +233,15 @@ class CreateManager:
 
         self.system.write_batchfile(model.dirname)
 
-        self.system.update_imas_locations(run=model.dirname,
-                                          inp=model.data_in,
-                                          out=model.data_out,
-                                          cfg_filename=self.template_drc.name)
+        if model.data_in and model.data_out:
+            self.system.update_imas_locations(
+                run=model.dirname,
+                inp=model.data_in,
+                out=model.data_out,
+                cfg_filename=self.template_drc.name)
+        else:
+            raise Exception(
+                'data not present in model, this should not happen')
 
 
 def create(*,

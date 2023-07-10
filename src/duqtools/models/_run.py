@@ -8,11 +8,11 @@ from ..schema import BaseModel, IDSOperation, ImasBaseModel, JettoOperation
 
 
 class Run(BaseModel):
-    dirname: Path = Field(None, description='Directory of run')
+    dirname: Path = Field(description='Directory of run')
     shortname: Optional[Path] = Field(
         description='Short name (`dirname.name`)')
-    data_in: ImasBaseModel = Field(None)
-    data_out: ImasBaseModel = Field(None)
+    data_in: Optional[ImasBaseModel] = Field(None)
+    data_out: Optional[ImasBaseModel] = Field(None)
     operations: Optional[list[Union[IDSOperation, JettoOperation,
                                     list[Union[IDSOperation,
                                                JettoOperation]]]]]

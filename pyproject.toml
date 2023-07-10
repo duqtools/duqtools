@@ -114,7 +114,9 @@ data_file = ".coverage"
 testpaths = ["tests"]
 norecursedirs = ["tests/helpers"]
 
+
 [tool.mypy]
+plugins = "pydantic.mypy"
 ignore_missing_imports = true
 files = ["duqtools", "tests"]
 allow_redefinition = true
@@ -126,6 +128,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = ["pkg_resources.*"]
 ignore_missing_imports = true
+
 
 [tool.yapf]
 blank_line_before_nested_class_or_def = "True"

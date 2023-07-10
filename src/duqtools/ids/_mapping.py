@@ -39,7 +39,7 @@ def replace_index_str(string: str) -> str:
 
 class IDSMapping(Mapping):
 
-    def __init__(self, ids):
+    def __init__(self, ids: Any) -> None:
         """Map the IMASDB object.
 
         Empty arrays are excluded from the mapping.

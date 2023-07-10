@@ -24,8 +24,10 @@ if not inp.exists():
 
 handles = read_imas_handles_from_file(inp)
 df = pd.DataFrame.from_dict(
-    {index: model.dict()
-     for index, model in handles.items()}, orient='index')
+    {
+        index: model.dict()
+        for index, model in handles.items()
+    }, orient='index')
 
 with st.expander('Click to show runs'):
     st.table(df)
