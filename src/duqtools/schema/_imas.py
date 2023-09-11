@@ -21,7 +21,7 @@ class ImasBaseModel(BaseModel):
     shot: int = Field(description='IMAS Shot number.')
     run: int = Field(description='IMAS Run number.')
 
-    @field_validator('user')
+    @field_validator('user', mode='before')
     def validate_user(cls, v):
         return v or getuser()
 

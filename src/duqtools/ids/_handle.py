@@ -94,7 +94,7 @@ class ImasHandle(ImasBaseModel):
     @field_validator('user')
     def user_rel_path(cls, v, values):
         # Override user if we have a relative location
-        if values['relative_location']:
+        if values.data['relative_location']:
             logger.info(
                 f'Updating imasdb location with relative location {values["relative_location"]}'
             )
