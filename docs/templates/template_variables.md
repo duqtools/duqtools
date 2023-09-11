@@ -31,7 +31,7 @@ The default duqtools variables are listed below.
 
 #### {{ var.name }}
 ```yaml
-{{ var.yaml() }}
+{{ var | to_yaml_str }}
 ```
 {% endfor %}
 {% endfor %}
@@ -44,7 +44,7 @@ The default duqtools variables are listed below.
 
 #### {{ var.name }}
 ```yaml
-{{ var.yaml() }}
+{{ var | to_yaml_str }}
 ```
 
 {% endfor %}
