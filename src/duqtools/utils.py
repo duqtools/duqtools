@@ -92,7 +92,8 @@ def read_imas_handles_from_file(inp: PathLike) -> dict[str, ImasHandle]:
         with open(inp) as f:
             runs = parse_yaml_raw_as(Runs, f)
         handles = {
-            str(run.dirname): ImasHandle.parse_obj(run.data_out)
+            str(run.dirname):
+            ImasHandle.model_validate(run.data_out, from_attributes=True)
             for run in runs
         }
 

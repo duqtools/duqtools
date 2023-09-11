@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from typing import Literal, Optional, Union
 
-from pydantic import Field, model_validator, validator
+from pydantic import Field, field_validator, model_validator
 
 from ._basemodel import BaseModel, RootModel
 from ._description_helpers import formatter as f
@@ -73,7 +73,8 @@ class OperatorMixin(BaseModel):
     _upper_suffix: str = '_error_upper'
     _lower_suffix: str = '_error_lower'
 
-    @validator('custom_code')
+    @field_validator('custom_code')
+    @classmethod
     def check_ast(cls, custom_code):
         if custom_code:
             ast.parse(custom_code)
@@ -93,7 +94,8 @@ class DimMixin(BaseModel):
             Values to use with operator on field to create sampling
             space."""))
 
-    @validator('values')
+    @field_validator('values')
+    @classmethod
     def convert_to_list(cls, v):
         if not isinstance(v, list):
             v = v.values
@@ -123,7 +125,8 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
 class CoupledDim(RootModel):
     root: list[OperationDim]
 
-    @validator('root')
+    @field_validator('root')
+    @classmethod
     def check_dimensions_match(cls, dims):
         if len(dims) > 0:
             refdim = len(dims[0].values)
@@ -211,7 +214,7 @@ class Operation(OperatorMixin, BaseModel):
             raise NotImplementedError(
                 f'{self.variable} convert not implemented')
 
-        mapping = self.dict()
+        mapping = self.model_dump()
         mapping['variable'] = variable
 
         return cls(**mapping)

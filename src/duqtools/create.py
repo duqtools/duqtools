@@ -46,10 +46,13 @@ class CreateManager:
         self.data_csv = locations.data_csv
 
     def _get_source_handle(self) -> ImasHandle:
-        if not self.options.template_data:
+        template_data = self.options.template_data
+
+        if not template_data:
             source = self.system.imas_from_path(self.template_drc)
         else:
-            source = ImasHandle.parse_obj(self.options.template_data)
+            source = ImasHandle.model_validate(template_data,
+                                               from_attributes=True)
 
         logger.info('Source data: %s', source)
 
@@ -127,7 +130,8 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            if ImasHandle.parse_obj(model.data_in).exists():
+            if ImasHandle.model_validate(model.data_in,
+                                         from_attributes=True).exists():
                 logger.info('Target %s already exists', model.data_in)
                 op_queue.add_no_op(
                     description='Not creating IDS',
@@ -168,7 +172,7 @@ class CreateManager:
 
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
     def write_runs_file(self, runs: Sequence[Run]) -> None:
-        runs = Runs.parse_obj(runs)
+        runs = Runs.model_validate(runs, from_attributes=True)
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -185,7 +189,7 @@ class CreateManager:
         prefix = f'{self.cfg.tag}.' if self.cfg.tag else ''
 
         run_map = {
-            f'{prefix}{run.shortname}': run.data_out.dict()
+            f'{prefix}{run.shortname}': run.data_out.model_dump()
             for run in runs if run.data_out
         }
         df = pd.DataFrame.from_dict(run_map, orient='index')
@@ -224,7 +228,8 @@ class CreateManager:
                      description='Creating run',
                      extra_description=f'{model.dirname}')
 
-        self.source.copy_data_to(ImasHandle.parse_obj(model.data_in))
+        self.source.copy_data_to(
+            ImasHandle.model_validate(model.data_in, from_attributes=True))
 
         self.system.copy_from_template(self.template_drc, model.dirname)
 
@@ -330,8 +335,10 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
             raise ValueError(f'`{run}` not in `runs.yaml`.')
 
         model = run_dict[run]
-        model.data_in = ImasHandle.parse_obj(model.data_in)
-        model.data_out = ImasHandle.parse_obj(model.data_out)
+        model.data_in = ImasHandle.model_validate(model.data_in,
+                                                  from_attributes=True)
+        model.data_out = ImasHandle.model_validate(model.data_out,
+                                                   from_attributes=True)
 
         model.data_in.delete()
         remove_run(model)

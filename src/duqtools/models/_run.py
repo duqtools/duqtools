@@ -27,7 +27,7 @@ class Run(BaseModel):
         if not self.data_out:
             raise NotImplementedError(
                 'Run has no data_out, necessary for mapping')
-        handle = ImasHandle.parse_obj(self.data_out)
+        handle = ImasHandle.model_validate(self.data_out, from_attributes=True)
         return handle
 
     @classmethod

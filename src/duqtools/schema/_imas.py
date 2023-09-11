@@ -3,7 +3,7 @@ from __future__ import annotations
 from getpass import getuser
 from typing import Optional
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from ._basemodel import BaseModel
 
@@ -14,12 +14,14 @@ class ImasBaseModel(BaseModel):
         None,
         description='Set as the relative location to the'
         ' imasdb location if a local imasdb is used')
-    user: Optional[str] = Field(None, description='Username.')
+    user: Optional[str] = Field(None,
+                                validate_default=True,
+                                description='Username.')
     db: str = Field(description='IMAS db/machine name.')
     shot: int = Field(description='IMAS Shot number.')
     run: int = Field(description='IMAS Run number.')
 
-    @validator('user', pre=True, always=True)
+    @field_validator('user', mode='before')
     def validate_user(cls, v):
         return v or getuser()
 

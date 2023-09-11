@@ -78,8 +78,8 @@ def _get_dataset(handles, variable, *, include_error: bool = False):
 
 def get_dataset(handles, variable, *, include_error: bool = False):
     """Convert to hashable types before calling `_get_dataset`."""
-    handles = {name: handle.dict() for name, handle in handles.items()}
-    variable = variable.dict()
+    handles = {name: handle.model_dump() for name, handle in handles.items()}
+    variable = variable.model_dump()
 
     return _get_dataset(handles, variable, include_error=include_error)
 

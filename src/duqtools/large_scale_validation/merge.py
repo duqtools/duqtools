@@ -42,7 +42,9 @@ def merge(force: bool, var_names: Sequence[str], **kwargs):
 
         runs = Locations(parent_dir=config_dir, cfg=cfg).runs
         runs = (run for run in runs if Job(run.dirname, cfg=cfg).is_completed)
-        handles = (ImasHandle.parse_obj(run.data_out) for run in runs)
+        handles = (ImasHandle.model_validate(run.data_out,
+                                             from_attributes=True)
+                   for run in runs)
         handles = [handle for handle in handles if handle.exists()]
 
         if not handles:
@@ -56,7 +58,7 @@ def merge(force: bool, var_names: Sequence[str], **kwargs):
 
         target_data = template_data.copy()
         target_data.user = str(cfg.create.runs_dir / 'imasdb')
-        target_handles[f'{run_name}_merged'] = target_data.dict()
+        target_handles[f'{run_name}_merged'] = target_data.model_dump()
 
         _merge(
             variables=variables,
