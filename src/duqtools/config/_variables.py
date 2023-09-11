@@ -8,6 +8,8 @@ from collections import UserDict
 from pathlib import Path, PosixPath
 from typing import Hashable, Sequence
 
+from pydantic_yaml import parse_yaml_raw_as
+
 from ..schema import IDSVariableModel
 from ..schema.variables import VariableConfigModel
 from ..utils import groupby
@@ -92,8 +94,8 @@ class VariableConfigLoader:
 
         for path in self.paths:
             logger.debug(f'Loading variables from: {path}')
-
-            var_config = VariableConfigModel.parse_file(path)
+            with open(path) as f:
+                var_config = parse_yaml_raw_as(VariableConfigModel, f)
             var_lookup.update(var_config.to_variable_dict())
 
         return var_lookup

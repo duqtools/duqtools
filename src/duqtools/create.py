@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import pandas as pd
+from pydantic_yaml import to_yaml_file
 
 from .apply_model import apply_model
 from .cleanup import remove_run
@@ -171,13 +172,11 @@ class CreateManager:
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            with open(self.runs_yaml, 'w') as f:
-                runs.yaml(stream=f)
+            to_yaml_file(self.runs_yaml, runs)
 
             # Only if it is a different directory
             if self._is_runs_dir_different_from_config_dir():
-                with open(self.runs_dir / 'runs.yaml', 'w') as f:
-                    runs.yaml(stream=f)
+                to_yaml_file(self.runs_dir / 'runs.yaml', runs)
 
     @add_to_op_queue('Writing csv', quiet=True)
     def write_runs_csv(self, runs: Sequence[Run]):

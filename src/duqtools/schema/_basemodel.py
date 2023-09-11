@@ -1,9 +1,8 @@
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import Extra
-from pydantic_yaml import YamlModelMixin
 
 
-class BaseModel(YamlModelMixin, PydanticBaseModel):
+class BaseModel(PydanticBaseModel):
     """Base model."""
 
     class Config:
