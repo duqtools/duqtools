@@ -8,7 +8,7 @@ from inspect import signature
 from typing import Any, Callable, Optional, Sequence
 
 import click
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from ._logging_utils import duqlog_screen
 from .config import CFG
@@ -79,11 +79,13 @@ class Operation(LongDescription):
 
     args: Optional[Sequence] = Field(
         None,
+        validate_default=True,
         description='positional arguments that have to be '
         'passed to the action')
 
     kwargs: Optional[dict] = Field(
         None,
+        validate_default=True,
         description='keyword arguments that will be '
         'passed to the action')
 
@@ -100,13 +102,13 @@ class Operation(LongDescription):
             self.action(*self.args, **self.kwargs)  # type: ignore
         return self
 
-    @validator('args', always=True)
+    @field_validator('args')
     def validate_args(cls, v):
         if v is None:
             v = ()
         return v
 
-    @validator('kwargs', always=True)
+    @field_validator('kwargs')
     def validate_kwargs(cls, v):
         if v is None:
             v = {}

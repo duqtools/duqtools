@@ -57,8 +57,8 @@ def cleanup(*, cfg: Config, out: bool, force: bool, **kwargs):
                     '`runs.yaml.old` exists, use --force to overwrite anyway')
 
     for run in runs:
-        data_in = ImasHandle.parse_obj(run.data_in)
-        data_out = ImasHandle.parse_obj(run.data_out)
+        data_in = ImasHandle.model_validate(run.data_in)
+        data_out = ImasHandle.model_validate(run.data_out)
 
         data_in.delete()
 

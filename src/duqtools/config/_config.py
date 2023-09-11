@@ -47,7 +47,7 @@ class Config(ConfigModel):
         cfg : Config
             Return instance of Config class.
         """
-        cfg = cls.parse_obj(mapping)
+        cfg = cls.model_validate(mapping)
         cls._update_global_config(cfg)
         return cfg
 

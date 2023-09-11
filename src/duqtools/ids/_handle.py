@@ -8,7 +8,7 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
-from pydantic import validator
+from pydantic import field_validator
 
 from ..config import lookup_vars, var_lookup
 from ..operations import add_to_op_queue
@@ -91,7 +91,7 @@ class ImasHandle(ImasBaseModel):
 
         raise ValueError(f'Could not match {string!r}')
 
-    @validator('user')
+    @field_validator('user')
     def user_rel_path(cls, v, values):
         # Override user if we have a relative location
         if values['relative_location']:
