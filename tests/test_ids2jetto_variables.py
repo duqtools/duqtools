@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pydantic_yaml import parse_yaml_raw_as
 
 from duqtools.api import IDSMapping
 from duqtools.schema._variable import IDS2JettoVariableModel
@@ -23,7 +24,8 @@ def var():
 def test_pick_first(var):
     lookup = {
         'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
+        parse_yaml_raw_as(
+            IDS2JettoVariableModel, """
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
@@ -39,7 +41,8 @@ def test_pick_first(var):
 def test_pick_second(var):
     lookup = {
         'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
+        parse_yaml_raw_as(
+            IDS2JettoVariableModel, """
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
@@ -55,7 +58,8 @@ def test_pick_second(var):
 def test_default(var):
     lookup = {
         'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
+        parse_yaml_raw_as(
+            IDS2JettoVariableModel, """
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
@@ -71,7 +75,8 @@ def test_default(var):
 def test_raise(var):
     lookup = {
         'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
+        parse_yaml_raw_as(
+            IDS2JettoVariableModel, """
     name: ids-t_start
     type: IDS2jetto-variable
     paths:
@@ -101,7 +106,8 @@ def test_getattr(var):
 def test_caching(var):
     lookup = {
         'ids-t_start':
-        IDS2JettoVariableModel.parse_raw("""
+        parse_yaml_raw_as(
+            IDS2JettoVariableModel, """
     name: ids-t_start
     type: IDS2jetto-variable
     paths:

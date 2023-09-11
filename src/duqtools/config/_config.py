@@ -17,6 +17,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Union
 
+from pydantic_yaml import parse_yaml_raw_as
+
 from ..schema.cli import ConfigModel
 
 
@@ -63,7 +65,8 @@ class Config(ConfigModel):
         cfg : Config
             Return instance of Config class.
         """
-        cfg = cls.parse_file(path)
+        with open(path) as f:
+            cfg = parse_yaml_raw_as(cls, f)
 
         cls._update_global_config(cfg)
 

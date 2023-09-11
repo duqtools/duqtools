@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
+from pydantic_yaml import parse_yaml_raw_as
+
 from ..config import Config
 from ._run import Run, Runs
 
@@ -45,4 +47,7 @@ class Locations:
         if not runs_yaml.exists():
             raise OSError(f'Cannot find {runs_yaml}.')
 
-        return Runs.parse_file(runs_yaml)
+        with open(runs_yaml) as f:
+            model = parse_yaml_raw_as(Runs, f)
+
+        return model

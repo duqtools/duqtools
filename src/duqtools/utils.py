@@ -7,6 +7,8 @@ from itertools import filterfalse, tee
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
+from pydantic_yaml import parse_yaml_raw_as
+
 from ._types import PathLike
 
 if TYPE_CHECKING:
@@ -87,7 +89,8 @@ def read_imas_handles_from_file(inp: PathLike) -> dict[str, ImasHandle]:
                 handles[index] = ImasHandle(**row)
 
     elif inp.name == 'runs.yaml':
-        runs = Runs.parse_file(inp)
+        with open(inp) as f:
+            runs = parse_yaml_raw_as(Runs, f)
         handles = {
             str(run.dirname): ImasHandle.parse_obj(run.data_out)
             for run in runs

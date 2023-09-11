@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
+from pydantic_yaml import parse_yaml_raw_as
 
 from duqtools.api import ImasHandle
 from duqtools.config import var_lookup
@@ -192,7 +193,7 @@ def substitute_templates(
 
         cfg = template.render(run=run, variables=variables, handle=handle)
 
-        Config.parse_raw(cfg)  # make sure config is valid
+        parse_yaml_raw_as(Config, cfg)  # make sure config is valid
 
         if output:
             out_drc = cwd / output / name
