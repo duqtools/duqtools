@@ -1,23 +1,22 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 
 from ..ids import ImasHandle
-from ..schema import BaseModel, IDSOperation, ImasBaseModel, JettoOperation
+from ..schema import BaseModel, IDSOperation, ImasBaseModel, JettoOperation, RootModel
 
 
 class Run(BaseModel):
     dirname: Path = Field(description='Directory of run')
     shortname: Optional[Path] = Field(
-        description='Short name (`dirname.name`)')
+        None, description='Short name (`dirname.name`)')
     data_in: Optional[ImasBaseModel] = Field(None)
     data_out: Optional[ImasBaseModel] = Field(None)
-    operations: Optional[list[Union[IDSOperation, JettoOperation,
-                                    list[Union[IDSOperation,
-                                               JettoOperation]]]]]
+    operations: Optional[list[Union[IDSOperation, JettoOperation, list[Union[
+        IDSOperation, JettoOperation]]]]] = Field(None)
 
-    @root_validator()
+    @model_validator(mode='before')
     def shortname_compat(cls, root):
         # Compatibility with old runs.yaml
         if 'shortname' not in root and 'dirname' in root:
@@ -40,14 +39,14 @@ class Run(BaseModel):
         return self.shortname == 'base'
 
 
-class Runs(BaseModel):
-    __root__: list[Run] = []
+class Runs(RootModel):
+    root: list[Run] = []
 
     def __iter__(self):
-        yield from self.__root__
+        yield from self.root
 
     def __getitem__(self, index: int):
-        return self.__root__[index]
+        return self.root[index]
 
     def __len__(self):
-        return len(self.__root__)
+        return len(self.root)

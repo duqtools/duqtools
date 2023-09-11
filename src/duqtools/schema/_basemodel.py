@@ -1,9 +1,13 @@
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import Extra
+from pydantic import ConfigDict, Extra
+from pydantic import RootModel as PydanticRootModel
 
 
 class BaseModel(PydanticBaseModel):
     """Base model."""
 
-    class Config:
-        extra = Extra.forbid
+    model_config = ConfigDict(extra=Extra.forbid)
+
+
+class RootModel(PydanticRootModel):
+    """Root model."""

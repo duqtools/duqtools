@@ -1,18 +1,18 @@
 from typing import Union
 
-from ._basemodel import BaseModel
+from ._basemodel import RootModel
 from ._variable import IDS2JettoVariableModel, IDSVariableModel, JettoVariableModel
 
 
-class VariableConfigModel(BaseModel):
-    __root__: list[Union[JettoVariableModel, IDSVariableModel,
-                         IDS2JettoVariableModel]]
+class VariableConfigModel(RootModel):
+    root: list[Union[JettoVariableModel, IDSVariableModel,
+                     IDS2JettoVariableModel]]
 
     def __iter__(self):
-        yield from self.__root__
+        yield from self.root
 
     def __getitem__(self, index: int):
-        return self.__root__[index]
+        return self.root[index]
 
     def to_variable_dict(self) -> dict:
         """Return dict of variables."""

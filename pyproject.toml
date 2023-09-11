@@ -42,13 +42,11 @@ dependencies = [
     "importlib_resources;python_version<'3.10'",
     "numpy",
     "pandas",
-    "pydantic !=1.10.3, !=1.10.4, !=1.10.5, <2.0.0",
+    "pydantic >= 2.0",
     "pydantic-yaml >= 1.0",
     "scipy >= 1.09",
     "tqdm",
-    # 4.6.0  breaks duqtools on python 3.9 using pydantic <=1.10.7
-    # https://github.com/duqtools/duqtools/issues/616
-    "typing-extensions!=4.6.0",
+    "typing-extensions",
     "xarray",
     "jetto-tools >= 1.8.8",
     "streamlit >= 1.18",

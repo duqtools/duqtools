@@ -18,7 +18,9 @@ class JettoVariableModel(BaseModel):
         Name of the variable.
         Used for the lookup table to find actual fields.
         """))
-    lookup: Optional[JettoVar] = Field(description=f("""
+
+    lookup: Optional[JettoVar] = Field(None,
+                                       description=f("""
     Description of the fields that have to be updated for a Jetto Variable
     """))
 
@@ -83,6 +85,7 @@ class IDS2JettoVariableModel(BaseModel):
         Search these variables in the given order until a match with the conditions
         defined below is found.
     """))
-    default: Optional[float] = Field(description=f("""
+    default: Optional[float] = Field(None,
+                                     description=f("""
         Default value if no match is found. Set to None to raise an exeption instead."""
                                                    ))

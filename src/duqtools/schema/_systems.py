@@ -129,8 +129,10 @@ class JettoSystemModel(SystemModel):
             running status.
             """))
 
-    jruns: Optional[DirectoryPath] = Field(description=f(
-        """`jruns` defines the the root directory where all simulations are
+    jruns: Optional[DirectoryPath] = Field(
+        None,
+        description=f(
+            """`jruns` defines the the root directory where all simulations are
         run for the jetto system. Because the jetto system works with relative
         directories from some root directory.
 

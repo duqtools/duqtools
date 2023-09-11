@@ -35,10 +35,13 @@ logwarning = duqlog_screen.warning
 style = click.style
 
 
-class LongDescriptionMixin:
-    description: str
-    extra_description: Optional[str]
-    style: dict
+class LongDescription(BaseModel):
+    description: str = Field(
+        description='description of the operation to be done')
+    extra_description: Optional[str] = Field(None,
+                                             description='Extra description')
+    style: dict[str, Any] = Field(OP_STYLE,
+                                  description='Styling for op description')
 
     @property
     def long_description(self) -> str:
@@ -50,13 +53,9 @@ class LongDescriptionMixin:
         return description
 
 
-class Warning(LongDescriptionMixin):
+class Warning(LongDescription):
     """Warning item for screen log."""
-    style = NO_OP_STYLE
-
-    def __init__(self, description: str, extra_description: str):
-        self.description = description
-        self.extra_description = extra_description
+    style: dict[str, Any] = NO_OP_STYLE
 
     def __hash__(self):
         return hash((self.description, self.extra_description))
@@ -65,27 +64,24 @@ class Warning(LongDescriptionMixin):
         return hash(self) == hash(other)
 
 
-class Operation(LongDescriptionMixin, BaseModel):
+class Operation(LongDescription):
     """Operation, simple class which has a callable action.
 
-    Usually not called directly but used through Operations. has the
-    following members:
+    Usually not called directly but used through Operations.
     """
-
     quiet: bool = Field(False,
                         description='print out this operation to the screen')
-    description: str = Field(
-        description='description of the operation to be done')
+
     action: Optional[Callable] = Field(
+        None,
         description='a function which can be executed when we '
         'decide to apply this operation')
-    extra_description: Optional[str] = Field(description='Extra description')
+
     args: Optional[Sequence] = Field(
         None,
         description='positional arguments that have to be '
         'passed to the action')
-    style: dict[str, Any] = Field(OP_STYLE,
-                                  description='Styling for op description')
+
     kwargs: Optional[dict] = Field(
         None,
         description='keyword arguments that will be '
