@@ -3,9 +3,6 @@ def fix_dependencies():
     import __main__
     __main__.__requires__ = [
         'jetto_tools>=1.8.8',
-        'pydantic!=1.10.3',
-        'pydantic!=1.10.4',
-        'pydantic!=1.10.5',
         'scipy>=1.09',
         'jinja2>=3.0.0',
     ]
