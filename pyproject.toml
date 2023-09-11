@@ -35,7 +35,8 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "altair",
+    # https://github.com/duqtools/duqtools/issues/655
+    "altair<=5",
     "click",
     "gitpython",
     "jinja2 >= 3.0",
