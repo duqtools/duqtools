@@ -7,8 +7,6 @@ import pytest
 
 from duqtools.api import create, get_status, recreate, submit
 
-# from duqtools.api import status
-
 imas = pytest.importorskip('imas',
                            reason='No way of testing this without IMAS')
 
@@ -135,7 +133,7 @@ def test_status():
 
 def test_example_plot():
     pytest.xfail('`duqtools plot` is not compatible with local imasdb, '
-                 'so we no way of testing this currently')
+                 'so we have no way of testing this currently')
 
     import subprocess as sp
 
