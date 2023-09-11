@@ -85,6 +85,7 @@ class IDS2JettoVariableModel(BaseModel):
         Search these variables in the given order until a match with the conditions
         defined below is found.
     """))
-    default: Optional[float] = Field(description=f("""
+    default: Optional[float] = Field(None,
+                                     description=f("""
         Default value if no match is found. Set to None to raise an exeption instead."""
                                                    ))

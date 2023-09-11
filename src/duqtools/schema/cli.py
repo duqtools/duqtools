@@ -16,8 +16,10 @@ from .variables import VariableConfigModel
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
-    runs_dir: Optional[Path] = Field(description=f(
-        """Relative location from the workspace, which specifies the folder where to
+    runs_dir: Optional[Path] = Field(
+        None,
+        description=
+        f("""Relative location from the workspace, which specifies the folder where to
         store all the created runs.
 
         This defaults to `workspace/duqtools_experiment_x`
@@ -32,7 +34,8 @@ class CreateConfigModel(BaseModel):
         the UQ runs.
         """))
 
-    template_data: Optional[ImasBaseModel] = Field(description=f("""
+    template_data: Optional[ImasBaseModel] = Field(None,
+                                                   description=f("""
         Specify the location of the template data to modify. This overrides the
         location of the data specified in settings file in the template
         directory.
@@ -73,7 +76,8 @@ class CreateConfigModel(BaseModel):
         this hypercube can be efficiently sampled. This paramater is optional.
         """))
 
-    data: Optional[DataLocation] = Field(description=f("""
+    data: Optional[DataLocation] = Field(None,
+                                         description=f("""
         Required for system `jetto-v210921`, ignored for other systems.
 
         Where to store the in/output IDS data.
@@ -94,11 +98,12 @@ class ConfigModel(BaseModel):
         'Create a tag for the runs to identify them in slurm or `data.csv`')
 
     create: Optional[CreateConfigModel] = Field(
+        None,
         description=
         'Configuration for the create subcommand. See model for more info.')
 
     extra_variables: Optional[VariableConfigModel] = Field(
-        description='Specify extra variables for this run.')
+        None, description='Specify extra variables for this run.')
 
     system: Union[DummySystemModel, Ets6SystemModel, JettoSystemModel] = Field(
         JettoSystemModel(),
