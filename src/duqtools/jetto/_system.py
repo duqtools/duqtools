@@ -70,30 +70,35 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         -------
         Path
         """
-        if self.jruns:  # type: ignore
-            return self.jruns  # type: ignore
-        elif os.getenv('JRUNS'):
-            return Path(os.getenv('JRUNS'))  # type: ignore
+        if self.jruns:
+            return Path(self.jruns)
+        elif jruns_env := os.getenv('JRUNS'):
+            return Path(jruns_env)
         else:
             return Path()
 
     def get_runs_dir(self) -> Path:
         path = self.jruns_path
-        runs_dir = self.cfg.create.runs_dir  # type: ignore
-        if not runs_dir:
-            abs_cwd = str(Path.cwd().resolve())
-            abs_jruns = str(path.resolve())
-            # Check if jruns is parent dir of current dir
-            if abs_cwd.startswith(abs_jruns):
-                runs_dir = Path()
-            else:  # jruns is somewhere else
-                count = 0
-                while True:  # find the next free folder
-                    runs_dir = f'duqtools_experiment_{count:04d}'
-                    if not (path / runs_dir).exists():
-                        break
-                    count = count + 1
-        return path / runs_dir
+        runs_dir = self.cfg.create.runs_dir
+
+        if runs_dir:
+            return path / runs_dir
+
+        abs_cwd = str(Path.cwd().resolve())
+        abs_jruns = str(path.resolve())
+
+        # Check if jruns is parent dir of current dir
+        if abs_cwd.startswith(abs_jruns):
+            return path
+
+        count = 0
+        while True:  # find the next free folder
+            dirname = f'duqtools_experiment_{count:04d}'
+            if not (path / dirname).exists():
+                break
+            count = count + 1
+
+        return path / dirname
 
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
