@@ -56,7 +56,7 @@ def merge(force: bool, var_names: Sequence[str], **kwargs):
 
         target_data = template_data.copy()
         target_data.user = str(cfg.create.runs_dir / 'imasdb')
-        target_handles[f'{run_name}_merged'] = target_data.dict()
+        target_handles[f'{run_name}_merged'] = target_data.model_dump()
 
         _merge(
             variables=variables,

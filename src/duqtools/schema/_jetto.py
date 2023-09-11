@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Union
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
@@ -20,7 +20,7 @@ class NamelistField(BaseModel):
     field: str = Field(description='Field name.')
     section: str = Field(description='Section in the config.')
 
-    @validator('section')
+    @field_validator('section')
     def section_lower(cls, v):
         return v.lower()
 

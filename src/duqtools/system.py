@@ -56,4 +56,4 @@ def get_system(cfg: Config) -> AbstractSystem:
     else:
         raise NotImplementedError(
             f'system {cfg.system.name} is not implemented')
-    return System.model_validate({'cfg': cfg, **cfg.system.dict()})
+    return System.model_validate({'cfg': cfg, **cfg.system.model_dump()})

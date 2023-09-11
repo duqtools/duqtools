@@ -214,7 +214,7 @@ class Operation(OperatorMixin, BaseModel):
             raise NotImplementedError(
                 f'{self.variable} convert not implemented')
 
-        mapping = self.dict()
+        mapping = self.model_dump()
         mapping['variable'] = variable
 
         return cls(**mapping)

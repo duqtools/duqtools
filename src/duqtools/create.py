@@ -185,7 +185,7 @@ class CreateManager:
         prefix = f'{self.cfg.tag}.' if self.cfg.tag else ''
 
         run_map = {
-            f'{prefix}{run.shortname}': run.data_out.dict()
+            f'{prefix}{run.shortname}': run.data_out.model_dump()
             for run in runs if run.data_out
         }
         df = pd.DataFrame.from_dict(run_map, orient='index')
