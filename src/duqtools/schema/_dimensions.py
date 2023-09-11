@@ -3,9 +3,9 @@ from __future__ import annotations
 import ast
 from typing import Literal, Optional, Union
 
-from pydantic import Field, root_validator, validator
+from pydantic import Field, model_validator, validator
 
-from ._basemodel import BaseModel
+from ._basemodel import BaseModel, RootModel
 from ._description_helpers import formatter as f
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel, JettoVariableModel
@@ -79,7 +79,7 @@ class OperatorMixin(BaseModel):
             ast.parse(custom_code)
         return custom_code
 
-    @root_validator
+    @model_validator(mode='before')
     def check_custom(cls, values):
         if values.get(
                 'operator') == 'custom' and not values.get('custom_code'):
@@ -120,10 +120,10 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
         return expand_func(self, *args, variable=variable, **kwargs)
 
 
-class CoupledDim(BaseModel):
-    __root__: list[OperationDim]
+class CoupledDim(RootModel):
+    root: list[OperationDim]
 
-    @validator('__root__')
+    @validator('root')
     def check_dimensions_match(cls, dims):
         if len(dims) > 0:
             refdim = len(dims[0].values)
@@ -133,7 +133,7 @@ class CoupledDim(BaseModel):
         return dims
 
     def expand(self, *args, **kwargs):
-        expanded = [operation.expand() for operation in self.__root__]
+        expanded = [operation.expand() for operation in self.root]
         return [entry for entry in zip(*expanded)]  # Transpose
 
 
