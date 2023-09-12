@@ -86,11 +86,11 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
                                    min=0,
                                    max=max_slider,
                                    step=1)
-        select_step = alt.selection_single(name=z,
-                                           fields=['slider'],
-                                           bind=slider,
-                                           init={'slider': 0})
-        line = line.add_selection(select_step).transform_filter(
+        select_step = alt.selection_point(name=z,
+                                          fields=['slider'],
+                                          bind=slider,
+                                          value=0)
+        line = line.add_params(select_step).transform_filter(
             select_step).interactive()
         if std:
             band = band.transform_filter(select_step).interactive()
@@ -100,12 +100,12 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
                                    min=0,
                                    max=max_slider,
                                    step=1)
-        select_step = alt.selection_single(name='reference',
-                                           fields=['slider'],
-                                           bind=slider,
-                                           init={'slider': 0})
+        select_step = alt.selection_point(name='reference',
+                                          fields=['slider'],
+                                          bind=slider,
+                                          value=0)
 
-        ref = ref.add_selection(select_step).transform_filter(
+        ref = ref.add_params(select_step).transform_filter(
             select_step).transform_filter(
                 alt.datum.run == first_run).interactive()
 
@@ -169,14 +169,14 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
 
     if max_slider != 0:
         slider = alt.binding_range(min=0, max=max_slider, step=1)
-        select_step = alt.selection_single(name=z,
-                                           fields=['slider'],
-                                           bind=slider,
-                                           init={'slider': 0})
+        select_step = alt.selection_point(name=z,
+                                          fields=['slider'],
+                                          bind=slider,
+                                          value=0)
 
-        line = line.add_selection(select_step).transform_filter(
+        line = line.add_params(select_step).transform_filter(
             select_step).interactive()
-        band = band.add_selection(select_step).transform_filter(
+        band = band.add_params(select_step).transform_filter(
             select_step).interactive()
 
         slider = alt.binding_range(name='Reference time index',
@@ -184,12 +184,12 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
                                    max=max_slider,
                                    step=1)
 
-        select_step = alt.selection_single(name='reference',
-                                           fields=['slider'],
-                                           bind=slider,
-                                           init={'slider': 0})
+        select_step = alt.selection_point(name='reference',
+                                          fields=['slider'],
+                                          bind=slider,
+                                          value=0)
 
-        ref = ref.add_selection(select_step).transform_filter(
+        ref = ref.add_params(select_step).transform_filter(
             select_step).interactive()
 
     return line + band + ref
