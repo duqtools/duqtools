@@ -7,6 +7,7 @@ from ._systems import (
     DummySystemModel,
     Ets6SystemModel,
     JettoSystemModel,
+    NoSystemModel,
     StatusConfigModel,
     SubmitConfigModel,
 )
@@ -33,5 +34,6 @@ __all__ = [
     'SubmitConfigModel',
     'JettoSystemModel',
     'DummySystemModel',
+    'NoSystemModel',
     'Ets6SystemModel',
 ]

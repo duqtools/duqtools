@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Sequence
 
 from ..config import Config
-from ..schema import ImasBaseModel
+from ..schema import BaseModel, ImasBaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AbstractSystem(ABC):
+class AbstractSystem(ABC, BaseModel):
 
     cfg: Config
 
