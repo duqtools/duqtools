@@ -13,6 +13,7 @@ from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..ids import ImasHandle
+from ..jintrac import V210921Mixin, V220922Mixin
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
 from ..schema import JettoSystemModel, JettoVar
@@ -334,7 +335,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_config.export(run)  # Just overwrite the poor files
 
 
-class JettoSystemV210921(BaseJettoSystem):
+class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
     """System that can be used to create runs for jetto.
 
     The backend that is  assumed is jetto-v210921.
@@ -349,40 +350,8 @@ class JettoSystemV210921(BaseJettoSystem):
     ```
     """
 
-    def get_data_in_handle(
-        self,
-        *,
-        dirname: Path,
-        source: ImasHandle,
-        seq_number: int,
-        options,
-    ):
-        """Get handle for data input."""
-        return ImasHandle(
-            user=options.user,
-            db=options.imasdb,
-            shot=source.shot,
-            run=options.run_in_start_at + seq_number,
-        )
 
-    def get_data_out_handle(
-        self,
-        *,
-        dirname: Path,
-        source: ImasHandle,
-        seq_number: int,
-        options,
-    ):
-        """Get handle for data output."""
-        return ImasHandle(
-            user=options.user,
-            db=options.imasdb,
-            shot=source.shot,
-            run=options.run_out_start_at + seq_number,
-        )
-
-
-class JettoSystemV220922(BaseJettoSystem):
+class JettoSystemV220922(V220922Mixin, BaseJettoSystem):
     """System that can be used to create runs for jetto.
 
     The backend that is  assumed is jetto-v220922. The most important
@@ -398,46 +367,6 @@ class JettoSystemV220922(BaseJettoSystem):
       submit_system: docker
     ```
     """
-
-    def get_data_in_handle(
-        self,
-        *,
-        dirname: Path,
-        source: ImasHandle,
-        seq_number: int,
-        options,
-    ):
-        relative_location: Optional[str] = str(
-            os.path.relpath((dirname / 'imasdb').resolve()))
-        if relative_location:
-            if relative_location.startswith('..'):
-                relative_location = None
-        """Get handle for data input."""
-        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
-                          db=source.db,
-                          shot=source.shot,
-                          run=1,
-                          relative_location=relative_location)
-
-    def get_data_out_handle(
-        self,
-        *,
-        dirname: Path,
-        source: ImasHandle,
-        seq_number: int,
-        options,
-    ):
-        relative_location: Optional[str] = str(
-            os.path.relpath((dirname / 'imasdb').resolve()))
-        if relative_location:
-            if relative_location.startswith('..'):
-                relative_location = None
-        """Get handle for data output."""
-        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
-                          db=source.db,
-                          shot=source.shot,
-                          run=2,
-                          relative_location=relative_location)
 
 
 JettoSystem = JettoSystemV220922
