@@ -8,6 +8,7 @@ import xarray as xr
 
 from duqtools.api import ImasHandle, standardize_grid_and_time
 from duqtools.config import var_lookup
+from duqtools.ids._mapping import EmptyVarError
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -56,9 +57,19 @@ def _get_dataset(handles, variable, *, include_error: bool = False):
     if include_error:
         variables.append(var_lookup.error_upper(data_var))
 
+    runs = []
+
     for name, handle in handles.items():
         handle = ImasHandle(**handle)
-        ds = handle.get_variables(variables=variables)
+
+        try:
+            ds = handle.get_variables(variables=variables)
+        except EmptyVarError as e:
+            st.warning(f'Skipping {handle}, {e}.')
+            continue
+
+        runs.append(name)
+
         datasets.append(ds)
 
     grid_var_norm = str(var_lookup.normalize(grid_var))
@@ -71,7 +82,7 @@ def _get_dataset(handles, variable, *, include_error: bool = False):
     )
 
     dataset = xr.concat(datasets, 'run')
-    dataset['run'] = list(handles.keys())
+    dataset['run'] = runs
 
     return dataset, time_var_norm, grid_var_norm, data_var
 
