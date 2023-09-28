@@ -134,9 +134,10 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
 
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
     def update_imas_locations(self, run: Path, inp: ImasHandle,
-                              out: ImasHandle, cfg_filename: Path):
+                              out: ImasHandle, template_drc: Path):
         #raise NotImplementedError('update_imas_location')
         new_input = []
+        cfg_filename = template_drc.name
         with open(run / cfg_filename) as f:
             for line in f.readlines():
                 if line.startswith('START.output_run'):

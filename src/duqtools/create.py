@@ -49,6 +49,8 @@ class CreateManager:
         template_data = self.options.template_data
 
         if not template_data:
+            if not self.template_drc:
+                raise ValueError('Missing `create.template`')
             source = self.system.imas_from_path(self.template_drc)
         else:
             source = ImasHandle.model_validate(template_data,
@@ -231,18 +233,18 @@ class CreateManager:
         self.source.copy_data_to(
             ImasHandle.model_validate(model.data_in, from_attributes=True))
 
-        self.system.copy_from_template(self.template_drc, model.dirname)
+        if self.template_drc:
+            self.system.copy_from_template(self.template_drc, model.dirname)
 
         self.apply_operations(model.data_in, model.dirname, model.operations)
 
         self.system.write_batchfile(model.dirname)
 
         if model.data_in and model.data_out:
-            self.system.update_imas_locations(
-                run=model.dirname,
-                inp=model.data_in,
-                out=model.data_out,
-                cfg_filename=self.template_drc.name)
+            self.system.update_imas_locations(run=model.dirname,
+                                              inp=model.data_in,
+                                              out=model.data_out,
+                                              template_drc=self.template_drc)
         else:
             raise Exception(
                 'data not present in model, this should not happen')
