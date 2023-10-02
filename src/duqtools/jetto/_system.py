@@ -16,10 +16,11 @@ from ..ids import ImasHandle
 from ..jintrac import V210921Mixin, V220922Mixin
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
-from ..schema import JettoSystemModel, JettoVar
+from ..schema import JettoVar
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
+from ._schema import JettoSystemModel
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -80,6 +81,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
 
     def get_runs_dir(self) -> Path:
         path = self.jruns_path
+
+        assert self.cfg.create
         runs_dir = self.cfg.create.runs_dir
 
         if runs_dir:

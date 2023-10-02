@@ -10,7 +10,7 @@ from typing import Any
 from ..ids import ImasHandle
 from ..models import AbstractSystem, Job
 from ..operations import add_to_op_queue
-from ..schema import Ets6SystemModel
+from .schema import Ets6SystemModel
 
 logger = logging.getLogger(__name__)
 

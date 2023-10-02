@@ -3,11 +3,14 @@ from typing import Optional, Union
 
 from pydantic import Field, PrivateAttr
 
+from duqtools.ets import Ets6SystemModel
+from duqtools.jetto import JettoSystemModel
+
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
-from ._systems import Ets6SystemModel, JettoSystemModel, NoSystemModel
+from ._systems import NoSystemModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel

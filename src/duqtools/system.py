@@ -39,6 +39,8 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
 
     def get_runs_dir(self) -> Path:
         path = self.jruns_path
+
+        assert self.cfg.create
         runs_dir = self.cfg.create.runs_dir
 
         if runs_dir:
