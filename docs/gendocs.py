@@ -27,7 +27,7 @@ from duqtools.schema import (
 from duqtools.schema._jetto import JsetField, NamelistField
 from duqtools.schema.cli import ConfigModel, CreateConfigModel
 from duqtools.schema.data_location import DataLocation
-from duqtools.system import DummySystem
+from duqtools.system import NoSystem
 
 this_dir = Path(__file__).parent
 sys.path.append(str(this_dir))
@@ -41,7 +41,7 @@ objects = {
     ConfigModel,
     CreateConfigModel,
     DataLocation,
-    DummySystem,
+    NoSystem,
     IDSOperationDim,
     IDSVariableModel,
     ImasBaseModel,

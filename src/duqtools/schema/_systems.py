@@ -59,6 +59,10 @@ class SystemModel(StatusConfigModel, SubmitConfigModel):
     pass
 
 
+class NoSystemModel(SystemModel):
+    name: Literal[None, 'nosystem'] = Field(None, description='No system.')
+
+
 class Ets6SystemModel(SystemModel):
     name: Literal['ets6'] = Field(
         'ets6', description='Backend system to use. Set by ConfigModel.')
@@ -72,12 +76,6 @@ class Ets6SystemModel(SystemModel):
     ets_xml: str = Field(
         '$ITMWORK/ETS6.xml',
         description='ETS6.XML file to use, can include for example `$ITMWORK`')
-
-
-class DummySystemModel(SystemModel):
-    name: Literal['dummy'] = 'dummy'
-    submit_script_name: str = 'true'
-    submit_command: str = 'true'
 
 
 class JettoSystemModel(SystemModel):

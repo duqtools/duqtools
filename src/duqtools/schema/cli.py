@@ -7,7 +7,7 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
-from ._systems import DummySystemModel, Ets6SystemModel, JettoSystemModel
+from ._systems import Ets6SystemModel, JettoSystemModel, NoSystemModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel
@@ -25,13 +25,14 @@ class CreateConfigModel(BaseModel):
         This defaults to `workspace/duqtools_experiment_x`
         where `x` is a not yet existing integer."""))
 
-    template: Path = Field(description=f("""
+    template: Optional[Path] = Field(None,
+                                     description=f("""
         Template directory to modify. Duqtools copies and updates the settings
         required for the specified system from this directory. This can be a
         directory with a finished run, or one just stored by JAMS (but not yet
         started). By default, duqtools extracts the input IMAS database entry
         from the settings file (e.g. jetto.in) to find the data to modify for
-        the UQ runs.
+        the UQ runs. Defaults to None.
         """))
 
     template_data: Optional[ImasBaseModel] = Field(None,
@@ -105,8 +106,8 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[VariableConfigModel] = Field(
         None, description='Specify extra variables for this run.')
 
-    system: Union[DummySystemModel, Ets6SystemModel, JettoSystemModel] = Field(
-        JettoSystemModel(),
+    system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+        NoSystemModel(),
         description='Options specific to the system used',
         discriminator='name')
 
