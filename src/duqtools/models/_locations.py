@@ -50,4 +50,4 @@ class Locations:
         with open(runs_yaml) as f:
             model = parse_yaml_raw_as(Runs, f)
 
-        return model
+        return model.root

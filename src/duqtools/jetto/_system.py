@@ -335,7 +335,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_config.export(run)  # Just overwrite the poor files
 
 
-class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
+class JettoSystemV210921(V210921Mixin, BaseJettoSystem):  # type: ignore
     """System that can be used to create runs for jetto.
 
     The backend that is  assumed is jetto-v210921.
@@ -351,7 +351,7 @@ class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
     """
 
 
-class JettoSystemV220922(V220922Mixin, BaseJettoSystem):
+class JettoSystemV220922(V220922Mixin, BaseJettoSystem):  # type: ignore
     """System that can be used to create runs for jetto.
 
     The backend that is  assumed is jetto-v220922. The most important
