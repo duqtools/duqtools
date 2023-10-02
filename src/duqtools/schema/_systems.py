@@ -63,12 +63,6 @@ class NoSystemModel(SystemModel):
     name: Literal[None] = Field(None, description='No system.')
 
 
-class DummySystemModel(SystemModel):
-    name: Literal['dummy'] = 'dummy'
-    submit_script_name: str = 'true'
-    submit_command: str = 'true'
-
-
 class Ets6SystemModel(SystemModel):
     name: Literal['ets6'] = Field(
         'ets6', description='Backend system to use. Set by ConfigModel.')

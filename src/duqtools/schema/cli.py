@@ -7,7 +7,7 @@ from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
 from ._dimensions import CoupledDim, Operation, OperationDim
 from ._imas import ImasBaseModel
-from ._systems import DummySystemModel, Ets6SystemModel, JettoSystemModel, NoSystemModel
+from ._systems import Ets6SystemModel, JettoSystemModel, NoSystemModel
 from .data_location import DataLocation
 from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
 from .variables import VariableConfigModel
@@ -106,11 +106,10 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[VariableConfigModel] = Field(
         None, description='Specify extra variables for this run.')
 
-    system: Union[NoSystemModel, DummySystemModel, Ets6SystemModel,
-                  JettoSystemModel] = Field(
-                      NoSystemModel(),
-                      description='Options specific to the system used',
-                      discriminator='name')
+    system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+        NoSystemModel(),
+        description='Options specific to the system used',
+        discriminator='name')
 
     quiet: bool = Field(
         False,

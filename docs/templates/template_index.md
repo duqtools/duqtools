@@ -49,9 +49,9 @@ system:
 
 {{ schema_Ets6System['description'] }}
 
-### dummy
+### No system
 
-{{ schema_DummySystem['description'] }}
+{{ schema_NoSystem['description'] }}
 
 ## Extra variables
 

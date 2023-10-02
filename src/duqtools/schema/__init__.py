@@ -4,7 +4,6 @@ from ._imas import ImasBaseModel
 from ._jetto import JettoField, JettoVar, JsetField, NamelistField
 from ._ranges import ARange, LinSpace
 from ._systems import (
-    DummySystemModel,
     Ets6SystemModel,
     JettoSystemModel,
     NoSystemModel,
@@ -33,7 +32,6 @@ __all__ = [
     'StatusConfigModel',
     'SubmitConfigModel',
     'JettoSystemModel',
-    'DummySystemModel',
     'NoSystemModel',
     'Ets6SystemModel',
 ]
