@@ -60,7 +60,7 @@ class SystemModel(StatusConfigModel, SubmitConfigModel):
 
 
 class NoSystemModel(SystemModel):
-    name: Literal[None] = Field(None, description='No system.')
+    name: Literal[None, 'nosystem'] = Field(None, description='No system.')
 
 
 class Ets6SystemModel(SystemModel):

@@ -11,7 +11,17 @@ from .schema import NoSystemModel
 
 
 class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
-    """The no system does nothing."""
+    """This system is intended for workflows that need to apply some operations
+    or sampling of the data without any system like Jetto or ETS in mind.
+
+    With this system, you won't have to specify `create.template`. Only
+    `create.template_data` is required.
+
+    ```yaml title="duqtools.yaml"
+    system:
+      name: 'nosystem'  # or `name: None`
+    ```
+    """
 
     @property
     def jruns_path(self) -> Path:

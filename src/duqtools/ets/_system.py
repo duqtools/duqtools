@@ -28,7 +28,13 @@ BATCH_TEMPLATE = '\n'.join([
 
 
 class Ets6System(AbstractSystem, Ets6SystemModel):
-    """System that can be used to create runs for ets."""
+    """System that can be used to create runs for ets.
+
+    ```yaml title="duqtools.yaml"
+    system:
+      name: 'ets6'
+    ```
+    """
 
     def get_runs_dir(self) -> Path:
         runs_dir = self.cfg.create.runs_dir  # type: ignore
