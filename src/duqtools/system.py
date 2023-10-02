@@ -83,13 +83,13 @@ def get_system(cfg: Config) -> AbstractSystem:
     """Get the system to do operations with."""
     System: Any = None  # Shut up mypy
 
-    if (cfg.system.name in ['jetto', 'jetto-v220922', 'jetto-v230123']):
+    if (cfg.system.name in ('jetto', 'jetto-v220922', 'jetto-v230123')):
         System = JettoSystemV220922
-    elif (cfg.system.name in ['jetto-v210921']):
+    elif (cfg.system.name == 'jetto-v210921'):
         System = JettoSystemV210921
     elif (cfg.system.name == 'ets6'):
         System = Ets6System
-    elif (cfg.system.name is None):
+    elif (cfg.system.name in (None, 'nosystem')):
         System = NoSystem
     else:
         raise NotImplementedError(
