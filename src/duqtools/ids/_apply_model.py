@@ -7,7 +7,6 @@ from typing import Union
 import numpy as np
 
 from .._logging_utils import duqlog_screen
-from ..apply_model import apply_model
 from ..schema import IDSOperation
 from ._handle import ImasHandle
 from ._mapping import IDSMapping
@@ -20,7 +19,6 @@ def _custom_function(data: np.ndarray, value, *, out: np.ndarray, code: str):
     out[:] = eval(code)
 
 
-@apply_model.register  # type: ignore
 def _apply_ids(model: IDSOperation, *,
                ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
     """Implementation for IDS operations.
