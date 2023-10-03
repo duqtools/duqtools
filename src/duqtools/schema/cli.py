@@ -3,19 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import Field, PrivateAttr
-
-from duqtools.ets import Ets6SystemModel
-from duqtools.jetto import JettoSystemModel
+from pydantic import Field, PrivateAttr, field_validator
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import CoupledDim, Operation, OperationDim
-from ._imas import ImasBaseModel
-from ._systems import NoSystemModel
-from .data_location import DataLocation
-from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
-from .variables import VariableConfigModel
 
 
 class CreateConfigModel(BaseModel):
@@ -58,8 +49,7 @@ class CreateConfigModel(BaseModel):
         """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default=CartesianProduct(),
-                                             discriminator='method',
+                   CartesianProduct] = Field(discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
         or hypercube. By default, the cartesian product is taken
@@ -95,6 +85,13 @@ class CreateConfigModel(BaseModel):
 
         """))
 
+    @field_validator('sampler')
+    def default_system(cls, v):
+        if v is None:
+            from .matrix_samplers import CartesianProduct
+            v = CartesianProduct()
+        return v
+
 
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
@@ -112,7 +109,6 @@ class ConfigModel(BaseModel):
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
-        NoSystemModel(),
         description='Options specific to the system used',
         discriminator='name')
 
@@ -122,3 +118,25 @@ class ConfigModel(BaseModel):
         'If true, do not output to stdout, except for mandatory prompts.')
 
     _path: Union[Path, str] = PrivateAttr(None)
+
+    @field_validator('system')
+    def default_system(cls, v):
+        if v is None:
+            from ..systems.no_system import NoSystemModel
+            v = NoSystemModel()
+        return v
+
+
+from ..systems.ets import Ets6SystemModel  # noqa
+from ..systems.jetto import JettoSystemModel  # noqa
+from ..systems.no_system import NoSystemModel  # noqa
+from ._dimensions import CoupledDim, Operation, OperationDim  # noqa
+from ._imas import ImasBaseModel  # noqa
+from .data_location import DataLocation  # noqa
+from .matrix_samplers import (  # noqa
+    CartesianProduct, HaltonSampler, LHSSampler, SobolSampler,
+)
+from .variables import VariableConfigModel  # noqa
+
+CreateConfigModel.update_forward_refs()
+ConfigModel.update_forward_refs()

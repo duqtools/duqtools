@@ -14,17 +14,18 @@ from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..ids import ImasHandle
+from duqtools.operations import add_to_op_queue
+
+from ..base_system import AbstractSystem
 from ..jintrac import V210921Mixin, V220922Mixin
-from ..models import AbstractSystem
-from ..operations import add_to_op_queue
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
 from ._schema import JettoSystemModel
 
 if TYPE_CHECKING:
-    from ..models import Job
+    from duqtools.api import ImasHandle, Job
+
     from ..schema import JettoVar
 
 if sys.version_info < (3, 10):
@@ -290,6 +291,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
     def imas_from_path(self, template_drc: Path) -> ImasHandle:
+        from duqtools.api import ImasHandle
+
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return ImasHandle(

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from ..schema import SystemModel
+from ..models import SystemModel
 
 
 class Ets6SystemModel(SystemModel):

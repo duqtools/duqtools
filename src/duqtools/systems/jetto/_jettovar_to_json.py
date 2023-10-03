@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from ..schema import JsetField, NamelistField
+from duqtools.schema import JsetField, NamelistField
 
 if TYPE_CHECKING:
     from ..schema import JettoVar

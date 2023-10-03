@@ -4,15 +4,15 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Sequence
 
-from ..config import Config
 from ..schema import BaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ..ids import ImasHandle
+    from duqtools.api import ImasHandle, Job
+    from duqtools.config import Config
+
     from ..schema import ImasBaseModel
-    from ._job import Job
 
 logger = logging.getLogger(__name__)
 

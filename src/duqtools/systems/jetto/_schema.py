@@ -4,8 +4,9 @@ from typing import Literal, Optional
 
 from pydantic import DirectoryPath, Field
 
-from ..schema import SystemModel
-from ..schema._description_helpers import formatter as f
+from duqtools.schema._description_helpers import formatter as f
+
+from ..models import SystemModel
 
 
 class JettoSystemModel(SystemModel):

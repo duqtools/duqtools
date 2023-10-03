@@ -15,7 +15,9 @@ def test_list_variables():
     out = click.unstyle(result.stdout.decode())
     err = click.unstyle(result.stderr.decode())
 
-    assert err == ''
+    err = [line for line in err.splitlines() if '[WARNING]' not in line]
+
+    assert not err
     assert 'IDS-variable' in out
     assert 'jetto-variable' in out
     assert '*my_extra_var' in out

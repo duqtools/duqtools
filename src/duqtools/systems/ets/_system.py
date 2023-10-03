@@ -7,12 +7,15 @@ import stat
 import subprocess as sp
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ..ids import ImasHandle
-from ..models import AbstractSystem, Job
-from ..operations import add_to_op_queue
-from .schema import Ets6SystemModel
+from duqtools.operations import add_to_op_queue
+
+from ..base_system import AbstractSystem
+from ._schema import Ets6SystemModel
+
+if TYPE_CHECKING:
+    from duqtools.api import ImasHandle, Job
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +64,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
 
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
+        from duqtools.api import Job
+
         job = Job(run_dir, cfg=self.cfg)
         script = SCRIPT_TEMPLATE.format(job=job, cfg=self.cfg)
         batchfile = '\n'.join([
@@ -174,6 +179,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         options,
     ):
         """Get handle for data input."""
+        from duqtools.api import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,
@@ -190,6 +197,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         options,
     ):
         """Get handle for data output."""
+        from duqtools.api import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,

@@ -1,17 +1,9 @@
-from __future__ import annotations
-
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-from .ets import Ets6System
-from .jetto import JettoSystemV210921, JettoSystemV220922
+from .base_system import AbstractSystem
 from .jintrac import V220922Mixin
-from .models import AbstractSystem
-from .schema import NoSystemModel
-
-if TYPE_CHECKING:
-    from .config import Config
+from .models import NoSystemModel
 
 
 class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
@@ -83,21 +75,3 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
 
     def imas_from_path(*args, **kwargs):
         pass
-
-
-def get_system(cfg: Config) -> AbstractSystem:
-    """Get the system to do operations with."""
-    System: Any = None  # Shut up mypy
-
-    if (cfg.system.name in ('jetto', 'jetto-v220922', 'jetto-v230123')):
-        System = JettoSystemV220922
-    elif (cfg.system.name == 'jetto-v210921'):
-        System = JettoSystemV210921
-    elif (cfg.system.name == 'ets6'):
-        System = Ets6System
-    elif (cfg.system.name in (None, 'nosystem')):
-        System = NoSystem
-    else:
-        raise NotImplementedError(
-            f'system {cfg.system.name} is not implemented')
-    return System.model_validate({'cfg': cfg, **cfg.system.model_dump()})

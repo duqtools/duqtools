@@ -4,8 +4,8 @@ from typing import Literal
 
 from pydantic import Field
 
-from ._basemodel import BaseModel
-from ._description_helpers import formatter as f
+from ..schema._basemodel import BaseModel
+from ..schema._description_helpers import formatter as f
 
 
 class SubmitConfigModel(BaseModel):
