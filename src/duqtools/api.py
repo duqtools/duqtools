@@ -25,6 +25,7 @@ Plotting:
 - [alt_errorband_chart][duqtools.api.alt_errorband_chart]
 - [alt_line_chart][duqtools.api.alt_line_chart]
 """
+from __future__ import annotations
 
 from ._plot_utils import alt_errorband_chart, alt_line_chart
 from .create import create_api as create

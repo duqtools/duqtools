@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ._basemodel import BaseModel, RootModel
 from ._dimensions import IDSOperation, IDSOperationDim, JettoOperation, OperationDim
 from ._imas import ImasBaseModel

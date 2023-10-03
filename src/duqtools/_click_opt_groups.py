@@ -7,6 +7,7 @@ Example:
 Implementation based on:
 https://github.com/pallets/click/issues/373#issuecomment-515293746
 """
+from __future__ import annotations
 
 from collections import defaultdict
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..setup import substitute_templates
 from ..utils import read_imas_handles_from_file
 

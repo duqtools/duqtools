@@ -1,4 +1,5 @@
 # https://github.com/duqtools/duqtools/issues/27
+from __future__ import annotations
 
 import logging
 

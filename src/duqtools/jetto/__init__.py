@@ -1,4 +1,5 @@
 """This module contains tools for interfacing with jetto runs."""
+from __future__ import annotations
 
 from ._batchfile import write_batchfile
 from ._jettovar_to_json import jettovar_to_json
