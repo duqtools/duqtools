@@ -8,7 +8,7 @@ import subprocess as sp
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
@@ -16,13 +16,16 @@ from jetto_tools.template import _EXTRA_FILE_REGEXES
 
 from ..ids import ImasHandle
 from ..jintrac import V210921Mixin, V220922Mixin
-from ..models import AbstractSystem, Job
+from ..models import AbstractSystem
 from ..operations import add_to_op_queue
-from ..schema import JettoVar
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
 from ._schema import JettoSystemModel
+
+if TYPE_CHECKING:
+    from ..models import Job
+    from ..schema import JettoVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files

@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
 
 from ..config import var_lookup
 from ..operations import add_to_op_queue
-from ..schema import IDSVariableModel
 from ..utils import groupby
-from ._handle import ImasHandle
 from ._rebase import rebase_all_coords, squash_placeholders
+
+if TYPE_CHECKING:
+    from ..schema import IDSVariableModel
+    from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)
 

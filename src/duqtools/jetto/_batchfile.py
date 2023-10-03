@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING, Sequence
 
 import jetto_tools
 
-from ..config import Config
-
 if TYPE_CHECKING:
+    from ..config import Config
     from ..models import Job
 
 

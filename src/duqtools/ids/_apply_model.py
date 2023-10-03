@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import logging
 from functools import partial
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from .._logging_utils import duqlog_screen
-from ..schema import IDSOperation
 from ._handle import ImasHandle
-from ._mapping import IDSMapping
+
+if TYPE_CHECKING:
+    from ..schema import IDSOperation
+    from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 

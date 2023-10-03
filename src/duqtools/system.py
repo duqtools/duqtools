@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .config import Config
 from .ets import Ets6System
 from .jetto import JettoSystemV210921, JettoSystemV220922
 from .jintrac import V220922Mixin
 from .models import AbstractSystem
 from .schema import NoSystemModel
+
+if TYPE_CHECKING:
+    from .config import Config
 
 
 class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):

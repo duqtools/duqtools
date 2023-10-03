@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 from .config import var_lookup
 from .ids import ImasHandle, merge_data
 from .operations import op_queue
-from .schema import IDSVariableModel
 from .utils import read_imas_handles_from_file
+
+if TYPE_CHECKING:
+    from .schema import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

@@ -12,7 +12,7 @@ from pydantic import field_validator
 
 from ..config import lookup_vars, var_lookup
 from ..operations import add_to_op_queue
-from ..schema import IDSVariableModel, ImasBaseModel
+from ..schema import ImasBaseModel
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
@@ -20,6 +20,8 @@ from ._rebase import squash_placeholders
 
 if TYPE_CHECKING:
     import xarray as xr
+
+    from ..schema import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 

@@ -4,10 +4,12 @@ import logging
 import time
 from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 
-from ..config import Config
+if TYPE_CHECKING:
+    from ..config import Config
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

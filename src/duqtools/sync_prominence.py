@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import os
 import subprocess
+from typing import TYPE_CHECKING
 
-from .config import Config
 from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
+
+if TYPE_CHECKING:
+    from .config import Config
 
 
 @add_to_op_queue('Getting data', 'job {job.path.name} from prominence')

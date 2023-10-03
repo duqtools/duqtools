@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import altair as alt
 import numpy as np
-import pandas as pd
 import xarray as xr
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def _standardize_data(source: Union[pd.DataFrame, xr.Dataset],

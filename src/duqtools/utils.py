@@ -9,9 +9,8 @@ from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from ._types import PathLike
-
 if TYPE_CHECKING:
+    from ._types import PathLike
     from .ids import ImasHandle
 
 

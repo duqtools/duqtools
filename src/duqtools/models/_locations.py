@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from ..config import Config
-from ._run import Run, Runs
+from ._run import Runs
+
+if TYPE_CHECKING:
+    from ..config import Config
+    from ._run import Run
 
 
 class Locations:
