@@ -5,8 +5,8 @@ from functools import singledispatch
 from pathlib import Path
 
 from .ids._apply_model import _apply_ids
-from .jetto import BaseJettoSystem
 from .schema import IDSOperation, JettoOperation
+from .systems.jetto import BaseJettoSystem
 
 
 @singledispatch
@@ -48,5 +48,9 @@ def _apply_model_jetto_operation(
     system: BaseJettoSystem,
     **kwargs,
 ):
-    system.set_jetto_variable(run_dir, model.variable.name, model.value,
-                              model.variable.lookup)
+    system.set_jetto_variable(
+        run=run_dir,
+        key=model.variable.name,
+        value=model.value,
+        variable=model.variable.lookup,
+    )

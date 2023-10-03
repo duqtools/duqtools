@@ -3,10 +3,20 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import Field, PrivateAttr, field_validator
+from pydantic import Field, PrivateAttr
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
+
+
+def _default_sampler():
+    from .matrix_samplers import CartesianProduct
+    return CartesianProduct()
+
+
+def _default_system():
+    from ..systems.no_system import NoSystemModel
+    return NoSystemModel()
 
 
 class CreateConfigModel(BaseModel):
@@ -49,7 +59,8 @@ class CreateConfigModel(BaseModel):
         """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(discriminator='method',
+                   CartesianProduct] = Field(default_factory=_default_sampler,
+                                             discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
         or hypercube. By default, the cartesian product is taken
@@ -85,13 +96,6 @@ class CreateConfigModel(BaseModel):
 
         """))
 
-    @field_validator('sampler')
-    def default_system(cls, v):
-        if v is None:
-            from .matrix_samplers import CartesianProduct
-            v = CartesianProduct()
-        return v
-
 
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
@@ -109,6 +113,7 @@ class ConfigModel(BaseModel):
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+        default_factory=_default_system,
         description='Options specific to the system used',
         discriminator='name')
 
@@ -118,13 +123,6 @@ class ConfigModel(BaseModel):
         'If true, do not output to stdout, except for mandatory prompts.')
 
     _path: Union[Path, str] = PrivateAttr(None)
-
-    @field_validator('system')
-    def default_system(cls, v):
-        if v is None:
-            from ..systems.no_system import NoSystemModel
-            v = NoSystemModel()
-        return v
 
 
 from ..systems.ets import Ets6SystemModel  # noqa
