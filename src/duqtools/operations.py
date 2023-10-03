@@ -11,7 +11,6 @@ import click
 from pydantic import Field, field_validator
 
 from ._logging_utils import duqlog_screen
-from .config import CFG
 from .schema import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -210,9 +209,6 @@ class Operations(deque):
         """
         from tqdm import tqdm
         loginfo(style('Applying Operations', **HEADER_STYLE))  # type: ignore
-
-        if CFG.quiet:
-            return self._apply_all()
 
         with tqdm(total=self.n_actions, position=1) as pbar:
             pbar.set_description('Progress')
