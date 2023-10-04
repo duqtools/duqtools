@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import logging
 import time
 from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 
-from ..config import Config
+if TYPE_CHECKING:
+    from ..config import Config
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
@@ -152,7 +156,7 @@ class Job:
 
     def submit(self):
         """Submit job."""
-        from ..system import get_system
+        from duqtools.systems import get_system
         debug(f'Put lockfile in place for {self.lockfile}')
         self.lockfile.touch()
 

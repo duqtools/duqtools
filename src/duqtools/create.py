@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import shutil
 import warnings
@@ -14,7 +16,7 @@ from .ids import ImasHandle
 from .matrix_samplers import get_matrix_sampler
 from .models import Job, Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
-from .system import get_system
+from .systems import get_system
 
 logger = logging.getLogger(__name__)
 

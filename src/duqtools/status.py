@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import subprocess as sp
 from collections import Counter
@@ -7,8 +9,8 @@ from typing import Sequence
 from jetto_tools import config, template
 
 from .config import Config
-from .jetto._system import jetto_lookup
 from .models import Job, JobStatus, Locations
+from .systems.jetto._system import jetto_lookup
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

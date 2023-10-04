@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Optional, Union
 
@@ -5,12 +7,16 @@ from pydantic import Field, PrivateAttr
 
 from ._basemodel import BaseModel
 from ._description_helpers import formatter as f
-from ._dimensions import CoupledDim, Operation, OperationDim
-from ._imas import ImasBaseModel
-from ._systems import Ets6SystemModel, JettoSystemModel, NoSystemModel
-from .data_location import DataLocation
-from .matrix_samplers import CartesianProduct, HaltonSampler, LHSSampler, SobolSampler
-from .variables import VariableConfigModel
+
+
+def _default_sampler():
+    from .matrix_samplers import CartesianProduct
+    return CartesianProduct()
+
+
+def _default_system():
+    from ..systems.no_system import NoSystemModel
+    return NoSystemModel()
 
 
 class CreateConfigModel(BaseModel):
@@ -53,7 +59,7 @@ class CreateConfigModel(BaseModel):
         """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default=CartesianProduct(),
+                   CartesianProduct] = Field(default_factory=_default_sampler,
                                              discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
@@ -107,7 +113,7 @@ class ConfigModel(BaseModel):
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
-        NoSystemModel(),
+        default_factory=_default_system,
         description='Options specific to the system used',
         discriminator='name')
 
@@ -117,3 +123,18 @@ class ConfigModel(BaseModel):
         'If true, do not output to stdout, except for mandatory prompts.')
 
     _path: Union[Path, str] = PrivateAttr(None)
+
+
+from ..systems.ets import Ets6SystemModel  # noqa
+from ..systems.jetto import JettoSystemModel  # noqa
+from ..systems.no_system import NoSystemModel  # noqa
+from ._dimensions import CoupledDim, Operation, OperationDim  # noqa
+from ._imas import ImasBaseModel  # noqa
+from .data_location import DataLocation  # noqa
+from .matrix_samplers import (  # noqa
+    CartesianProduct, HaltonSampler, LHSSampler, SobolSampler,
+)
+from .variables import VariableConfigModel  # noqa
+
+CreateConfigModel.model_rebuild()
+ConfigModel.model_rebuild()

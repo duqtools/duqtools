@@ -4,28 +4,26 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Sequence
 
-from ..config import Config
-from ..schema import BaseModel, ImasBaseModel
-
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ..ids import ImasHandle
-    from ._job import Job
+    from duqtools.api import ImasHandle, Job
+    from duqtools.config import Config
+
+    from ..schema import ImasBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class AbstractSystem(ABC, BaseModel):
+class AbstractSystem(ABC):
 
-    cfg: Config
+    def __init__(self, cfg: Config):
+        self.cfg = cfg
+        self.options = cfg.system
 
     @abstractmethod
-    def get_runs_dir(self, ) -> Path:
+    def get_runs_dir(self) -> Path:
         """Get the directory where the runs should be stored.
-
-        Parameters
-        ----------
 
         Returns
         -------
@@ -41,7 +39,7 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         run_dir : Path
-            directory of run
+            Directory of run
         """
         pass
 
@@ -52,7 +50,7 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         job : Job
-            job
+            Job to submit
         """
         pass
 
@@ -64,9 +62,9 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         source_drc : Path
-            source directory
+            Source directory
         target_drc : Path
-            target directory
+            Target directory
         """
         pass
 
@@ -77,7 +75,7 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         template_drc : Path
-            folder from which to extract IMAS location
+            Folder from which to extract IMAS location
 
         Returns
         -------
@@ -99,7 +97,7 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         run : Path
-            run directory
+            Run directory
         inp : ImasBaseModel
             Imas entry to use as input
         out : ImasBaseModel
@@ -122,13 +120,13 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         dirname : Path
-            run directory
+            Run directory
         source : ImasHandle
-            template Imas data
+            Template Imas data
         seq_number : int
-            sequential number, used by some systems
+            Sequential number, used by some systems
         options :
-            create.data key from the config
+            `create.data` key from the config
         """
         pass
 
@@ -148,13 +146,13 @@ class AbstractSystem(ABC, BaseModel):
         Parameters
         ----------
         dirname : Path
-            run directory
+            Run directory
         source : ImasHandle
-            template Imas data
+            Template Imas data
         seq_number : int
-            sequential number, used by some systems
+            Sequential number, used by some systems.
         options :
-            create.data key from the config
+            `create.data` key from the config.
         """
         pass
 
@@ -168,21 +166,20 @@ class AbstractSystem(ABC, BaseModel):
         create_only: bool = False,
         **kwargs,
     ):
-        """Submit method used for submitting the jobs in an array fashion, its
-        perfectly fine to just throw an error if the system does not support
-        it.
+        """Submit the jobs in an array fashion, its perfectly fine to just
+        throw an error if the system does not support it.
 
         Parameters
         ----------
         jobs : Sequence[Job]
-            jobs
+            List of jobs to submit.
         max_jobs : int
-            max_jobs
+            Maximum number of jobs at the same time.
         max_array_size : int
-            max_array_size
+            Maximum slurm array size.
         create_only : bool
             If true, create array script, but do not submit
-        kwargs :
-            Optional arguments
+        kwargs : dict
+            These keyword arguments are passed on to the system.
         """
         pass

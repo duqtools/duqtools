@@ -4,11 +4,15 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .config import Config
 from .ids import ImasHandle
-from .models import Locations, Run
+from .models import Locations
 from .operations import op_queue
+
+if TYPE_CHECKING:
+    from .models import Run
 
 logger = logging.getLogger(__name__)
 

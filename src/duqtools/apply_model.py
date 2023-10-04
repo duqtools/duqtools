@@ -4,12 +4,16 @@ from collections import abc
 from functools import singledispatch
 from pathlib import Path
 
-from .jetto import BaseJettoSystem
-from .schema import BaseModel, JettoOperation
+from .ids._apply_model import _apply_ids
+from .schema import IDSOperation, JettoOperation
+from .systems.jetto import BaseJettoSystem
 
 
 @singledispatch
-def apply_model(model: BaseModel, **kwargs):
+def apply_model(
+    model,
+    **kwargs,
+):
     """Apply operation in model to target. Data are modified in-place.
 
     Parameters
@@ -26,21 +30,27 @@ def apply_model(model: BaseModel, **kwargs):
 
 
 @apply_model.register
-def _apply_coupled(model: abc.Iterable, **kwargs):  # type: ignore
+def _apply_model_coupled(
+    model: abc.Iterable,
+    **kwargs,
+):
     for submodel in model:
         apply_model(submodel, **kwargs)
 
 
-from .ids._apply_model import _apply_ids  # noqa: E402, F401
+apply_model.register(IDSOperation, _apply_ids)
 
 
 @apply_model.register
-def _apply_jetto(model: JettoOperation, run_dir: Path, system: BaseJettoSystem,
-                 **kwargs):
-    system.set_jetto_variable(run_dir, model.variable.name, model.value,
-                              model.variable.lookup)
-
-
-#@apply_model.register
-#def _apply_ets6(model: JettoOperation, run_dir: Path, **kwargs):
-#    pass
+def _apply_model_jetto_operation(
+    model: JettoOperation,
+    run_dir: Path,
+    system: BaseJettoSystem,
+    **kwargs,
+):
+    system.set_jetto_variable(
+        run=run_dir,
+        key=model.variable.name,
+        value=model.value,
+        variable=model.variable.lookup,
+    )

@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 import typing
+from typing import TYPE_CHECKING
 
 import click
 
-from duqtools.config import Config, var_lookup
+from duqtools.config import var_lookup
+
+if TYPE_CHECKING:
+    from duqtools.config import Config
 
 cs = click.style
 

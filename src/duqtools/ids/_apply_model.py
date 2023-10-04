@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import logging
 from functools import partial
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from .._logging_utils import duqlog_screen
-from ..apply_model import apply_model
-from ..schema import IDSOperation
 from ._handle import ImasHandle
-from ._mapping import IDSMapping
+
+if TYPE_CHECKING:
+    from ..schema import IDSOperation
+    from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,6 @@ def _custom_function(data: np.ndarray, value, *, out: np.ndarray, code: str):
     out[:] = eval(code)
 
 
-@apply_model.register  # type: ignore
 def _apply_ids(model: IDSOperation, *,
                ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
     """Implementation for IDS operations.

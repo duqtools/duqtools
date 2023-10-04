@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -6,20 +8,25 @@ import subprocess as sp
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from jetto_tools import config, jset, lookup, namelist, template
 from jetto_tools import job as jetto_job
 from jetto_tools.template import _EXTRA_FILE_REGEXES
 
-from ..ids import ImasHandle
+from duqtools.operations import add_to_op_queue
+
+from ..base_system import AbstractSystem
 from ..jintrac import V210921Mixin, V220922Mixin
-from ..models import AbstractSystem, Job
-from ..operations import add_to_op_queue
-from ..schema import JettoSystemModel, JettoVar
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
+
+if TYPE_CHECKING:
+    from duqtools.api import ImasHandle, Job
+
+    from ..schema import JettoVar
+    from ._schema import JettoSystemModel
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -54,12 +61,13 @@ def _get_jetto_extra(filenames: List[str], *, jset):
     return jetto_extra
 
 
-class BaseJettoSystem(AbstractSystem, JettoSystemModel):
+class BaseJettoSystem(AbstractSystem):
     """System that can be used to create runs for jetto.
 
     This system can submit to various backends like docker, prominence
     and the gateway.
     """
+    options: JettoSystemModel
 
     @property
     def jruns_path(self) -> Path:
@@ -71,8 +79,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         -------
         Path
         """
-        if self.jruns:
-            return Path(self.jruns)
+        if self.options.jruns:
+            return Path(self.options.jruns)
         elif jruns_env := os.getenv('JRUNS'):
             return Path(jruns_env)
         else:
@@ -80,6 +88,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
 
     def get_runs_dir(self) -> Path:
         path = self.jruns_path
+
+        assert self.cfg.create
         runs_dir = self.cfg.create.runs_dir
 
         if runs_dir:
@@ -114,7 +124,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         if (job.path / 'jetto.status').exists():
             os.remove(job.path / 'jetto.status')
 
-        submit_system = self.submit_system
+        submit_system = self.options.submit_system
 
         if submit_system == 'slurm':
             submit = self.submit_slurm
@@ -132,7 +142,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = self.submit_command.split()
+        submit_cmd = self.options.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting script via slurm {cmd}')
@@ -158,7 +168,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
             job.path,
-            image=self.docker_image,
+            image=self.options.docker_image,
             extra_volumes=extra_volumes)
         job.lockfile.touch()
         with open(job.lockfile, 'w') as f:
@@ -173,7 +183,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         # Jetto tools decided to be weird, so we use jams/prom-submit.py
         cmd = [
             'prom-submit.py', '--rundir',
-            str(job.path), '--image', self.prominence_image, '--cpus',
+            str(job.path), '--image', self.options.prominence_image, '--cpus',
             str(jetto_jset['JobProcessingPanel.numProcessors']), '--walltime',
             '24.0', '--name', f'duqtools_{job.path.name}', '--cmd',
             '/docker-entrypoint.sh rjettov -I -xmpi -x64'
@@ -192,7 +202,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         create_only=False,
         **kwargs,
     ):
-        if self.submit_system == 'slurm':
+        if self.options.submit_system == 'slurm':
             self.create_array_slurm(jobs,
                                     max_jobs=max_jobs,
                                     max_array_size=max_array_size)
@@ -201,7 +211,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
 
         else:
             raise NotImplementedError(
-                f'array submission type {self.submit_system}'
+                f'array submission type {self.options.submit_system}'
                 ' not implemented')
 
     @add_to_op_queue('Create array job',
@@ -225,7 +235,7 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         for job in jobs:
             job.lockfile.touch()
 
-        submit_cmd = self.submit_command.split()
+        submit_cmd = self.options.submit_command.split()
         cmd: list[Any] = [*submit_cmd, 'duqtools_slurm_array.sh']
 
         logger.info(f'Submitting script via: {cmd}')
@@ -282,6 +292,8 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
     def imas_from_path(self, template_drc: Path) -> ImasHandle:
+        from duqtools.api import ImasHandle
+
         jetto_jset = jset.read(template_drc / 'jetto.jset')
 
         return ImasHandle(
@@ -335,10 +347,12 @@ class BaseJettoSystem(AbstractSystem, JettoSystemModel):
         jetto_config.export(run)  # Just overwrite the poor files
 
 
-class JettoSystemV210921(V210921Mixin, BaseJettoSystem):  # type: ignore
-    """System that can be used to create runs for jetto.
+class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
+    """System that can be used to create runs for jetto using the JINTRAC
+    `v210921` release.
 
-    The backend that is  assumed is jetto-v210921.
+    This system handles IMAS data via a public `imasdb`. Although this still works, this
+    backend is no longer supported. If possible, use `jetto-v220922` or newer.
 
     This system can submit to various backends like docker, prominence
     and the gateway.
@@ -351,12 +365,12 @@ class JettoSystemV210921(V210921Mixin, BaseJettoSystem):  # type: ignore
     """
 
 
-class JettoSystemV220922(V220922Mixin, BaseJettoSystem):  # type: ignore
-    """System that can be used to create runs for jetto.
+class JettoSystemV220922(V220922Mixin, BaseJettoSystem):
+    """This is the default jetto system that can be used to create runs for
+    jetto using the JINTRAC `v220922` release or newer.
 
-    The backend that is  assumed is jetto-v220922. The most important
-    difference with v210921 is that the IMAS data is handled locally
-    instead of via a public `imasdb`
+    The most important difference with `jetto-v210921` is that the IMAS data are handled locally
+    instead of via a public `imasdb`.
 
     This system can submit to various backends like docker, prominence
     and the gateway.

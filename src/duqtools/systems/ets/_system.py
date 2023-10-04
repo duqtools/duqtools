@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -5,12 +7,16 @@ import stat
 import subprocess as sp
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ..ids import ImasHandle
-from ..models import AbstractSystem, Job
-from ..operations import add_to_op_queue
-from ..schema import Ets6SystemModel
+from duqtools.operations import add_to_op_queue
+
+from ..base_system import AbstractSystem
+
+if TYPE_CHECKING:
+    from duqtools.api import ImasHandle, Job
+
+    from ._schema import Ets6SystemModel
 
 logger = logging.getLogger(__name__)
 
@@ -27,17 +33,20 @@ BATCH_TEMPLATE = '\n'.join([
 ])
 
 
-class Ets6System(AbstractSystem, Ets6SystemModel):
-    """System that can be used to create runs for ets.
+class Ets6System(AbstractSystem):
+    """This system can be used to create runs for Ets6.
 
     ```yaml title="duqtools.yaml"
     system:
       name: 'ets6'
     ```
     """
+    options: Ets6SystemModel
 
     def get_runs_dir(self) -> Path:
-        runs_dir = self.cfg.create.runs_dir  # type: ignore
+        assert self.cfg.create
+        runs_dir = self.cfg.create.runs_dir
+
         if not runs_dir:
             if os.getenv('ITMWORK'):
                 runs_dir = Path(os.getenv('ITMWORK'))  # type: ignore
@@ -59,6 +68,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
 
     @add_to_op_queue('Writing new batchfile', '{run_dir.name}', quiet=True)
     def write_batchfile(self, run_dir: Path):
+        from duqtools.api import Job
+
         job = Job(run_dir, cfg=self.cfg)
         script = SCRIPT_TEMPLATE.format(job=job, cfg=self.cfg)
         batchfile = '\n'.join([
@@ -92,7 +103,7 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = self.submit_command.split()
+        submit_cmd = self.options.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting via {cmd}')
@@ -172,6 +183,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         options,
     ):
         """Get handle for data input."""
+        from duqtools.api import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,
@@ -188,6 +201,8 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         options,
     ):
         """Get handle for data output."""
+        from duqtools.api import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,

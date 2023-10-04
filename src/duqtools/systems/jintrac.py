@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from duqtools.ids import ImasHandle
+if TYPE_CHECKING:
+    from ..ids import ImasHandle
 
 
 class V210921Mixin:
@@ -17,6 +20,8 @@ class V210921Mixin:
         options,
     ):
         """Get handle for data input."""
+        from duqtools.ids import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,
@@ -33,6 +38,8 @@ class V210921Mixin:
         options,
     ):
         """Get handle for data output."""
+        from duqtools.ids import ImasHandle
+
         return ImasHandle(
             user=options.user,
             db=options.imasdb,
@@ -53,6 +60,8 @@ class V220922Mixin:
         options,
     ):
         """Get handle for data input."""
+        from duqtools.ids import ImasHandle
+
         relative_location: Optional[str] = str(
             os.path.relpath((dirname / 'imasdb').resolve()))
         if relative_location:
@@ -73,6 +82,8 @@ class V220922Mixin:
         options,
     ):
         """Get handle for data output."""
+        from duqtools.ids import ImasHandle
+
         relative_location: Optional[str] = str(
             os.path.relpath((dirname / 'imasdb').resolve()))
         if relative_location:

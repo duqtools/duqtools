@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import time
 from collections import deque
@@ -10,7 +12,7 @@ from .config import Config
 from .create import CreateError
 from .models import Job, Locations
 from .operations import add_to_op_queue, op_queue
-from .system import get_system
+from .systems import get_system
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug

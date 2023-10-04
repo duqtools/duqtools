@@ -1,16 +1,14 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import Any
 
-from .config import Config
-from .ets import Ets6System
-from .jetto import JettoSystemV210921, JettoSystemV220922
-from .jintrac import V220922Mixin
-from .models import AbstractSystem
-from .schema import NoSystemModel
+from ..base_system import AbstractSystem
+from ..jintrac import V220922Mixin
+from ._schema import NoSystemModel
 
 
-class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
+class NoSystem(V220922Mixin, AbstractSystem):
     """This system is intended for workflows that need to apply some operations
     or sampling of the data without any system like Jetto or ETS in mind.
 
@@ -22,6 +20,7 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
       name: 'nosystem'  # or `name: None`
     ```
     """
+    model: NoSystemModel
 
     @property
     def jruns_path(self) -> Path:
@@ -39,6 +38,8 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
 
     def get_runs_dir(self) -> Path:
         path = self.jruns_path
+
+        assert self.cfg.create
         runs_dir = self.cfg.create.runs_dir
 
         if runs_dir:
@@ -77,21 +78,3 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
 
     def imas_from_path(*args, **kwargs):
         pass
-
-
-def get_system(cfg: Config) -> AbstractSystem:
-    """Get the system to do operations with."""
-    System: Any = None  # Shut up mypy
-
-    if (cfg.system.name in ('jetto', 'jetto-v220922', 'jetto-v230123')):
-        System = JettoSystemV220922
-    elif (cfg.system.name == 'jetto-v210921'):
-        System = JettoSystemV210921
-    elif (cfg.system.name == 'ets6'):
-        System = Ets6System
-    elif (cfg.system.name in (None, 'nosystem')):
-        System = NoSystem
-    else:
-        raise NotImplementedError(
-            f'system {cfg.system.name} is not implemented')
-    return System.model_validate({'cfg': cfg, **cfg.system.model_dump()})

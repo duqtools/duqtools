@@ -8,10 +8,9 @@ from typing import TYPE_CHECKING, Sequence
 
 import jetto_tools
 
-from ..config import Config
-
 if TYPE_CHECKING:
-    from ..models import Job
+    from duqtools.api import Job
+    from duqtools.config import Config
 
 
 def write_batchfile(

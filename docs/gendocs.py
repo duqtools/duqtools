@@ -10,8 +10,6 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-from duqtools.ets import Ets6System
-from duqtools.jetto import BaseJettoSystem, JettoSystemV210921, JettoSystemV220922
 from duqtools.schema import (
     ARange,
     IDSOperationDim,
@@ -21,13 +19,11 @@ from duqtools.schema import (
     JettoVariableModel,
     LinSpace,
     OperationDim,
-    StatusConfigModel,
-    SubmitConfigModel,
 )
 from duqtools.schema._jetto import JsetField, NamelistField
 from duqtools.schema.cli import ConfigModel, CreateConfigModel
 from duqtools.schema.data_location import DataLocation
-from duqtools.system import NoSystem
+from duqtools.systems.models import StatusConfigModel, SubmitConfigModel
 
 this_dir = Path(__file__).parent
 sys.path.append(str(this_dir))
@@ -41,13 +37,9 @@ objects = {
     ConfigModel,
     CreateConfigModel,
     DataLocation,
-    NoSystem,
     IDSOperationDim,
     IDSVariableModel,
     ImasBaseModel,
-    BaseJettoSystem,
-    JettoSystemV210921,
-    JettoSystemV220922,
     JettoVariableModel,
     JettoVar,
     JsetField,
@@ -56,10 +48,9 @@ objects = {
     OperationDim,
     StatusConfigModel,
     SubmitConfigModel,
-    Ets6System,
 }
 schemas = {
-    f'schema_{obj.__name__}': obj.schema()  # type: ignore
+    f'schema_{obj.__name__}': obj.model_json_schema()  # type: ignore
     for obj in objects
 }
 for page in 'index', 'status', 'submit', 'create':
