@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
-
 from pydantic import Field
 
 from ..schema._basemodel import BaseModel
 from ..schema._description_helpers import formatter as f
-
-if TYPE_CHECKING:
-    pass
 
 
 class SubmitConfigModel(BaseModel):
@@ -62,7 +57,3 @@ class StatusConfigModel(BaseModel):
 
 class SystemModel(StatusConfigModel, SubmitConfigModel):
     pass
-
-
-class NoSystemModel(SystemModel):
-    name: Literal[None, 'nosystem'] = Field(None, description='No system.')

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
-from .base_system import AbstractSystem
-from .jintrac import V220922Mixin
-from .models import NoSystemModel
+from ..base_system import AbstractSystem
+from ..jintrac import V220922Mixin
+from ._schema import NoSystemModel
 
 
 class NoSystem(V220922Mixin, AbstractSystem):
