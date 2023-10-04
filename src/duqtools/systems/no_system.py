@@ -6,7 +6,7 @@ from .jintrac import V220922Mixin
 from .models import NoSystemModel
 
 
-class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
+class NoSystem(V220922Mixin, AbstractSystem):
     """This system is intended for workflows that need to apply some operations
     or sampling of the data without any system like Jetto or ETS in mind.
 
@@ -18,6 +18,7 @@ class NoSystem(NoSystemModel, V220922Mixin, AbstractSystem):
       name: 'nosystem'  # or `name: None`
     ```
     """
+    model: NoSystemModel
 
     @property
     def jruns_path(self) -> Path:

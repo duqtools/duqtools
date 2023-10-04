@@ -12,10 +12,11 @@ from typing import TYPE_CHECKING, Any
 from duqtools.operations import add_to_op_queue
 
 from ..base_system import AbstractSystem
-from ._schema import Ets6SystemModel
 
 if TYPE_CHECKING:
     from duqtools.api import ImasHandle, Job
+
+    from ._schema import Ets6SystemModel
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ BATCH_TEMPLATE = '\n'.join([
 ])
 
 
-class Ets6System(AbstractSystem, Ets6SystemModel):
+class Ets6System(AbstractSystem):
     """System that can be used to create runs for ets.
 
     ```yaml title="duqtools.yaml"
@@ -40,9 +41,12 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
       name: 'ets6'
     ```
     """
+    options: Ets6SystemModel
 
     def get_runs_dir(self) -> Path:
-        runs_dir = self.cfg.create.runs_dir  # type: ignore
+        assert self.cfg.create
+        runs_dir = self.cfg.create.runs_dir
+
         if not runs_dir:
             if os.getenv('ITMWORK'):
                 runs_dir = Path(os.getenv('ITMWORK'))  # type: ignore
@@ -99,7 +103,7 @@ class Ets6System(AbstractSystem, Ets6SystemModel):
         if not job.has_submit_script:
             raise FileNotFoundError(job.submit_script)
 
-        submit_cmd = self.submit_command.split()
+        submit_cmd = self.options.submit_command.split()
         cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
 
         logger.info(f'submitting via {cmd}')

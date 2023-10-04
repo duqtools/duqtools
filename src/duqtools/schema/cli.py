@@ -127,7 +127,7 @@ class ConfigModel(BaseModel):
 
 from ..systems.ets import Ets6SystemModel  # noqa
 from ..systems.jetto import JettoSystemModel  # noqa
-from ..systems.no_system import NoSystemModel  # noqa
+from ..systems.models import NoSystemModel  # noqa
 from ._dimensions import CoupledDim, Operation, OperationDim  # noqa
 from ._imas import ImasBaseModel  # noqa
 from .data_location import DataLocation  # noqa
