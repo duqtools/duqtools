@@ -341,8 +341,11 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
         model = run_dict[run]
         model.data_in = ImasHandle.model_validate(model.data_in,
                                                   from_attributes=True)
+        assert model.data_in
+
         model.data_out = ImasHandle.model_validate(model.data_out,
                                                    from_attributes=True)
+        assert model.data_out
 
         model.data_in.delete()
         remove_run(model)

@@ -5,8 +5,11 @@ from typing import Optional, Union
 
 from pydantic import Field, model_validator
 
+from duqtools.systems.jetto._dimensions import JettoOperation
+
 from ..ids import ImasHandle
-from ..schema import BaseModel, IDSOperation, ImasBaseModel, JettoOperation, RootModel
+from ..ids._schema import ImasBaseModel
+from ..schema import BaseModel, IDSOperation, RootModel
 
 
 class Run(BaseModel):

@@ -1,3 +1,6 @@
+"""This module contains adapters to interface with various simulation
+suites."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any

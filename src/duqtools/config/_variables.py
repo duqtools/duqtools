@@ -11,8 +11,8 @@ from typing import Hashable, Sequence
 from pydantic_yaml import parse_yaml_raw_as
 
 from ..schema import IDSVariableModel
-from ..schema.variables import VariableConfigModel
 from ..utils import groupby
+from ._models import VariableConfigModel
 
 if sys.version_info < (3, 10):
     from importlib_resources import files

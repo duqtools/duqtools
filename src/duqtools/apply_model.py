@@ -5,8 +5,9 @@ from functools import singledispatch
 from pathlib import Path
 
 from .ids._apply_model import _apply_ids
-from .schema import IDSOperation, JettoOperation
+from .schema import IDSOperation
 from .systems.jetto import BaseJettoSystem
+from .systems.jetto._dimensions import JettoOperation
 
 
 @singledispatch

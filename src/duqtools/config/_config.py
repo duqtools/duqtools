@@ -19,7 +19,7 @@ from typing import Union
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from ..schema.cli import ConfigModel
+from ._schema_root import ConfigModel
 
 
 class Config(ConfigModel):

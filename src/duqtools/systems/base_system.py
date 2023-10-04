@@ -9,8 +9,7 @@ if TYPE_CHECKING:
 
     from duqtools.api import ImasHandle, Job
     from duqtools.config import Config
-
-    from ..schema import ImasBaseModel
+    from duqtools.ids._schema import ImasBaseModel
 
 logger = logging.getLogger(__name__)
 

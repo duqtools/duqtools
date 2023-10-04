@@ -4,7 +4,7 @@ from typing import Literal, Optional
 
 from pydantic import DirectoryPath, Field
 
-from duqtools.schema._description_helpers import formatter as f
+from duqtools.utils import formatter as f
 
 from ..models import SystemModel
 

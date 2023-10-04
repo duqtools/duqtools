@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import Field, field_validator
 
-from ._basemodel import BaseModel
+from duqtools.schema import BaseModel
 
 
 class ImasBaseModel(BaseModel):

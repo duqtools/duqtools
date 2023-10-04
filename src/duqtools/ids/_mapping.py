@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from duqtools.config import lookup_vars
-
 from ..schema import IDSVariableModel
 from ._copy import add_provenance_info
 
@@ -349,6 +347,8 @@ class IDSMapping(Mapping):
                     f"Don't know how to deal with: {var.name}: {arr}")
 
         import xarray as xr
+
+        from duqtools.config import lookup_vars
 
         xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
 from pydantic_yaml import parse_yaml_raw_as
 
 from duqtools.api import IDSMapping
-from duqtools.schema._variable import IDS2JettoVariableModel
 from duqtools.setup import Variables
+from duqtools.systems.jetto import IDS2JettoVariableModel
 
 
 @pytest.fixture

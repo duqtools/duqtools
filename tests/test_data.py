@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pytest import TEST_DATA
 
 from duqtools.api import ImasHandle
