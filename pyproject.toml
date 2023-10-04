@@ -219,7 +219,7 @@ line-length = 96
 
 [tool.ruff.isort]
 known-first-party = ["duqtools"]
+required-imports = ["from __future__ import annotations"]
 
 [tool.isort]
 profile = "black"
-# force-single-line = true

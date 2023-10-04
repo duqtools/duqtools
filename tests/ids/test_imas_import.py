@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 def test_imas():
     from unittest.mock import MagicMock as Mock
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample

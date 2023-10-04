@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from duqtools.matrix_samplers import cartesian_product, halton, latin_hypercube, sobol
 
 

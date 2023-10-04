@@ -1,4 +1,7 @@
 # https://setuptools.pypa.io/en/latest/pkg_resources.html#workingset-objects
+from __future__ import annotations
+
+
 def fix_dependencies():
     import __main__
     __main__.__requires__ = [

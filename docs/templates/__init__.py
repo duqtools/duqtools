@@ -1,4 +1,5 @@
 """Collection of jinja2 templates to render md output."""
+from __future__ import annotations
 
 from pathlib import Path
 
