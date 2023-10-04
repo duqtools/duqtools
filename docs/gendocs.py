@@ -10,19 +10,18 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
+from duqtools.config._schema_create import CreateConfigModel
+from duqtools.config._schema_root import ConfigModel
+from duqtools.ids._schema import ImasBaseModel
 from duqtools.schema import (
     ARange,
     IDSOperationDim,
     IDSVariableModel,
-    ImasBaseModel,
-    JettoVar,
-    JettoVariableModel,
     LinSpace,
     OperationDim,
 )
-from duqtools.schema._jetto import JsetField, NamelistField
-from duqtools.schema.cli import ConfigModel, CreateConfigModel
 from duqtools.schema.data_location import DataLocation
+from duqtools.systems.jetto import JettoVar, JettoVariableModel, JsetField, NamelistField
 from duqtools.systems.models import StatusConfigModel, SubmitConfigModel
 
 this_dir = Path(__file__).parent

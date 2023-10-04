@@ -4,19 +4,28 @@ from __future__ import annotations
 from ._batchfile import write_batchfile
 from ._dimensions import JettoOperation
 from ._jettovar_to_json import jettovar_to_json
-from ._models import IDS2JettoVariableModel, JettoVariableModel
+from ._models import (
+    IDS2JettoVariableModel,
+    JettoVar,
+    JettoVariableModel,
+    JsetField,
+    NamelistField,
+)
 from ._schema import JettoSystemModel
 from ._system import BaseJettoSystem, JettoSystem, JettoSystemV210921, JettoSystemV220922
 
 __all__ = [
     'BaseJettoSystem',
+    'IDS2JettoVariableModel',
+    'JettoOperation',
     'JettoSystem',
+    'JettoSystemModel',
     'JettoSystemV210921',
     'JettoSystemV220922',
-    'JettoSystemModel',
-    'JettoVariableModel',
-    'JettoOperation',
-    'IDS2JettoVariableModel',
+    'JettoVar',
     'jettovar_to_json',
+    'JettoVariableModel',
+    'JsetField',
+    'NamelistField',
     'write_batchfile',
 ]
