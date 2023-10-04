@@ -136,5 +136,5 @@ from .matrix_samplers import (  # noqa
 )
 from .variables import VariableConfigModel  # noqa
 
-CreateConfigModel.update_forward_refs()
-ConfigModel.update_forward_refs()
+CreateConfigModel.model_rebuild()
+ConfigModel.model_rebuild()
