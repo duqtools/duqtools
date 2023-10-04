@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
 
-from ..config import var_lookup
 from ..operations import add_to_op_queue
 from ..utils import groupby
 from ._rebase import rebase_all_coords, squash_placeholders
@@ -39,6 +38,8 @@ def merge_data(
     variables : Sequence[IDSVariableModel]
         variables
     """
+    from ..config import var_lookup
+
     # Add dimensions to variables
     variable_dict = {}
 

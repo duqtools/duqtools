@@ -14,11 +14,6 @@ from ._schema_create import CreateConfigModel
 from ._variables import VariableConfigModel
 
 
-def _default_system():
-    from ..systems.no_system import NoSystemModel
-    return NoSystemModel()
-
-
 class ConfigModel(BaseModel):
     """The options for the CLI are defined by this model."""
     tag: str = Field(
@@ -35,7 +30,7 @@ class ConfigModel(BaseModel):
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
-        default_factory=_default_system,
+        NoSystemModel(),
         description='Options specific to the system used',
         discriminator='name')
 

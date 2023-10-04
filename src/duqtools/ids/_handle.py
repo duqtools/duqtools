@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, List, Sequence
 
 from pydantic import field_validator
 
-from ..config import lookup_vars, var_lookup
 from ..operations import add_to_op_queue
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
@@ -264,6 +263,8 @@ class ImasHandle(ImasBaseModel):
         ValueError
             When variables are from multiple IDSs.
         """
+        from duqtools.config import var_lookup
+
         idsvar_lookup = var_lookup.filter_ids(ids)
         variables = list(
             set(list(extra_variables) + list(idsvar_lookup.keys())))
@@ -302,6 +303,7 @@ class ImasHandle(ImasBaseModel):
         ValueError
             When variables are from multiple IDSs.
         """
+        from duqtools.config import lookup_vars
         var_models = lookup_vars(variables)
 
         idss = {var.ids for var in var_models}

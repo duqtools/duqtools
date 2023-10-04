@@ -19,11 +19,6 @@ from ..schema.matrix_samplers import (
 )
 
 
-def _default_sampler():
-    from .matrix_samplers import CartesianProduct
-    return CartesianProduct()
-
-
 class CreateConfigModel(BaseModel):
     """The options of the `create` subcommand are stored in the `create` key in
     the config."""
@@ -64,7 +59,7 @@ class CreateConfigModel(BaseModel):
         """)
 
     sampler: Union[LHSSampler, HaltonSampler, SobolSampler,
-                   CartesianProduct] = Field(default_factory=_default_sampler,
+                   CartesianProduct] = Field(CartesianProduct(),
                                              discriminator='method',
                                              description=f("""
         For efficient UQ, it may not be necessary to sample the entire matrix
