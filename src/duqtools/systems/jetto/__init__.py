@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from ._batchfile import write_batchfile
-from ._dimensions import JettoOperation
+from ._dimensions import JettoOperation, JettoOperationDim
 from ._jettovar_to_json import jettovar_to_json
 from ._models import (
     IDS2JettoVariableModel,
@@ -18,6 +18,7 @@ __all__ = [
     'BaseJettoSystem',
     'IDS2JettoVariableModel',
     'JettoOperation',
+    'JettoOperationDim',
     'JettoSystem',
     'JettoSystemModel',
     'JettoSystemV210921',
