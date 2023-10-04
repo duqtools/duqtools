@@ -34,7 +34,7 @@ BATCH_TEMPLATE = '\n'.join([
 
 
 class Ets6System(AbstractSystem):
-    """System that can be used to create runs for ets.
+    """This system can be used to create runs for Ets6.
 
     ```yaml title="duqtools.yaml"
     system:

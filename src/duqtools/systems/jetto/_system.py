@@ -347,10 +347,12 @@ class BaseJettoSystem(AbstractSystem):
         jetto_config.export(run)  # Just overwrite the poor files
 
 
-class JettoSystemV210921(V210921Mixin, BaseJettoSystem):  # type: ignore
-    """System that can be used to create runs for jetto.
+class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
+    """System that can be used to create runs for jetto using the JINTRAC
+    `v210921` release.
 
-    The backend that is  assumed is jetto-v210921.
+    This system handles IMAS data via a public `imasdb`. Although this still works, this
+    backend is no longer supported. If possible, use `jetto-v220922` or newer.
 
     This system can submit to various backends like docker, prominence
     and the gateway.
@@ -363,12 +365,12 @@ class JettoSystemV210921(V210921Mixin, BaseJettoSystem):  # type: ignore
     """
 
 
-class JettoSystemV220922(V220922Mixin, BaseJettoSystem):  # type: ignore
-    """System that can be used to create runs for jetto.
+class JettoSystemV220922(V220922Mixin, BaseJettoSystem):
+    """This is the default jetto system that can be used to create runs for
+    jetto using the JINTRAC `v220922` release or newer.
 
-    The backend that is  assumed is jetto-v220922. The most important
-    difference with v210921 is that the IMAS data is handled locally
-    instead of via a public `imasdb`
+    The most important difference with `jetto-v210921` is that the IMAS data are handled locally
+    instead of via a public `imasdb`.
 
     This system can submit to various backends like docker, prominence
     and the gateway.
