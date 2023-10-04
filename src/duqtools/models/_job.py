@@ -156,7 +156,7 @@ class Job:
 
     def submit(self):
         """Submit job."""
-        from ..system import get_system
+        from duqtools.systems import get_system
         debug(f'Put lockfile in place for {self.lockfile}')
         self.lockfile.touch()
 
