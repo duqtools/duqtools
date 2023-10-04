@@ -4,8 +4,9 @@ from typing import Annotated, Literal, Union
 
 from pydantic import Field, field_validator
 
+from duqtools.utils import formatter as f
+
 from ._basemodel import BaseModel
-from ._description_helpers import formatter as f
 
 
 class JsetField(BaseModel):

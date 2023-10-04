@@ -5,8 +5,9 @@ from typing import Optional, Union
 
 from pydantic import Field, PrivateAttr
 
+from duqtools.utils import formatter as f
+
 from ._basemodel import BaseModel
-from ._description_helpers import formatter as f
 
 
 def _default_sampler():

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import Field
 
 from ..schema._basemodel import BaseModel
-from ..schema._description_helpers import formatter as f
+from ..schemaduqtools.utils import formatter as f
 
 
 class SubmitConfigModel(BaseModel):

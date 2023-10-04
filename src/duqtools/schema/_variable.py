@@ -4,8 +4,9 @@ from typing import Optional
 
 from pydantic import Field
 
+from duqtools.utils import formatter as f
+
 from ._basemodel import BaseModel
-from ._description_helpers import formatter as f
 from ._jetto import JettoVar
 
 

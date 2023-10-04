@@ -5,6 +5,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from itertools import filterfalse, tee
 from pathlib import Path
+from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
 
 from pydantic_yaml import parse_yaml_raw_as
@@ -17,6 +18,12 @@ if TYPE_CHECKING:
 def no_op(*args, **kwargs):
     """Do nothing."""
     pass
+
+
+def formatter(s):
+    """Dedent and remove newlines."""
+    s = dedent(s)
+    return s.replace('\n', ' ').strip()
 
 
 @contextmanager

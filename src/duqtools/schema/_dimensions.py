@@ -5,8 +5,9 @@ from typing import Literal, Optional, Union
 
 from pydantic import Field, field_validator, model_validator
 
+from duqtools.utils import formatter as f
+
 from ._basemodel import BaseModel, RootModel
-from ._description_helpers import formatter as f
 from ._ranges import ARange, LinSpace
 from ._variable import IDSVariableModel, JettoVariableModel
 
