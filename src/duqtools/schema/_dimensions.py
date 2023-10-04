@@ -9,7 +9,7 @@ from duqtools.utils import formatter as f
 
 from ._basemodel import BaseModel, RootModel
 from ._ranges import ARange, LinSpace
-from ._variable import IDSVariableModel, JettoVariableModel
+from .variables import IDSVariableModel
 
 
 class OperatorMixin(BaseModel):
@@ -112,6 +112,8 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
         from duqtools.config import var_lookup
         variable = var_lookup[self.variable]
 
+        from duqtools.systems.jetto import JettoOperationDim, JettoVariableModel
+
         if isinstance(variable, JettoVariableModel):
             expand_func = JettoOperationDim.expand
         elif isinstance(variable, IDSVariableModel):
@@ -176,28 +178,6 @@ class IDSOperationDim(IDSPathMixin, OperatorMixin, DimMixin, BaseModel):
             for value in self.values)
 
 
-class JettoPathMixin(BaseModel):
-    variable: JettoVariableModel
-
-
-class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
-    value: float = Field(description=f("""
-        Value to use with operator on field to create sampling
-        space."""))
-
-
-class JettoOperationDim(JettoPathMixin, OperatorMixin, DimMixin, BaseModel):
-
-    def expand(self, *args, variable, **kwargs) -> tuple[JettoOperation, ...]:
-        """Expand list of values into operations with its components."""
-        return tuple(
-            JettoOperation(variable=variable,
-                           operator=self.operator,
-                           value=value,
-                           scale_to_error=self.scale_to_error)
-            for value in self.values)
-
-
 class Operation(OperatorMixin, BaseModel):
     variable: str
     value: float
@@ -206,6 +186,8 @@ class Operation(OperatorMixin, BaseModel):
         """Expand variable and convert to correct type."""
         from duqtools.config import var_lookup
         variable = var_lookup[self.variable]
+
+        from duqtools.systems.jetto import JettoOperation, JettoVariableModel
 
         if isinstance(variable, JettoVariableModel):
             cls = JettoOperation

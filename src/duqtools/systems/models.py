@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from ..schema._basemodel import BaseModel
-from ..schemaduqtools.utils import formatter as f
+from duqtools.utils import formatter as f
+
+from ..schema import BaseModel
 
 
 class SubmitConfigModel(BaseModel):

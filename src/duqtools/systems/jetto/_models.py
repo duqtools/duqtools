@@ -1,13 +1,50 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Annotated, Literal, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
+from duqtools.schema import BaseModel
+from duqtools.schema.variables import IDSPath
 from duqtools.utils import formatter as f
 
-from ._basemodel import BaseModel
-from ._jetto import JettoVar
+
+class JsetField(BaseModel):
+    file: Literal['jetto.jset'] = Field('jetto.jset',
+                                        description='Name of the file.')
+    field: str = Field(description='Field name.')
+
+
+class NamelistField(BaseModel):
+    file: Literal['jetto.in'] = Field('jetto.in',
+                                      description='Name of the file.')
+    field: str = Field(description='Field name.')
+    section: str = Field(description='Section in the config.')
+
+    @field_validator('section')
+    def section_lower(cls, v):
+        return v.lower()
+
+
+JettoField = Annotated[Union[JsetField, NamelistField],
+                       Field(discriminator='file')]
+
+
+class JettoVar(BaseModel):
+    """These describe the jetto variables."""
+    doc: str = Field(description='Docstring for the variable.')
+    name: str = Field(description='Name of the variable.')
+    type: Literal['str', 'int', 'float'] = Field(
+        description=f('Type of the variable (str, int, float)'))
+    keys: list[JettoField] = Field(description=f(
+        'Jetto keys to update when this jetto variable is requested'))
+
+    def get_type(self):
+        return {
+            'str': str,
+            'int': int,
+            'float': float,
+        }[self.type]
 
 
 class JettoVariableModel(BaseModel):
@@ -25,48 +62,6 @@ class JettoVariableModel(BaseModel):
     lookup: Optional[JettoVar] = Field(None,
                                        description=f("""
     Description of the fields that have to be updated for a Jetto Variable
-    """))
-
-
-class IDSPath(BaseModel):
-    ids: str = Field(description='Root IDS name.')
-    path: str = Field(description=f("""
-        Path to the data within the IDS.
-        The fields are separated by forward slashes (`\\`).
-    """))
-
-
-class IDSVariableModel(IDSPath):
-    """Variable for describing data within a IMAS database.
-
-    The variable can be given a name, which will be used in the rest of
-    the config to reference the variable. It will also be used as the
-    column labels or on plots.
-
-    The dimensions for each variable must be specified. This ensures the
-    the data will be self-consistent. For example for 1D data, you can
-    use `[x]` and for 2D data, `[x, y]`.
-
-    The IDS path may contain indices. You can point to a single index,
-    by simply giving the complete path (i.e. `profiles_1d/0/t_i_ave` for
-    the 0th time slice). To retrieve all time slices, you can use
-    `profiles_1d/*/t_i_ave`.
-    """
-    type: str = Field('IDS-variable',
-                      description='discriminator for the variable type')
-
-    name: str = Field(description=f("""
-        Name of the variable.
-        This will be used to reference this variable.
-    """))
-    ids: str = Field(description='Root IDS name.')
-    path: str = Field(description=f("""
-        Path to the data within the IDS.
-        The fields are separated by forward slashes (`/`).
-    """))
-    dims: list[str] = Field(description=f("""
-        Give the dimensions of the data,
-        i.e. [x] for 1D, or [x, y] for 2D data.
     """))
 
 
