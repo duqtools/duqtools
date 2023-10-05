@@ -22,3 +22,18 @@ def test_list_variables():
     assert 'jetto-variable' in out
     assert '*my_extra_var' in out
     assert 'rho_tor_norm' in out
+
+
+def test_version():
+    runner = CliRunner()
+    ret = runner.invoke(cli.cli_version)
+
+    assert ret.exit_code == 0
+
+
+def test_no_command():
+    runner = CliRunner()
+    ret = runner.invoke(cli.cli)
+
+    assert ret.exit_code == 0
+    assert ret.output.startswith('Usage:')
