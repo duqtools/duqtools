@@ -363,7 +363,7 @@ def cli_submit(**kwargs):
 @cli.command('sync_prominence', cls=GroupCmd)
 @click.option('--force', is_flag=True, help='Overwrite data if necessary')
 @common_options(*all_options)
-def cli_sync_proinence(**kwargs):
+def cli_sync_prominence(**kwargs):
     """Sync data back from prominence.
 
     This subcommand is meant to be used in combination with the
