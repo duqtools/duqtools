@@ -70,3 +70,25 @@ def test_create(tmpworkdir):
 
     for fn in 'ids_1230001.characteristics', 'ids_1230001.datafile', 'ids_1230001.tree':
         assert Path(outdir, 'run_0000', 'imasdb', 'jet', '3', '0', fn).exists()
+
+
+@pytest.mark.dependency()
+def test_merge(tmpworkdir):
+    tmpworkdir = Path(tmpworkdir).absolute()
+    imasdbdir = Path(tmpworkdir, 'run_0000', 'imasdb')
+
+    with work_directory(tmpworkdir):
+        runner = CliRunner()
+        ret = runner.invoke(cli.cli_merge, [
+            '--force',
+            '--yes',
+            *('--template', f'{imasdbdir}/jet/123/1'),
+            *('--handle', f'{imasdbdir}/jet/123/1'),
+            *('--out', f'{imasdbdir}/jet/123/1001'),
+            *('--variable', 't_e'),
+        ])
+
+    assert ret.exit_code == 0
+
+    for fn in 'ids_1231001.characteristics', 'ids_1231001.datafile', 'ids_1231001.tree':
+        assert Path(imasdbdir, 'jet', '3', '0', fn).exists()
