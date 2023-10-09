@@ -58,7 +58,9 @@ def test_clean(duqtools_tmpdir):
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 def test_create(duqtools_tmpdir):
@@ -69,7 +71,9 @@ def test_create(duqtools_tmpdir):
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 @pytest.mark.skip(reason='Starting the server blocks the rest of the tests.')
@@ -86,11 +90,14 @@ def test_go(duqtools_tmpdir):
         runner = CliRunner()
         ret = runner.invoke(cli.cli_go)
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
-def test_init(duqtools_tmpdir):
-    with work_directory(duqtools_tmpdir):
+def test_init(tmpdir):
+    # must run in a different tmpdir becuase it generated duqtools.yaml
+    with work_directory(tmpdir):
         runner = CliRunner()
         ret = runner.invoke(cli.cli_init, [
             '--force',
@@ -98,6 +105,7 @@ def test_init(duqtools_tmpdir):
         ])
 
     assert ret.exit_code == 0
+    assert (tmpdir / 'duqtools.yaml').exists()
 
 
 def test_merge(duqtools_tmpdir):
@@ -108,29 +116,30 @@ def test_merge(duqtools_tmpdir):
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 2
+    assert ret.output.splitlines(
+    )[-1] == "Error: Missing option '-t' / '--template'."
 
 
 def test_plot(duqtools_tmpdir):
     with work_directory(duqtools_tmpdir):
         runner = CliRunner()
-        ret = runner.invoke(cli.cli_plot, [
-            '--force',
-            '--yes',
-        ])
+        ret = runner.invoke(cli.cli_plot)
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip() == 'No data to show.'
 
 
 def test_recreate(duqtools_tmpdir):
     with work_directory(duqtools_tmpdir):
         runner = CliRunner()
         ret = runner.invoke(cli.cli_recreate, [
-            '--force',
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 def test_setup(duqtools_tmpdir):
@@ -141,7 +150,10 @@ def test_setup(duqtools_tmpdir):
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 2
+    assert ret.output.splitlines()[-1] == (
+        "Error: Invalid value for '-t' / '--template': "
+        "Path 'duqtools.template.yaml' does not exist.")
 
 
 def test_status(duqtools_tmpdir):
@@ -149,7 +161,9 @@ def test_status(duqtools_tmpdir):
         runner = CliRunner()
         ret = runner.invoke(cli.cli_status)
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 def test_submit(duqtools_tmpdir):
@@ -159,8 +173,9 @@ def test_submit(duqtools_tmpdir):
             '--force',
             '--yes',
         ])
-
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 def test_sync_prominence(duqtools_tmpdir):
@@ -171,15 +186,16 @@ def test_sync_prominence(duqtools_tmpdir):
             '--yes',
         ])
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"
 
 
 def test_yolo(duqtools_tmpdir):
     with work_directory(duqtools_tmpdir):
         runner = CliRunner()
-        ret = runner.invoke(cli.cli_yolo, [
-            '--force',
-            '--yes',
-        ])
+        ret = runner.invoke(cli.cli_yolo)
 
-    assert ret.exit_code == 0
+    assert ret.exit_code == 1
+    assert ret.output.strip(
+    ) == "[Errno 2] No such file or directory: 'duqtools.yaml'"

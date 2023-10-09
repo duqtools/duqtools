@@ -29,9 +29,10 @@ def test_setup(duqduq_tmpdir):
             '--yes',
         ])
 
-    # Error: Invalid value for '-t' / '--template':
-    # Path 'duqtools.template.yaml' does not exist.\n"
     assert ret.exit_code == 2
+    assert ret.output.splitlines()[-1] == (
+        "Error: Invalid value for '-i' / '--input': "
+        "Path 'data.csv' does not exist.")
 
 
 def test_create(duqduq_tmpdir):

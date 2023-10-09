@@ -177,6 +177,8 @@ class OptionParser:
             load_config(config)
         except ValidationError as e:
             exit(e)
+        except FileNotFoundError as e:
+            exit(e)
 
     def parse_yes(self, *, yes, **kwargs):
         op_queue.yes = yes
