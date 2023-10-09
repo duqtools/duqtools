@@ -19,12 +19,33 @@ TEST_OUTPUT = (
     (getuser(), 'moo', 9234, 123),
 )
 
+TEST_STRINGS_localdb = (
+    '/user/directory/jet/1/2',
+    '/a/longer/user/directory/jet/123/456',
+)
+TEST_OUTPUT_localdb = (
+    ('/user/directory', 'jet', 1, 2),
+    ('/a/longer/user/directory', 'jet', 123, 456),
+)
+
 
 @pytest.mark.parametrize('string,expected', zip(TEST_STRINGS, TEST_OUTPUT))
 def test_from_string(string, expected):
     handle = ImasHandle.from_string(string)
 
     assert not handle.is_local_db
+    assert handle.user == expected[0]
+    assert handle.db == expected[1]
+    assert handle.shot == expected[2]
+    assert handle.run == expected[3]
+
+
+@pytest.mark.parametrize('string,expected',
+                         zip(TEST_STRINGS_localdb, TEST_OUTPUT_localdb))
+def test_from_string_localdb(string, expected):
+    handle = ImasHandle.from_string(string)
+
+    assert handle.is_local_db
     assert handle.user == expected[0]
     assert handle.db == expected[1]
     assert handle.shot == expected[2]
