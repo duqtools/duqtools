@@ -39,7 +39,7 @@ SUFFIXES = (
 )
 
 IMAS_PATTERN = re.compile(
-    r'^((?P<user>\w+)/)?(?P<db>\w+)/(?P<shot>\d+)/(?P<run>\d+)$')
+    r'^((?P<user>[\\\/\w]*)\/)?(?P<db>\w+)\/(?P<shot>\d+)\/(?P<run>\d+)$')
 
 
 def _patch_str_repr(obj: object):
