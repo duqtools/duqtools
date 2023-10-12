@@ -1,0 +1,22 @@
+create:
+  template: ./template_model
+  template_data:
+    user: {{ handle.user }}
+    db: {{ handle.db }}
+    shot: {{ handle.shot }}
+    run: {{ handle.run }}
+  operations:
+    - variable: major_radius
+      operator: copyto
+      value: {{ variables.major_radius | round(4) }}
+    - variable: b_field
+      operator: copyto
+      value: {{ variables.b_field | round(4) }}
+    - variable: t_start
+      operator: copyto
+      value: {{ variables.t_start | round(4) }}
+    - variable: t_end
+      operator: copyto
+      value: {{ (variables.t_start + 0.01) | round(4) }}
+system:
+  name: jetto

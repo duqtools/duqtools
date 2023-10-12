@@ -69,6 +69,8 @@ class Status():
 
     def progress_status(self):
         """Monitor the directory for status changes."""
+        self.update_status()
+
         from tqdm import tqdm
         pbar_a = tqdm(total=len(self.jobs), position=0)
         pbar_a.set_description('Submitted jobs            ...')
