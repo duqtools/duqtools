@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
 name = "duqtools"
-version = "1.9.0"
+version = "2.0.0"
 description = "Dynamic uncertainty quantification for Tokamak reactor simulations modelling"
 readme = "README.md"
 requires-python = ">=3.9"
