@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from functools import partial
-from typing import Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import numpy as np
 from pydantic import Field, field_validator, model_validator
@@ -59,6 +59,13 @@ class OperatorMixin(BaseModel):
         `new_data = data + np.linspace(start, stop, len(data)) * value`
         """))
 
+    input_variables: Optional[list[Any]] = Field(None,
+                                                 description=f("""
+        Input variables that should be present for a `operator: custom`
+        operation. The values of this input variable can be used in the `custom_code`
+        field.
+    """))
+
     custom_code: Optional[str] = Field(None,
                                        description=f("""
         Custom python code to apply for the `custom` operator.
@@ -66,9 +73,15 @@ class OperatorMixin(BaseModel):
         Two variables are accessible: `data` corresponds
         to the variable data, and `value` corresponds to pass value.
 
+        The extra input_variables are defined in
+        a dict named `var = { variable1 : value, variable2 : value}`
+
         For example, an implementation of `operator: multiply`:
 
         `custom_code: 'value * data'`
+
+        Or an example of multiplying some input_variable named `key1`:
+        `custom_code: `var['key1']*value`
 
         The resulting data must be of the same shape.
             """))
@@ -88,17 +101,24 @@ class OperatorMixin(BaseModel):
         if values.get(
                 'operator') == 'custom' and not values.get('custom_code'):
             raise ValueError(
-                'Missing `custom_code` field for `operator: custom`.')
+                'Missing `custom_code` field for `operator: custom')
         return values
 
     def _custom_function(self, data: np.ndarray, value, *, out: np.ndarray,
-                         code: str):
+                         code: str, var: Any):
         """Mimick np.ufunc for custom functions."""
         out[:] = eval(code)
 
-    def npfunc(self, data: np.ndarray, value, *, out: np.ndarray):
+    def npfunc(self,
+               data: np.ndarray,
+               value,
+               *,
+               out: np.ndarray,
+               var: Optional[Any] = None):
         if self.operator == 'custom':
-            npfunc = partial(self._custom_function, code=self.custom_code)
+            npfunc = partial(self._custom_function,
+                             code=self.custom_code,
+                             var=var)
         else:
             npfunc = getattr(np, self.operator)
         return npfunc(data, value, out=out)

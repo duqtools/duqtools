@@ -20,7 +20,6 @@ from ..base_system import AbstractSystem
 from ..jintrac import V210921Mixin, V220922Mixin
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
-from ._dimensions import JettoOperation
 from ._jettovar_to_json import jettovar_to_json
 
 if TYPE_CHECKING:
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
 
     from ..schema import JettoVar
     from ._schema import JettoSystemModel
+    from .dimensions import JettoOperation
 
 if sys.version_info < (3, 10):
     from importlib_resources import files

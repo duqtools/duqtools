@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import numpy as np
 
@@ -15,8 +15,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _apply_ids(model: IDSOperation, *,
-               ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
+def _apply_ids(model: IDSOperation,
+               *,
+               ids_mapping: Union[ImasHandle, IDSMapping],
+               input_var: Optional[Any] = None,
+               **kwargs) -> None:
     """Implementation for IDS operations.
 
     Parameters
@@ -75,7 +78,7 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
 
-        model.npfunc(data, value, out=data)
+        model.npfunc(data, value, out=data, var=input_var)
 
         if model.clip_max is not None or model.clip_min is not None:
             np.clip(data, a_min=model.clip_min, a_max=model.clip_max, out=data)

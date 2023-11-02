@@ -6,7 +6,8 @@ from pathlib import Path
 
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
-from .systems.jetto import BaseJettoSystem
+from .schema.variables import IDSVariableModel
+from .systems.jetto import BaseJettoSystem, JettoVariableModel
 from .systems.jetto._dimensions import JettoOperation
 
 
@@ -39,7 +40,22 @@ def _apply_model_coupled(
         apply_model(submodel, **kwargs)
 
 
-apply_model.register(IDSOperation, _apply_ids)
+@apply_model.register
+def _apply_model_ids_operation(model: IDSOperation, *, ids_mapping, **kwargs):
+    from duqtools.config import var_lookup
+    input_var = {}
+    if model.input_variables is not None:
+        for var_name in model.input_variables:
+            variable = var_lookup[var_name]
+            if isinstance(variable, JettoVariableModel):
+                pass
+            elif isinstance(variable, IDSVariableModel):
+                val = ids_mapping[variable.path]
+                input_var[var_name] = val
+            else:
+                raise NotImplementedError(
+                    f'{variable} convert not implemented')
+    _apply_ids(model, ids_mapping=ids_mapping, input_var=input_var, **kwargs)
 
 
 @apply_model.register
@@ -54,5 +70,4 @@ def _apply_model_jetto_operation(
         key=model.variable.name,
         value=model.value,
         variable=model.variable.lookup,
-        operation=model,
     )
