@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import ast
+from functools import partial
 from typing import Literal, Optional, Union
 
+import numpy as np
 from pydantic import Field, field_validator, model_validator
 
 from duqtools.utils import formatter as f
@@ -88,6 +90,18 @@ class OperatorMixin(BaseModel):
             raise ValueError(
                 'Missing `custom_code` field for `operator: custom`.')
         return values
+
+    def _custom_function(self, data: np.ndarray, value, *, out: np.ndarray,
+                         code: str):
+        """Mimick np.ufunc for custom functions."""
+        out[:] = eval(code)
+
+    def npfunc(self, data: np.ndarray, value, *, out: np.ndarray):
+        if self.operator == 'custom':
+            npfunc = partial(self._custom_function, code=self.custom_code)
+        else:
+            npfunc = getattr(np, self.operator)
+        return npfunc(data, value, out=out)
 
 
 class DimMixin(BaseModel):

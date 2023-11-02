@@ -54,4 +54,5 @@ def _apply_model_jetto_operation(
         key=model.variable.name,
         value=model.value,
         variable=model.variable.lookup,
+        operation=model,
     )

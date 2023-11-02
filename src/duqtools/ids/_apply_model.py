@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from functools import partial
 from typing import TYPE_CHECKING, Union
 
 import numpy as np
@@ -14,11 +13,6 @@ if TYPE_CHECKING:
     from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
-
-
-def _custom_function(data: np.ndarray, value, *, out: np.ndarray, code: str):
-    """Mimick np.ufunc for custom functions."""
-    out[:] = eval(code)
 
 
 def _apply_ids(model: IDSOperation, *,
@@ -43,11 +37,6 @@ def _apply_ids(model: IDSOperation, *,
 
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
-
-    if model.operator == 'custom':
-        npfunc = partial(_custom_function, code=model.custom_code)
-    else:
-        npfunc = getattr(np, model.operator)
 
     data_map = ids_mapping.findall(model.variable.path)
 
@@ -86,7 +75,7 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
 
-        npfunc(data, value, out=data)
+        model.npfunc(data, value, out=data)
 
         if model.clip_max is not None or model.clip_min is not None:
             np.clip(data, a_min=model.clip_min, a_max=model.clip_max, out=data)

@@ -20,6 +20,7 @@ from ..base_system import AbstractSystem
 from ..jintrac import V210921Mixin, V220922Mixin
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
+from ._dimensions import JettoOperation
 from ._jettovar_to_json import jettovar_to_json
 
 if TYPE_CHECKING:
@@ -328,7 +329,8 @@ class BaseJettoSystem(AbstractSystem):
                            run: Path,
                            key: str,
                            value,
-                           variable: Optional[JettoVar] = None):
+                           variable: Optional[JettoVar] = None,
+                           operation: Optional[JettoOperation] = None):
         jetto_template = template.from_directory(run)
 
         if variable:
@@ -336,6 +338,11 @@ class BaseJettoSystem(AbstractSystem):
             jetto_template._lookup.update(extra_lookup)
 
         jetto_config = config.RunConfig(jetto_template)
+
+        # Do operation if present
+        if operation is not None:
+            data = jetto_config[key]
+            operation.npfunc(data, value, out=value)
 
         if key == 't_start':
             jetto_config.start_time = value
