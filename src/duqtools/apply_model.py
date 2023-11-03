@@ -96,13 +96,18 @@ def _apply_model_ids_operation(model: IDSOperation,
 @apply_model.register
 def _apply_model_jetto_operation(
     model: JettoOperation,
+    *,
+    ids_mapping,
     run_dir: Path,
     system: BaseJettoSystem,
     **kwargs,
 ):
-    system.set_jetto_variable(
-        run=run_dir,
-        key=model.variable.name,
-        value=model.value,
-        variable=model.variable.lookup,
-    )
+    if model.input_variables is not None:
+        kwargs['input_var'] = get_input_var(model.input_variables, ids_mapping,
+                                            system, run_dir)
+    system.set_jetto_variable(run=run_dir,
+                              key=model.variable.name,
+                              value=model.value,
+                              variable=model.variable.lookup,
+                              operation=model,
+                              **kwargs)

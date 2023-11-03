@@ -337,7 +337,9 @@ class BaseJettoSystem(AbstractSystem):
                            key: str,
                            value,
                            variable: Optional[JettoVar] = None,
-                           operation: Optional[JettoOperation] = None):
+                           operation: Optional[JettoOperation] = None,
+                           input_var: Optional[Any] = None,
+                           **kwargs):
         jetto_template = template.from_directory(run)
 
         if variable:
@@ -349,7 +351,7 @@ class BaseJettoSystem(AbstractSystem):
         # Do operation if present
         if operation is not None:
             data = jetto_config[key]
-            operation.npfunc(data, value, out=value)
+            value = operation.npfunc(data, value, var=input_var)
 
         if key == 't_start':
             jetto_config.start_time = value

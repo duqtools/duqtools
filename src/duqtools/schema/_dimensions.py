@@ -104,17 +104,21 @@ class OperatorMixin(BaseModel):
                 'Missing `custom_code` field for `operator: custom')
         return values
 
-    def _custom_function(self, data: np.ndarray, value, *, out: np.ndarray,
-                         code: str, var: Any):
+    def _custom_function(self, data: np.ndarray, value, *,
+                         out: Optional[np.ndarray], code: str, var: Any):
         """Mimick np.ufunc for custom functions."""
-        out[:] = eval(code)
+        if out is not None:
+            out[:] = eval(code)
+        else:
+            out = eval(code)
+        return out
 
     def npfunc(self,
                data: np.ndarray,
                value,
                *,
-               out: np.ndarray,
-               var: Optional[Any] = None):
+               out: Optional[np.ndarray] = None,
+               var: Optional[Any] = None) -> None:
         if self.operator == 'custom':
             npfunc = partial(self._custom_function,
                              code=self.custom_code,
