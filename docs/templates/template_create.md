@@ -228,12 +228,12 @@ extra_variables:
 - name: rho_tor_norm_0
   ids: core_profiles
   path: profiles_1d/0/grid/rho_tor_norm
-  dims: [time]
+  dims: [x]
   type: IDS-variable
 - name: t_i_ave_0
   ids: core_profiles
   path: profiles_1d/0/t_i_ave
-  dims: [time]
+  dims: [x]
   type: IDS-variable
 create:
   dimensions:
