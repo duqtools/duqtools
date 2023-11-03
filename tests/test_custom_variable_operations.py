@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import shutil
 import tempfile
-from importlib.resources import files
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +16,6 @@ from duqtools.schema import IDSOperation, IDSVariableModel
 from duqtools.systems import get_system
 
 EXTRA_VARS = TEST_DATA / 'config_list-vars.yaml'  # type: ignore
-lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
 
 assert_equal = np.testing.assert_array_equal
 
@@ -27,7 +25,6 @@ def tmpworkdir():
     with tempfile.TemporaryDirectory() as workdir:
         shutil.copytree(TEST_DATA / 'template_model',
                         Path(workdir) / 'template_model')
-        shutil.copy(lookup_file, Path(workdir) / 'template_model/lookup.json')
         yield Path(workdir)
 
 
