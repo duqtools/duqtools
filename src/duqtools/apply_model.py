@@ -3,11 +3,13 @@ from __future__ import annotations
 from collections import abc
 from functools import singledispatch
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
 from .schema.variables import IDSVariableModel
-from .systems.jetto import BaseJettoSystem, JettoVariableModel
+from .systems.base_system import AbstractSystem
+from .systems.jetto import BaseJettoSystem
 from .systems.jetto._dimensions import JettoOperation
 
 
@@ -40,22 +42,55 @@ def _apply_model_coupled(
         apply_model(submodel, **kwargs)
 
 
-@apply_model.register
-def _apply_model_ids_operation(model: IDSOperation, *, ids_mapping, **kwargs):
+def get_input_var(input_variables: list[str],
+                  ids_mapping,
+                  system: Optional[AbstractSystem] = None,
+                  run_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """get_input_var translates a list of input variables to their values,
+    which can then be used in operations.
+
+    Parameters
+    ----------
+    input_variables : list[str]
+        input_variables to get values for
+    ids_mapping :
+        ids_mapping
+    system : Optional[AbstractSystem]
+        system
+    run_dir : Optional[Path]
+        run_dir
+
+    Returns
+    -------
+    a dict with all the values for the list of input variables
+    """
     from duqtools.config import var_lookup
     input_var = {}
+    for var_name in input_variables:
+        variable = var_lookup[var_name]
+        if isinstance(variable, IDSVariableModel):
+            val = ids_mapping[variable.path]
+            input_var[var_name] = val
+        else:  # Must be a system variable, assume its the current system
+            val = system.get_variable(run=run_dir,
+                                      key=var_name,
+                                      variable=variable)
+            input_var[var_name] = val
+    return input_var
+
+
+@apply_model.register
+def _apply_model_ids_operation(model: IDSOperation,
+                               *,
+                               ids_mapping,
+                               system: Optional[AbstractSystem] = None,
+                               run_dir: Optional[Path] = None,
+                               **kwargs):
     if model.input_variables is not None:
-        for var_name in model.input_variables:
-            variable = var_lookup[var_name]
-            if isinstance(variable, JettoVariableModel):
-                pass
-            elif isinstance(variable, IDSVariableModel):
-                val = ids_mapping[variable.path]
-                input_var[var_name] = val
-            else:
-                raise NotImplementedError(
-                    f'{variable} convert not implemented')
-    _apply_ids(model, ids_mapping=ids_mapping, input_var=input_var, **kwargs)
+        kwargs['input_var'] = get_input_var(model.input_variables, ids_mapping,
+                                            system, run_dir)
+
+    _apply_ids(model, ids_mapping=ids_mapping, **kwargs)
 
 
 @apply_model.register

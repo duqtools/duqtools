@@ -25,7 +25,7 @@ from ._jettovar_to_json import jettovar_to_json
 if TYPE_CHECKING:
     from duqtools.api import ImasHandle, Job
 
-    from ..schema import JettoVar
+    from ..schema import JettoVar, JettoVariableModel
     from ._schema import JettoSystemModel
     from .dimensions import JettoOperation
 
@@ -324,6 +324,13 @@ class BaseJettoSystem(AbstractSystem):
         jetto_config['run_out'] = out.run
 
         jetto_config.export(run)  # Just overwrite the poor files
+
+    def get_variable(self, run: Path, key: str, variable: JettoVariableModel):
+        jetto_template = template.from_directory(run)
+        extra_lookup = lookup.from_json(jettovar_to_json(variable.lookup))
+        jetto_template._lookup.update(extra_lookup)
+        jetto_config = config.RunConfig(jetto_template)
+        return jetto_config[key]
 
     def set_jetto_variable(self,
                            run: Path,
