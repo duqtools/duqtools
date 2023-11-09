@@ -1,5 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/duqtools/badge/?version=latest)](https://duqtools.readthedocs.io/en/latest/?badge=latest)
 [![Tests](https://github.com/duqtools/duqtools/actions/workflows/test.yaml/badge.svg)](https://github.com/duqtools/duqtools/actions/workflows/test.yaml)
+[![Tests (IMAS)](https://github.com/duqtools/duqtools/actions/workflows/test_imas.yaml/badge.svg)](https://github.com/duqtools/duqtools/actions/workflows/test_imas.yaml)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/duqtools)](https://pypi.org/project/duqtools/)
 [![PyPI](https://img.shields.io/pypi/v/duqtools.svg?style=flat)](https://pypi.org/project/duqtools/)
 [![DOI](https://zenodo.org/badge/492734189.svg)](https://zenodo.org/badge/latestdoi/492734189)
