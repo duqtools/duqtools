@@ -157,10 +157,10 @@ class OptionParser:
             fhandler.setFormatter(escaped_format)
             logging.getLogger().addHandler(fhandler)
 
+        start_time = datetime.now().astimezone().strftime(
+            '%Y-%m-%d %H:%M:%S %z')
         logger.info('')
-        logger.info(
-            'Duqtools starting at '
-            f'{datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")}')
+        logger.info(f'Duqtools starting at {start_time}')
         logger.info('------------------------------------------------')
         logger.info('')
 
@@ -561,10 +561,10 @@ def cli_version(**kwargs):
     try:
         repo = git.Repo(Path(__file__), search_parent_directories=True)
         sha = repo.head.object.hexsha
-    except OSError:
-        pass
-    else:
-        string += f' (rev: {sha})'
+    except (OSError, ValueError):
+        sha = '???'
+
+    string += f' (rev: {sha})'
 
     click.echo(string)
 
