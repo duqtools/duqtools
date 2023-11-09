@@ -86,7 +86,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
         x=f'{x}:Q', y=f'{y}:Q', color=alt.Color('run:N'), tooltip='run')
 
     if max_slider != 0:
-        slider = alt.binding_range(name='Time index',
+        slider = alt.binding_range(name=f'{z} index',
                                    min=0,
                                    max=max_slider,
                                    step=1)
@@ -100,7 +100,7 @@ def alt_line_chart(source: Union[pd.DataFrame, xr.Dataset],
             band = band.transform_filter(select_step).interactive()
 
         first_run = source.iloc[0].run
-        slider = alt.binding_range(name='Reference time index',
+        slider = alt.binding_range(name=f'Reference {z} index',
                                    min=0,
                                    max=max_slider,
                                    step=1)
@@ -183,7 +183,7 @@ def alt_errorband_chart(source: Union[pd.DataFrame, xr.Dataset],
         band = band.add_params(select_step).transform_filter(
             select_step).interactive()
 
-        slider = alt.binding_range(name='Reference time index',
+        slider = alt.binding_range(name=f'Reference {z} index',
                                    min=0,
                                    max=max_slider,
                                    step=1)
