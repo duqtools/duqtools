@@ -55,24 +55,34 @@ with st.sidebar:
         help=('Show standard deviation band around mean y-value.'),
     )
 
+    axes_opts = 'grid', 'data', 'time'
+    x_axis = st.selectbox('X axis', axes_opts, index=0)
+    y_axis = st.selectbox('Y axis', axes_opts, index=1)
+    z_axis = st.selectbox('Z axis', axes_opts, index=2)
+
 for variable in (var_lookup[var_name] for var_name in var_names):
     source, time_var, grid_var, data_var = get_dataset(
         handles, variable, include_error=show_errorbar)
 
     st.header(f'{grid_var} vs. {data_var}')
 
+    axes = {'time': time_var, 'grid': grid_var, 'data': data_var}
+    x_var = axes[x_axis]
+    y_var = axes[y_axis]
+    z_var = axes[z_axis]
+
     if aggregate_data:
-        chart = alt_errorband_chart(source, x=grid_var, y=data_var, z=time_var)
+        chart = alt_errorband_chart(source, x=x_var, y=y_var, z=z_var)
     else:
         chart = alt_line_chart(source,
-                               x=grid_var,
-                               y=data_var,
-                               z=time_var,
+                               x=x_var,
+                               y=y_var,
+                               z=z_var,
                                std=show_errorbar)
 
     st.altair_chart(chart, use_container_width=True)
 
-    if st.button('Save this chart', key=f'download_{grid_var}-{data_var}'):
-        fname = f'chart_{grid_var}-{data_var}.html'
+    if st.button('Save this chart', key=f'download_{x_var}-{y_var}'):
+        fname = f'chart_{x_var}-{y_var}.html'
         chart.save(fname)
         st.success(f'✔️ Wrote chart to "{fname}"')
