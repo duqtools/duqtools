@@ -23,6 +23,8 @@ from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
 
 if TYPE_CHECKING:
+    from types import SimpleNamespace
+
     from duqtools.api import ImasHandle, Job
 
     from ..schema import JettoVar, JettoVariableModel
@@ -338,7 +340,7 @@ class BaseJettoSystem(AbstractSystem):
                            value,
                            variable: Optional[JettoVar] = None,
                            operation: Optional[JettoOperation] = None,
-                           input_var: Optional[Any] = None,
+                           input_var: Optional[SimpleNamespace] = None,
                            **kwargs):
         jetto_template = template.from_directory(run)
 

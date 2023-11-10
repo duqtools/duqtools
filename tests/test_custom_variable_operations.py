@@ -71,7 +71,7 @@ TEST_IDS_INPUT = (
         'operator': 'custom',
         'variable': get_test_var('data/0/x'),
         'value': 2.0,
-        'custom_code': 'var["test"] * value * data',  # data times 6
+        'custom_code': 'var.test * value * data',  # data times 6
         'input_variables': ['test'],
     },
     # IDS with Jetto input_variables
@@ -79,7 +79,7 @@ TEST_IDS_INPUT = (
         'operator': 'custom',
         'variable': get_test_var('data/0/x'),
         'value': 2.0,
-        'custom_code': 'var["test"] * var["major_radius"]',
+        'custom_code': 'var.test * var.major_radius',
         'input_variables': ['test', 'major_radius'],
     },
 )
@@ -89,7 +89,7 @@ TEST_JETTO_INPUT = (
         'operator': 'custom',
         'variable': get_test_jettovar('b_field'),
         'value': 2.0,
-        'custom_code': 'value * var["major_radius"]',
+        'custom_code': 'value * var.major_radius',
         'input_variables': ['major_radius'],
     },
     # Jetto with IDS input_variables
@@ -97,7 +97,7 @@ TEST_JETTO_INPUT = (
         'operator': 'custom',
         'variable': get_test_jettovar('b_field'),
         'value': 2.0,
-        'custom_code': 'var["test"][0] * var["major_radius"]',
+        'custom_code': 'var.test[0] * var.major_radius',
         'input_variables': ['test', 'major_radius'],
     },
 )

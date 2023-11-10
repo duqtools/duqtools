@@ -219,7 +219,7 @@ custom_code: 'np.clip(data * value, a_min=0, a_max=100)'
 
 #### Using other variables as input
 
-It is possible to specify other variables to use as input for your operation. This can be used to calculate a value of a variable with a `custom` operation which includes these variables. These variables are available in the `custom_code` as `var[<variable name>]`.
+It is possible to specify other variables to use as input for your operation. This can be used to calculate a value of a variable with a `custom` operation which includes these variables. These variables are available in the `custom_code` in a SimpleNamespace as `var.variable name`.
 
 The example below sets all `t_i_ave` to some value calculated by dividing `t_i_ave_0` by `rho_tor_norm_0`
 
@@ -243,7 +243,7 @@ create:
     input_variables:
       - "t_i_ave_0"
       - "rho_tor_norm_0"
-    custom_code: 'var["t_i_ave_0"]/var["rho_tor_norm_0"]'
+    custom_code: 'var.t_i_ave_0/var.rho_tor_norm_0'
 ```
 
 !!! note

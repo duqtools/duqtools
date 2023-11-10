@@ -3,7 +3,8 @@ from __future__ import annotations
 from collections import abc
 from functools import singledispatch
 from pathlib import Path
-from typing import Any, Dict, Optional
+from types import SimpleNamespace
+from typing import Optional
 
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
@@ -45,7 +46,7 @@ def _apply_model_coupled(
 def get_input_var(input_variables: list[str],
                   ids_mapping,
                   system: Optional[AbstractSystem] = None,
-                  run_dir: Optional[Path] = None) -> Dict[str, Any]:
+                  run_dir: Optional[Path] = None) -> SimpleNamespace:
     """get_input_var translates a list of input variables to their values,
     which can then be used in operations.
 
@@ -76,7 +77,7 @@ def get_input_var(input_variables: list[str],
                                       key=var_name,
                                       variable=variable)
             input_var[var_name] = val
-    return input_var
+    return SimpleNamespace(**input_var)
 
 
 @apply_model.register

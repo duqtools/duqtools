@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 
@@ -9,6 +9,8 @@ from .._logging_utils import duqlog_screen
 from ._handle import ImasHandle
 
 if TYPE_CHECKING:
+    from types import SimpleNamespace
+
     from ..schema import IDSOperation
     from ._mapping import IDSMapping
 
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 def _apply_ids(model: IDSOperation,
                *,
                ids_mapping: Union[ImasHandle, IDSMapping],
-               input_var: Optional[Any] = None,
+               input_var: Optional[SimpleNamespace] = None,
                **kwargs) -> None:
     """Implementation for IDS operations.
 
