@@ -23,10 +23,13 @@ from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
 
 if TYPE_CHECKING:
+    from types import SimpleNamespace
+
     from duqtools.api import ImasHandle, Job
 
-    from ..schema import JettoVar
+    from ..schema import JettoVar, JettoVariableModel
     from ._schema import JettoSystemModel
+    from .dimensions import JettoOperation
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -324,11 +327,21 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config.export(run)  # Just overwrite the poor files
 
+    def get_variable(self, run: Path, key: str, variable: JettoVariableModel):
+        jetto_template = template.from_directory(run)
+        extra_lookup = lookup.from_json(jettovar_to_json(variable.lookup))
+        jetto_template._lookup.update(extra_lookup)
+        jetto_config = config.RunConfig(jetto_template)
+        return jetto_config[key]
+
     def set_jetto_variable(self,
                            run: Path,
                            key: str,
                            value,
-                           variable: Optional[JettoVar] = None):
+                           variable: Optional[JettoVar] = None,
+                           operation: Optional[JettoOperation] = None,
+                           input_var: Optional[SimpleNamespace] = None,
+                           **kwargs):
         jetto_template = template.from_directory(run)
 
         if variable:
@@ -336,6 +349,11 @@ class BaseJettoSystem(AbstractSystem):
             jetto_template._lookup.update(extra_lookup)
 
         jetto_config = config.RunConfig(jetto_template)
+
+        # Do operation if present
+        if operation is not None:
+            data = jetto_config[key]
+            value = operation.npfunc(data, value, var=input_var)
 
         if key == 't_start':
             jetto_config.start_time = value

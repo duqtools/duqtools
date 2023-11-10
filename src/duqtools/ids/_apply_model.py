@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-from functools import partial
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 
@@ -10,19 +9,19 @@ from .._logging_utils import duqlog_screen
 from ._handle import ImasHandle
 
 if TYPE_CHECKING:
+    from types import SimpleNamespace
+
     from ..schema import IDSOperation
     from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
 
-def _custom_function(data: np.ndarray, value, *, out: np.ndarray, code: str):
-    """Mimick np.ufunc for custom functions."""
-    out[:] = eval(code)
-
-
-def _apply_ids(model: IDSOperation, *,
-               ids_mapping: Union[ImasHandle, IDSMapping], **kwargs) -> None:
+def _apply_ids(model: IDSOperation,
+               *,
+               ids_mapping: Union[ImasHandle, IDSMapping],
+               input_var: Optional[SimpleNamespace] = None,
+               **kwargs) -> None:
     """Implementation for IDS operations.
 
     Parameters
@@ -43,11 +42,6 @@ def _apply_ids(model: IDSOperation, *,
 
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
-
-    if model.operator == 'custom':
-        npfunc = partial(_custom_function, code=model.custom_code)
-    else:
-        npfunc = getattr(np, model.operator)
 
     data_map = ids_mapping.findall(model.variable.path)
 
@@ -86,7 +80,7 @@ def _apply_ids(model: IDSOperation, *,
 
         logger.debug('data range before: %s - %s', data.min(), data.max())
 
-        npfunc(data, value, out=data)
+        model.npfunc(data, value, out=data, var=input_var)
 
         if model.clip_max is not None or model.clip_min is not None:
             np.clip(data, a_min=model.clip_min, a_max=model.clip_max, out=data)

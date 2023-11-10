@@ -217,6 +217,41 @@ custom_code: 'np.clip(data * value, a_min=0, a_max=100)'
 ```
 
 
+#### Using other variables as input
+
+It is possible to specify other variables to use as input for your operation. This can be used to calculate a value of a variable with a `custom` operation which includes these variables. These variables are available in the `custom_code` in a SimpleNamespace as `var.variable name`.
+
+The example below sets all `t_i_ave` to some value calculated by dividing `t_i_ave_0` by `rho_tor_norm_0`
+
+```yaml
+extra_variables:
+- name: rho_tor_norm_0
+  ids: core_profiles
+  path: profiles_1d/0/grid/rho_tor_norm
+  dims: [x]
+  type: IDS-variable
+- name: t_i_ave_0
+  ids: core_profiles
+  path: profiles_1d/0/t_i_ave
+  dims: [x]
+  type: IDS-variable
+create:
+  dimensions:
+    variable: t_i_ave
+    operator: custom
+    values: [1.0]
+    input_variables:
+      - "t_i_ave_0"
+      - "rho_tor_norm_0"
+    custom_code: 'var.t_i_ave_0/var.rho_tor_norm_0'
+```
+
+!!! note
+
+  - If a variable that has been operated on earlier is specified as input, it will probably be the new value.
+  - `input_variables` must not have multiple dimensions (so for IDS, no `*` operator in the path is allowed.
+
+
 ### Variables
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.

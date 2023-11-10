@@ -4,3 +4,8 @@ extra_variables:
     path: profiles_1d/*/t_i_average
     dims: [time, x]
     type: IDS-variable
+  - name: test
+    ids: core_profiles
+    path: data/0/test
+    dims: [time]
+    type: IDS-variable
