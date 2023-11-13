@@ -125,7 +125,11 @@ class OperatorMixin(BaseModel):
                              var=var)
         else:
             npfunc = getattr(np, self.operator)
-        return npfunc(data, value, out=out)
+
+        if out is not None:
+            return npfunc(data, value, out=out)
+        else:
+            return npfunc(data, value)
 
 
 class DimMixin(BaseModel):
