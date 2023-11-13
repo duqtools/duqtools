@@ -104,8 +104,13 @@ class OperatorMixin(BaseModel):
                 'Missing `custom_code` field for `operator: custom')
         return values
 
-    def _custom_function(self, data: np.ndarray, value, *,
-                         out: Optional[np.ndarray], code: str, var: Any):
+    def _custom_function(self,
+                         data: np.ndarray,
+                         value,
+                         *,
+                         out: Optional[np.ndarray] = None,
+                         code: str,
+                         var: Any):
         """Mimick np.ufunc for custom functions."""
         if out is not None:
             out[:] = eval(code)
@@ -114,18 +119,26 @@ class OperatorMixin(BaseModel):
         return out
 
     def npfunc(self,
-               data: np.ndarray,
+               data: np.ndarray | float,
                value,
                *,
                out: Optional[np.ndarray] = None,
-               var: Optional[Any] = None) -> None:
+               var: Optional[Any] = None) -> Any:
         if self.operator == 'custom':
             npfunc = partial(self._custom_function,
                              code=self.custom_code,
                              var=var)
         else:
             npfunc = getattr(np, self.operator)
-        return npfunc(data, value, out=out)
+
+        # copyto is different, and does not like scalars
+        if self.operator == 'copyto' and not isinstance(data, np.ndarray):
+            return data
+
+        if out is not None:
+            return npfunc(data, value, out=out)
+        else:
+            return npfunc(data, value)
 
 
 class DimMixin(BaseModel):
