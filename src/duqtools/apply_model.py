@@ -6,9 +6,10 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Optional
 
+from duqtools.imas2xarray import IDSVariableModel
+
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
-from .schema.variables import IDSVariableModel
 from .systems.base_system import AbstractSystem
 from .systems.jetto import BaseJettoSystem
 from .systems.jetto._dimensions import JettoOperation

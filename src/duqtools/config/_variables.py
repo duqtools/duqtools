@@ -10,7 +10,8 @@ from typing import Hashable, Sequence
 
 from pydantic_yaml import parse_yaml_raw_as
 
-from ..schema import IDSVariableModel
+from duqtools.imas2xarray import IDSVariableModel
+
 from ..utils import groupby
 from ._models import VariableConfigModel
 

@@ -29,7 +29,6 @@ from .create import recreate_api as recreate
 from .duqmap import duqmap
 from .ids import ImasHandle
 from .models import Job, Run, Runs
-from .schema import IDSVariableModel as Variable
 from .status import status_api as get_status
 from .submit import submit_api as submit
 
@@ -45,5 +44,4 @@ __all__ = [
     'Run',
     'Runs',
     'submit',
-    'Variable',
 ]

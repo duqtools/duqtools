@@ -12,7 +12,6 @@ from ._dimensions import (
     OperatorMixin,
 )
 from ._ranges import ARange, LinSpace
-from .variables import IDSVariableModel
 
 __all__ = [
     'ARange',
@@ -27,7 +26,6 @@ __all__ = [
     'IDSOperation',
     'IDSOperationDim',
     'Operation',
-    'IDSVariableModel',
     'LinSpace',
     'OperationDim',
 ]

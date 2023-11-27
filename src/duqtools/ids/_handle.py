@@ -20,7 +20,7 @@ from ._schema import ImasBaseModel
 if TYPE_CHECKING:
     import xarray as xr
 
-    from ..schema import IDSVariableModel
+    from duqtools.imas2xarray import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 

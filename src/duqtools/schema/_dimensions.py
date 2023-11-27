@@ -7,11 +7,11 @@ from typing import Any, Literal, Optional, Union
 import numpy as np
 from pydantic import Field, field_validator, model_validator
 
+from duqtools.imas2xarray import IDSVariableModel
 from duqtools.utils import formatter as f
 
 from ._basemodel import BaseModel, RootModel
 from ._ranges import ARange, LinSpace
-from .variables import IDSVariableModel
 
 
 class OperatorMixin(BaseModel):

@@ -1,10 +1,24 @@
 from __future__ import annotations
 
-from pydantic import Field
+from textwrap import dedent
 
-from duqtools.utils import formatter as f
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict, Field
 
-from ._basemodel import BaseModel
+
+def formatter(s):
+    """Dedent and remove newlines."""
+    s = dedent(s)
+    return s.replace('\n', ' ').strip()
+
+
+f = formatter
+
+
+class BaseModel(PydanticBaseModel):
+    """Base model."""
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class IDSPath(BaseModel):

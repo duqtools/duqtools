@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ._mapping import EmptyVarError, IDSMapping
+from ._models import IDSPath, IDSVariableModel
 from ._rebase import (
     rebase_all_coords,
     rebase_on_grid,
@@ -14,6 +15,8 @@ from ._rebase import (
 __all__ = [
     'EmptyVarError',
     'IDSMapping',
+    'IDSVariableModel',
+    'IDSPath',
     'rebase_all_coords',
     'rebase_on_grid',
     'rebase_on_time',

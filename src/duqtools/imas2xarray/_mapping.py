@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from ..schema import IDSVariableModel
+from ._models import IDSVariableModel
 
 if TYPE_CHECKING:
     import xarray as xr

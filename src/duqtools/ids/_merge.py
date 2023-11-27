@@ -11,7 +11,8 @@ from ..operations import add_to_op_queue
 from ..utils import groupby
 
 if TYPE_CHECKING:
-    from ..schema import IDSVariableModel
+    from duqtools.imas2xarray import IDSVariableModel
+
     from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)

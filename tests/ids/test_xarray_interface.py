@@ -4,8 +4,8 @@ import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample
 
-from duqtools.api import Variable
 from duqtools.imas2xarray import IDSMapping
+from duqtools.imas2xarray import IDSVariableModel as Variable
 
 TIME_VAR = Variable(
     name='time',
