@@ -97,4 +97,4 @@ def merge_data(
             path_upper = path + '_error_upper'
             target_ids.write_array_in_parts(path_upper, std_data[name])
 
-        target_ids.sync(target)
+        target.update_from(target_ids)

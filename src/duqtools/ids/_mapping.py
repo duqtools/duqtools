@@ -7,12 +7,9 @@ from typing import TYPE_CHECKING, Any, Sequence
 import numpy as np
 
 from ..schema import IDSVariableModel
-from ._copy import add_provenance_info
 
 if TYPE_CHECKING:
     import xarray as xr
-
-    from ._handle import ImasHandle
 
 INDEX_STR = '*'
 
@@ -182,22 +179,6 @@ class IDSMapping(Mapping):
             return len(self[key])
         except Exception:
             pass
-
-    def sync(self, target: ImasHandle):
-        """Synchronize updated data back to IMAS db entry.
-
-        Shortcut for 'put' command.
-
-        Parameters
-        ----------
-        target : ImasHandle
-            Points to an IMAS db entry of where the data should be written.
-        """
-
-        add_provenance_info(handle=target)
-
-        with target.open() as db_entry:
-            self._ids.put(db_entry=db_entry)
 
     def dive(self, val, path: list):
         """Recursively find the data fields.

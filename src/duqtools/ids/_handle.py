@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, List, Sequence
 from pydantic import field_validator
 
 from ..operations import add_to_op_queue
-from ._copy import copy_ids_entry
+from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
 from ._rebase import squash_placeholders
@@ -374,3 +374,20 @@ class ImasHandle(ImasBaseModel):
             yield entry
         finally:
             entry.close()
+
+    def update_from(self, mapping: IDSMapping):
+        """Synchronize updated data back to IMAS db entry.
+
+        Shortcut for 'put' command.
+
+        Parameters
+        ----------
+        mapping : IDSMapping
+            Points to an IDS mapping of the data that should be written
+            to this handle.
+        """
+
+        add_provenance_info(handle=self)
+
+        with self.open() as db_entry:
+            mapping._ids.put(db_entry=db_entry)
