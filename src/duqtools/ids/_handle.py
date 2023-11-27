@@ -10,10 +10,11 @@ from typing import TYPE_CHECKING, List, Sequence
 
 from pydantic import field_validator
 
+from duqtools.imas2xarray import IDSMapping
+
 from ..operations import add_to_op_queue
 from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
-from ._mapping import IDSMapping
 from ._rebase import squash_placeholders
 from ._schema import ImasBaseModel
 

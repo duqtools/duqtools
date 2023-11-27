@@ -4,7 +4,6 @@ import logging
 
 from ._handle import ImasHandle
 from ._imas import imas_mocked
-from ._mapping import IDSMapping
 from ._merge import merge_data
 from ._rebase import (
     rebase_all_coords,
@@ -19,7 +18,6 @@ from ._rebase import (
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    'IDSMapping',
     'ImasHandle',
     'merge_data',
     'rebase_on_grid',

@@ -4,7 +4,8 @@ import pytest
 import xarray as xr
 from idsmapping_sample_data import Sample
 
-from duqtools.api import IDSMapping, Variable
+from duqtools.api import Variable
+from duqtools.imas2xarray import IDSMapping
 
 TIME_VAR = Variable(
     name='time',
@@ -348,7 +349,7 @@ def test_2d_ion(sample_data, expected_dataset_2d_ion):
 
 
 def test_empty_var_ok(sample_data):
-    from duqtools.ids._mapping import EmptyVarError
+    from duqtools.imas2xarray import EmptyVarError
 
     EmptyVar = Variable(ids='core_profiles',
                         path='profiles_1d/*/empty',

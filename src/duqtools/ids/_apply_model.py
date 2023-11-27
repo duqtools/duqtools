@@ -11,8 +11,9 @@ from ._handle import ImasHandle
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
+    from duqtools.imas2xarray import IDSMapping
+
     from ..schema import IDSOperation
-    from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 

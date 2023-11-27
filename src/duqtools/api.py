@@ -14,7 +14,6 @@ Functions:
 Data classes:
 
 - [ImasHandle][duqtools.api.ImasHandle]
-- [IDSMapping][duqtools.api.IDSMapping]
 - [Variable][duqtools.api.Variable]
 - [Job][duqtools.api.Job]
 - [Run][duqtools.api.Run]
@@ -32,7 +31,6 @@ from .create import create_api as create
 from .create import recreate_api as recreate
 from .duqmap import duqmap
 from .ids import (
-    IDSMapping,
     ImasHandle,
     rebase_all_coords,
     rebase_on_grid,
@@ -50,7 +48,6 @@ __all__ = [
     'create',
     'duqmap',
     'get_status',
-    'IDSMapping',
     'ImasHandle',
     'Job',
     'rebase_all_coords',

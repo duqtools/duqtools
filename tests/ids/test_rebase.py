@@ -6,12 +6,12 @@ import xarray as xr
 from idsmapping_sample_data import Sample
 
 from duqtools.ids import (
-    IDSMapping,
     rebase_on_grid,
     rebase_on_time,
     rezero_time,
     standardize_grid,
 )
+from duqtools.imas2xarray import IDSMapping
 from duqtools.schema import IDSVariableModel
 
 TIME_VAR = IDSVariableModel(
