@@ -386,7 +386,6 @@ class ImasHandle(ImasBaseModel):
             Points to an IDS mapping of the data that should be written
             to this handle.
         """
-
         add_provenance_info(handle=self)
 
         with self.open() as db_entry:
