@@ -6,9 +6,11 @@ from pathlib import Path
 import click
 import xarray as xr
 
+from duqtools.imas2xarray import rebase_all_coords
+
 from ._plot_utils import alt_line_chart
 from .config import var_lookup
-from .ids import ImasHandle, rebase_all_coords
+from .ids import ImasHandle
 from .utils import read_imas_handles_from_file
 
 logger = logging.getLogger(__name__)

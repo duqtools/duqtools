@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
 
+from duqtools.imas2xarray import rebase_all_coords, squash_placeholders
+
 from ..operations import add_to_op_queue
 from ..utils import groupby
-from ._rebase import rebase_all_coords, squash_placeholders
 
 if TYPE_CHECKING:
     from ..schema import IDSVariableModel

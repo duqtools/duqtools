@@ -7,9 +7,6 @@ Functions:
 - [recreate][duqtools.api.recreate]
 - [submit][duqtools.api.submit]
 - [duqmap][duqtools.api.duqmap]
-- [rebase_on_grid][duqtools.api.rebase_on_grid]
-- [rebase_on_time][duqtools.api.rebase_on_time]
-- [standardize_grid_and_time][duqtools.api.standardize_grid_and_time]
 
 Data classes:
 
@@ -30,13 +27,7 @@ from ._plot_utils import alt_errorband_chart, alt_line_chart
 from .create import create_api as create
 from .create import recreate_api as recreate
 from .duqmap import duqmap
-from .ids import (
-    ImasHandle,
-    rebase_all_coords,
-    rebase_on_grid,
-    rebase_on_time,
-    standardize_grid_and_time,
-)
+from .ids import ImasHandle
 from .models import Job, Run, Runs
 from .schema import IDSVariableModel as Variable
 from .status import status_api as get_status
@@ -50,13 +41,9 @@ __all__ = [
     'get_status',
     'ImasHandle',
     'Job',
-    'rebase_all_coords',
-    'rebase_on_grid',
-    'rebase_on_time',
     'recreate',
     'Run',
     'Runs',
-    'standardize_grid_and_time',
     'submit',
     'Variable',
 ]
