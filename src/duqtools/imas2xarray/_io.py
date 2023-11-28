@@ -7,6 +7,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
+import h5py
+
 from ._lookup import var_lookup
 from ._mapping import IDSMapping
 from ._rebase import squash_placeholders
@@ -20,7 +22,7 @@ if TYPE_CHECKING:
 class H5Handle:
 
     def __init__(self, path: Path):
-        self.path = path
+        self.path = Path(path)
 
     def get(self, ids: str = 'core_profiles') -> IDSMapping:
         """Map the data to a dict-like structure.
@@ -34,7 +36,13 @@ class H5Handle:
         -------
         IDSMapping
         """
-        raw_data = ...
+        data_file = (self.path / ids).with_suffix('.h5')
+        assert data_file.exists()
+
+        raw_data = h5py.File(data_file, 'r')[ids]
+
+        # TODO: Add missing interface between hdf5 and IDSMapping
+
         return IDSMapping(raw_data)
 
     def get_all_variables(

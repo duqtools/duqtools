@@ -11,7 +11,6 @@ Functions:
 Data classes:
 
 - [ImasHandle][duqtools.api.ImasHandle]
-- [Variable][duqtools.api.Variable]
 - [Job][duqtools.api.Job]
 - [Run][duqtools.api.Run]
 - [Runs][duqtools.api.Runs]
