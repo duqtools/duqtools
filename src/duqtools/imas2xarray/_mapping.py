@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
+from ._lookup import var_lookup
 from ._models import IDSVariableModel
 
 if TYPE_CHECKING:
@@ -329,11 +330,9 @@ class IDSMapping(Mapping):
 
         import xarray as xr
 
-        from duqtools.config import lookup_vars
-
         xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 
-        variables = lookup_vars(variables)
+        variables = var_lookup.lookup(variables)
 
         for var in variables:
             parts = var.path.split('/*/')

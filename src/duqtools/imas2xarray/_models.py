@@ -4,6 +4,7 @@ from textwrap import dedent
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
+from pydantic import RootModel as PydanticRootModel
 
 
 def formatter(s):
@@ -19,6 +20,10 @@ class BaseModel(PydanticBaseModel):
     """Base model."""
 
     model_config = ConfigDict(extra='forbid')
+
+
+class RootModel(PydanticRootModel):
+    """Root model."""
 
 
 class IDSPath(BaseModel):
@@ -61,3 +66,17 @@ class IDSVariableModel(IDSPath):
         Give the dimensions of the data,
         i.e. [x] for 1D, or [x, y] for 2D data.
     """))
+
+
+class VariableConfigModel(RootModel):
+    root: list[IDSVariableModel]
+
+    def __iter__(self):
+        yield from self.root
+
+    def __getitem__(self, index: int):
+        return self.root[index]
+
+    def to_variable_dict(self) -> dict:
+        """Return dict of variables."""
+        return {variable.name: variable for variable in self}

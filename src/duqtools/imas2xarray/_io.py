@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
-from ._config import lookup_vars, var_lookup
+from ._lookup import var_lookup
 from ._mapping import IDSMapping
 from ._rebase import squash_placeholders
 
@@ -108,7 +108,7 @@ class H5Handle:
         ValueError
             When variables are from multiple IDSs.
         """
-        var_models = lookup_vars(variables)
+        var_models = var_lookup.lookup(variables)
 
         idss = {var.ids for var in var_models}
 

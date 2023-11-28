@@ -1,0 +1,47 @@
+### Core sources
+
+- name: energy_e_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/electrons/energy
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: particles_e_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/electrons/particles
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: energy_i_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/ion/*/energy
+  dims: [time_src, ion_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: particles_i_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/ion/*/particles
+  dims: [time_src, ion_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: energy_i_tot_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/total_ion_energy
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: j_par_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/j_parallel
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: tau_tor_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/momentum_tor
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: rho_tor_norm_src
+  ids: core_sources
+  path: source/0/profiles_1d/*/grid/rho_tor_norm
+  dims: [time_src, $rho_tor_norm_src]
+  type: IDS-variable
+- name: time_src
+  ids: core_sources
+  path: time
+  dims: [time_src]
+  type: IDS-variable

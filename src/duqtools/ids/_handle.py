@@ -303,8 +303,8 @@ class ImasHandle(ImasBaseModel):
         ValueError
             When variables are from multiple IDSs.
         """
-        from duqtools.config import lookup_vars
-        var_models = lookup_vars(variables)
+        from duqtools.config import var_lookup
+        var_models = var_lookup.lookup(variables)
 
         idss = {var.ids for var in var_models}
 

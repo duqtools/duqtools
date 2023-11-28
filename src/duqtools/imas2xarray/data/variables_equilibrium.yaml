@@ -1,0 +1,122 @@
+### Equilibrium
+
+- name: beta_p_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/beta_pol
+  dims: [time_eq]
+  type: IDS-variable
+- name: beta_t_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/beta_tor
+  dims: [time_eq]
+  type: IDS-variable
+- name: beta_n_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/beta_normal
+  dims: [time_eq]
+  type: IDS-variable
+- name: ip_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/ip
+  dims: [time_eq]
+  type: IDS-variable
+- name: li3_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/li_3
+  dims: [time_eq]
+  type: IDS-variable
+- name: wmhd_eq
+  ids: equilibrium
+  path: time_slice/*/global_quantities/energy_mhd
+  dims: [time_eq]
+  type: IDS-variable
+- name: psi_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/psi
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: p_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/pressure
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: f_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/f
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: j_tor_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/j_tor
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: j_par_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/j_parallel
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: beta_pol_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/beta_pol
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: q_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/q
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: smag_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/magnetic_shear
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: kappa_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/elongation
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: delta_upper_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/triangularity_upper
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: delta_lower_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/triangularity_lower
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: r_inner_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/r_inboard
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: r_outer_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/r_outboard
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: volume_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/volume
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: area_xs_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/area
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: area_surf_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/surface
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: rho_tor_norm_eq
+  ids: equilibrium
+  path: time_slice/*/profiles_1d/rho_tor_norm
+  dims: [time_eq, $rho_tor_norm_eq]
+  type: IDS-variable
+- name: time_eq
+  ids: equilibrium
+  path: time
+  dims: [time_eq]
+  type: IDS-variable
