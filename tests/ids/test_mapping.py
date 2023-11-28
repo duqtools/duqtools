@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from duqtools.ids._mapping import IDSMapping
+from duqtools.imas2xarray import IDSMapping
 
 assert_equal = np.testing.assert_array_equal
 

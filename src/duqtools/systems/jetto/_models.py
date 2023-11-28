@@ -4,8 +4,8 @@ from typing import Annotated, Literal, Optional, Union
 
 from pydantic import Field, field_validator
 
+from duqtools.imas2xarray import IDSPath
 from duqtools.schema import BaseModel
-from duqtools.schema.variables import IDSPath
 from duqtools.utils import formatter as f
 
 

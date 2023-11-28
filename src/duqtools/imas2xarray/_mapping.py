@@ -6,13 +6,11 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from ..schema import IDSVariableModel
-from ._copy import add_provenance_info
+from ._lookup import var_lookup
+from ._models import IDSVariableModel
 
 if TYPE_CHECKING:
     import xarray as xr
-
-    from ._handle import ImasHandle
 
 INDEX_STR = '*'
 
@@ -183,22 +181,6 @@ class IDSMapping(Mapping):
         except Exception:
             pass
 
-    def sync(self, target: ImasHandle):
-        """Synchronize updated data back to IMAS db entry.
-
-        Shortcut for 'put' command.
-
-        Parameters
-        ----------
-        target : ImasHandle
-            Points to an IMAS db entry of where the data should be written.
-        """
-
-        add_provenance_info(handle=target)
-
-        with target.open() as db_entry:
-            self._ids.put(db_entry=db_entry)
-
     def dive(self, val, path: list):
         """Recursively find the data fields.
 
@@ -348,11 +330,9 @@ class IDSMapping(Mapping):
 
         import xarray as xr
 
-        from duqtools.config import lookup_vars
-
         xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 
-        variables = lookup_vars(variables)
+        variables = var_lookup.lookup(variables)
 
         for var in variables:
             parts = var.path.split('/*/')

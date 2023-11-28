@@ -10,17 +10,17 @@ from typing import TYPE_CHECKING, List, Sequence
 
 from pydantic import field_validator
 
+from duqtools.imas2xarray import IDSMapping, squash_placeholders
+
 from ..operations import add_to_op_queue
-from ._copy import copy_ids_entry
+from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
-from ._mapping import IDSMapping
-from ._rebase import squash_placeholders
 from ._schema import ImasBaseModel
 
 if TYPE_CHECKING:
     import xarray as xr
 
-    from ..schema import IDSVariableModel
+    from duqtools.imas2xarray import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 
@@ -303,8 +303,8 @@ class ImasHandle(ImasBaseModel):
         ValueError
             When variables are from multiple IDSs.
         """
-        from duqtools.config import lookup_vars
-        var_models = lookup_vars(variables)
+        from duqtools.config import var_lookup
+        var_models = var_lookup.lookup(variables)
 
         idss = {var.ids for var in var_models}
 
@@ -374,3 +374,19 @@ class ImasHandle(ImasBaseModel):
             yield entry
         finally:
             entry.close()
+
+    def update_from(self, mapping: IDSMapping):
+        """Synchronize updated data back to IMAS db entry.
+
+        Shortcut for 'put' command.
+
+        Parameters
+        ----------
+        mapping : IDSMapping
+            Points to an IDS mapping of the data that should be written
+            to this handle.
+        """
+        add_provenance_info(handle=self)
+
+        with self.open() as db_entry:
+            mapping._ids.put(db_entry=db_entry)

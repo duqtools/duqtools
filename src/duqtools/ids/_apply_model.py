@@ -11,8 +11,9 @@ from ._handle import ImasHandle
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
+    from duqtools.imas2xarray import IDSMapping
+
     from ..schema import IDSOperation
-    from ._mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -89,4 +90,4 @@ def _apply_ids(model: IDSOperation,
 
     if target_in:
         logger.info('Writing data entry: %s', target_in)
-        ids_mapping.sync(target_in)
+        target_in.update_from(ids_mapping)

@@ -5,12 +5,14 @@ from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
 
+from duqtools.imas2xarray import rebase_all_coords, squash_placeholders
+
 from ..operations import add_to_op_queue
 from ..utils import groupby
-from ._rebase import rebase_all_coords, squash_placeholders
 
 if TYPE_CHECKING:
-    from ..schema import IDSVariableModel
+    from duqtools.imas2xarray import IDSVariableModel
+
     from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)
@@ -97,4 +99,4 @@ def merge_data(
             path_upper = path + '_error_upper'
             target_ids.write_array_in_parts(path_upper, std_data[name])
 
-        target_ids.sync(target)
+        target.update_from(target_ids)

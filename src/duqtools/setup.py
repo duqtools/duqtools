@@ -21,7 +21,7 @@ from .utils import no_op
 if TYPE_CHECKING:
     import jinja2
 
-    from duqtools.api import IDSMapping
+    from duqtools.imas2xarray import IDSMapping
     from duqtools.systems.jetto import IDS2JettoVariableModel
 
 logger = logging.getLogger(__name__)

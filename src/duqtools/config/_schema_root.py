@@ -10,8 +10,8 @@ from duqtools.systems.ets import Ets6SystemModel
 from duqtools.systems.jetto import JettoSystemModel
 from duqtools.systems.no_system import NoSystemModel
 
+from ._models import DuqtoolsVariableConfigModel
 from ._schema_create import CreateConfigModel
-from ._variables import VariableConfigModel
 
 
 class ConfigModel(BaseModel):
@@ -26,7 +26,7 @@ class ConfigModel(BaseModel):
         description=
         'Configuration for the create subcommand. See model for more info.')
 
-    extra_variables: Optional[VariableConfigModel] = Field(
+    extra_variables: Optional[DuqtoolsVariableConfigModel] = Field(
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(

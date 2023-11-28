@@ -11,8 +11,8 @@ from pytest import TEST_DATA
 
 from duqtools.apply_model import apply_model
 from duqtools.config import Config
-from duqtools.ids import IDSMapping
-from duqtools.schema import IDSOperation, IDSVariableModel
+from duqtools.imas2xarray import IDSMapping, IDSVariableModel
+from duqtools.schema import IDSOperation
 from duqtools.systems import get_system
 from duqtools.systems.jetto import JettoOperation
 
