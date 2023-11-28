@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Union
 
-from duqtools.imas2xarray import IDSVariableModel, VariableConfigModel
+from imas2xarray import IDSVariableModel, VariableConfigModel
+
 from duqtools.systems.jetto import IDS2JettoVariableModel, JettoVariableModel
 
 

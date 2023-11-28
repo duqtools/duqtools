@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from imas2xarray import IDSMapping, IDSVariableModel
 
 from duqtools.apply_model import apply_model
-from duqtools.imas2xarray import IDSMapping, IDSVariableModel
 from duqtools.schema import IDSOperation
 
 assert_equal = np.testing.assert_array_equal

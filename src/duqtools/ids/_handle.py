@@ -8,9 +8,8 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
+from imas2xarray import IDSMapping, squash_placeholders
 from pydantic import field_validator
-
-from duqtools.imas2xarray import IDSMapping, squash_placeholders
 
 from ..operations import add_to_op_queue
 from ._copy import add_provenance_info, copy_ids_entry
@@ -19,8 +18,7 @@ from ._schema import ImasBaseModel
 
 if TYPE_CHECKING:
     import xarray as xr
-
-    from duqtools.imas2xarray import IDSVariableModel
+    from imas2xarray import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 

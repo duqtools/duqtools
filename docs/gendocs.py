@@ -11,11 +11,11 @@ import sys
 from pathlib import Path
 
 import mkdocs_gen_files
+from imas2xarray import IDSVariableModel
 
 from duqtools.config._schema_create import CreateConfigModel
 from duqtools.config._schema_root import ConfigModel
 from duqtools.ids._schema import ImasBaseModel
-from duqtools.imas2xarray import IDSVariableModel
 from duqtools.schema import (
     ARange,
     IDSOperationDim,

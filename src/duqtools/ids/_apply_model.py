@@ -11,7 +11,7 @@ from ._handle import ImasHandle
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
-    from duqtools.imas2xarray import IDSMapping
+    from imas2xarray import IDSMapping
 
     from ..schema import IDSOperation
 

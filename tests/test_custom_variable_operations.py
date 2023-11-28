@@ -7,11 +7,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
+from imas2xarray import IDSMapping, IDSVariableModel
 from pytest import TEST_DATA
 
 from duqtools.apply_model import apply_model
 from duqtools.config import Config
-from duqtools.imas2xarray import IDSMapping, IDSVariableModel
 from duqtools.schema import IDSOperation
 from duqtools.systems import get_system
 from duqtools.systems.jetto import JettoOperation

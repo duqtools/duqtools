@@ -4,14 +4,13 @@ import logging
 from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
-
-from duqtools.imas2xarray import rebase_all_coords, squash_placeholders
+from imas2xarray import rebase_all_coords, squash_placeholders
 
 from ..operations import add_to_op_queue
 from ..utils import groupby
 
 if TYPE_CHECKING:
-    from duqtools.imas2xarray import IDSVariableModel
+    from imas2xarray import IDSVariableModel
 
     from ._handle import ImasHandle
 

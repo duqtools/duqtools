@@ -9,7 +9,7 @@ from .operations import op_queue
 from .utils import read_imas_handles_from_file
 
 if TYPE_CHECKING:
-    from duqtools.imas2xarray import IDSVariableModel
+    from imas2xarray import IDSVariableModel
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
