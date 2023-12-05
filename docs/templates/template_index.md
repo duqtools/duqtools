@@ -83,9 +83,9 @@ Duqtools comes with a list of default [variables](../variables.md). You can upda
 
 ### IDS variables
 
-{{ schema_IDSVariableModel['description'] }}
+{{ schema_Variable['description'] }}
 
-{% for name, prop in schema_IDSVariableModel['properties'].items() %}
+{% for name, prop in schema_Variable['properties'].items() %}
 `{{ name }}`
 : {{ prop['description'] }}
 {% endfor %}

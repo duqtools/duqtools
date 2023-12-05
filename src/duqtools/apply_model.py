@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Optional
 
-from imas2xarray import IDSVariableModel
+from imas2xarray import Variable
 
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
@@ -74,7 +74,7 @@ def get_input_var(input_variables: list[str],
 
     for var_name in input_variables:
         variable = var_lookup[var_name]
-        if isinstance(variable, IDSVariableModel):
+        if isinstance(variable, Variable):
             val = ids_mapping[variable.path]
             input_var[var_name] = val
         elif hasattr(

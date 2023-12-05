@@ -8,17 +8,18 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
-from imas2xarray import IDSMapping, squash_placeholders
+from imas2xarray import squash_placeholders
 from pydantic import field_validator
 
 from ..operations import add_to_op_queue
 from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
+from ._mapping import IDSMapping
 from ._schema import ImasBaseModel
 
 if TYPE_CHECKING:
     import xarray as xr
-    from imas2xarray import IDSVariableModel
+    from imas2xarray import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +232,7 @@ class ImasHandle(ImasBaseModel):
 
     def get_all_variables(
         self,
-        extra_variables: Sequence[IDSVariableModel] = [],
+        extra_variables: Sequence[Variable] = [],
         squash: bool = True,
         ids: str = 'core_profiles',
         **kwargs,
@@ -244,7 +245,7 @@ class ImasHandle(ImasBaseModel):
 
         Parameters
         ----------
-        variables : Sequence[IDSVariableModel]
+        variables : Sequence[Variable]
             Extra variables to load in addition to the ones known by duqtools.
         squash : bool
             Squash placeholder variables
@@ -273,7 +274,7 @@ class ImasHandle(ImasBaseModel):
 
     def get_variables(
         self,
-        variables: Sequence[str | IDSVariableModel],
+        variables: Sequence[str | Variable],
         squash: bool = True,
         **kwargs,
     ) -> xr.Dataset:
@@ -284,7 +285,7 @@ class ImasHandle(ImasBaseModel):
 
         Parameters
         ----------
-        variables : Sequence[Union[str, IDSVariableModel]]
+        variables : Sequence[Union[str, Variable]]
             Variable names of the data to load.
         squash : bool
             Squash placeholder variables

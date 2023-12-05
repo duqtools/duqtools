@@ -20,9 +20,10 @@ from .utils import no_op
 
 if TYPE_CHECKING:
     import jinja2
-    from imas2xarray import IDSMapping
 
     from duqtools.systems.jetto import IDS2JettoVariableModel
+
+    from .ids import IDSMapping
 
 logger = logging.getLogger(__name__)
 

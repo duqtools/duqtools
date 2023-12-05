@@ -11,9 +11,8 @@ from ._handle import ImasHandle
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
-    from imas2xarray import IDSMapping
-
     from ..schema import IDSOperation
+    from .mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 

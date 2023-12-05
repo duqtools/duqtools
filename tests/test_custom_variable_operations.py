@@ -7,11 +7,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from imas2xarray import IDSMapping, IDSVariableModel
+from imas2xarray import Variable
 from pytest import TEST_DATA
 
 from duqtools.apply_model import apply_model
 from duqtools.config import Config
+from duqtools.ids import IDSMapping
 from duqtools.schema import IDSOperation
 from duqtools.systems import get_system
 from duqtools.systems.jetto import JettoOperation
@@ -51,7 +52,7 @@ def gen_sample_data():
 
 
 def get_test_var(path):
-    return IDSVariableModel(
+    return Variable(
         name='var',
         path=path,
         ids='test',

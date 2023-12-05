@@ -10,7 +10,7 @@ from ..operations import add_to_op_queue
 from ..utils import groupby
 
 if TYPE_CHECKING:
-    from imas2xarray import IDSVariableModel
+    from imas2xarray import Variable
 
     from ._handle import ImasHandle
 
@@ -23,7 +23,7 @@ info = logger.info
 def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
-    variables: list[IDSVariableModel],
+    variables: list[Variable],
     callback=None,
 ):
     """merge_data merges the data from the handles to the target, only merges
@@ -36,7 +36,7 @@ def merge_data(
         handles
     target : ImasHandle
         target
-    variables : Sequence[IDSVariableModel]
+    variables : Sequence[Variable]
         variables
     """
     from ..config import var_lookup

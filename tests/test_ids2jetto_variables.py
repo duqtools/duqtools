@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from imas2xarray import IDSMapping
 from pydantic_yaml import parse_yaml_raw_as
 
+from duqtools.ids import IDSMapping
 from duqtools.setup import Variables
 from duqtools.systems.jetto import IDS2JettoVariableModel
 
