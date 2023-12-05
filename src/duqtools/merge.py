@@ -9,13 +9,13 @@ from .operations import op_queue
 from .utils import read_imas_handles_from_file
 
 if TYPE_CHECKING:
-    from duqtools.imas2xarray import IDSVariableModel
+    from imas2xarray import Variable
 
 logger = logging.getLogger(__name__)
 info, debug = logger.info, logger.debug
 
 
-def _resolve_variables(var_names: Sequence[str]) -> list[IDSVariableModel]:
+def _resolve_variables(var_names: Sequence[str]) -> Sequence[Variable]:
     """Looks up variables if specified, if empty return all variables."""
     idsvar_lookup = var_lookup.filter_type('IDS-variable')
 
@@ -35,7 +35,7 @@ def _merge(*,
            handles: Sequence[ImasHandle],
            template: ImasHandle,
            target: ImasHandle,
-           variables: Sequence[IDSVariableModel],
+           variables: Sequence[Variable],
            force: bool = False):
     """Merge mas data.
 

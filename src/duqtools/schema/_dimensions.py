@@ -5,9 +5,9 @@ from functools import partial
 from typing import Any, Literal, Optional, Union
 
 import numpy as np
+from imas2xarray import Variable
 from pydantic import Field, field_validator, model_validator
 
-from duqtools.imas2xarray import IDSVariableModel
 from duqtools.utils import formatter as f
 
 from ._basemodel import BaseModel, RootModel
@@ -167,7 +167,7 @@ class OperationDim(OperatorMixin, DimMixin, BaseModel):
 
         if isinstance(variable, JettoVariableModel):
             expand_func = JettoOperationDim.expand
-        elif isinstance(variable, IDSVariableModel):
+        elif isinstance(variable, Variable):
             expand_func = IDSOperationDim.expand
         else:
             raise NotImplementedError(
@@ -195,7 +195,7 @@ class CoupledDim(RootModel):
 
 
 class IDSPathMixin(BaseModel):
-    variable: IDSVariableModel = Field(description=f("""
+    variable: Variable = Field(description=f("""
             IDS variable for the data to modify.
             The time slice can be denoted with '*', this will match all
             time slices in the IDS. Alternatively, you can specify the time
@@ -242,7 +242,7 @@ class Operation(OperatorMixin, BaseModel):
 
         if isinstance(variable, JettoVariableModel):
             cls = JettoOperation
-        elif isinstance(variable, IDSVariableModel):
+        elif isinstance(variable, Variable):
             cls = IDSOperation
         else:
             raise NotImplementedError(

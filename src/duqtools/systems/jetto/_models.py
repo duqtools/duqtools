@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Optional, Union
 
+from imas2xarray import IDSPath
 from pydantic import Field, field_validator
 
-from duqtools.imas2xarray import IDSPath
 from duqtools.schema import BaseModel
 from duqtools.utils import formatter as f
 

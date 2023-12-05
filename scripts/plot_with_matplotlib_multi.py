@@ -3,7 +3,7 @@ import pandas as pd
 import xarray as xr
 
 from duqtools.api import ImasHandle
-from duqtools.imas2xarray import standardize_grid_and_time
+from imas2xarray import standardize_grid_and_time
 
 runs = 8000, 8001, 8002
 

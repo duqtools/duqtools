@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-from duqtools.imas2xarray import VariableConfigLoader
+from imas2xarray import VariableConfigLoader
 
 from ._models import DuqtoolsVariableConfigModel
 

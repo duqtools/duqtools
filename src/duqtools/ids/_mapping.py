@@ -5,9 +5,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
-
-from ._lookup import var_lookup
-from ._models import IDSVariableModel
+from imas2xarray import Variable, var_lookup
 
 if TYPE_CHECKING:
     import xarray as xr
@@ -124,10 +122,8 @@ class IDSMapping(Mapping):
         return key in self._keys
 
     @staticmethod
-    def _path_at_index(variable: str | IDSVariableModel,
-                       index: int | Sequence[int]):
-        path = variable.path if isinstance(variable,
-                                           IDSVariableModel) else variable
+    def _path_at_index(variable: str | Variable, index: int | Sequence[int]):
+        path = variable.path if isinstance(variable, Variable) else variable
 
         if isinstance(index, int):
             index = (index, )
@@ -137,7 +133,7 @@ class IDSMapping(Mapping):
 
         return path
 
-    def get_at_index(self, variable: str | IDSVariableModel,
+    def get_at_index(self, variable: str | Variable,
                      index: int | Sequence[int], **kwargs) -> Any:
         """Grab key with index replacement.
 
@@ -146,7 +142,7 @@ class IDSMapping(Mapping):
         path = self._path_at_index(variable, index)
         return self[path]
 
-    def set_at_index(self, variable: str | IDSVariableModel,
+    def set_at_index(self, variable: str | Variable,
                      index: int | Sequence[int], value: Any, **kwargs):
         """Grab key with index replacement.
 
@@ -294,7 +290,7 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        variables: Sequence[str | IDSVariableModel],
+        variables: Sequence[str | Variable],
         empty_var_ok: bool = False,
         **kwargs,
     ) -> xr.Dataset:
@@ -302,7 +298,7 @@ class IDSMapping(Mapping):
 
         Parameters
         ----------
-        variables : Sequence[str | IDSVariableModel]]
+        variables : Sequence[str | Variable]]
             Dictionary of data variables
         empty_var_ok : bool
             If True, silently skip data that are missing from the mapping.
@@ -332,9 +328,9 @@ class IDSMapping(Mapping):
 
         xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 
-        variables = var_lookup.lookup(variables)
+        var_models = var_lookup.lookup(variables)
 
-        for var in variables:
+        for var in var_models:
             parts = var.path.split('/*/')
 
             if len(parts) == 1:

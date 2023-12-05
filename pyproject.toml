@@ -38,6 +38,7 @@ dependencies = [
     "altair >= 5.0",
     "click",
     "gitpython",
+    "imas2xarray",
     "importlib_resources; python_version<'3.10'",
     "jetto-tools >= 1.8.8",
     "jinja2 >= 3.0",
@@ -66,21 +67,18 @@ develop = [
     "yapf",
     "mypy",
     "coverage[toml]",
-    "nbmake",
     "pytest",
     "pytest-dependency",
-    "pycodestyle",
 ]
 docs = [
-    "matplotlib",
     "jinja2",
     "markdown-include",
     "mkdocs",
     "mkdocs-click",
-    "mkdocs-jupyter",
     "mkdocs-gen-files",
     "mkdocs-material",
     "mkdocstrings[python]",
+    "mknotebooks",
 ]
 publishing = [
     "twine",
@@ -112,7 +110,6 @@ data_file = ".coverage"
 testpaths = ["tests"]
 norecursedirs = ["tests/helpers"]
 
-
 [tool.mypy]
 plugins = "pydantic.mypy"
 ignore_missing_imports = true
@@ -127,57 +124,15 @@ ignore_missing_imports = true
 module = ["pkg_resources.*"]
 ignore_missing_imports = true
 
-
 [tool.yapf]
 blank_line_before_nested_class_or_def = "True"
 
 [tool.ruff]
-# Enable Pyflakes `E` and `F` codes by default.
 select = [
-	"F",  # Pyflakes
-	"E",  # pycodestyle (error)
+	"F",    # Pyflakes
+	"E",    # pycodestyle (error)
 	"W",    # pycodestyle (warning)
-	# "C90",  # mccabe
 	"I",    # isort
-	# "N",    # pep8-naming
-	# "D",    # pydocstyle
-	# "UP",   # pyupgrade
-	# "YTT",  # flake8-2020
-	# "ANN",  # flake8-annotations
-	# "S",    # flake8-bandit
-	# "BLE",  # flake8-blind-except
-	# "FBT",  # flake8-boolean-trap
-	# "B",    # flake8-bugbear
-	# "A",    # flake8-builtins
-	# "COM",  # flake8-commas
-	# "C4",   # flake8-comprehensions
-	# "DTZ",  # flake8-datetimez
-	# "T10",  # flake8-debugger
-	# "EM",   # flake8-errmsg
-	# "EXE",  # flake8-executable
-	# "ISC",  # flake8-implicit-str-concat
-	# "ICN",  # flake8-import-conventions
-	# "G",    # flake8-logging-format
-	# "INP",  # flake8-no-pep420
-	# "PIE",  # flake8-pie
-	# "T20",  # flake8-print
-	# "PT",   # flake8-pytest-style
-	# "Q",    # flake8-quotes
-	# "RET",  # flake8-return
-	# "SIM",  # flake8-simplify
-	# "TID",  # flake8-tidy-imports
-	# "TCH",  # flake8-type-checking
-	# "ARG",  # flake8-unused-arguments
-	# "PTH",  # flake8-use-pathlib
-	# "ERA",  # eradicate
-	# "PD",   # pandas-vet
-	# "PGH",  # pygrep-hooks
-	# "PL",   # Pylint
-	# "PLC",  # Convention
-	# "PLE",  # Error
-	# "PLR",  # Refactor
-	# "PLW",  # Warning
-	# "TRY",  # tryceratops
 ]
 ignore = []
 
@@ -215,7 +170,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 target-version = "py39"
 line-length = 96
-
 
 [tool.ruff.isort]
 known-first-party = ["duqtools"]

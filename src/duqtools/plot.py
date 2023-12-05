@@ -5,8 +5,7 @@ from pathlib import Path
 
 import click
 import xarray as xr
-
-from duqtools.imas2xarray import rebase_all_coords
+from imas2xarray import rebase_all_coords
 
 from ._plot_utils import alt_line_chart
 from .config import var_lookup
