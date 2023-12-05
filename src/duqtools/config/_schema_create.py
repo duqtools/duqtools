@@ -66,9 +66,9 @@ class CreateConfigModel(BaseModel):
         or hypercube. By default, the cartesian product is taken
         (`method: cartesian-product`). For more efficient sampling of the space,
         the following `method` choices are available:
-        [`latin-hypercube`](en.wikipedia.org/wiki/Latin_hypercube_sampling),
-        [`sobol`](en.wikipedia.org/wiki/Sobol_sequence),
-        [`halton`](en.wikipedia.org/wiki/Halton_sequence).
+        [`latin-hypercube`](https://en.wikipedia.org/wiki/Latin_hypercube_sampling),
+        [`sobol`](https://en.wikipedia.org/wiki/Sobol_sequence),
+        [`halton`](https://en.wikipedia.org/wiki/Halton_sequence).
         Where `n_samples` gives the number of samples to extract.
         """))
 
@@ -78,7 +78,7 @@ class CreateConfigModel(BaseModel):
         from. Each dimension is a compound set of operations to apply.
         From this, a matrix all possible combinations is generated.
         Essentially, it generates the
-        [Cartesian product](en.wikipedia.org/wiki/Cartesian_product)
+        [Cartesian product](https://en.wikipedia.org/wiki/Cartesian_product)
         of all operations. By specifying a different `sampler`, a subset of
         this hypercube can be efficiently sampled. This paramater is optional.
         """))
