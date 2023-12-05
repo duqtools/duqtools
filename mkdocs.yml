@@ -22,9 +22,6 @@ nav:
   - Notebooks:
     - Overview: examples/index.md
     - examples/imas_handles.ipynb
-    - examples/xarray.ipynb
-    - examples/xarray-2D.ipynb
-    - examples/xarray-ions.ipynb
     - examples/create_api.ipynb
     - examples/demo_single_run.ipynb
     - examples/demo_lsv_run.ipynb
@@ -41,6 +38,7 @@ nav:
   - Code of Conduct: CODE_OF_CONDUCT.md
   - 🔗 Source code: https://github.com/duqtools/duqtools
   - 🔗 Issues: https://github.com/duqtools/duqtools/issues
+  - 🔗 Imas2xarray: https://imas2xarray.readthedocs.io
 
 
 theme:
