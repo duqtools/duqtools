@@ -45,7 +45,6 @@ theme:
   name: material
   primary: blue
   accent: red
-  custom_dir: docs/overrides
   palette:
     accent: indigo
 
@@ -67,35 +66,32 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
-- search
-- mkdocstrings:
-    # https://mkdocstrings.github.io/usage/
-    handlers:
-      python:
-        import:
-        - https://docs.python.org/3/objects.inv
-        - https://numpy.org/doc/stable/objects.inv
-        - https://docs.scipy.org/doc/scipy/objects.inv
-        - https://pandas.pydata.org/docs/objects.inv
-        options:
-          docstring_style: numpy
-          docstring_options:
-            ignore_init_summary: yes
-          show_submodules: no
-          show_source: true
-          docstring_section_style: list
-          members_order: alphabetical
-          show_category_heading: no
-          merge_init_into_class: yes
-- gen-files:
-    scripts:
-      - docs/gendocs.py
-      - docs/genvariables.py
-- mkdocs-jupyter:
-    include_source: True
-    ignore:
-      - gendocs.py
-      - genvariables.py
+  - search
+  - mkdocstrings:
+      # https://mkdocstrings.github.io/usage/
+      handlers:
+        python:
+          import:
+          - https://docs.python.org/3/objects.inv
+          - https://numpy.org/doc/stable/objects.inv
+          - https://docs.scipy.org/doc/scipy/objects.inv
+          - https://pandas.pydata.org/docs/objects.inv
+          options:
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: yes
+            show_submodules: no
+            show_source: true
+            docstring_section_style: list
+            members_order: alphabetical
+            show_category_heading: no
+            merge_init_into_class: yes
+  - gen-files:
+      scripts:
+        - docs/gendocs.py
+        - docs/genvariables.py
+  - mknotebooks:
+      execute: false
 
 watch:
   - src/duqtools

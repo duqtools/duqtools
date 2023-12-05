@@ -75,10 +75,10 @@ docs = [
     "markdown-include",
     "mkdocs",
     "mkdocs-click",
-    "mkdocs-jupyter",
     "mkdocs-gen-files",
     "mkdocs-material",
     "mkdocstrings[python]",
+    "mknotebooks",
 ]
 publishing = [
     "twine",
