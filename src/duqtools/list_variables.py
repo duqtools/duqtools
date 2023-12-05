@@ -56,7 +56,7 @@ def list_variables(*, cfg: Config, **kwargs):
         list_group(group, extra_variables)
 
     grouped_other_vars = var_lookup.groupby_type()
-    grouped_other_vars.pop('IDS-variable')
+    grouped_other_vars.pop('IDS-variable', None)
 
     for var_type, group in grouped_other_vars.items():
         click.secho(f'\n{var_type}:', **ST_HEADER)

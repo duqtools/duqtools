@@ -3,15 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Union
 
+from imas2xarray import Variable, VariableConfigModel
 from pydantic import Field, PrivateAttr
 
 from duqtools.schema import BaseModel
 from duqtools.systems.ets import Ets6SystemModel
-from duqtools.systems.jetto import JettoSystemModel
+from duqtools.systems.jetto import IDS2JettoVariableModel, JettoSystemModel, JettoVariableModel
 from duqtools.systems.no_system import NoSystemModel
 
-from ._models import DuqtoolsVariableConfigModel
 from ._schema_create import CreateConfigModel
+
+
+class ExtraVariables(VariableConfigModel):
+    root: list[Union[JettoVariableModel, Variable, IDS2JettoVariableModel]]
 
 
 class ConfigModel(BaseModel):
@@ -26,7 +30,7 @@ class ConfigModel(BaseModel):
         description=
         'Configuration for the create subcommand. See model for more info.')
 
-    extra_variables: Optional[DuqtoolsVariableConfigModel] = Field(
+    extra_variables: Optional[ExtraVariables] = Field(
         None, description='Specify extra variables for this run.')
 
     system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
