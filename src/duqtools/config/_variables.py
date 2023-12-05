@@ -11,12 +11,11 @@ if sys.version_info < (3, 10):
 else:
     from importlib.resources import files
 
+imas2xarray_var_lookup = VariableConfigLoader().load()
 
-class DuqtoolsVariableConfigLoader(VariableConfigLoader):
-    MODEL = DuqtoolsVariableConfigModel
-    VAR_DIR = 'duqtools'
-    VAR_ENV = 'DUQTOOLS_VARDEF'
-    MODULE = files('duqtools.data')
-
-
-var_lookup = DuqtoolsVariableConfigLoader().load()
+var_lookup = VariableConfigLoader(
+    model=DuqtoolsVariableConfigModel,
+    var_dir='duqtools',
+    var_env='DUQTOOLS_VARDEF',
+    module=files('duqtools.data'),
+).load(var_lookup=imas2xarray_var_lookup)
