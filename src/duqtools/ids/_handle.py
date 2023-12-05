@@ -245,7 +245,7 @@ class ImasHandle(ImasBaseModel):
 
         Parameters
         ----------
-        variables : Sequence[Variable]
+        extra_variables : Sequence[Variable]
             Extra variables to load in addition to the ones known by duqtools.
         squash : bool
             Squash placeholder variables

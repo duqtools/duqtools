@@ -256,7 +256,7 @@ create:
 
 To specify additional variables, you can use the `extra_variables` lookup file. The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.
 
-For more info about variables, see [here](../index#extra-variables).
+For more info about variables, see [here](../index.md#extra-variables).
 
 ### Value ranges
 
