@@ -38,7 +38,7 @@ dependencies = [
     "altair >= 5.0",
     "click",
     "gitpython",
-    "imas2xarray",
+    "imas2xarray >= 0.2.0",
     "importlib_resources; python_version<'3.10'",
     "jetto-tools >= 1.8.8",
     "jinja2 >= 3.0",
