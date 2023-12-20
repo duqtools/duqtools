@@ -61,7 +61,7 @@ changelog = "https://github.com/duqtools/duqtools/releases"
 
 [project.optional-dependencies]
 develop = [
-    "bump2version",
+    "bump-my-version",
     "ruff",
     "pre-commit",
     "yapf",
@@ -177,3 +177,21 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.isort]
 profile = "black"
+
+[tool.bumpversion]
+current_version = "2.0.0"
+
+[[tool.bumpversion.files]]
+filename = "src/duqtools/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"
