@@ -36,6 +36,7 @@ class JettoVar(BaseModel):
     name: str = Field(description='Name of the variable.')
     type: Literal['str', 'int', 'float'] = Field(
         description=f('Type of the variable (str, int, float)'))
+    dimension: Optional[Literal['scalar','vector']] = Field(None)
     keys: list[JettoField] = Field(description=f(
         'Jetto keys to update when this jetto variable is requested'))
 

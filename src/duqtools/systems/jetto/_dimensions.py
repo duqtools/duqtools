@@ -13,7 +13,7 @@ class JettoPathMixin(BaseModel):
 
 
 class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
-    value: float = Field(description=f("""
+    value: float | list = Field(description=f("""
         Value to use with operator on field to create sampling
         space."""))
 

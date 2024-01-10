@@ -231,7 +231,7 @@ class IDSOperationDim(IDSPathMixin, OperatorMixin, DimMixin, BaseModel):
 
 class Operation(OperatorMixin, BaseModel):
     variable: str
-    value: float
+    value: float | list
 
     def convert(self):
         """Expand variable and convert to correct type."""
