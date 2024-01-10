@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Union
+
 from pydantic import Field
 
 from duqtools.schema import BaseModel, DimMixin, OperatorMixin
@@ -13,7 +15,7 @@ class JettoPathMixin(BaseModel):
 
 
 class JettoOperation(JettoPathMixin, OperatorMixin, BaseModel):
-    value: float | list = Field(description=f("""
+    value: Union[float, list] = Field(description=f("""
         Value to use with operator on field to create sampling
         space."""))
 

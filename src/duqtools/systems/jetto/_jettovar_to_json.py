@@ -27,7 +27,7 @@ def jettovar_to_json(variable: JettoVar):
     var_dict = {'type': variable.type, 'dimension': variable.dimension}
     if var_dict['type'] == 'float':
         var_dict['type'] = 'real'
-    if var_dict['dimension'] == None:
+    if var_dict['dimension'] is None:
         var_dict['dimension'] = 'scalar'
 
     if len(jsetfields) > 0:
