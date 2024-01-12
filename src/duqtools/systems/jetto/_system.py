@@ -350,15 +350,21 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config = config.RunConfig(jetto_template)
 
+        special_keys = [
+            't_start',
+            't_end',
+        ]
+
         # Do operation if present
-        if operation is not None:
+        if key not in special_keys and operation is not None:
             data = jetto_config[key]
             value = operation.npfunc(data, value, var=input_var)
 
-        if key == 't_start':
-            jetto_config.start_time = value
-        elif key == 't_end':
-            jetto_config.end_time = value
+        if key in special_keys:
+            if key == 't_start':
+                jetto_config.start_time = value
+            elif key == 't_end':
+                jetto_config.end_time = value
         else:
             jetto_config[key] = value
 
