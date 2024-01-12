@@ -22,8 +22,8 @@ class NamelistField(BaseModel):
     section: str = Field(description='Section in the config.')
 
     @field_validator('section')
-    def section_lower(cls, v):
-        return v.lower()
+    def section_upper(cls, v):
+        return v.upper()
 
 
 JettoField = Annotated[Union[JsetField, NamelistField],
