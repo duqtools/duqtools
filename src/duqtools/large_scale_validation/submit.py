@@ -63,6 +63,7 @@ def submit(*, array: bool, array_script: bool, limit: Optional[int],
 
     jobs: list[Job] = []
 
+    cfg = None
     for drc in dirs:
         config_file = drc / 'duqtools.yaml'
         cfg = load_config(config_file)
