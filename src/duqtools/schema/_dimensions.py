@@ -133,7 +133,10 @@ class OperatorMixin(BaseModel):
 
         # copyto is different, and does not like scalars
         if self.operator == 'copyto' and not isinstance(data, np.ndarray):
-            return data
+            if isinstance(value, type(data)):
+                return value
+            else:
+                return data
 
         if out is not None:
             return npfunc(data, value, out=out)

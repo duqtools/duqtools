@@ -79,6 +79,10 @@ def submit(*, array: bool, array_script: bool, limit: Optional[int],
             Job(run.dirname, cfg=cfg)
             for run in Locations(parent_dir=config_dir, cfg=cfg).runs)
 
+    if not jobs:
+        info('No jobs found.')
+        return
+
     job_queue: Deque[Job] = deque()
 
     for job in jobs:
