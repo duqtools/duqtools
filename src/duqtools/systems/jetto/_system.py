@@ -350,10 +350,10 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config = config.RunConfig(jetto_template)
 
-        special_keys = [
+        special_keys = (
             't_start',
             't_end',
-        ]
+        )
 
         # Do operation if present
         if key not in special_keys and operation is not None:
