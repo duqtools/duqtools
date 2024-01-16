@@ -132,12 +132,10 @@ class OperatorMixin(BaseModel):
             npfunc = getattr(np, self.operator)
 
         # copyto is different, and does not like scalars
-        #if self.operator == 'copyto' and not isinstance(data, np.ndarray):
-        #    return data
-        if self.operator == 'copyto':
+        if self.operator == 'copyto' and not isinstance(data, np.ndarray):
             if isinstance(value, type(data)):
                 return value
-            elif not isinstance(data, np.ndarray):
+            else:
                 return data
 
         if out is not None:
