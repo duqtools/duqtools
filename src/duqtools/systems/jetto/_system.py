@@ -360,11 +360,10 @@ class BaseJettoSystem(AbstractSystem):
             data = jetto_config[key]
             value = operation.npfunc(data, value, var=input_var)
 
-        if key in special_keys:
-            if key == 't_start':
-                jetto_config.start_time = value
-            elif key == 't_end':
-                jetto_config.end_time = value
+        if key == 't_start':
+            jetto_config.start_time = value
+        elif key == 't_end':
+            jetto_config.end_time = value
         else:
             jetto_config[key] = value
 
