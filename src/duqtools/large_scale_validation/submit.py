@@ -63,7 +63,6 @@ def submit(*, array: bool, array_script: bool, limit: Optional[int],
 
     jobs: list[Job] = []
 
-    cfg = None
     for drc in dirs:
         config_file = drc / 'duqtools.yaml'
         cfg = load_config(config_file)
@@ -79,6 +78,10 @@ def submit(*, array: bool, array_script: bool, limit: Optional[int],
         jobs.extend(
             Job(run.dirname, cfg=cfg)
             for run in Locations(parent_dir=config_dir, cfg=cfg).runs)
+
+    if not jobs:
+        info('No jobs found.')
+        return
 
     job_queue: Deque[Job] = deque()
 
