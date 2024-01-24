@@ -17,7 +17,7 @@ fix_dependencies()
 
 __author__ = 'Stef Smeets'
 __email__ = 's.smeets@esciencecenter.nl'
-__version__ = '3.0.1'
+__version__ = '3.0.2'
 
 import logging  # noqa
 import warnings  # noqa
