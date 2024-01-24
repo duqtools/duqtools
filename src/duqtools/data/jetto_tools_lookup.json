@@ -73,6 +73,6 @@
       "field": "KWMAIN"
     },
     "type": "str",
-    "dimension": "scalar"
+    "dimension": "vector"
   }
 }
