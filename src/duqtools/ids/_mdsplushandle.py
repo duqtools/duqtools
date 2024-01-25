@@ -11,13 +11,12 @@ from imas2xarray import squash_placeholders
 from ..operations import add_to_op_queue
 from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
+from ._imasbasehandle import ImasBaseHandle
 from ._mapping import IDSMapping
 
 if TYPE_CHECKING:
     import xarray as xr
     from imas2xarray import Variable
-
-    from ._imasbasehandle import ImasBaseHandle
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, Optional, Union
 import numpy as np
 
 from .._logging_utils import duqlog_screen
-from ._handle import ImasHandle
+from ._handle import ImasHandleType
+from ._imasbasehandle import ImasBaseHandle
 
 if TYPE_CHECKING:
     from types import SimpleNamespace
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def _apply_ids(model: IDSOperation,
                *,
-               ids_mapping: Union[ImasHandle, IDSMapping],
+               ids_mapping: Union[ImasHandleType, IDSMapping],
                input_var: Optional[SimpleNamespace] = None,
                **kwargs) -> None:
     """Implementation for IDS operations.
@@ -28,7 +29,7 @@ def _apply_ids(model: IDSOperation,
     ----------
     model : IDSOperation
         model
-    target_in : ImasHandle, IDSMapping
+    target_in : ImasHandleType, IDSMapping
         ImasHandle/IDSHandle, data to apply operation to.
 
     Returns
@@ -36,7 +37,7 @@ def _apply_ids(model: IDSOperation,
     None
     """
     target_in = None
-    if isinstance(ids_mapping, ImasHandle):
+    if isinstance(ids_mapping, ImasBaseHandle):
         target_in = ids_mapping
         ids_mapping = ids_mapping.get(model.variable.ids)
 
