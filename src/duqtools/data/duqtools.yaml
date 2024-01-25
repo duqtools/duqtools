@@ -17,4 +17,4 @@ create:
     method: latin-hypercube
     n_samples: 3
 system:
-  name: jetto
+  name: nosystem
