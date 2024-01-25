@@ -79,9 +79,9 @@ Copying config to : duqtools.yaml:
 Progress: 100%|███████████████████████████████████| 1/1 [00:00<00:00, 46.59it/s]
 ```
 
-Press <kbd>y</kbd> and <kbc>Enter</kbc> to continue.
+Press <kbd>y</kbd> and <kbd>Enter</kbd> to continue.
 
-This will create a new file called `duqtools.yaml`. This is the main file you will be modifying to set up a duqtools run. For more information about how to modify the file, for a description of the variables, have a look at the [rest of the documentation](.config/index.md).
+This will create a new file called `duqtools.yaml`. This is the main file you will be modifying to set up a duqtools run. For more information about how to modify the file, for a description of the variables, have a look at the [rest of the documentation](./config/index.md).
 
 ## Example `duqtools.yaml`
 
@@ -206,7 +206,7 @@ Start the dashboard using:
 duqtools dash
 ```
 
-This will open a webserver that you can open in your browser.
+This will open a webserver that you can open in your browser copying the url.
 
 ```
   You can now view your Streamlit app in your browser.

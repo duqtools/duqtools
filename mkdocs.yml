@@ -5,7 +5,7 @@ repo_name: GitHub
 
 nav:
   - Home: index.md
-  - Quickstart: quickstart.md
+  - Quickstart (Gateway): quickstart_gateway.md
   - Usage: command-line-interface.md
   - Configuration:
     - Getting Started: config/index.md
