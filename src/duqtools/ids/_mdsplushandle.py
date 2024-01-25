@@ -6,16 +6,17 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
+from imas2xarray import squash_placeholders
+
 from ..operations import add_to_op_queue
-from ._copy import copy_ids_entry
+from ._copy import add_provenance_info, copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
-from ._rebase import squash_placeholders
 
 if TYPE_CHECKING:
     import xarray as xr
+    from imas2xarray import Variable
 
-    from ..schema import IDSVariableModel
     from ._imasbasehandle import ImasBaseHandle
 
 logger = logging.getLogger(__name__)
@@ -169,7 +170,7 @@ class MDSPlusImasHandle(ImasBaseHandle):
 
     def get_all_variables(
         self,
-        extra_variables: Sequence[IDSVariableModel] = [],
+        extra_variables: Sequence[Variable] = [],
         squash: bool = True,
         ids: str = 'core_profiles',
         **kwargs,
@@ -182,7 +183,7 @@ class MDSPlusImasHandle(ImasBaseHandle):
 
         Parameters
         ----------
-        variables : Sequence[IDSVariableModel]
+        extra_variables : Sequence[Variable]
             Extra variables to load in addition to the ones known by duqtools.
         squash : bool
             Squash placeholder variables
@@ -211,7 +212,7 @@ class MDSPlusImasHandle(ImasBaseHandle):
 
     def get_variables(
         self,
-        variables: Sequence[str | IDSVariableModel],
+        variables: Sequence[str | Variable],
         squash: bool = True,
         **kwargs,
     ) -> xr.Dataset:
@@ -222,7 +223,7 @@ class MDSPlusImasHandle(ImasBaseHandle):
 
         Parameters
         ----------
-        variables : Sequence[Union[str, IDSVariableModel]]
+        variables : Sequence[Union[str, Variable]]
             Variable names of the data to load.
         squash : bool
             Squash placeholder variables
@@ -239,8 +240,8 @@ class MDSPlusImasHandle(ImasBaseHandle):
         ValueError
             When variables are from multiple IDSs.
         """
-        from duqtools.config import lookup_vars
-        var_models = lookup_vars(variables)
+        from duqtools.config import var_lookup
+        var_models = var_lookup.lookup(variables)
 
         idss = {var.ids for var in var_models}
 
@@ -293,3 +294,19 @@ class MDSPlusImasHandle(ImasBaseHandle):
             yield entry
         finally:
             entry.close()
+
+    def update_from(self, mapping: IDSMapping):
+        """Synchronize updated data back to IMAS db entry.
+
+        Shortcut for 'put' command.
+
+        Parameters
+        ----------
+        mapping : IDSMapping
+            Points to an IDS mapping of the data that should be written
+            to this handle.
+        """
+        add_provenance_info(handle=self)
+
+        with self.open() as db_entry:
+            mapping._ids.put(db_entry=db_entry)

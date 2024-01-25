@@ -10,4 +10,4 @@ core_profiles = target.get('core_profiles')
 
 core_profiles['profiles_1d/0/t_i_average'] *= 1.1
 
-core_profiles.sync(target)
+target.update_from(core_profiles)

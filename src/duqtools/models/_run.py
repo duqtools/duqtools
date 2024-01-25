@@ -13,6 +13,7 @@ from ..schema import BaseModel, IDSOperation, RootModel
 
 
 class Run(BaseModel):
+    """Dataclass describing a run."""
     dirname: Path = Field(description='Directory of run')
     shortname: Optional[Path] = Field(
         None, description='Short name (`dirname.name`)')
@@ -41,6 +42,7 @@ class Run(BaseModel):
 
 
 class Runs(RootModel):
+    """Dataclass describing a collection of runs."""
     root: list[Run] = []
 
     def __iter__(self):

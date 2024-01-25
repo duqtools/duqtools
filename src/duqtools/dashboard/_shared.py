@@ -7,8 +7,9 @@ from typing import Sequence
 
 import streamlit as st
 import xarray as xr
+from imas2xarray import standardize_grid_and_time
 
-from duqtools.api import ImasHandle, standardize_grid_and_time
+from duqtools.api import ImasHandle
 from duqtools.config import var_lookup
 from duqtools.ids._mapping import EmptyVarError
 

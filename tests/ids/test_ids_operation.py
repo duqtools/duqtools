@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from imas2xarray import Variable
 
 from duqtools.apply_model import apply_model
 from duqtools.ids import IDSMapping
-from duqtools.schema import IDSOperation, IDSVariableModel
+from duqtools.schema import IDSOperation
 
 assert_equal = np.testing.assert_array_equal
 
@@ -30,7 +31,7 @@ def gen_sample_data():
 
 
 def get_test_var(path):
-    return IDSVariableModel(
+    return Variable(
         name='var',
         path=path,
         ids='test',

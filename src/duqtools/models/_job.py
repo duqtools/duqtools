@@ -48,7 +48,7 @@ class JobStatus(str, Enum):
 class Job:
 
     def __init__(self, path: Path, *, cfg: Config):
-        """Summary.
+        """This class handles job status and submission.
 
         Parameters
         ----------

@@ -77,9 +77,9 @@ def duqmap(function: Callable[[Run | ImasHandleType], Any],
 
     argument_type = argument.annotation
 
-    if argument_type == 'Run':
+    if argument_type in [Run, 'Run']:
         map_fun: Callable[[Any], Any] = duqmap_run
-    elif argument_type == 'ImasHandleType':
+    elif argument_type == [ImasHandleType, 'ImasHandleType']:
         map_fun = duqmap_imas
     else:
         raise NotImplementedError('Dont know how to map function signature:'

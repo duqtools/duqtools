@@ -126,11 +126,11 @@ jobs:
 
       - name: Make badge
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: schneegans/dynamic-badges-action@v1.6.0
+        uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ea916a5b3c3d9bc59065a7304e4ca707
-          filename: covbadge.json
+          filename: covbadge.svg
           label: Coverage
           message: ${{ env.total }}%
           minColorRange: 50

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Optional, Union
 
+from imas2xarray import IDSPath
 from pydantic import Field, field_validator
 
 from duqtools.schema import BaseModel
-from duqtools.schema.variables import IDSPath
 from duqtools.utils import formatter as f
 
 
@@ -22,8 +22,8 @@ class NamelistField(BaseModel):
     section: str = Field(description='Section in the config.')
 
     @field_validator('section')
-    def section_lower(cls, v):
-        return v.lower()
+    def section_upper(cls, v):
+        return v.upper()
 
 
 JettoField = Annotated[Union[JsetField, NamelistField],
@@ -36,6 +36,7 @@ class JettoVar(BaseModel):
     name: str = Field(description='Name of the variable.')
     type: Literal['str', 'int', 'float'] = Field(
         description=f('Type of the variable (str, int, float)'))
+    dimension: Optional[Literal['scalar', 'vector']] = Field(None)
     keys: list[JettoField] = Field(description=f(
         'Jetto keys to update when this jetto variable is requested'))
 

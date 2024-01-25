@@ -24,9 +24,11 @@ def jettovar_to_json(variable: JettoVar):
         raise RuntimeError(
             f'jetto_tools only support a single nml entry: {nmlfields}')
 
-    var_dict = {'type': variable.type, 'dimension': 'scalar'}
+    var_dict = {'type': variable.type, 'dimension': variable.dimension}
     if var_dict['type'] == 'float':
         var_dict['type'] = 'real'
+    if var_dict['dimension'] is None:
+        var_dict['dimension'] = 'scalar'
 
     if len(jsetfields) > 0:
         var_dict['jset_id'] = jsetfields[0].field
