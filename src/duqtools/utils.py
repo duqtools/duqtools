@@ -12,7 +12,6 @@ from pydantic_yaml import parse_yaml_raw_as
 
 if TYPE_CHECKING:
     from ._types import PathLike
-    from .ids import ImasHandle
 
 
 def no_op(*args, **kwargs):
@@ -43,7 +42,7 @@ def work_directory(path: PathLike):
         os.chdir(prev_cwd)
 
 
-def read_imas_handles_from_file(inp: PathLike) -> dict[str, ImasHandle]:
+def read_imas_handles_from_file(inp: PathLike) -> dict[str, Any]:
     """Read a collection of imas paths from a file.
 
     Input can be a `Runs.yaml` file `data.csv` file.

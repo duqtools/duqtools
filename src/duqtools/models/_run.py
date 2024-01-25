@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import Field, model_validator
 
@@ -28,7 +28,7 @@ class Run(BaseModel):
             root['shortname'] = root['dirname'].name
         return root
 
-    def to_imas_handle(self) -> ImasHandle:
+    def to_imas_handle(self) -> Any:
         if not self.data_out:
             raise NotImplementedError(
                 'Run has no data_out, necessary for mapping')

@@ -25,7 +25,8 @@ from ._jettovar_to_json import jettovar_to_json
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
-    from duqtools.api import ImasHandle, Job
+    from duqtools.api import Job
+    from duqtools.ids import ImasHandleType
 
     from ..schema import JettoVar, JettoVariableModel
     from ._schema import JettoSystemModel
@@ -293,7 +294,7 @@ class BaseJettoSystem(AbstractSystem):
             shutil.copyfile(src, dst)
             dst.chmod(dst.stat().st_mode | stat.S_IXUSR)
 
-    def imas_from_path(self, template_drc: Path) -> ImasHandle:
+    def imas_from_path(self, template_drc: Path) -> ImasHandleType:
         from duqtools.api import ImasHandle
 
         jetto_jset = jset.read(template_drc / 'jetto.jset')
@@ -308,8 +309,8 @@ class BaseJettoSystem(AbstractSystem):
     def update_imas_locations(
         self,
         run: Path,
-        inp: ImasHandle,
-        out: ImasHandle,
+        inp: ImasHandleType,
+        out: ImasHandleType,
         **kwargs,
     ):
         jetto_template = template.from_directory(run)

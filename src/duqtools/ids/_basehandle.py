@@ -93,3 +93,6 @@ class ImasBaseHandle(ImasBaseModel):
     def is_local_db(self):
         """Return True if the handle points to a local imas database."""
         return self.user.startswith('/')
+
+    def copy_data_to(self, *args, **kwargs):
+        raise NotImplementedError

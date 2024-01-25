@@ -4,7 +4,7 @@ from inspect import signature
 from pathlib import Path
 from typing import Any, Callable, List, Optional
 
-from .ids import ImasHandle
+from .ids import ImasHandleType
 from .models import Locations, Run
 
 
@@ -31,7 +31,8 @@ def duqmap_run(function: Callable[[Run], Any], **kwargs) -> List[Any]:
     return _duqmap(function, lambda x: x, **kwargs)  # Identity
 
 
-def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
+def duqmap_imas(function: Callable[[ImasHandleType], Any],
+                **kwargs) -> List[Any]:
 
     def to_imas_handle(run):
         return run.to_imas_handle()
@@ -39,7 +40,7 @@ def duqmap_imas(function: Callable[[ImasHandle], Any], **kwargs) -> List[Any]:
     return _duqmap(function, to_imas_handle, **kwargs)
 
 
-def duqmap(function: Callable[[Run | ImasHandle], Any],
+def duqmap(function: Callable[[Run | ImasHandleType], Any],
            *,
            runs: Optional[List[Run | Path]] = None,
            **kwargs) -> List[Any]:
@@ -48,13 +49,13 @@ def duqmap(function: Callable[[Run | ImasHandle], Any],
     specified by the user in `runs`.
 
     An important gotcha is that when `Paths` are used to define the runs, duqtools
-    does not know how to associate the corresponding ImasHandles, as that information
+    does not know how to associate the corresponding ImasHandleTypes, as that information
     is not available.  So when using it in this way, it is not possible to provide a
-    function which takes an `ImasHandle` as input.
+    function which takes an `ImasHandleType` as input.
 
     Parameters
     ----------
-    function : Callable[[Run | ImasHandle], Any]
+    function : Callable[[Run | ImasHandleType], Any]
         function which is called for each run, specified either by `runs`, or implicitly
         by any available `runs.yaml`
     runs : Optional[List[Run | Path]]
@@ -78,7 +79,7 @@ def duqmap(function: Callable[[Run | ImasHandle], Any],
 
     if argument_type == 'Run':
         map_fun: Callable[[Any], Any] = duqmap_run
-    elif argument_type == 'ImasHandle':
+    elif argument_type == 'ImasHandleType':
         map_fun = duqmap_imas
     else:
         raise NotImplementedError('Dont know how to map function signature:'

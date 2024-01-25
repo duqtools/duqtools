@@ -4,7 +4,7 @@ import logging
 import shutil
 import warnings
 from pathlib import Path
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 import pandas as pd
 from pydantic_yaml import to_yaml_file
@@ -17,6 +17,9 @@ from .matrix_samplers import get_matrix_sampler
 from .models import Job, Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
 from .systems import get_system
+
+if TYPE_CHECKING:
+    from .ids import ImasHandleType
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +50,9 @@ class CreateManager:
         self.runs_yaml = locations.runs_yaml
         self.data_csv = locations.data_csv
 
-    def _get_source_handle(self) -> ImasHandle:
+    def _get_source_handle(self) -> Any:
         template_data = self.options.template_data
+        source: Any
 
         if not template_data:
             if not self.template_drc:
@@ -166,7 +170,7 @@ class CreateManager:
                          'use --force to override')
 
     @add_to_op_queue('Setting inital condition of', '{data_in}', quiet=True)
-    def apply_operations(self, data_in: ImasHandle, run_dir: Path,
+    def apply_operations(self, data_in: ImasHandleType, run_dir: Path,
                          operations: list[Any]):
         for model in operations:
             apply_model(model,

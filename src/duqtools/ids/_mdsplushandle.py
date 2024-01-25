@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
 from ..operations import add_to_op_queue
-from ._basehandle import ImasBaseHandle
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
     import xarray as xr
 
     from ..schema import IDSVariableModel
+    from ._imasbasehandle import ImasBaseHandle
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def _patch_str_repr(obj: object):
     obj.__repr__ = types.MethodType(true_repr, obj)  # type: ignore
 
 
-class MdsplusHandle(ImasBaseHandle):
+class MDSPlusImasHandle(ImasBaseHandle):
 
     def path(self, suffix=SUFFIXES[0]) -> Path:
         """Return location as Path."""

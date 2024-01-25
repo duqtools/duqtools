@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING, Sequence
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from duqtools.api import ImasHandle, Job
+    from duqtools.api import Job
     from duqtools.config import Config
+    from duqtools.ids import ImasHandleType
     from duqtools.ids._schema import ImasBaseModel
 
 logger = logging.getLogger(__name__)
@@ -68,7 +69,7 @@ class AbstractSystem(ABC):
         pass
 
     @abstractmethod
-    def imas_from_path(self, template_drc: Path) -> ImasHandle:
+    def imas_from_path(self, template_drc: Path) -> ImasHandleType:
         """It takes a path, and finds out the IMAS entry associated with it.
 
         Parameters
@@ -109,10 +110,10 @@ class AbstractSystem(ABC):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
-    ) -> ImasHandle:
+    ) -> ImasHandleType:
         """Get handle for data input. This method is used to copy the template
         data to wherever the system expects the input data to be.
 
@@ -120,7 +121,7 @@ class AbstractSystem(ABC):
         ----------
         dirname : Path
             Run directory
-        source : ImasHandle
+        source : ImasHandleType
             Template Imas data
         seq_number : int
             Sequential number, used by some systems
@@ -134,10 +135,10 @@ class AbstractSystem(ABC):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
-    ) -> ImasHandle:
+    ) -> ImasHandleType:
         """Get handle for data output. This method is used to set the locations
         in the system correct (later on), in a sense this method is
         superfluous.
@@ -146,7 +147,7 @@ class AbstractSystem(ABC):
         ----------
         dirname : Path
             Run directory
-        source : ImasHandle
+        source : ImasHandleType
             Template Imas data
         seq_number : int
             Sequential number, used by some systems.

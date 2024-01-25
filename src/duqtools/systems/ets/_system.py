@@ -14,8 +14,9 @@ from duqtools.operations import add_to_op_queue
 from ..base_system import AbstractSystem
 
 if TYPE_CHECKING:
-    from duqtools.api import ImasHandle, Job
+    from duqtools.api import Job
 
+    from ..ids import ImasHandleType
     from ._schema import Ets6SystemModel
 
 logger = logging.getLogger(__name__)
@@ -146,12 +147,12 @@ class Ets6System(AbstractSystem):
     def copy_from_template(self, source_drc: Path, target_drc: Path):
         shutil.copy(source_drc, target_drc)
 
-    def imas_from_path(self, template_drc: Path) -> ImasHandle:
+    def imas_from_path(self, template_drc: Path) -> ImasHandleType:
         raise NotImplementedError('imas_from_path')
 
     @add_to_op_queue('Updating imas locations of', '{run}', quiet=True)
-    def update_imas_locations(self, run: Path, inp: ImasHandle,
-                              out: ImasHandle, template_drc: Path):
+    def update_imas_locations(self, run: Path, inp: ImasHandleType,
+                              out: ImasHandleType, template_drc: Path):
         #raise NotImplementedError('update_imas_location')
         new_input = []
         cfg_filename = template_drc.name
@@ -178,7 +179,7 @@ class Ets6System(AbstractSystem):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):
@@ -196,7 +197,7 @@ class Ets6System(AbstractSystem):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):

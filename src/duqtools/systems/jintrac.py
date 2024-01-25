@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..ids import ImasHandle
+    from ..ids import ImasHandleType
 
 
 class V210921Mixin:
@@ -15,7 +15,7 @@ class V210921Mixin:
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):
@@ -33,7 +33,7 @@ class V210921Mixin:
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):
@@ -55,7 +55,7 @@ class V220922Mixin:
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):
@@ -77,7 +77,7 @@ class V220922Mixin:
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: ImasHandleType,
         seq_number: int,
         options,
     ):
