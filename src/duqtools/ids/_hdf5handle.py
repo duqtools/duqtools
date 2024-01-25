@@ -2,38 +2,23 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 import shutil
-from contextlib import contextmanager
-from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Sequence
-
-from pydantic import field_validator
+from typing import List
 
 from ..operations import add_to_op_queue
-from ._copy import copy_ids_entry
-from ._imas import imas, imasdef
-from ._mapping import IDSMapping
-from ._rebase import squash_placeholders
-from ._schema import ImasBaseModel
-from .__handle import _ImasHandle
-
-if TYPE_CHECKING:
-    import xarray as xr
-
-    from ..schema import IDSVariableModel
-
+from ._basehandle import ImasBaseHandle
 
 logger = logging.getLogger(__name__)
 
-_IMASDB = ('{db}', '3', '{shot}','{run}')
+_IMASDB = ('{db}', '3', '{shot}', '{run}')
 GLOBAL_PATH_TEMPLATE = str(Path.home().parent.joinpath('{user}', 'public',
-                                                       'imasdb', *_IMASDB ))
+                                                       'imasdb', *_IMASDB))
 LOCAL_PATH_TEMPLATE = str(Path('{user}', *_IMASDB))
 PUBLIC_PATH_TEMPLATE = str(Path('shared', 'imasdb', *_IMASDB))
 
-class HDF5ImasHandle(_ImasHandle):
+
+class HDF5ImasHandle(ImasBaseHandle):
 
     def path(self) -> Path:
         """Return location as Path."""
@@ -51,7 +36,6 @@ class HDF5ImasHandle(_ImasHandle):
                             db=self.db,
                             shot=self.shot,
                             run=self.run))
-                            
 
     def paths(self) -> List[Path]:
         """Return location of all files as a list of Paths."""
@@ -70,13 +54,15 @@ class HDF5ImasHandle(_ImasHandle):
         """
         return self.path().exists()
 
-    @add_to_op_queue('Copy imas data', 'from {self} to {destination}', quiet=True)
-    def copy_data_to(self, destination: ImasHandle):
+    @add_to_op_queue('Copy imas data',
+                     'from {self} to {destination}',
+                     quiet=True)
+    def copy_data_to(self, destination: HDF5ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters
         ----------
-        destination : ImasHandle
+        destination : HDF5ImasHandle
             Copy data to a new location.
         """
         logger.debug('Copy %s to %s', self, destination)
@@ -98,17 +84,11 @@ class HDF5ImasHandle(_ImasHandle):
             except FileNotFoundError:
                 logger.warning('%s does not exist', path)
 
-    def entry(self):
-        """Return reference to `imas.DBEntry.`
+    def get(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Parameters
-        ----------
-        backend : optional
-            Which IMAS backend to use
+    def get_variables(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Returns
-        ------
-        entry : `imas.DBEntry`
-            IMAS database entry
-        """
-        return imas.DBEntry(imasdef.HDF5_BACKEND, self.db, self.shot, self.run, self.user)
+    def get_all_variables(self, *args, **kwargs):
+        raise NotImplementedError

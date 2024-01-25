@@ -2,21 +2,16 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 from contextlib import contextmanager
-from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
-from pydantic import field_validator
-
 from ..operations import add_to_op_queue
+from ._basehandle import ImasBaseHandle
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
 from ._mapping import IDSMapping
 from ._rebase import squash_placeholders
-from ._schema import ImasBaseModel
-from .__handle import _ImasHandle
 
 if TYPE_CHECKING:
     import xarray as xr
@@ -39,7 +34,22 @@ SUFFIXES = (
     '.tree',
 )
 
-class MdsplusImasHandle(_ImasHandle):
+
+def _patch_str_repr(obj: object):
+    """Reset str/repr methods to default."""
+    import types
+
+    def true_repr(x):
+        type_ = type(x)
+        module = type_.__module__
+        qualname = type_.__qualname__
+        return f'<{module}.{qualname} object at {hex(id(x))}>'
+
+    obj.__str__ = types.MethodType(true_repr, obj)  # type: ignore
+    obj.__repr__ = types.MethodType(true_repr, obj)  # type: ignore
+
+
+class MdsplusHandle(ImasBaseHandle):
 
     def path(self, suffix=SUFFIXES[0]) -> Path:
         """Return location as Path."""
@@ -77,12 +87,12 @@ class MdsplusImasHandle(_ImasHandle):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_data_to(self, destination: ImasHandle):
+    def copy_data_to(self, destination: ImasBaseHandle):
         """Copy ids entry to given destination.
 
         Parameters
         ----------
-        destination : ImasHandle
+        destination : ImasBaseHandle
             Copy data to a new location.
         """
         logger.debug('Copy %s to %s', self, destination)
@@ -119,3 +129,167 @@ class MdsplusImasHandle(_ImasHandle):
             IMAS database entry
         """
         return imas.DBEntry(backend, self.db, self.shot, self.run, self.user)
+
+    def get_raw_data(self, ids: str = 'core_profiles', **kwargs):
+        """Get data from IDS entry.
+
+        Parameters
+        ----------
+        ids : str, optional
+            Name of profiles to open.
+        **kwargs
+            These keyword parameters are passed to `ImasBaseHandle.open()`.
+
+        Returns
+        -------
+        data
+        """
+        with self.open(**kwargs) as data_entry:
+            data = data_entry.get(ids)
+
+        # reset string representation because output is extremely lengthy
+        _patch_str_repr(data)
+
+        return data
+
+    def get(self, ids: str = 'core_profiles') -> IDSMapping:
+        """Map the data to a dict-like structure.
+
+        Parameters
+        ----------
+        ids : str, optional
+            Name of profiles to open
+
+        Returns
+        -------
+        IDSMapping
+        """
+        raw_data = self.get_raw_data(ids)
+        return IDSMapping(raw_data)
+
+    def get_all_variables(
+        self,
+        extra_variables: Sequence[IDSVariableModel] = [],
+        squash: bool = True,
+        ids: str = 'core_profiles',
+        **kwargs,
+    ) -> xr.Dataset:
+        """Get all variables that duqtools knows of from selected ids from the
+        dataset.
+
+        This function looks up the data location from the
+        `duqtools.config.var_lookup` table
+
+        Parameters
+        ----------
+        variables : Sequence[IDSVariableModel]
+            Extra variables to load in addition to the ones known by duqtools.
+        squash : bool
+            Squash placeholder variables
+
+        Returns
+        -------
+        ds : xarray
+            The data in `xarray` format.
+        **kwargs
+            These keyword arguments are passed to `IDSMapping.to_xarray()`
+
+        Raises
+        ------
+        ValueError
+            When variables are from multiple IDSs.
+        """
+        from duqtools.config import var_lookup
+
+        idsvar_lookup = var_lookup.filter_ids(ids)
+        variables = list(
+            set(list(extra_variables) + list(idsvar_lookup.keys())))
+        return self.get_variables(variables,
+                                  squash,
+                                  empty_var_ok=True,
+                                  **kwargs)
+
+    def get_variables(
+        self,
+        variables: Sequence[str | IDSVariableModel],
+        squash: bool = True,
+        **kwargs,
+    ) -> xr.Dataset:
+        """Get variables from data set.
+
+        This function looks up the data location from the
+        `duqtools.config.var_lookup` table, and returns
+
+        Parameters
+        ----------
+        variables : Sequence[Union[str, IDSVariableModel]]
+            Variable names of the data to load.
+        squash : bool
+            Squash placeholder variables
+
+        Returns
+        -------
+        ds : xarray
+            The data in `xarray` format.
+        **kwargs
+            These keyword arguments are passed to `IDSMapping.to_xarray()`
+
+        Raises
+        ------
+        ValueError
+            When variables are from multiple IDSs.
+        """
+        from duqtools.config import lookup_vars
+        var_models = lookup_vars(variables)
+
+        idss = {var.ids for var in var_models}
+
+        if len(idss) > 1:
+            raise ValueError(
+                f'All variables must belong to the same IDS, got {idss}')
+
+        ids = var_models[0].ids
+
+        data_map = self.get(ids)
+
+        ds = data_map.to_xarray(variables=var_models, **kwargs)
+
+        if squash:
+            ds = squash_placeholders(ds)
+
+        return ds
+
+    @contextmanager
+    def open(self, create: bool = False):
+        """Context manager to open database entry.
+
+        Parameters
+        ----------
+        create : bool, optional
+            Create empty database entry if it does not exist.
+
+        Yields
+        ------
+        entry : `imas.DBEntry`
+            Opened IMAS database entry
+        """
+        entry = self.entry()
+        opcode, _ = entry.open()
+
+        if opcode == 0:
+            logger.debug('Data entry opened: %s', self)
+        elif create:
+            cpcode, _ = entry.create()
+            if cpcode == 0:
+                logger.debug('Data entry created: %s', self)
+            else:
+                raise OSError(
+                    f'Cannot create data entry: {self}. '
+                    f'Create a new db first using `imasdb {self.db}`')
+        else:
+            raise OSError(f'Data entry does not exist: {self}')
+
+        try:
+            yield entry
+        finally:
+            entry.close()
