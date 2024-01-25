@@ -561,7 +561,7 @@ def cli_version(**kwargs):
     try:
         repo = git.Repo(Path(__file__), search_parent_directories=True)
         sha = repo.head.object.hexsha
-    except (OSError, ValueError):
+    except BaseException:
         sha = '???'
 
     string += f' (rev: {sha})'
