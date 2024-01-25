@@ -64,8 +64,7 @@ def _apply_ids(model: IDSOperation,
                 raise ValueError(f'scale_to_error={model.scale_to_error} '
                                  f'but `{sigma_key}` is empty.')
 
-            sigma_bound = ids_mapping[sigma_key]
-            sigma = abs(sigma_bound - data)
+            sigma = ids_mapping[sigma_key]
 
             value = sigma * model.value
         else:

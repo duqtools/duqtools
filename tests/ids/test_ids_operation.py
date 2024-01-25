@@ -15,11 +15,11 @@ def gen_sample_data():
 
     class t0:
         x = np.array((10., 20., 30.))
-        x_error_upper = np.array((11., 22., 33.))
-        x_error_lower = np.array((8., 16., 24.))
+        x_error_upper = np.array((1., 2., 3.))
+        x_error_lower = np.array((2., 4., 6.))
 
         y = np.array((100., 200., 300.))
-        y_error_upper = np.array((110., 220., 330.))
+        y_error_upper = np.array((10., 20., 30.))
 
     class Data:
         data = [
