@@ -3,13 +3,15 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from duqtools.api import ImasHandle
 from duqtools.operations import add_to_op_queue
 
 from ..base_system import AbstractSystem
 from ._schema import NoSystemModel
+
+if TYPE_CHECKING:
+    from duqtools.api import ImasHandle
 
 
 class NoSystem(AbstractSystem):
