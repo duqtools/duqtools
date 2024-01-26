@@ -45,7 +45,7 @@ def _apply_model_coupled(
 
 
 def get_input_var(input_variables: list[str],
-                  ids_mapping,
+                  handle,
                   system: Optional[AbstractSystem] = None,
                   run_dir: Optional[Path] = None) -> SimpleNamespace:
     """get_input_var translates a list of input variables to their values,
@@ -55,8 +55,8 @@ def get_input_var(input_variables: list[str],
     ----------
     input_variables : list[str]
         input_variables to get values for
-    ids_mapping :
-        ids_mapping
+    handle :
+        handle
     system : Optional[AbstractSystem]
         system
     run_dir : Optional[Path]
@@ -75,7 +75,7 @@ def get_input_var(input_variables: list[str],
     for var_name in input_variables:
         variable = var_lookup[var_name]
         if isinstance(variable, Variable):
-            val = ids_mapping[variable.path]
+            val = handle[variable.path]
             input_var[var_name] = val
         elif hasattr(
                 system, 'get_variable'
@@ -92,28 +92,28 @@ def get_input_var(input_variables: list[str],
 @apply_model.register
 def _apply_model_ids_operation(model: IDSOperation,
                                *,
-                               ids_mapping,
+                               handle,
                                system: Optional[AbstractSystem] = None,
                                run_dir: Optional[Path] = None,
                                **kwargs):
     if model.input_variables is not None:
-        kwargs['input_var'] = get_input_var(model.input_variables, ids_mapping,
+        kwargs['input_var'] = get_input_var(model.input_variables, handle,
                                             system, run_dir)
 
-    _apply_ids(model, ids_mapping=ids_mapping, **kwargs)
+    _apply_ids(model, handle=handle, **kwargs)
 
 
 @apply_model.register
 def _apply_model_jetto_operation(
     model: JettoOperation,
     *,
-    ids_mapping,
+    handle,
     run_dir: Path,
     system: BaseJettoSystem,
     **kwargs,
 ):
     if model.input_variables is not None:
-        kwargs['input_var'] = get_input_var(model.input_variables, ids_mapping,
+        kwargs['input_var'] = get_input_var(model.input_variables, handle,
                                             system, run_dir)
     system.set_jetto_variable(run=run_dir,
                               key=model.variable.name,

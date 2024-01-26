@@ -171,7 +171,7 @@ class CreateManager:
         for model in operations:
             apply_model(model,
                         run_dir=run_dir,
-                        ids_mapping=data_in,
+                        handle=data_in,
                         system=self.system)
 
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
@@ -238,7 +238,7 @@ class CreateManager:
         if self.template_drc:
             self.system.copy_from_template(self.template_drc, model.dirname)
 
-        # self.apply_operations(model.data_in, model.dirname, model.operations)
+        self.apply_operations(model.data_in, model.dirname, model.operations)
 
         # self.system.write_batchfile(model.dirname)
 

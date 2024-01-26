@@ -1,25 +1,24 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
+from imas2xarray import to_xarray
 
-from .._logging_utils import duqlog_screen
 from ._handle import ImasHandle
 
 if TYPE_CHECKING:
     from types import SimpleNamespace
 
     from ..schema import IDSOperation
-    from .mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
 
 def _apply_ids(model: IDSOperation,
                *,
-               ids_mapping: Union[ImasHandle, IDSMapping],
+               handle: ImasHandle,
                input_var: Optional[SimpleNamespace] = None,
                **kwargs) -> None:
     """Implementation for IDS operations.
@@ -28,64 +27,63 @@ def _apply_ids(model: IDSOperation,
     ----------
     model : IDSOperation
         model
-    target_in : ImasHandle, IDSMapping
-        ImasHandle/IDSHandle, data to apply operation to.
+    handle : ImasHandle
+        Data to apply operation to.
 
     Returns
     -------
     None
     """
-    target_in = None
-    if isinstance(ids_mapping, ImasHandle):
-        target_in = ids_mapping
-        ids_mapping = ids_mapping.get(model.variable.ids)
+    assert isinstance(handle, ImasHandle)
+
+    dataset = to_xarray(handle.path(),
+                        ids=model.variable.ids,
+                        variables=(model.variable.name, ))
 
     if isinstance(model.variable, str):
         raise TypeError('`model.variable` must have a `path` attribute.')
 
-    data_map = ids_mapping.findall(model.variable.path)
+    dataarray = dataset[model.variable.name]
 
-    if len(data_map) == 0:
-        # TODO this should be 'raise Error' but that breaks our tests,
-        # leave it as a message until we can fix it with a Jetto-IMAS container
-        duqlog_screen.error(
-            f'{model.variable.path} not found in IDS, cannot adjust value')
+    if model.scale_to_error:
+        sigma_key = path + model._upper_suffix
 
-    for path, data in data_map.items():
-        if model.scale_to_error:
-            sigma_key = path + model._upper_suffix
+        if model.value < 0:
+            lower_key = path + model._lower_suffix
+            if lower_key in handle:
+                sigma_key = lower_key
 
-            if model.value < 0:
-                lower_key = path + model._lower_suffix
-                if lower_key in ids_mapping:
-                    sigma_key = lower_key
+        if sigma_key not in handle:
+            raise ValueError(f'scale_to_error={model.scale_to_error} '
+                             f'but `{sigma_key}` is empty.')
 
-            if sigma_key not in ids_mapping:
-                raise ValueError(f'scale_to_error={model.scale_to_error} '
-                                 f'but `{sigma_key}` is empty.')
+        sigma = handle[sigma_key]
 
-            sigma = ids_mapping[sigma_key]
+        value = sigma * model.value
+    else:
+        value = model.value
 
-            value = sigma * model.value
-        else:
+    logger.info('Apply %s', model)
 
-            value = model.value
+    if model.linear_ramp is not None:
+        a, b = model.linear_ramp
+        value = np.linspace(a, b, len(dataarray)) * value
 
-        logger.info('Apply %s', model)
+    logger.debug('data range before: %s - %s', dataarray.min(),
+                 dataarray.max())
 
-        if model.linear_ramp is not None:
-            a, b = model.linear_ramp
-            value = np.linspace(a, b, len(data)) * value
+    dataset[model.variable.name] = model.npfunc(dataarray,
+                                                value,
+                                                var=input_var)
 
-        logger.debug('data range before: %s - %s', data.min(), data.max())
+    if model.clip_max is not None or model.clip_min is not None:
+        np.clip(dataarray,
+                a_min=model.clip_min,
+                a_max=model.clip_max,
+                out=dataarray)
 
-        model.npfunc(data, value, out=data, var=input_var)
+    logger.debug('data range after: %s - %s', dataarray.min(), dataarray.max())
 
-        if model.clip_max is not None or model.clip_min is not None:
-            np.clip(data, a_min=model.clip_min, a_max=model.clip_max, out=data)
+    logger.info('Writing data entry: %s', handle)
 
-        logger.debug('data range after: %s - %s', data.min(), data.max())
-
-    if target_in:
-        logger.info('Writing data entry: %s', target_in)
-        target_in.update_from(ids_mapping)
+    # handle.update_from(dataset)
