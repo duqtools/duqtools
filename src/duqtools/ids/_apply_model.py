@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 import numpy as np
-from imas2xarray import to_xarray
+from imas2xarray import to_imas, to_xarray
 
 from ._handle import ImasHandle
 
@@ -86,4 +86,7 @@ def _apply_ids(model: IDSOperation,
 
     logger.info('Writing data entry: %s', handle)
 
-    # handle.update_from(dataset)
+    dataset = to_imas(handle.path(),
+                      dataset=dataset,
+                      ids=model.variable.ids,
+                      variables=(model.variable.name, ))
