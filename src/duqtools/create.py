@@ -238,18 +238,18 @@ class CreateManager:
         if self.template_drc:
             self.system.copy_from_template(self.template_drc, model.dirname)
 
-        self.apply_operations(model.data_in, model.dirname, model.operations)
+        # self.apply_operations(model.data_in, model.dirname, model.operations)
 
-        self.system.write_batchfile(model.dirname)
+        # self.system.write_batchfile(model.dirname)
 
-        if model.data_in and model.data_out:
-            self.system.update_imas_locations(run=model.dirname,
-                                              inp=model.data_in,
-                                              out=model.data_out,
-                                              template_drc=self.template_drc)
-        else:
-            raise Exception(
-                'data not present in model, this should not happen')
+        # if model.data_in and model.data_out:
+        #     self.system.update_imas_locations(run=model.dirname,
+        #                                       inp=model.data_in,
+        #                                       out=model.data_out,
+        #                                       template_drc=self.template_drc)
+        # else:
+        #     raise Exception(
+        #         'data not present in model, this should not happen')
 
 
 def create(*,

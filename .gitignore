@@ -139,3 +139,4 @@ dmypy.json
 
 # duqtools specific
 example/workspace/
+hdf5test
