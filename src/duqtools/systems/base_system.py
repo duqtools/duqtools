@@ -155,7 +155,6 @@ class AbstractSystem(ABC):
         """
         pass
 
-    @abstractmethod
     def submit_array(
         self,
         jobs: Sequence[Job],
@@ -181,4 +180,4 @@ class AbstractSystem(ABC):
         kwargs : dict
             These keyword arguments are passed on to the system.
         """
-        pass
+        raise NotImplementedError('Array submission not implemented')

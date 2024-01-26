@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
+from typing import Optional
+
+from duqtools.api import ImasHandle
+from duqtools.operations import add_to_op_queue
 
 from ..base_system import AbstractSystem
-from ..jintrac import V220922Mixin
 from ._schema import NoSystemModel
 
 
-class NoSystem(V220922Mixin, AbstractSystem):
+class NoSystem(AbstractSystem):
     """This system is intended for workflows that need to apply some operations
     or sampling of the data without any system like Jetto or ETS in mind.
 
@@ -22,59 +26,108 @@ class NoSystem(V220922Mixin, AbstractSystem):
     """
     model: NoSystemModel
 
-    @property
-    def jruns_path(self) -> Path:
-        """Return the Path specified in the `$JRUNS` environment variable, or,
-        if `$JRUNS` does not exists, return the current directory `./`.
-
-        Returns
-        -------
-        Path
-        """
-        if jruns_env := os.getenv('JRUNS'):
-            return Path(jruns_env)
-        else:
-            return Path()
-
     def get_runs_dir(self) -> Path:
-        path = self.jruns_path
-
         assert self.cfg.create
         runs_dir = self.cfg.create.runs_dir
 
         if runs_dir:
-            return path / runs_dir
-
-        abs_cwd = str(Path.cwd().resolve())
-        abs_jruns = str(path.resolve())
-
-        # Check if jruns is parent dir of current dir
-        if abs_cwd.startswith(abs_jruns):
-            return path
+            return runs_dir
 
         count = 0
         while True:  # find the next free folder
             dirname = f'duqtools_data_{count:04d}'
-            if not (path / dirname).exists():
+            if not (Path() / dirname).exists():
                 break
             count = count + 1
 
-        return path / dirname
+        return Path() / dirname
 
     def write_batchfile(*args, **kwargs):
         pass
 
-    def copy_from_template(*args, **kwargs):
-        pass
+    @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
+    def copy_from_template(self, source_drc: Path, target_drc: Path):
+        shutil.copytree(source_drc, target_drc, dirs_exist_ok=True)
 
     def update_imas_locations(*args, **kwargs):
         pass
 
-    def submit_array(*args, **kwargs):
-        pass
-
     def submit_job(*args, **kwargs):
-        pass
+        raise NotImplementedError(
+            'Not yet implemented, please submit your jobs manually`')
 
     def imas_from_path(*args, **kwargs):
-        pass
+        raise NotImplementedError(
+            """We cannot determine the input imas from a path,
+               please specify `create->template_data`""")
+
+    def get_data_in_handle(
+        self,
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ) -> ImasHandle:
+        """Get handle for data input. This method is used to copy the template
+        data to wherever the system expects the input data to be.
+
+        Parameters
+        ----------
+        dirname : Path
+            Run directory
+        source : ImasHandle
+            Template Imas data
+        seq_number : int
+            Sequential number, used by some systems
+        options :
+            `create.data` key from the config
+        """
+        from duqtools.ids import ImasHandle
+
+        relative_location: Optional[str] = str(
+            os.path.relpath((dirname / 'imasdb').resolve()))
+        if relative_location:
+            if relative_location.startswith('..'):
+                relative_location = None
+        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                          db=source.db,
+                          shot=source.shot,
+                          run=source.run,
+                          relative_location=relative_location)
+
+    def get_data_out_handle(
+        self,
+        *,
+        dirname: Path,
+        source: ImasHandle,
+        seq_number: int,
+        options,
+    ) -> ImasHandle:
+        """Get handle for data output. This method is used to set the locations
+        in the system correct (later on), in a sense this method is
+        superfluous.
+
+        Parameters
+        ----------
+        dirname : Path
+            Run directory
+        source : ImasHandle
+            Template Imas data
+        seq_number : int
+            Sequential number, used by some systems.
+        options :
+            `create.data` key from the config.
+        """
+        from duqtools.ids import ImasHandle
+
+        relative_location: Optional[str] = str(
+            os.path.relpath((dirname / 'imasdb').resolve()))
+        if relative_location:
+            if relative_location.startswith('..'):
+                relative_location = None
+        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+                          db=source.db,
+                          shot=source.shot,
+                          run=source.run,
+                          relative_location=relative_location)
