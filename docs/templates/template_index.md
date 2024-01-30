@@ -53,6 +53,12 @@ system:
       members: None
       show_bases: False
 
+The Jetto system uses [jetto-pythontools](https://jintrac.gitlab.io/jetto-pythontools/) to write variables to the `jetto.jset`/`jetto.in` files.
+These variables are defined in the [lookup.json](https://jintrac.gitlab.io/jetto-pythontools/lookup.html).
+Duqtools includes its [own version](https://github.com/duqtools/duqtools/blob/main/src/duqtools/data/jetto_tools_lookup.json), but in case
+you run into issues with future versions, you can specify your own by setting the environment variable `JETTO_LOOKUP`.
+For example, `JETTO_LOOKUP=./my-jetto-lookup.json duqtools create`.
+
 ### Jetto-v210921
 
 ::: duqtools.systems.jetto.JettoSystemV210921
