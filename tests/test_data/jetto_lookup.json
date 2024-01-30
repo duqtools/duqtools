@@ -1,0 +1,78 @@
+{
+  "shot_in": {
+    "jset_id": "SetUpPanel.idsIMASDBShot",
+    "jset_flex_id": [
+      "AdvancedPanel.catShotID",
+      "AdvancedPanel.catShotID_R"],
+    "nml_id": {
+      "namelist": "INESCO",
+      "field": "NPULSE"
+    },
+    "type": "int",
+    "dimension": "scalar"
+  },
+  "shot_out": {
+    "jset_id": "SetUpPanel.shotNum",
+    "type": "int",
+    "dimension": "scalar"
+  },
+  "run_in": {
+    "jset_id": "SetUpPanel.idsIMASDBRunid",
+    "type": "int",
+    "dimension": "scalar"
+  },
+  "run_out": {
+    "jset_id": "JobProcessingPanel.idsRunid",
+    "type": "int",
+    "dimension": "scalar"
+  },
+  "user_in": {
+    "jset_id": "SetUpPanel.idsIMASDBUser",
+    "jset_flex_id":[
+      "AdvancedPanel.catOwner",
+      "AdvancedPanel.catOwner_R"],
+    "type": "str",
+    "dimension": "scalar"
+  },
+  "machine_in": {
+    "jset_id": "SetUpPanel.idsIMASDBMachine",
+    "jset_flex_id":[
+      "AdvancedPanel.catMachID",
+      "AdvancedPanel.catMachID_R"],
+    "type": "str",
+    "dimension": "scalar"
+  },
+  "machine_out": {
+    "jset_id": "SetUpPanel.machine",
+    "nml_id": {
+      "namelist": "NLIST1",
+      "field": "MACHID"
+    },
+    "type": "str",
+    "dimension": "scalar"
+  },
+  "noprocessors": {
+    "jset_id": "JobProcessingPanel.numProcessors",
+    "type": "int",
+    "dimension": "scalar"
+  },
+  "run_dir": {
+    "jset_id": "AppPanel.openPrvSetDir",
+    "type": "str",
+    "dimension": "scalar"
+  },
+  "run_dir_name": {
+    "jset_id": "JobProcessingPanel.runDirNumber",
+    "type": "str",
+    "dimension": "scalar"
+  },
+  "kwmain": {
+    "jset_id": null,
+    "nml_id": {
+      "namelist": "NLIST2",
+      "field": "KWMAIN"
+    },
+    "type": "str",
+    "dimension": "scalar"
+  }
+}
