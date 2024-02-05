@@ -2,26 +2,17 @@ from __future__ import annotations
 
 import logging
 import os
-import re
-from contextlib import contextmanager
-from getpass import getuser
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Sequence
-
-from pydantic import field_validator
+from typing import TYPE_CHECKING, List
 
 from ..operations import add_to_op_queue
+from .__handle import _ImasHandle
 from ._copy import copy_ids_entry
 from ._imas import imas, imasdef
-from ._mapping import IDSMapping
-from ._rebase import squash_placeholders
-from ._schema import ImasBaseModel
-from .__handle import _ImasHandle
 
 if TYPE_CHECKING:
-    import xarray as xr
 
-    from ..schema import IDSVariableModel
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +29,7 @@ SUFFIXES = (
     '.characteristics',
     '.tree',
 )
+
 
 class MdsplusImasHandle(_ImasHandle):
 
@@ -77,7 +69,7 @@ class MdsplusImasHandle(_ImasHandle):
         path = self.path()
         return all(path.with_suffix(sf).exists() for sf in SUFFIXES)
 
-    def copy_data_to(self, destination: ImasHandle):
+    def copy_data_to(self, destination: _ImasHandle):
         """Copy ids entry to given destination.
 
         Parameters

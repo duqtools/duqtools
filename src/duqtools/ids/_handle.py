@@ -6,8 +6,8 @@ from ._hdf5handle import HDF5ImasHandle
 from ._mdsplushandle import MdsplusImasHandle
 
 if os.environ['JINTRAC_IMAS_BACKEND'] == 'MDSPLUS':
-    ImasHandle = MdsplusImasHandle
+    ImasHandle = MdsplusImasHandle  # type: ignore
 elif os.environ['JINTRAC_IMAS_BACKEND'] == 'HDF5':
-    ImasHandle = HDF5ImasHandle
+    ImasHandle = HDF5ImasHandle  # type: ignore
 else:
-    ImasHandle = MdsplusImasHandle
+    ImasHandle = MdsplusImasHandle  # type: ignore
