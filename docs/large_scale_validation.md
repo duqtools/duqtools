@@ -8,7 +8,7 @@ To get started:
 
     duqduq --help
 
-For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](../config).
+For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](./config/index.md).
 
 To start with large scale validation, two files are needed:
 
@@ -27,7 +27,7 @@ Each of these commands mimick the `duqtools` equivalent, for example, `duqduq cr
 
 ## Input data
 
-`data.csv` contains a list of IMAS handles pointing. For more info on this file, click [here](../dash/#from-a-csv-file). `duqduq setup` will loop over the entries in this file, and create a new directory (named after the index column) in the current directory with input for duqtools.
+`data.csv` contains a list of IMAS handles pointing. For more info on this file, click [here](./dash.md#from-a-csv-file). `duqduq setup` will loop over the entries in this file, and create a new directory (named after the index column) in the current directory with input for duqtools.
 
 ```csv title="data.csv"
 ,user,db,shot,run
@@ -42,9 +42,9 @@ Each column will be exposed through the `handle` dataclass in the config templat
 
 ## Config template
 
-`duqtools.template.yaml` is a template for the [duqtools create config](../config/create/#the-create-config). It contains a few placeholders for variable data (see [the documentation for `setup`](../config/setup/#placeholder-variables)).
+`duqtools.template.yaml` is a template for the [duqtools create config](./config/create.md#the-create-config). It contains a few placeholders for variable data (see [the documentation for `setup`](./config/setup.md#placeholder-variables)).
 
-The template uses [jinja2 as a templating language](../config/setup/#jinja2-quickstart).
+The template uses [jinja2 as a templating language](./config/setup.md#jinja2-quickstart).
 
 ```yaml title="duqtools.template.yaml"
 tag: {{ run.name }}

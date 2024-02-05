@@ -6,9 +6,10 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Optional
 
+from imas2xarray import Variable
+
 from .ids._apply_model import _apply_ids
 from .schema import IDSOperation
-from .schema.variables import IDSVariableModel
 from .systems.base_system import AbstractSystem
 from .systems.jetto import BaseJettoSystem
 from .systems.jetto._dimensions import JettoOperation
@@ -65,18 +66,26 @@ def get_input_var(input_variables: list[str],
     -------
     a dict with all the values for the list of input variables
     """
+    if system is None:
+        return SimpleNamespace()
+
     from duqtools.config import var_lookup
     input_var = {}
+
     for var_name in input_variables:
         variable = var_lookup[var_name]
-        if isinstance(variable, IDSVariableModel):
+        if isinstance(variable, Variable):
             val = ids_mapping[variable.path]
             input_var[var_name] = val
-        else:  # Must be a system variable, assume its the current system
+        elif hasattr(
+                system, 'get_variable'
+        ):  # Must be a system variable, assume its the current system
             val = system.get_variable(run=run_dir,
                                       key=var_name,
                                       variable=variable)
             input_var[var_name] = val
+        else:
+            raise ValueError
     return SimpleNamespace(**input_var)
 
 

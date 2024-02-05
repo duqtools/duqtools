@@ -4,13 +4,14 @@ import logging
 from typing import TYPE_CHECKING, Sequence
 
 import xarray as xr
+from imas2xarray import rebase_all_coords, squash_placeholders
 
 from ..operations import add_to_op_queue
 from ..utils import groupby
-from ._rebase import rebase_all_coords, squash_placeholders
 
 if TYPE_CHECKING:
-    from ..schema import IDSVariableModel
+    from imas2xarray import Variable
+
     from ._handle import ImasHandle
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ info = logger.info
 def merge_data(
     handles: Sequence[ImasHandle],
     target: ImasHandle,
-    variables: list[IDSVariableModel],
+    variables: list[Variable],
     callback=None,
 ):
     """merge_data merges the data from the handles to the target, only merges
@@ -35,7 +36,7 @@ def merge_data(
         handles
     target : ImasHandle
         target
-    variables : Sequence[IDSVariableModel]
+    variables : Sequence[Variable]
         variables
     """
     from ..config import var_lookup
@@ -97,4 +98,4 @@ def merge_data(
             path_upper = path + '_error_upper'
             target_ids.write_array_in_parts(path_upper, std_data[name])
 
-        target_ids.sync(target)
+        target.update_from(target_ids)

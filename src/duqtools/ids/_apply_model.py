@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from types import SimpleNamespace
 
     from ..schema import IDSOperation
-    from ._mapping import IDSMapping
+    from .mapping import IDSMapping
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,7 @@ def _apply_ids(model: IDSOperation,
                 raise ValueError(f'scale_to_error={model.scale_to_error} '
                                  f'but `{sigma_key}` is empty.')
 
-            sigma_bound = ids_mapping[sigma_key]
-            sigma = abs(sigma_bound - data)
+            sigma = ids_mapping[sigma_key]
 
             value = sigma * model.value
         else:
@@ -89,4 +88,4 @@ def _apply_ids(model: IDSOperation,
 
     if target_in:
         logger.info('Writing data entry: %s', target_in)
-        ids_mapping.sync(target_in)
+        target_in.update_from(ids_mapping)

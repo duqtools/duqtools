@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 import mkdocs_gen_files
+from imas2xarray import Variable
 
 from duqtools.config._schema_create import CreateConfigModel
 from duqtools.config._schema_root import ConfigModel
@@ -18,7 +19,6 @@ from duqtools.ids._schema import ImasBaseModel
 from duqtools.schema import (
     ARange,
     IDSOperationDim,
-    IDSVariableModel,
     LinSpace,
     OperationDim,
 )
@@ -39,7 +39,6 @@ objects = {
     CreateConfigModel,
     DataLocation,
     IDSOperationDim,
-    IDSVariableModel,
     ImasBaseModel,
     JettoVariableModel,
     JettoVar,
@@ -49,6 +48,7 @@ objects = {
     OperationDim,
     StatusConfigModel,
     SubmitConfigModel,
+    Variable,
 }
 schemas = {
     f'schema_{obj.__name__}': obj.model_json_schema()  # type: ignore

@@ -38,7 +38,9 @@ else:
 
 logger = logging.getLogger(__name__)
 
-lookup_file = files('duqtools.data') / 'jetto_tools_lookup.json'
+# https://jintrac.gitlab.io/jetto-pythontools/lookup.html
+lookup_file = os.environ.get('JETTO_LOOKUP',
+                             files('duqtools.data') / 'jetto_lookup.json')
 jetto_lookup = lookup.from_file(lookup_file)
 
 
@@ -257,6 +259,7 @@ class BaseJettoSystem(AbstractSystem):
 
     @add_to_op_queue('Copying template to', '{target_drc}', quiet=True)
     def copy_from_template(self, source_drc: Path, target_drc: Path):
+
         jetto_jset = jset.read(source_drc / 'jetto.jset')
         jetto_namelist = namelist.read(source_drc / 'jetto.in')
 
@@ -349,8 +352,13 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config = config.RunConfig(jetto_template)
 
+        special_keys = (
+            't_start',
+            't_end',
+        )
+
         # Do operation if present
-        if operation is not None:
+        if key not in special_keys and operation is not None:
             data = jetto_config[key]
             value = operation.npfunc(data, value, var=input_var)
 

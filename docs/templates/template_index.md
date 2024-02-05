@@ -1,22 +1,22 @@
 # The `duqtools` config file
 
-UQ run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the -c/--config option (see `duqtools help` or the [cli](../command-line-interface)).
+UQ run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the -c/--config option (see `duqtools help` or the [cli](../command-line-interface.md)).
 
 As a minimum, this configuration file must define the root workspace and the system to use (see below). All other settings are (in principle) optional.
 
 
 ## Starting from scratch
 
-To help initialize a starting config to modify, you can run [`duqtools init`](../command-line-interface#init).
+To help initialize a starting config to modify, you can run [`duqtools init`](../command-line-interface.md#init).
 
 <script id="asciicast-Byj5a5Z9dUI0tEw0q6P7RMnO5" src="https://asciinema.org/a/Byj5a5Z9dUI0tEw0q6P7RMnO5.js" async></script>
 
 Check out the different subpages of this section that explain the different parts of the config.
 
-- [setup](../config/setup)
-- [create](../config/create)
-- [submit](../config/submit)
-- [status](../config/status)
+- [setup](../config/setup.md)
+- [create](../config/create.md)
+- [submit](../config/submit.md)
+- [status](../config/status.md)
 - [system](#defining-the-system)
 - [variables](#extra-variables)
 
@@ -52,6 +52,12 @@ system:
       show_root_toc_entry: false
       members: None
       show_bases: False
+
+The Jetto system uses [jetto-pythontools](https://jintrac.gitlab.io/jetto-pythontools/) to write variables to the `jetto.jset`/`jetto.in` files.
+These variables are defined in the [lookup.json](https://jintrac.gitlab.io/jetto-pythontools/lookup.html).
+Duqtools includes its [own version](https://github.com/duqtools/duqtools/blob/main/src/duqtools/data/jetto_tools_lookup.json), but in case
+you run into issues with future versions, you can specify your own by setting the environment variable `JETTO_LOOKUP`.
+For example, `JETTO_LOOKUP=./my-jetto-lookup.json duqtools create`.
 
 ### Jetto-v210921
 

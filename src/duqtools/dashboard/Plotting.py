@@ -55,11 +55,19 @@ with st.sidebar:
         help=('Show standard deviation band around mean y-value.'),
     )
 
+    flip_axes = st.checkbox(
+        'Flip time/grid axes',
+        help=('Flips the time and grid axes.'),
+    )
+
 for variable in (var_lookup[var_name] for var_name in var_names):
     source, time_var, grid_var, data_var = get_dataset(
         handles, variable, include_error=show_errorbar)
 
     st.header(f'{grid_var} vs. {data_var}')
+
+    if flip_axes:
+        grid_var, time_var = time_var, grid_var
 
     if aggregate_data:
         chart = alt_errorband_chart(source, x=grid_var, y=data_var, z=time_var)

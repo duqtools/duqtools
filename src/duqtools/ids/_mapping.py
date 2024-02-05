@@ -5,14 +5,10 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
-
-from ..schema import IDSVariableModel
-from ._copy import add_provenance_info
+from imas2xarray import Variable, var_lookup
 
 if TYPE_CHECKING:
     import xarray as xr
-
-    from ._handle import ImasHandle
 
 INDEX_STR = '*'
 
@@ -126,10 +122,8 @@ class IDSMapping(Mapping):
         return key in self._keys
 
     @staticmethod
-    def _path_at_index(variable: str | IDSVariableModel,
-                       index: int | Sequence[int]):
-        path = variable.path if isinstance(variable,
-                                           IDSVariableModel) else variable
+    def _path_at_index(variable: str | Variable, index: int | Sequence[int]):
+        path = variable.path if isinstance(variable, Variable) else variable
 
         if isinstance(index, int):
             index = (index, )
@@ -139,7 +133,7 @@ class IDSMapping(Mapping):
 
         return path
 
-    def get_at_index(self, variable: str | IDSVariableModel,
+    def get_at_index(self, variable: str | Variable,
                      index: int | Sequence[int], **kwargs) -> Any:
         """Grab key with index replacement.
 
@@ -148,7 +142,7 @@ class IDSMapping(Mapping):
         path = self._path_at_index(variable, index)
         return self[path]
 
-    def set_at_index(self, variable: str | IDSVariableModel,
+    def set_at_index(self, variable: str | Variable,
                      index: int | Sequence[int], value: Any, **kwargs):
         """Grab key with index replacement.
 
@@ -182,22 +176,6 @@ class IDSMapping(Mapping):
             return len(self[key])
         except Exception:
             pass
-
-    def sync(self, target: ImasHandle):
-        """Synchronize updated data back to IMAS db entry.
-
-        Shortcut for 'put' command.
-
-        Parameters
-        ----------
-        target : ImasHandle
-            Points to an IMAS db entry of where the data should be written.
-        """
-
-        add_provenance_info(handle=target)
-
-        with target.open() as db_entry:
-            self._ids.put(db_entry=db_entry)
 
     def dive(self, val, path: list):
         """Recursively find the data fields.
@@ -312,7 +290,7 @@ class IDSMapping(Mapping):
 
     def to_xarray(
         self,
-        variables: Sequence[str | IDSVariableModel],
+        variables: Sequence[str | Variable],
         empty_var_ok: bool = False,
         **kwargs,
     ) -> xr.Dataset:
@@ -320,7 +298,7 @@ class IDSMapping(Mapping):
 
         Parameters
         ----------
-        variables : Sequence[str | IDSVariableModel]]
+        variables : Sequence[str | Variable]]
             Dictionary of data variables
         empty_var_ok : bool
             If True, silently skip data that are missing from the mapping.
@@ -348,13 +326,11 @@ class IDSMapping(Mapping):
 
         import xarray as xr
 
-        from duqtools.config import lookup_vars
-
         xr_data_vars: dict[str, tuple[list[str], np.ndarray]] = {}
 
-        variables = lookup_vars(variables)
+        var_models = var_lookup.lookup(variables)
 
-        for var in variables:
+        for var in var_models:
             parts = var.path.split('/*/')
 
             if len(parts) == 1:

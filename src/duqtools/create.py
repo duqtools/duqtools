@@ -114,8 +114,8 @@ class CreateManager:
             model = Run(dirname=dirname,
                         shortname=name,
                         data_in=data_in,
-                        data_out=data_out,
-                        operations=operations)
+                        data_out=data_out)
+            model.operations = operations  # it bugs out so don't validate
 
             run_models.append(model)
 

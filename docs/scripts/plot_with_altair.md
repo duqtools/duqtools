@@ -10,8 +10,6 @@ Below is an example of how to use the duqtools api to plot data with [altair](ht
 
 The code below shows how to make a plot with [altair](https://altair-viz.github.io/.) for multiple datasets.
 
-For a more advanced example of how to concatenate data, check out the [example notebooks](../../examples/xarray).
-
 ```python
 {!../scripts/plot_with_altair_multi.py!}
 ```
