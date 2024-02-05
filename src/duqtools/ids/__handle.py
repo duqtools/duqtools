@@ -9,11 +9,11 @@ from getpass import getuser
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
+from imas2xarray import squash_placeholders
 from pydantic import field_validator
 
 from ._copy import add_provenance_info
 from ._mapping import IDSMapping
-from ._rebase import squash_placeholders
 from ._schema import ImasBaseModel
 
 if TYPE_CHECKING:
