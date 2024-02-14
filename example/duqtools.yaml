@@ -35,4 +35,4 @@ extra_variables:
     dims: [time, x]
     type: IDS-variable
 system:
-  name: jetto-v220922
+  name: nosystem
