@@ -84,8 +84,8 @@ def merge(*, target: str, template: str, handles: list[str],
     variables = _resolve_variables(var_names)
 
     _merge(
-        handles=handles,
-        template=template,
-        target=target,
+        handles=handles,  # type: ignore
+        template=template,  # type: ignore
+        target=target,  # type: ignore
         variables=variables,
     )

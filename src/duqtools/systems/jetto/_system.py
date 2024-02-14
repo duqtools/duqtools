@@ -169,7 +169,6 @@ class BaseJettoSystem(AbstractSystem):
         }
 
         os.environ['RUNS_HOME'] = os.getcwd()
-        os.environ['JINTRAC_IMAS_BACKEND'] = 'MDSPLUS'
         container = jetto_manager.submit_job_to_docker(
             jetto_config,
             job.path,

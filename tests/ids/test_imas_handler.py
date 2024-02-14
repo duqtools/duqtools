@@ -4,7 +4,7 @@ from getpass import getuser
 
 import pytest
 
-from duqtools.ids import ImasHandle
+from duqtools.ids import HDF5ImasHandle, ImasHandle, MdsplusImasHandle
 
 TEST_STRINGS = (
     'gu3ido/m0o/9234/123',
@@ -55,7 +55,18 @@ def test_from_string_localdb(string, expected):
 def test_jintrac_v220922():
     """Test local db implementation."""
     user = '/some/path/imasdb'
-    h = ImasHandle(user=user, db='moo', shot=1, run=1)
+
+    h = MdsplusImasHandle(user=user, db='moo', shot=1, run=1)
 
     assert h.is_local_db
     assert str(h.path().parent) == '/some/path/imasdb/moo/3/0'
+
+
+def test_imas_hdf5():
+    """Test local db implementation."""
+    user = '/some/path/imasdb'
+
+    h = HDF5ImasHandle(user=user, db='moo', shot=1, run=1)
+
+    assert h.is_local_db
+    assert str(h.path().parent) == '/some/path/imasdb/moo/3/1'
