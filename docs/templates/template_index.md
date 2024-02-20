@@ -32,15 +32,10 @@ Currently there are multiple systems available. They are distinguished by specif
 
 Options:
 
-- `no-system` (default)
-- `jetto` (see [the jetto specific documentation](./jetto/index.md))
+- `None` or `nosystem` (default)
+- `jetto` (see [jetto specific documentation](./jetto/index.md))
 
-```yaml title="duqtools.yaml"
-system:
-  name: nosystem
-```
-
-### No system
+### Default (no system)
 
 ::: duqtools.systems.no_system.NoSystem
     options:
