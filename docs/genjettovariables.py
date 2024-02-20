@@ -28,14 +28,10 @@ sys.path.append(str(this_dir))
 
 from templates import get_template  # noqa
 
-template = get_template('template_jetto_variables.md')
+template = get_template('template_systems_variables.md')
 
 variable_groups = var_lookup.groupby_type()
-variable_groups = {
-    k: v
-    for k, v in variable_groups.items()
-    if k in ('jetto-variable', 'IDS2jetto-variable')
-}
+variable_groups.pop('IDS-variable')
 
 
 def sort_var_groups_in_dict(dct):

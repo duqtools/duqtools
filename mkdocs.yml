@@ -5,21 +5,19 @@ repo_name: GitHub
 
 nav:
   - Home: index.md
-  - Quickstart (Gateway): quickstart_gateway.md
+  - Usage: usage.md
   - Duqtools CLI: command-line-interface.md
-  - Configuration:
-    - Getting Started: config/index.md
-    - config/setup.md
-    - config/create.md
-    - config/submit.md
-    - config/status.md
-  - Dashboard: dash.md
   - Visualization: visualization.md
+  - Dashboard: dash.md
   - Variables: variables.md
+  - Canonical UQ: canonical.md
   - Large scale validation: large_scale_validation.md
-  - Jetto:
-    - jetto/index.md
-    - jetto/jetto_variables.md
+  - Quickstart (Gateway): quickstart_gateway.md
+  - Systems:
+    - Jetto: jetto/index.md
+    - Job submission: jetto/submit.md
+    - Job status: jetto/status.md
+    - Variables: jetto/jetto_variables.md
   - Example scripts:
     - Overview: scripts/index.md
     - scripts/modify_imas_data.md

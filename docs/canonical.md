@@ -1,4 +1,4 @@
-# Setup
+# Canonical UQ
 
 The setup subcommand takes a config template and turns it into a valid duqtools config.
 
@@ -6,11 +6,11 @@ To run the command:
 
 `duqtools setup`
 
-Check out [the command-line interface](../command-line-interface.md#setup) for more info on how to use this command.
+Check out [the command-line interface](./command-line-interface.md#setup) for more info on how to use this command.
 
 ## The `setup` template
 
-Unlike most of the other commands, `duqtools` setup does not require a config file, it *creates* the config file for you.
+Unlike most of the other commands, `duqtools setup` does not require a config file, it *creates* the config file for you.
 
 You can pass the IMAS handle to use as `template_data`, the run name (this defines the name of the run directory) and the template file (defaults to `duqtools.template.yaml`):
 

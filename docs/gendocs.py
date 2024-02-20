@@ -31,8 +31,6 @@ sys.path.append(str(this_dir))
 
 from templates import get_template  # noqa
 
-SUBDIR = 'config'
-
 objects = {
     ARange,
     ConfigModel,
@@ -52,12 +50,16 @@ schemas = {
     f'schema_{obj.__name__}': obj.model_json_schema()  # type: ignore
     for obj in objects
 }
-for page in 'index', 'status', 'submit', 'create':
+for page in (
+        'usage',
+        'systems_status',
+        'systems_submit',
+):
     template = get_template(f'template_{page}.md')
 
     rendered = template.render(**schemas)
 
-    filename = f'{SUBDIR}/{page}.md'
+    filename = '/'.join(page.split('_')) + '.md'
 
     with mkdocs_gen_files.open(filename, 'w') as file:
         print(f'Writing {file.name}')
