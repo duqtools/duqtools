@@ -17,10 +17,15 @@ nav:
   - Visualization: visualization.md
   - Variables: variables.md
   - Large scale validation: large_scale_validation.md
-  - Python API:
-    - Public API: api/index.md
-    - Operations: api/operations.md
-  - Notebooks:
+  - Jetto:
+    - jetto/index.md
+    - jetto/jetto_variables.md
+  - Example scripts:
+    - Overview: scripts/index.md
+    - scripts/modify_imas_data.md
+    - scripts/plot_with_altair.md
+    - scripts/plot_with_matplotlib.md
+  - Example notebooks:
     - Overview: examples/index.md
     - examples/imas_handles.ipynb
     - examples/create_api.ipynb
@@ -29,11 +34,7 @@ nav:
     - examples/duqtools_on_prominence.ipynb
     - examples/duqtools_in_docker.ipynb
     - examples/duqmap.ipynb
-  - Scripts:
-    - Overview: scripts/index.md
-    - scripts/modify_imas_data.md
-    - scripts/plot_with_altair.md
-    - scripts/plot_with_matplotlib.md
+  - Python API: api/index.md
   - Contributing: CONTRIBUTING.md
   - Dissemination: dissemination.md
   - Code of Conduct: CODE_OF_CONDUCT.md
@@ -90,7 +91,7 @@ plugins:
   - gen-files:
       scripts:
         - docs/gendocs.py
-        - docs/genvariables.py
+        - docs/genjettovariables.py
   - mknotebooks:
       execute: false
 

@@ -15,17 +15,8 @@ Duqtools looks for files matching `variables*.yaml` in the following locations, 
 
     To access different data variables, duqtools must know how to navigate the IMAS specification. Since duqtools 3.0.0, [imas2xarray](https://imas2xarray.readthedocs.io) handles the IDS data variables. Please check its documentation for more information.
 
-## Default variables
+## System variables
 
-{% for name, var_group in other_vars.items() %}
-### {{ name }}s
+For system variables, check out the system subsection.
 
-{% for var in var_group %}
-
-#### {{ var.name }}
-```yaml
-{{ var | to_yaml_str }}
-```
-
-{% endfor %}
-{% endfor %}
+- [Jetto](./jetto/jetto_variables.md)
