@@ -9,8 +9,6 @@ As a minimum, this configuration file must define the root workspace and the sys
 
 To help initialize a starting config to modify, you can run [`duqtools init`](../command-line-interface.md#init).
 
-<script id="asciicast-Byj5a5Z9dUI0tEw0q6P7RMnO5" src="https://asciinema.org/a/Byj5a5Z9dUI0tEw0q6P7RMnO5.js" async></script>
-
 Check out the different subpages of this section that explain the different parts of the config.
 
 - [setup](../config/setup.md)

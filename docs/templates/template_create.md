@@ -8,8 +8,6 @@ To run the command:
 
 Check out [the command-line interface](../command-line-interface.md#create) for more info on how to use this command.
 
-<script id="asciicast-p4FXHwy5yS9u9n1WQexvs7g1h" src="https://asciinema.org/a/p4FXHwy5yS9u9n1WQexvs7g1h.js" async></script>
-
 ## The `create` config
 
 {{ schema_CreateConfigModel['description'] }}
