@@ -12,7 +12,7 @@ from pydantic_yaml import to_yaml_file
 from .apply_model import apply_model
 from .cleanup import remove_run
 from .config import Config
-from .ids import ImasHandle
+from imaspy.db_entry import DBEntry
 from .matrix_samplers import get_matrix_sampler
 from .models import Job, Locations, Run, Runs
 from .operations import add_to_op_queue, op_queue
@@ -47,7 +47,7 @@ class CreateManager:
         self.runs_yaml = locations.runs_yaml
         self.data_csv = locations.data_csv
 
-    def _get_source_handle(self) -> ImasHandle:
+    def _get_source_handle(self) -> DBEntry:
         template_data = self.options.template_data
 
         if not template_data:
@@ -55,8 +55,7 @@ class CreateManager:
                 raise ValueError('Missing `create.template`')
             source = self.system.imas_from_path(self.template_drc)
         else:
-            source = ImasHandle.model_validate(template_data,
-                                               from_attributes=True)
+            source = DBEntry(**template_data)
 
         logger.info('Source data: %s', source)
 
@@ -134,8 +133,9 @@ class CreateManager:
         any_exists = False
 
         for model in models:
-            if ImasHandle.model_validate(model.data_in,
-                                         from_attributes=True).exists():
+            try:
+                model.data_in.open()
+            except:
                 logger.info('Target %s already exists', model.data_in)
                 op_queue.add_no_op(
                     description='Not creating IDS',
@@ -166,12 +166,12 @@ class CreateManager:
                          'use --force to override')
 
     @add_to_op_queue('Setting inital condition of', '{data_in}', quiet=True)
-    def apply_operations(self, data_in: ImasHandle, run_dir: Path,
+    def apply_operations(self, data_in: DBEntry, run_dir: Path,
                          operations: list[Any]):
         for model in operations:
             apply_model(model,
                         run_dir=run_dir,
-                        ids_mapping=data_in,
+                        dbentry=data_in,
                         system=self.system)
 
     @add_to_op_queue('Writing runs', '{self.runs_yaml}', quiet=True)
@@ -232,8 +232,7 @@ class CreateManager:
                      description='Creating run',
                      extra_description=f'{model.dirname}')
 
-        self.source.copy_data_to(
-            ImasHandle.model_validate(model.data_in, from_attributes=True))
+        self.source.copy_data_to(model.data_in)
 
         if self.template_drc:
             self.system.copy_from_template(self.template_drc, model.dirname)
@@ -339,15 +338,13 @@ def recreate(*, cfg: Config, runs: Sequence[Path], **kwargs):
             raise ValueError(f'`{run}` not in `runs.yaml`.')
 
         model = run_dict[run]
-        model.data_in = ImasHandle.model_validate(model.data_in,
-                                                  from_attributes=True)
-        assert model.data_in
 
-        model.data_out = ImasHandle.model_validate(model.data_out,
-                                                   from_attributes=True)
+        assert model.data_in
         assert model.data_out
 
-        model.data_in.delete()
+        # Delete by removing data
+        model.data_in.create()
+        model.data_in.close()
         remove_run(model)
 
         run_models.append(model)

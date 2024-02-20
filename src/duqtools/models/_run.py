@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional, Union
+from imaspy import DBEntry
 
 from pydantic import Field, model_validator
 
 from duqtools.systems.jetto._dimensions import JettoOperation
 
 from ..ids import ImasHandle
-from ..ids._schema import ImasBaseModel
 from ..schema import BaseModel, IDSOperation, RootModel
 
 
@@ -17,8 +17,8 @@ class Run(BaseModel):
     dirname: Path = Field(description='Directory of run')
     shortname: Optional[Path] = Field(
         None, description='Short name (`dirname.name`)')
-    data_in: Optional[ImasBaseModel] = Field(None)
-    data_out: Optional[ImasBaseModel] = Field(None)
+    data_in: Optional[DBEntry] = Field(None)
+    data_out: Optional[DBEntry] = Field(None)
     operations: Optional[list[Union[IDSOperation, JettoOperation, list[Union[
         IDSOperation, JettoOperation]]]]] = Field(None)
 
@@ -33,7 +33,7 @@ class Run(BaseModel):
         if not self.data_out:
             raise NotImplementedError(
                 'Run has no data_out, necessary for mapping')
-        handle = ImasHandle.model_validate(self.data_out, from_attributes=True)
+        handle = DBEntry(**self.data_out)
         return handle
 
     @classmethod

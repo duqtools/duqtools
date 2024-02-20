@@ -10,9 +10,6 @@ from duqtools.operations import add_to_op_queue
 from ..base_system import AbstractSystem
 from ._schema import NoSystemModel
 
-if TYPE_CHECKING:
-    from duqtools.api import ImasHandle
-
 
 class NoSystem(AbstractSystem):
     """This system is intended for workflows that need to apply some operations
@@ -67,10 +64,10 @@ class NoSystem(AbstractSystem):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: DBEntry,
         seq_number: int,
         options,
-    ) -> ImasHandle:
+    ) -> DBEntry:
         """Get handle for data input. This method is used to copy the template
         data to wherever the system expects the input data to be.
 
@@ -92,7 +89,7 @@ class NoSystem(AbstractSystem):
         if relative_location:
             if relative_location.startswith('..'):
                 relative_location = None
-        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+        return DBEntry   (user=str((dirname / 'imasdb').resolve()),
                           db=source.db,
                           shot=source.shot,
                           run=source.run,
@@ -102,7 +99,7 @@ class NoSystem(AbstractSystem):
         self,
         *,
         dirname: Path,
-        source: ImasHandle,
+        source: DBEntry,
         seq_number: int,
         options,
     ) -> ImasHandle:
@@ -128,8 +125,7 @@ class NoSystem(AbstractSystem):
         if relative_location:
             if relative_location.startswith('..'):
                 relative_location = None
-        return ImasHandle(user=str((dirname / 'imasdb').resolve()),
+        return DBEntry(user=str((dirname / 'imasdb').resolve()),
                           db=source.db,
                           shot=source.shot,
-                          run=source.run,
-                          relative_location=relative_location)
+                          run=source.run)
