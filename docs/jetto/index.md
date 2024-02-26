@@ -43,3 +43,19 @@ For example, `JETTO_LOOKUP=./my-jetto-lookup.json duqtools create`.
       show_root_toc_entry: false
       members: None
       show_bases: False
+
+
+### Jetto output directory
+
+If you do not specify anything in `duqtools.yaml`, the jetto output location depends on the location of `duqtools.yaml`:
+
+1. If `duqtools.yaml` is **outside** `$JRUNS`: `$JRUNS/duqtools_experiment_xxx`
+2. If `duqtools.yaml` is **inside** `$JRUNS`: Parent directory of `duqtools.yaml`
+
+You can override the `$JRUNS` directory by setting the `jruns` variable. This must be a directory that `rjettov` can write to.
+
+```yaml title="duqtools.yaml"
+system:
+  name: jetto
+  jruns: /pfs/work/username/jetto/runs/
+```
