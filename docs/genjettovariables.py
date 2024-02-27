@@ -43,7 +43,7 @@ sort_var_groups_in_dict(variable_groups)
 
 rendered = template.render(variable_groups=variable_groups, **schemas)
 
-filename = 'jetto/jetto_variables.md'
+filename = 'systems/variables.md'
 
 with mkdocs_gen_files.open(filename, 'w') as file:
     print(f'Writing {file.name}')

@@ -14,10 +14,10 @@ nav:
   - Large scale validation: large_scale_validation.md
   - Quickstart (Gateway): quickstart_gateway.md
   - Systems:
-    - Jetto: jetto/index.md
-    - Job submission: jetto/submit.md
-    - Job status: jetto/status.md
-    - Variables: jetto/jetto_variables.md
+    - Jetto: systems/index.md
+    - Job submission: systems/submit.md
+    - Job status: systems/status.md
+    - Variables: systems/variables.md
   - Example scripts:
     - Overview: scripts/index.md
     - scripts/modify_imas_data.md
