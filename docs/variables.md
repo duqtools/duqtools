@@ -19,4 +19,4 @@ Duqtools looks for files matching `variables*.yaml` in the following locations, 
 
 For system variables, check out the system subsection.
 
-- [Jetto](./jetto/jetto_variables.md)
+- [Jetto](./systems/variables.md)

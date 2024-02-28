@@ -2,6 +2,8 @@
 
 Duqtools can also write directly to system config files. For jetto, duqtools uses [jetto-tools](https://pypi.org/project/jetto-tools/) to update the `jetto.jset` and `jetto.in`. These operations are handled by what we call 'systems'.
 
+System specific variables [are listed here](./variables.md).
+
 ## Defining the Jetto System
 
 The jetto system can be set by modifying `system` in the `duqtools.yaml`.

@@ -1,13 +1,13 @@
 # The `duqtools` config file
 
-Duqtools run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the `-c/--config` option (see `duqtools help` or the [cli](../command-line-interface.md)).
+Duqtools run settings are configured using a yaml configuration file in the project directory. By default it is named `duqtools.yaml`. You can specify another path for it using the `-c/--config` option (see `duqtools help` or the [cli](command-line-interface.md)).
 
 As a minimum, this configuration file must define the root workspace and the system to use (see below). All other settings are (in principle) optional.
 
 
 ## Starting from scratch
 
-To help initialize a starting config to modify, you can run [`duqtools init`](../command-line-interface.md#init).
+To help initialize a starting config to modify, you can run [`duqtools init`](command-line-interface.md#init).
 
 
 ### Example config file
@@ -34,7 +34,7 @@ The `create` section of the duqtools config is where you will be spending most o
 
 When you run `duqtools create` this section gets read and the steps executed.
 
-Check out [the command-line interface](../command-line-interface.md#create) for more info on how to use this command.
+Check out [the command-line interface](command-line-interface.md#create) for more info on how to use this command.
 
 ### `create` parameters
 
@@ -220,7 +220,7 @@ custom_code: 'np.clip(data * value, a_min=0, a_max=100)'
 
 To specify additional variables, you can use the `extra_variables` lookup file ([See below](#extra-variables)). The examples will use the `name` attribute to look up the location of the data. For example, `variable: zeff` will refer to the entry with `name: zeff`.
 
-For more info about variables, see [here](../index.md#extra-variables).
+For more info about variables, see [here](index.md#extra-variables).
 
 #### Value ranges
 
@@ -320,7 +320,7 @@ Currently there are two options available:
 Options:
 
 - `None` or `nosystem` (default)
-- `jetto` (see [jetto specific documentation](./jetto/index.md))
+- `jetto` (see [jetto specific documentation](systems/index.md))
 
 ### Default (no system)
 
@@ -331,11 +331,9 @@ Options:
       show_bases: False
 
 
-
-
 ## Extra variables
 
-Duqtools comes with a list of default [variables](../variables.md). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
+Duqtools comes with a list of default [variables](variables.md). You can update or add your own variables via the `extra_variables` key in the `duqtools.yaml` file.
 
 ### IDS variables
 
