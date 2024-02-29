@@ -24,7 +24,6 @@ from duqtools.schema import (
     LinSpace,
     OperationDim,
 )
-from duqtools.schema.data_location import DataLocation
 from duqtools.systems.jetto import JettoVar, JettoVariableModel
 from duqtools.systems.models import StatusConfigModel, SubmitConfigModel
 
@@ -47,7 +46,6 @@ def gen_docs():
         ARange,
         ConfigModel,
         CreateConfigModel,
-        DataLocation,
         IDSOperationDim,
         ImasBaseModel,
         JettoVariableModel,
