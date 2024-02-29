@@ -12,7 +12,7 @@ from ..models import SystemModel
 class JettoSystemModel(SystemModel):
     """The options of the JettoSystemModel, found under the `system:` key in
     the config."""
-    name: Literal['jetto', 'jetto-v210921', 'jetto-v220922'] = 'jetto'
+    name: Literal['jetto', 'jetto-v220922'] = 'jetto'
 
     submit_system: Literal['prominence', 'slurm', 'docker'] = Field(
         'slurm',

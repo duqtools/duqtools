@@ -17,7 +17,7 @@ from jetto_tools.template import _EXTRA_FILE_REGEXES
 from duqtools.operations import add_to_op_queue
 
 from ..base_system import AbstractSystem
-from ..jintrac import V210921Mixin, V220922Mixin
+from ..jintrac import V220922Mixin
 from ._batchfile import write_array_batchfile as _write_array_batchfile
 from ._batchfile import write_batchfile as _write_batchfile
 from ._jettovar_to_json import jettovar_to_json
@@ -370,24 +370,6 @@ class BaseJettoSystem(AbstractSystem):
             jetto_config[key] = value
 
         jetto_config.export(run)  # Just overwrite the poor files
-
-
-class JettoSystemV210921(V210921Mixin, BaseJettoSystem):
-    """System that can be used to create runs for jetto using the JINTRAC
-    `v210921` release.
-
-    This system handles IMAS data via a public `imasdb`. Although this still works, this
-    backend is no longer supported. If possible, use `jetto-v220922` or newer.
-
-    This system can submit to various backends like docker, prominence
-    and the gateway.
-
-    ```yaml title="duqtools.yaml"
-    system:
-      name: jetto-v210921
-      submit_system: prominence
-    ```
-    """
 
 
 class JettoSystemV220922(V220922Mixin, BaseJettoSystem):

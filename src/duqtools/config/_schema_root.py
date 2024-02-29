@@ -7,7 +7,6 @@ from imas2xarray import Variable, VariableConfigModel
 from pydantic import Field, PrivateAttr
 
 from duqtools.schema import BaseModel
-from duqtools.systems.ets import Ets6SystemModel
 from duqtools.systems.jetto import IDS2JettoVariableModel, JettoSystemModel, JettoVariableModel
 from duqtools.systems.no_system import NoSystemModel
 
@@ -33,7 +32,7 @@ class ConfigModel(BaseModel):
     extra_variables: Optional[ExtraVariables] = Field(
         None, description='Specify extra variables for this run.')
 
-    system: Union[NoSystemModel, Ets6SystemModel, JettoSystemModel] = Field(
+    system: Union[NoSystemModel, JettoSystemModel] = Field(
         NoSystemModel(),
         description='Options specific to the system used',
         discriminator='name')

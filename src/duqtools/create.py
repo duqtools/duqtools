@@ -94,21 +94,17 @@ class CreateManager:
         """Take list of operations and create run models."""
         run_models = []
 
-        for i, (name, operations) in enumerate(ops_dict.items()):
+        for name, operations in ops_dict.items():
             dirname = self.runs_dir / name
 
             data_in = self.system.get_data_in_handle(
                 dirname=dirname,
-                seq_number=i,
                 source=self.source,
-                options=self.options.data,
             )
 
             data_out = self.system.get_data_out_handle(
                 dirname=dirname,
-                seq_number=i,
                 source=self.source,
-                options=self.options.data,
             )
 
             model = Run(dirname=dirname,
