@@ -216,18 +216,6 @@ def cli(**kwargs):
     """For more information, check out the documentation:
 
     https://duqtools.readthedocs.io
-
-    \b
-    Example:
-    ```
-    duqtools init
-    duqtools create
-    duqtools submit --array --max_jobs 5
-    duqtools status
-    duqtools merge -i data.csv -t user1/jet/90123/1 -o user2/jet/90123/100
-    duqtools dash
-    ```
-    \f
     """
     pass
 
@@ -285,7 +273,8 @@ def cli_setup(**kwargs):
               help='Create base run (ignores `dimensions`/`sampler`).')
 @common_options(*all_options)
 def cli_create(**kwargs):
-    """Create the UQ run files."""
+    """Read duqtools.yaml and create the new IMAS data files from template
+    data."""
     from .create import create
     with op_queue_context():
         create(cfg=CFG, **kwargs)
@@ -346,7 +335,7 @@ def cli_recreate(**kwargs):
               help='Only submit jobs with this status.')
 @common_options(*all_options)
 def cli_submit(**kwargs):
-    """Submit the UQ runs.
+    """Submit system runs to job management system.
 
     This subcommand will read `runs.yaml`, and start all runs which are
     not yet running. By default, It will not re-submit running or
@@ -384,7 +373,7 @@ def cli_sync_prominence(**kwargs):
 @click.option('--progress', is_flag=True, help='Fancy progress bar')
 @common_options(*all_options)
 def cli_status(**kwargs):
-    """Print the status of the UQ runs."""
+    """Print the status of the system runs."""
     from .status import status
     status(cfg=CFG, **kwargs)
 
@@ -406,7 +395,7 @@ def cli_status(**kwargs):
 @datafile_option
 @common_options(*logging_options)
 def cli_plot(**kwargs):
-    """Plot some IDS data.
+    """Generate plots for IMAS data.
 
     \b
     Examples:
@@ -537,7 +526,7 @@ def cli_merge(**kwargs):
 def cli_list_variables(config, **kwargs):
     """List available variables.
 
-    Picks up variables from `duqtools.yaml` if it exists in the local
+    This also picks up variables from `duqtools.yaml` if it exists in the local
     directory.
     """
     from .list_variables import list_variables

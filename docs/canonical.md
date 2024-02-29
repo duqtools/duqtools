@@ -1,16 +1,20 @@
-# Setup
+# Canonical UQ
 
-The setup subcommand takes a config template and turns it into a valid duqtools config.
+Duqtools aims to automate workflows that researchers would normally perform manually or using ad-hoc scripts.
 
-To run the command:
+One of the requirements for duqtools is that configurations must be sharable by users to perform standard procedures or canonical UQ. These are enabled through template-based run generation.
+
+This means that the modifications performed by duqtools are completely reproducible with minimal programming (i.e. changing the yaml config). The templates can be re-used and shared, which enables standardized UQ or sensitivity tests. But also makes it convenient to re-use scripts locally.
+
+The setup subcommand takes a config template and turns it into a valid duqtools config (`duqtools.yaml`):
 
 `duqtools setup`
 
-Check out [the command-line interface](../command-line-interface.md#setup) for more info on how to use this command.
+Check out [the command-line interface](./command-line-interface.md#setup) for more info on how to use this command.
 
 ## The `setup` template
 
-Unlike most of the other commands, `duqtools` setup does not require a config file, it *creates* the config file for you.
+Unlike most of the other commands, `duqtools setup` does not require a config file, it *creates* the config file for you.
 
 You can pass the IMAS handle to use as `template_data`, the run name (this defines the name of the run directory) and the template file (defaults to `duqtools.template.yaml`):
 
@@ -74,18 +78,8 @@ The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/
 
 `variables`
 : These variable corresponds to pre-defined values in the IDS data. They are defined via as variables with the type `IDS2jetto-variable`. Essentially, each variable of this type is accessible as an attribute of `variables`. These are grabbed from the IDS data on-the-fly in the IMAS handle.
-: For more information on how to set this up, see the section on [variables](../variables.md/#ids2jetto-variables).
+: For more information on how to set this up, see the section on [variables](./variables.md/#ids2jetto-variables).
 
-### Jetto V210921
-
-For compatibility with Jintrac v210921 distributions (`name: jetto-v210921` under `system`), the `run` class has a few more attributes. These are needed to set the imas locations where the run in/out data can be stored. `duqduq` calculates a suitable range for `run_in_start_at`/`run_out_start_at`. This means any two runs will not write to the same imas location.
-
-```
-  data:
-    imasdb: {{ handle.db }}
-    run_in_start_at: {{ run.data_in_start }}
-    run_out_start_at: {{ run.data_out_start }}
-```
 
 ### Jinja2 quickstart
 

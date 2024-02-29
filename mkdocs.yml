@@ -5,22 +5,25 @@ repo_name: GitHub
 
 nav:
   - Home: index.md
-  - Quickstart (Gateway): quickstart_gateway.md
-  - Usage: command-line-interface.md
-  - Configuration:
-    - Getting Started: config/index.md
-    - config/setup.md
-    - config/create.md
-    - config/submit.md
-    - config/status.md
-  - Dashboard: dash.md
+  - Usage: usage.md
+  - Duqtools CLI: command-line-interface.md
   - Visualization: visualization.md
+  - Dashboard: dash.md
   - Variables: variables.md
+  - Canonical UQ: canonical.md
   - Large scale validation: large_scale_validation.md
-  - Python API:
-    - Public API: api/index.md
-    - Operations: api/operations.md
-  - Notebooks:
+  - Quickstart (Gateway): quickstart_gateway.md
+  - Systems:
+    - Jetto: systems/index.md
+    - Job submission: systems/submit.md
+    - Job status: systems/status.md
+    - Variables: systems/variables.md
+  - Example scripts:
+    - Overview: scripts/index.md
+    - scripts/modify_imas_data.md
+    - scripts/plot_with_altair.md
+    - scripts/plot_with_matplotlib.md
+  - Example notebooks:
     - Overview: examples/index.md
     - examples/imas_handles.ipynb
     - examples/create_api.ipynb
@@ -29,11 +32,7 @@ nav:
     - examples/duqtools_on_prominence.ipynb
     - examples/duqtools_in_docker.ipynb
     - examples/duqmap.ipynb
-  - Scripts:
-    - Overview: scripts/index.md
-    - scripts/modify_imas_data.md
-    - scripts/plot_with_altair.md
-    - scripts/plot_with_matplotlib.md
+  - Python API: api/index.md
   - Contributing: CONTRIBUTING.md
   - Dissemination: dissemination.md
   - Code of Conduct: CODE_OF_CONDUCT.md
@@ -90,9 +89,11 @@ plugins:
   - gen-files:
       scripts:
         - docs/gendocs.py
-        - docs/genvariables.py
   - mknotebooks:
       execute: false
+
+exclude_docs: |
+  *.template.md
 
 watch:
   - src/duqtools

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class NoSystem(AbstractSystem):
     """This system is intended for workflows that need to apply some operations
-    or sampling of the data without any system like Jetto or ETS in mind.
+    or sampling of the data without any system.
 
     With this system, you won't have to specify `create.template`. Only
     `create.template_data` is required.

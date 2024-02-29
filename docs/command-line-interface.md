@@ -1,12 +1,16 @@
 # Usage
 
-The main form of interaction with *duqtools* is via the command-line interface. This page documents the different subcommands available .
+The main form of interaction with *duqtools* is via the command-line interface. This page documents the different subcommands available.
 
 To get started:
 
     duqtools --help
 
-For information on how to configure your UQ runs via `duqtools.yaml`, check out the [configuration page](./config/index.md).
+For information on the subcommands, e.g. [create](#duqtools-create):
+
+    duqtools create --help
+
+For information on how to configure duqtools via `duqtools.yaml`, check out the [usage page](./usage.md).
 
 ::: mkdocs-click
     :module: duqtools.cli

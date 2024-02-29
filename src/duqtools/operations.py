@@ -1,3 +1,10 @@
+"""Submodule for handling queuing and jobs.
+
+*Duqtools* uses delayed operations for filesystem-changing operations.
+They are implemented mostly with decorators, but a function could be added directly
+to the `op_queue`.
+"""
+
 from __future__ import annotations
 
 import atexit

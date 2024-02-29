@@ -3,7 +3,11 @@
 tag: duqtools
 create:
   runs_dir: ./runs_dir # change to output directory
-  template: ./template # change to directory with template
+  template_data: # change to your template data
+    user: yourusername
+    db: jet
+    shot: 12345
+    run: 1
   dimensions:
   - variable: t_e
     operator: multiply
