@@ -78,7 +78,7 @@ The `duqduq` config template uses [jinja2](https://jinja.palletsprojects.com/en/
 
 `variables`
 : These variable corresponds to pre-defined values in the IDS data. They are defined via as variables with the type `IDS2jetto-variable`. Essentially, each variable of this type is accessible as an attribute of `variables`. These are grabbed from the IDS data on-the-fly in the IMAS handle.
-: For more information on how to set this up, see the section on [variables](../variables.md/#ids2jetto-variables).
+: For more information on how to set this up, see the section on [variables](./variables.md/#ids2jetto-variables).
 
 
 ### Jinja2 quickstart

@@ -10,7 +10,7 @@ For information on the subcommands, e.g. [create](#duqtools-create):
 
     duqtools create --help
 
-For information on how to configure duqtools via `duqtools.yaml`, check out the [configuration page](./config/index.md).
+For information on how to configure duqtools via `duqtools.yaml`, check out the [usage page](./usage.md).
 
 ::: mkdocs-click
     :module: duqtools.cli

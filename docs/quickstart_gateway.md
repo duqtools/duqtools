@@ -81,7 +81,7 @@ Progress: 100%|█████████████████████�
 
 Press <kbd>y</kbd> and <kbd>Enter</kbd> to continue.
 
-This will create a new file called `duqtools.yaml`. This is the main file you will be modifying to set up a duqtools run. For more information about how to modify the file, for a description of the variables, have a look at the [rest of the documentation](./config/index.md).
+This will create a new file called `duqtools.yaml`. This is the main file you will be modifying to set up a duqtools run. For more information about how to modify the file, for a description of the variables, have a look at the [rest of the documentation](./usage.md).
 
 ## Example `duqtools.yaml`
 
