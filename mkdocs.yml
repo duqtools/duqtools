@@ -92,6 +92,9 @@ plugins:
   - mknotebooks:
       execute: false
 
+exclude_docs: |
+  *.template.md
+
 watch:
   - src/duqtools
   - docs/
