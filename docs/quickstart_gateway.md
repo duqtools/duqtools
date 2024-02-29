@@ -27,7 +27,7 @@ This needs to be done every time. To make sure the modules are auto-loaded, add 
 
 ## Install duqtools
 
-Duqtools is available from [pypi](https://pypi.org/project/pipi). To install:
+Duqtools is available from [pypi](https://pypi.org/project/duqtools). To install:
 
 ```bash
 pip install duqtools
