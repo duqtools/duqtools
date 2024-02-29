@@ -89,7 +89,6 @@ plugins:
   - gen-files:
       scripts:
         - docs/gendocs.py
-        - docs/genjettovariables.py
   - mknotebooks:
       execute: false
 
