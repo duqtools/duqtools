@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from collections import defaultdict
 from contextlib import contextmanager
-from itertools import filterfalse, tee
 from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Callable, Hashable, Iterable
@@ -13,11 +12,6 @@ from pydantic_yaml import parse_yaml_raw_as
 if TYPE_CHECKING:
     from ._types import PathLike
     from .ids import ImasHandle
-
-
-def no_op(*args, **kwargs):
-    """Do nothing."""
-    pass
 
 
 def formatter(s):
@@ -133,28 +127,3 @@ def groupby(iterable: Iterable,
         grouped[key].append(item)
 
     return grouped
-
-
-def partition(pred: Callable, iterable: Iterable) -> tuple[Iterable, Iterable]:
-    """Use a predicate to partition entries into false entries and true
-    entries.
-
-    partition(is_odd, range(10)) --> 0 2 4 6 8   and  1 3 5 7 9
-
-    From: https://docs.python.org/3/library/itertools.html
-
-    Parameters
-    ----------
-    pred : Callable
-        Filter function called on every entry in the iterable to determine
-        whether to put it in the false or true bin
-    iterable : Iterable
-        List of items to partition
-
-    Returns
-    -------
-    tuple[Iterable, Iterable]
-        Two sequences with false and true entries, respectively.
-    """
-    t1, t2 = tee(iterable)
-    return filterfalse(pred, t1), filter(pred, t2)

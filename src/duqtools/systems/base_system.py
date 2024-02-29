@@ -110,8 +110,6 @@ class AbstractSystem(ABC):
         *,
         dirname: Path,
         source: ImasHandle,
-        seq_number: int,
-        options,
     ) -> ImasHandle:
         """Get handle for data input. This method is used to copy the template
         data to wherever the system expects the input data to be.
@@ -122,10 +120,6 @@ class AbstractSystem(ABC):
             Run directory
         source : ImasHandle
             Template Imas data
-        seq_number : int
-            Sequential number, used by some systems
-        options :
-            `create.data` key from the config
         """
         pass
 
@@ -135,8 +129,6 @@ class AbstractSystem(ABC):
         *,
         dirname: Path,
         source: ImasHandle,
-        seq_number: int,
-        options,
     ) -> ImasHandle:
         """Get handle for data output. This method is used to set the locations
         in the system correct (later on), in a sense this method is
@@ -148,10 +140,6 @@ class AbstractSystem(ABC):
             Run directory
         source : ImasHandle
             Template Imas data
-        seq_number : int
-            Sequential number, used by some systems.
-        options :
-            `create.data` key from the config.
         """
         pass
 
