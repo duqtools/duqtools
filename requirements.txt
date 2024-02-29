@@ -13,5 +13,5 @@ pydantic-yaml >= 1.0
 scipy >= 1.09
 streamlit >= 1.18
 tqdm
-typing-extensions
+typing-extensions >= 4.7.1
 xarray

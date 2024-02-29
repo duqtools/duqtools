@@ -195,7 +195,7 @@ traitlets==5.9.0
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.6.3
+typing-extensions==4.10.0
     # via
     #   duqtools (pyproject.toml)
     #   pydantic
