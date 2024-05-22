@@ -11,7 +11,7 @@
 
 # Duqtools
 
-*Duqtools* is a tool for **D**ynamic **U**ndertainty **Q**uantification for Tokamak reactor simulations modelling.
+*Duqtools* is a tool for **D**ynamic **U**ncertainty **Q**uantification for Tokamak reactor simulations modelling.
 
 Features:
 
