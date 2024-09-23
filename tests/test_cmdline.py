@@ -8,7 +8,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 from jetto_tools.template import TemplateError
-from pytest import TEST_DATA  # noqa
+from pytest import TEST_DATA  # type: ignore
 
 from duqtools import cli
 from duqtools.config import load_config
@@ -116,7 +116,6 @@ def test_status_detailed(tmpworkdir):
     assert isinstance(ret.exc_info[1], TemplateError)
 
 
-@pytest.mark.xfail(reason='https://github.com/duqtools/duqtools/issues/726')
 @pytest.mark.dependency()
 def test_merge(tmpworkdir):
     tmpworkdir = Path(tmpworkdir).absolute()
