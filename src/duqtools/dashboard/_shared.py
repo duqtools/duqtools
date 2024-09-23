@@ -106,20 +106,25 @@ def get_base64_of_bin_file(png_file):
 
 
 def build_markup_for_logo(
-    png_file,
-    background_position='50% 10%',
-    margin_top='10%',
-    image_width='60%',
-    image_height='',
+        png_file,
+        background_position='50% 10%',
+        margin_top='10%',
+        image_width='53%',
+        image_height='100%',
+        nav=True,  # page has navigation
 ):
     binary_string = get_base64_of_bin_file(png_file)
+
+    loc = 'stSidebarHeader' if nav else 'stSidebarUserContent'
+
     return f"""
             <style>
-                [data-testid="stSidebarNav"] {{
+                [data-testid="{loc}"] {{
                     background-image: url("data:image/png;base64,{binary_string}");
                     background-repeat: no-repeat;
                     background-position: {background_position};
                     margin-top: {margin_top};
+                    margin-bottom: {margin_top};
                     background-size: {image_width} {image_height};
                 }}
             </style>
@@ -129,7 +134,7 @@ def build_markup_for_logo(
 def add_sidebar_logo():
     """Based on: https://stackoverflow.com/a/73278825."""
     png_file = data_directory / 'logo.png'
-    logo_markup = build_markup_for_logo(png_file)
+    logo_markup = build_markup_for_logo(png_file, nav=True)
     st.markdown(
         logo_markup,
         unsafe_allow_html=True,
