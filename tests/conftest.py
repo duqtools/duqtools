@@ -5,6 +5,10 @@ from pathlib import Path
 
 import pytest
 
+from duqtools import fix_dependencies
+
+fix_dependencies()
+
 
 def pytest_configure():
     pytest.TEST_DATA = Path(__file__).parent / 'test_data'
