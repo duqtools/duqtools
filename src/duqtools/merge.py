@@ -88,4 +88,5 @@ def merge(*, target: str, template: str, handles: list[str],
         template=template,  # type: ignore
         target=target,  # type: ignore
         variables=variables,
+        force=force,
     )
