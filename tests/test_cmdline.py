@@ -8,7 +8,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 from jetto_tools.template import TemplateError
-from pytest import TEST_DATA
+from pytest import TEST_DATA  # noqa
 
 from duqtools import cli
 from duqtools.config import load_config
@@ -19,6 +19,9 @@ imas = pytest.importorskip('imas',
 
 CONTAINERIZED_RUNS_DIR = os.environ['CONTAINERIZED_RUNS_DIR']
 IMASDB = Path(CONTAINERIZED_RUNS_DIR).resolve() / 'imasdb'
+
+if not IMASDB.exists():
+    raise RuntimeError(f'Cannot find data: {IMASDB=}')
 
 CONFIG = {
     'tag': 'data_01',
@@ -113,6 +116,7 @@ def test_status_detailed(tmpworkdir):
     assert isinstance(ret.exc_info[1], TemplateError)
 
 
+@pytest.mark.xfail(reason='https://github.com/duqtools/duqtools/issues/726')
 @pytest.mark.dependency()
 def test_merge(tmpworkdir):
     tmpworkdir = Path(tmpworkdir).absolute()
