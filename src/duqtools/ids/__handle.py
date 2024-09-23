@@ -236,7 +236,7 @@ class _ImasHandle(ImasBaseModel):
             raise ValueError(
                 f'All variables must belong to the same IDS, got {idss}')
 
-        ids = var_models[0].ids
+        ids = list(idss)[0]
 
         data_map = self.get(ids)
 
