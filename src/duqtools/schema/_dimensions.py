@@ -105,7 +105,7 @@ class OperatorMixin(BaseModel):
         return values
 
     def _custom_function(self,
-                         data: np.ndarray,
+                         data: np.ndarray | float,
                          value,
                          *,
                          out: Optional[np.ndarray] = None,
@@ -125,6 +125,7 @@ class OperatorMixin(BaseModel):
                out: Optional[np.ndarray] = None,
                var: Optional[Any] = None) -> Any:
         if self.operator == 'custom':
+            assert self.custom_code
             npfunc = partial(self._custom_function,
                              code=self.custom_code,
                              var=var)
