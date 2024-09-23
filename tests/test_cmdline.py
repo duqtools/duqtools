@@ -59,7 +59,7 @@ def tmpworkdir():
         yield workdir
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(name='create')
 def test_create(tmpworkdir):
     with work_directory(tmpworkdir):
         runner = CliRunner()
@@ -78,7 +78,7 @@ def test_create(tmpworkdir):
         assert Path(outdir, 'run_0000', 'imasdb', 'jet', '3', '0', fn).exists()
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(name='submit', depends=['create'])
 def test_submit(tmpworkdir):
     with work_directory(tmpworkdir):
         runner = CliRunner()
@@ -87,7 +87,7 @@ def test_submit(tmpworkdir):
     assert ret.exit_code == 0
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(depends=['submit'])
 def test_status(tmpworkdir):
     with work_directory(tmpworkdir):
         runner = CliRunner()
@@ -96,7 +96,7 @@ def test_status(tmpworkdir):
     assert ret.exit_code == 0
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(depends=['submit'])
 def test_status_progress(tmpworkdir):
     with work_directory(tmpworkdir):
         runner = CliRunner()
@@ -105,7 +105,7 @@ def test_status_progress(tmpworkdir):
     assert ret.exit_code == 0
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(depends=['submit'])
 def test_status_detailed(tmpworkdir):
 
     with work_directory(tmpworkdir):
@@ -116,7 +116,7 @@ def test_status_detailed(tmpworkdir):
     assert isinstance(ret.exc_info[1], TemplateError)
 
 
-@pytest.mark.dependency()
+@pytest.mark.dependency(depends=['submit'])
 def test_merge(tmpworkdir):
     tmpworkdir = Path(tmpworkdir).absolute()
     imasdbdir = Path(tmpworkdir, 'run_0000', 'imasdb')
