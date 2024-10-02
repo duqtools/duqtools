@@ -31,9 +31,7 @@ click==8.1.3
     #   duqtools (pyproject.toml)
     #   streamlit
 decorator==5.1.1
-    # via
-    #   ipython
-    #   validators
+    # via ipython
 docker==6.1.3
     # via jetto-tools
 executing==1.2.0
@@ -53,9 +51,7 @@ idna==3.4
 imas2xarray==0.3.0
     # via duqtools (pyproject.toml)
 importlib-metadata==6.7.0
-    # via
-    #   pydantic-yaml
-    #   streamlit
+    # via pydantic-yaml
 ipython==8.14.0
     # via jetto-tools
 jedi==0.18.2
@@ -141,18 +137,12 @@ pygments==2.15.1
     #   rich
 pyjwt==2.7.0
     # via prominence
-pympler==1.0.1
-    # via streamlit
 pyrsistent==0.19.3
     # via jsonschema
 python-dateutil==2.8.2
-    # via
-    #   pandas
-    #   streamlit
+    # via pandas
 pytz==2023.3
     # via pandas
-pytz-deprecation-shim==0.1.0.post0
-    # via tzlocal
 pyyaml==6.0
     # via prominence
 requests==2.31.0
@@ -179,7 +169,7 @@ smmap==5.0.0
     # via gitdb
 stack-data==0.6.2
     # via ipython
-streamlit==1.23.1
+streamlit==1.39.0
     # via duqtools (pyproject.toml)
 tenacity==8.2.2
     # via streamlit
@@ -203,17 +193,11 @@ typing-extensions==4.10.0
     #   pydantic-yaml
     #   streamlit
 tzdata==2023.3
-    # via
-    #   pandas
-    #   pytz-deprecation-shim
-tzlocal==4.3
-    # via streamlit
+    # via pandas
 urllib3==2.0.3
     # via
     #   docker
     #   requests
-validators==0.20.0
-    # via streamlit
 watchdog==3.0.0
     # via streamlit
 wcwidth==0.2.6

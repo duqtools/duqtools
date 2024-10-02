@@ -11,7 +11,7 @@ pandas
 pydantic >= 2.0
 pydantic-yaml >= 1.0
 scipy >= 1.09
-streamlit >= 1.18
+streamlit >= 1.38
 tqdm
 typing-extensions >= 4.7.1
 xarray
