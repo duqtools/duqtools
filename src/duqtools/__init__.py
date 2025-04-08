@@ -5,7 +5,7 @@ from __future__ import annotations
 def fix_dependencies():
     import __main__
     __main__.__requires__ = [
-        'jetto_tools>=1.8.8',
+        'jetto_tools>=1.8.8,<2.0.0',
         'scipy>=1.09',
         'jinja2>=3.0.0',
         'typing_extensions>=4.13.1',

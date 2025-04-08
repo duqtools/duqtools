@@ -40,7 +40,7 @@ dependencies = [
     "gitpython",
     "imas2xarray >= 0.2.0",
     "importlib_resources; python_version<'3.10'",
-    "jetto-tools >= 1.8.8",
+    "jetto-tools >= 1.8.8,<2.0.0",
     "jinja2 >= 3.0",
     "numpy",
     "pandas",
