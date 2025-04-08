@@ -49,7 +49,7 @@ dependencies = [
     "scipy >= 1.09",
     "streamlit >= 1.38",
     "tqdm",
-    "typing-extensions >= 4.7.1",
+    "typing-extensions >= 4.13.1",
     "xarray",
 ]
 

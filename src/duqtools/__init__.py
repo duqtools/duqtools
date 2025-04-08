@@ -8,7 +8,7 @@ def fix_dependencies():
         'jetto_tools>=1.8.8',
         'scipy>=1.09',
         'jinja2>=3.0.0',
-        'typing_extensions>=4.7.1',
+        'typing_extensions>=4.13.1',
     ]
     import pkg_resources  # noqa
 
