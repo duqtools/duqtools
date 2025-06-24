@@ -61,7 +61,7 @@ def gen_docs():
         for obj in objects
     }
     for page in (
-            'usage.template.md',
+            #'usage.template.md',
             'systems/status.template.md',
             'systems/submit.template.md',
     ):

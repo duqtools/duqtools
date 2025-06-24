@@ -5,7 +5,7 @@ repo_name: GitHub
 
 nav:
   - Home: index.md
-  - Usage: usage.md
+  #- Usage: usage.md
   - Duqtools CLI: command-line-interface.md
   - Visualization: visualization.md
   - Dashboard: dash.md
