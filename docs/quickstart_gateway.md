@@ -6,15 +6,28 @@ This demo will guide you through setting up duqtools on the Gateway, and perform
 
 Duqtools needs a couple of modules on the gateway to be loaded.
 
-Load modules:
+Load modules, for example:
 
 ```bash
 module purge
 module load cineca
-module use /gss_efgw_work/work/g2fjc/jintrac/default/modules
+module use /gss_efgw_work/work/g2fjc/jintrac/32.0.1/modules
 module load jintrac
-module use /gss_efgw_work/work/g2fjc/cmg/jams/default/modules
+module use /gss_efgw_work/work/g2fjc/cmg/jams/31.0.0/modules
 module load jams
+module use /gss_efgw_work/work/g2vazizi/duqtools/modules
+```
+
+If you are using an older (python version 3.10) version of JINTRAC, you can load duqtools with:
+
+```
+module load duqtools
+```
+
+Otherwise if you are using a newer version of JINTRAC with python 3.11, you can use
+
+```
+module load duqtools/3.13-python3.11
 ```
 
 Duqtools currently works with MDSPlus only. Make sure you run the MDSPLUS backend:
@@ -24,6 +37,9 @@ export JINTRAC_IMAS_BACKEND=MDSPLUS
 ```
 
 This needs to be done every time. To make sure the modules are auto-loaded, add the lines above to `~/.bashrc`.
+
+
+
 
 ## Install duqtools
 
