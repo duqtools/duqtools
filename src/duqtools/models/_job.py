@@ -57,7 +57,8 @@ class Job:
         cfg : Optional[Config], optional
             Duqtools config, defaults to global config if unspecified.
         """
-        self.path = Path(path).resolve()
+        #self.path = Path(path).resolve()
+        self.path = Path(path)
         self.cfg = cfg
 
     def __repr__(self):

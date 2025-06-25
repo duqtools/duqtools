@@ -21,11 +21,6 @@
     "type": "int",
     "dimension": "scalar"
   },
-  "run_out": {
-    "jset_id": "JobProcessingPanel.idsRunid",
-    "type": "int",
-    "dimension": "scalar"
-  },
   "user_in": {
     "jset_id": "SetUpPanel.idsIMASDBUser",
     "jset_flex_id":[

@@ -79,11 +79,11 @@ class _ImasHandle(ImasBaseModel):
     @field_validator('user')
     def user_rel_path(cls, v, values):
         # Override user if we have a relative location
-        if relative_location := values.data['relative_location']:
-            logger.info(
-                f'Updating imasdb location with relative location {relative_location}'
-            )
-            return os.path.abspath(relative_location)
+        #if relative_location := values.data['relative_location']:
+        #    logger.info(
+        #        f'Updating imasdb location with relative location {relative_location}'
+        #    )
+        #    return os.path.abspath(relative_location)
         return v
 
     def validate(self):

@@ -20,6 +20,7 @@ def write_batchfile(
     cfg: Config,
     jruns_path: Path,
 ):
+    return
     """Write batchfile (`.llcmd`) to start jetto.
 
     Parameters

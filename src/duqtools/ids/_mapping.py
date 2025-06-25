@@ -193,7 +193,7 @@ class IDSMapping(Mapping):
 
         if hasattr(val,
                    '__getitem__') and not isinstance(val,
-                                                     (np.ndarray, np.generic)):
+                                                     (np.ndarray, np.generic, dict)):
             for i in range(len(val)):
                 item = val[i]
                 self.dive(item, path + [str(i)])

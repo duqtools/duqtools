@@ -63,7 +63,7 @@ def _get_jetto_extra(filenames: List[str], *, jset):
                 'before running duqtools again.'
                 'More info: https://github.com/duqtools/duqtools/issues/498')
 
-    return jetto_extra
+    return { file: file for file in jetto_extra }
 
 
 class BaseJettoSystem(AbstractSystem):
@@ -144,18 +144,18 @@ class BaseJettoSystem(AbstractSystem):
         submit(job)
 
     def submit_slurm(self, job: Job):
-        if not job.has_submit_script:
-            raise FileNotFoundError(job.submit_script)
+        jetto_template = template.from_directory(job.path)
+        jetto_config = config.RunConfig(jetto_template)
+        jetto_manager = jetto_job.JobManager()
 
-        submit_cmd = self.options.submit_command.split()
-        cmd: list[Any] = [*submit_cmd, str(job.submit_script)]
+        logger.info(f'submitting script via slurm')
+        rundir = job.path / "rundir"
+        rundir = os.path.relpath(rundir, self.jruns_path)
+        breakpoint()
+        jetto_manager.submit_job_to_batch(config = jetto_config, rundir = rundir)
 
-        logger.info(f'submitting script via slurm {cmd}')
-
-        ret = sp.run(cmd, check=True, capture_output=True)
-        logger.info('submission returned: ' + str(ret.stdout))
         with open(job.lockfile, 'wb') as f:
-            f.write(ret.stdout)
+            f.write("submitted")
 
     def submit_docker(self, job: Job):
         jetto_template = template.from_directory(job.path)
@@ -271,7 +271,7 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_extra = _get_jetto_extra(all_files, jset=jetto_jset)
 
-        jetto_extra = [str(source_drc / file) for file in jetto_extra]
+        jetto_extra = {file : str(source_drc / val) for file, val in jetto_extra.items()}
 
         jetto_template = template.Template(jset=jetto_jset,
                                            namelist=jetto_namelist,
@@ -325,7 +325,7 @@ class BaseJettoSystem(AbstractSystem):
 
         jetto_config['machine_out'] = out.db
         jetto_config['shot_out'] = out.shot
-        jetto_config['run_out'] = out.run
+        #jetto_config['run_out'] = out.run
 
         jetto_config.export(run)  # Just overwrite the poor files
 
