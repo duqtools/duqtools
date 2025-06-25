@@ -151,7 +151,6 @@ class BaseJettoSystem(AbstractSystem):
         logger.info(f'submitting script via slurm')
         rundir = job.path / "rundir"
         rundir = os.path.relpath(rundir, self.jruns_path)
-        breakpoint()
         jetto_manager.submit_job_to_batch(config = jetto_config, rundir = rundir)
 
         with open(job.lockfile, 'wb') as f:
