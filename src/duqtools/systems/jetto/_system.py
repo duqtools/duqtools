@@ -153,7 +153,7 @@ class BaseJettoSystem(AbstractSystem):
         rundir = os.path.relpath(rundir, self.jruns_path)
         jetto_manager.submit_job_to_batch(config = jetto_config, rundir = rundir)
 
-        with open(job.lockfile, 'wb') as f:
+        with open(job.lockfile, 'w') as f:
             f.write("submitted")
 
     def submit_docker(self, job: Job):
