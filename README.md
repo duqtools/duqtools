@@ -34,7 +34,7 @@ Or to use on the gateway:
 
 ```console
 module use /gss_efgw_work/work/g2vazizi/duqtools/modules
-module load duqtools/3.1.4
+module load duqtools/3.1.5
 ```
 
 The source code is available from [Github](https://github.com/duqtools/duqtools).
