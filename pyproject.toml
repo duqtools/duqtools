@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
 name = "duqtools"
-version = "3.1.5"
+version = "3.1.6"
 description = "Dynamic uncertainty quantification for Tokamak reactor simulations modelling"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -178,7 +178,7 @@ known-first-party = ["duqtools"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.bumpversion]
-current_version = "3.1.5"
+current_version = "3.1.6"
 
 [[tool.bumpversion.files]]
 filename = "src/duqtools/__init__.py"
